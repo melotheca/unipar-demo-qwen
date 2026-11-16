@@ -176,7 +176,8 @@ button{font-family:var(--fuente);color:var(--texto);cursor:pointer}
 #hudSup{position:absolute;top:calc(10px + env(safe-area-inset-top));left:10px;right:10px;display:flex;justify-content:space-between;align-items:flex-start;gap:14px;pointer-events:none}
 #hudSup>*{pointer-events:auto}
 #colIzq{display:flex;flex-direction:column;gap:6px;position:relative;min-width:0}
-#barrasFlotantes{width:min(252px,58vw);display:grid;gap:5px;min-width:0;background:transparent;border:none;box-shadow:none;padding:0}
+#barrasFlotantes{width:min(252px,58vw);display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px;min-width:0;background:transparent;border:none;box-shadow:none;padding:0}
+#barrasFlotantes .barra{grid-column:1;min-width:0}
 #hud .panel{clip-path:none;border-radius:12px;box-shadow:0 0 0 2px var(--sombra),0 4px 12px rgba(0,0,0,.35)}
 #filaTopInfo{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 #ajusteElemento{padding:10px 14px 0}
@@ -194,11 +195,12 @@ button{font-family:var(--fuente);color:var(--texto);cursor:pointer}
 .barra.esencia .relleno{background:linear-gradient(180deg,#9ccfff,var(--esencia) 50%,#1f5fb8)}
 .barra .nums{position:absolute;right:6px;top:0;font-size:13px;font-weight:700;line-height:19px;color:#fff;text-shadow:1px 1px 0 #000,0 0 4px #000}
 #agotado{position:absolute;left:50%;top:0;transform:translateX(-50%);font-size:11px;line-height:19px;color:var(--rayo);text-shadow:1px 1px 0 #000;animation:parpadeo .6s steps(2) infinite;letter-spacing:1px}
-#btnPocion{justify-self:start;display:inline-flex;align-items:center;gap:5px;background:transparent;border:none;box-shadow:none;color:#fff;font-size:15px;font-weight:700;line-height:1;padding:2px 2px 0;text-shadow:1px 1px 0 #000,0 0 5px rgba(0,0,0,.7);cursor:pointer}
+#btnPocion{grid-column:1/-1;justify-self:start;display:inline-flex;align-items:center;gap:5px;background:transparent;border:none;box-shadow:none;color:#fff;font-size:15px;font-weight:700;line-height:1;padding:2px 2px 0;text-shadow:1px 1px 0 #000,0 0 5px rgba(0,0,0,.7);cursor:pointer}
 #btnPocion:active{transform:translateY(1px)}
 #btnPocion[disabled]{opacity:.45;cursor:default}
-#monedasHud{justify-self:start;display:inline-flex;align-items:center;gap:5px;color:#ffe14d;font-size:15px;font-weight:700;text-shadow:1px 1px 0 #000,0 0 5px rgba(0,0,0,.7);padding:0 2px}
-#monedasHud small{color:var(--textoFrio);font-size:10px;font-weight:400}
+#monedasHud{grid-column:2;grid-row:1/span 2;align-self:stretch;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;color:#ffe14d;font-size:13px;font-weight:700;line-height:1.15;text-shadow:1px 1px 0 #000,0 0 5px rgba(0,0,0,.7);padding:3px 7px;background:rgba(14,21,48,.55);border:1px solid rgba(255,225,77,.35);border-radius:8px;opacity:.92}
+#monedasHud .monIco{font-size:12px;line-height:1}
+#monedasHud small{color:var(--textoFrio);font-size:8px;font-weight:400;letter-spacing:.5px;text-transform:uppercase}
 #panelDerecho{display:grid;gap:8px;justify-items:end}
 .btnAjustes{width:40px;height:40px;border-radius:50%;border:2px solid var(--borde);background:rgba(14,21,48,.88);color:var(--textoFrio);font-size:20px;line-height:1;display:grid;place-items:center;box-shadow:0 3px 0 var(--sombra);transition:transform .08s,color .15s,border-color .15s}
 .btnAjustes:hover{color:var(--texto);border-color:var(--bordeClaro)}
@@ -336,7 +338,7 @@ button{font-family:var(--fuente);color:var(--texto);cursor:pointer}
           <div class="barra vida" title="Vida"><div class="relleno" id="rellVida"></div><span class="nums" id="numVida">0/0</span></div>
           <div class="barra esencia" title="Esencia"><div class="relleno" id="rellEsencia"></div><span class="nums" id="numEsencia">0/0</span><span id="agotado" class="oculto">AGOTADO</span></div>
           <button id="btnPocion" title="Poción: +50% de Vida (Q)" aria-label="Usar poción">🧪 <span>×0</span></button>
-          <div id="monedasHud" title="Monedas: gana en torneo, oleadas y misiones; gasta en la tienda">🪙 <span id="numMonedas">30</span> <small>monedas</small></div>
+          <div id="monedasHud" title="Monedas: gana en torneo, oleadas y misiones; gasta en la tienda"><span class="monIco" aria-hidden="true">🪙</span><span id="numMonedas">30</span><small>monedas</small></div>
         </div>
         <div id="filaTopInfo">
           <button id="infoHud" title="Día y hora: toca para ver la fecha completa y el clima" aria-label="Día y hora: toca para ver la fecha completa y el clima" aria-expanded="false"><span id="relojIcono" aria-hidden="true">☀</span><span id="infoDia">Lunes</span><span aria-hidden="true">·</span><span id="relojHora">09:00</span><span id="relojAmpm">AM</span><span class="objFlecha" aria-hidden="true">▾</span></button>
@@ -1392,10 +1394,29 @@ U.Render = {
     ctx.fillStyle = this.vineta; ctx.fillRect(0, 0, vw, vh);
     // Luciérnagas nocturnas: puntitos cálidos que derivan y parpadean cuando el mundo está oscuro
     if (oscD > 0.35) { const fa = Math.min(1, (oscD - 0.35) / 0.3); for (let i = 0; i < 22; i++) { const bx = ((i * 89 + 37) % 100) / 100 * vw, by = ((i * 61 + 23) % 100) / 100 * vh; const fx = bx + Math.sin(this.tiempo * 0.7 + i * 1.7) * 9, fy = by + Math.cos(this.tiempo * 0.5 + i * 2.3) * 6; const par = 0.35 + 0.65 * Math.abs(Math.sin(this.tiempo * 1.4 + i * 2.1)); ctx.fillStyle = 'rgba(255,225,120,' + (fa * par * 0.85).toFixed(3) + ')'; ctx.fillRect(Math.round(fx), Math.round(fy), 1.6, 1.6); } }
-    // CLIMA visible sobre el mundo: lluvia que cae, niebla que tapa, tormenta con destellos
-    if (estado.clima) { const ct = estado.clima.tipo;
-      if (ct === 'lluvia' || ct === 'tormenta') { ctx.strokeStyle = ct === 'tormenta' ? 'rgba(190,220,255,.75)' : 'rgba(160,200,240,.55)'; ctx.lineWidth = 1; ctx.beginPath(); const nG = ct === 'tormenta' ? 90 : 60; for (let i = 0; i < nG; i++) { const gx = ((i * 53 + 17) % 101) / 101 * vw, gy = (((i * 37 + 11) % 101) / 101 * vh + this.tiempo * 260) % (vh + 12) - 6; ctx.moveTo(gx, gy); ctx.lineTo(gx - 2, gy + 7); } ctx.stroke(); if (ct === 'tormenta' && Math.sin(this.tiempo * 0.7) > 0.995) { ctx.fillStyle = 'rgba(255,255,240,.18)'; ctx.fillRect(0, 0, vw, vh); } }
-      else if (ct === 'niebla') { ctx.fillStyle = 'rgba(220,228,238,.20)'; ctx.fillRect(0, 0, vw, vh); ctx.fillStyle = 'rgba(220,228,238,.13)'; for (let i = 0; i < 5; i++) { const fy = ((i * 29 + Math.sin(this.tiempo * 0.3 + i) * 8) % 100) / 100 * vh; ctx.fillRect(0, fy, vw, vh * 0.14); } }
+    // CLIMA visible sobre el mundo. BAJO TECHO (casa / Oficina) NO llueve: sin gotas,
+    // sin salpicaduras, sin relámpagos y sin niebla dentro. Afuera, la LLUVIA tiene
+    // INTENSIDAD (1 ligera · 2 normal · 3 fuerte · 4 tormenta) y se nota en todo:
+    // más gotas, más largas, más rápidas, más opacas, con más viento y salpicaduras.
+    if (estado.clima) { const ct = estado.clima.tipo; const bajoTecho = !!(U.Clima && U.Clima.esInterior && U.Clima.esInterior(estado));
+      if ((ct === 'lluvia' || ct === 'tormenta') && !bajoTecho) {
+        const inten = (U.Clima && U.Clima.intensidadDe) ? (U.Clima.intensidadDe(estado) || 2) : 2;
+        const conf = [null,
+          { n: 26, len: 5, vel: 150, op: 0.35, viento: -1, salp: 5 },
+          { n: 55, len: 7, vel: 260, op: 0.55, viento: -2, salp: 10 },
+          { n: 95, len: 10, vel: 380, op: 0.7, viento: -3, salp: 16 },
+          { n: 140, len: 12, vel: 480, op: 0.82, viento: -4, salp: 22 }][inten];
+        ctx.fillStyle = 'rgba(30,50,90,' + (0.025 * inten).toFixed(3) + ')'; ctx.fillRect(0, 0, vw, vh);
+        ctx.strokeStyle = 'rgba(170,205,245,' + conf.op + ')'; ctx.lineWidth = inten >= 3 ? 1.4 : 1; ctx.beginPath();
+        for (let i = 0; i < conf.n; i++) { const gx = ((i * 53 + 17) % 101) / 101 * vw, gy = (((i * 37 + 11) % 101) / 101 * vh + this.tiempo * conf.vel) % (vh + 14) - 7; ctx.moveTo(gx, gy); ctx.lineTo(gx + conf.viento, gy + conf.len); }
+        ctx.stroke();
+        // Salpicaduras: anillitos cortos donde las gotas pegan, más con más intensidad
+        ctx.strokeStyle = 'rgba(190,220,255,' + (conf.op * 0.8).toFixed(2) + ')'; ctx.lineWidth = 1; ctx.beginPath();
+        for (let i = 0; i < conf.salp; i++) { const sx2 = ((i * 67 + 29) % 101) / 101 * vw, sy2 = ((i * 41 + 13) % 101) / 101 * vh; const fase = (this.tiempo * 2.4 + i * 0.37) % 1; const r = 1 + fase * (2 + inten); ctx.moveTo(sx2 - r, sy2); ctx.lineTo(sx2 + r, sy2); }
+        ctx.stroke();
+        if (ct === 'tormenta' && Math.sin(this.tiempo * 0.7) > 0.995) { ctx.fillStyle = 'rgba(255,255,240,.18)'; ctx.fillRect(0, 0, vw, vh); }
+      }
+      else if (ct === 'niebla' && !bajoTecho) { ctx.fillStyle = 'rgba(220,228,238,.20)'; ctx.fillRect(0, 0, vw, vh); ctx.fillStyle = 'rgba(220,228,238,.13)'; for (let i = 0; i < 5; i++) { const fy = ((i * 29 + Math.sin(this.tiempo * 0.3 + i) * 8) % 100) / 100 * vh; ctx.fillRect(0, fy, vw, vh * 0.14); } }
       else if (ct === 'calor') { ctx.fillStyle = 'rgba(255,150,50,.06)'; ctx.fillRect(0, 0, vw, vh); }
     }
     if (j.vida < j.stats.vida * 0.25) { ctx.fillStyle = 'rgba(255,40,60,' + (0.08 + 0.06 * Math.sin(this.tiempo * 6)) + ')'; ctx.fillRect(0, 0, vw, vh); }
@@ -1492,12 +1513,18 @@ U.Ambiente = {
   // Costo final visible = base × ambiente × atributo (Inestable muestra rango)
   costo(h, elem, z, atributo) {
     const mod = this.modificador(elem, z); const a = U.Atributos.de(atributo);
-    // Factor CLIMA: tormenta→Rayo ×0.75 · viento fuerte→Viento ×0.85 · calor extremo→Fuego ×0.85 · lluvia→Agua ×0.9
+    // Factor CLIMA: viento fuerte→Viento ×0.85 · calor extremo→Fuego ×0.85.
+    // LLUVIA CON INTENSIDAD (U.Clima.factorCosto): bajo techo no aplica NADA; afuera,
+    // el Agua cuesta 1 plano (solo controlas el agua que ya hay) y cada elemento paga
+    // según la intensidad: Fuego más, Tierra y Rayo un poco menos, Viento un poco más.
     const E = U.Juego.estado; const ct = E && E.clima ? E.clima.tipo : null;
-    if (ct === 'tormenta' && elem === 'rayo') mod.m *= 0.75;
-    else if (ct === 'viento' && elem === 'viento') mod.m *= 0.85;
+    if (ct === 'viento' && elem === 'viento') mod.m *= 0.85;
     else if (ct === 'calor' && elem === 'fuego') mod.m *= 0.85;
-    else if (ct === 'lluvia' && elem === 'agua') mod.m *= 0.9;
+    const fc = (E && U.Clima && U.Clima.factorCosto) ? U.Clima.factorCosto(elem, E) : null;
+    if (fc) {
+      if (fc.flat != null) return { costo: fc.flat, mod: 0, razon: fc.razon, plano: true };
+      mod.m *= fc.m; if (fc.razon) mod.razon = (mod.razon && mod.razon !== 'Ambiente neutro') ? mod.razon + ' · ' + fc.razon : fc.razon;
+    }
     const base = h.costo * mod.m;
     if (a.costo === 'inestable') return { costo: Math.max(1, Math.round(base)), mod: mod.m, razon: mod.razon, inestable: true, min: Math.max(1, Math.round(base * 0.5)), max: Math.round(base * 2) };
     return { costo: Math.max(1, Math.round(base * a.costo)), mod: mod.m, razon: mod.razon };
@@ -1603,6 +1630,8 @@ U.General = {
   // si su archivo no trae frase para ese clima, cae al archivo general.
   respuestaClima(npc, E) {
     const tipo = E.clima ? E.clima.tipo : 'despejado';
+    // Bajo techo nadie habla como si la lluvia le cayera encima: se oye afuera, nomás.
+    if ((tipo === 'lluvia' || tipo === 'tormenta') && U.Clima && U.Clima.esInterior(E)) { const inten = U.Clima.intensidadGuardada(E); const nom = U.Clima.INTENSIDAD_NOMBRES[inten] || ''; return 'Afuera hay ' + (tipo === 'tormenta' ? 'tormenta' : 'lluvia ' + nom) + ', se oye en el techo… pero aquí dentro estamos secos: bajo techo no llueve.'; }
     const per = U.Personas.de(npc.id);
     const propias = per && per.frases ? per.frases[tipo] : null;
     if (propias && propias.length) return propias[(npc.veces || 0) % propias.length];
@@ -2142,7 +2171,14 @@ U.Tiempo = {
 /* Unipar — CLIMA vivo: 7 climas con icono y detalle visibles en el HUD. Cambia con el momento
    del día, la zona y el azar de la semilla; dura unos minutos reales y se anuncia al cambiar.
    Efectos reales: la lluvia se VE caer, la niebla tapa el mundo, la tormenta abarata el Rayo,
-   el viento fuerte abarata el Viento, el calor extremo abarata el Fuego (vía Ambiente.costo). */
+   el viento fuerte abarata el Viento, el calor extremo abarata el Fuego (vía Ambiente.costo).
+   LLUVIA CON INTENSIDADES (1 ligera · 2 normal · 3 fuerte · 4 tormenta): gotas, largo,
+   velocidad, opacidad y salpicaduras crecen con la intensidad, y los costos también:
+   Agua cuesta 1 plano (solo controla el agua que ya hay), el Fuego paga cada vez más,
+   la Tierra y el Rayo bajan un poco, el Viento sube (tabla COSTOS_LLUVIA, vía Ambiente.costo).
+   BAJO TECHO NO LLUEVE: en los mapas interiores (tu casa, la Oficina) no caen gotas, no hay
+   relámpagos, los costos no cambian por lluvia y nadie comenta la lluvia como si le cayera
+   encima: solo se sabe que afuera llueve (U.Clima.esInterior lo decide todo). */
 window.U = window.U || {};
 
 U.Clima = {
@@ -2150,13 +2186,62 @@ U.Clima = {
     despejado: { nombre: 'Despejado', icono: '☀', detalle: 'Cielo limpio, sin efectos' },
     nublado:   { nombre: 'Nublado', icono: '☁', detalle: 'Nubes densas, luz suave' },
     lluvia:    { nombre: 'Lluvia', icono: '🌧', detalle: 'Llueve: el mundo se moja y se oye el agua' },
-    tormenta:  { nombre: 'Tormenta', icono: '⛈', detalle: 'Tormenta: el Rayo cuesta −25%' },
+    tormenta:  { nombre: 'Tormenta', icono: '⛈', detalle: 'Tormenta (intensidad máxima): Agua cuesta 1 · Rayo ×0.6 · Fuego ×2.5' },
     viento:    { nombre: 'Viento fuerte', icono: '🌬', detalle: 'Viento fuerte: el Viento cuesta −15%' },
     niebla:    { nombre: 'Niebla', icono: '🌫', detalle: 'Niebla espesa: se ve poco y todo suena lejos' },
     calor:     { nombre: 'Calor extremo', icono: '🌡', detalle: 'Calor extremo: el Fuego cuesta −15%' }
   },
-  crear(rng) { return { tipo: 'despejado', restante: 150 + (rng ? rng() * 90 : 60) }; },
-  de(E) { return (E && E.clima && this.TIPOS[E.clima.tipo]) ? this.TIPOS[E.clima.tipo] : this.TIPOS.despejado; },
+  // Mapas bajo techo: dentro de una casa o lugar con techo NO debe llover.
+  INTERIORES: ['casa', 'oficina'],
+  INTENSIDAD_NOMBRES: { 1: 'ligera', 2: 'normal', 3: 'fuerte', 4: 'tormenta' },
+  // Costos bajo lluvia por intensidad (índice = intensidad − 1). Agua va aparte: plano 1.
+  // Fuego: la lluvia lo apaga, paga más cuanto más llueve. Tierra: el barro ayuda.
+  // Viento: la lluvia lo frena. Rayo: el agua conduce; en tormenta, ×0.6.
+  COSTOS_LLUVIA: {
+    fuego:  [1.3, 1.6, 2.0, 2.5],
+    tierra: [0.95, 0.9, 0.85, 0.8],
+    viento: [1.1, 1.2, 1.35, 1.5],
+    rayo:   [0.95, 0.9, 0.85, 0.6]
+  },
+  esInterior(E) { return !!(E && this.INTERIORES.indexOf(E.mapaId) >= 0); },
+  // Intensidad que TE AFECTA: 0 bajo techo o sin lluvia; 1–3 en lluvia; 4 en tormenta.
+  intensidadDe(E) {
+    if (!E || !E.clima || this.esInterior(E)) return 0;
+    if (E.clima.tipo === 'tormenta') return 4;
+    if (E.clima.tipo === 'lluvia') return Math.max(1, Math.min(3, E.clima.intensidad || 2));
+    return 0;
+  },
+  // Intensidad real del clima afuera (para nombrar el clima aunque estés bajo techo).
+  intensidadGuardada(E) {
+    if (!E || !E.clima) return 0;
+    if (E.clima.tipo === 'tormenta') return 4;
+    if (E.clima.tipo === 'lluvia') return Math.max(1, Math.min(3, E.clima.intensidad || 2));
+    return 0;
+  },
+  factorCosto(elem, E) {
+    const inten = this.intensidadDe(E); if (!inten) return null;
+    const nom = this.INTENSIDAD_NOMBRES[inten];
+    if (elem === 'agua') return { flat: 1, m: 0, razon: 'Lluvia ' + nom + ': agua por todos lados, solo la controlas (costo 1)' };
+    const tabla = this.COSTOS_LLUVIA[elem]; if (!tabla) return null;
+    const m = tabla[inten - 1];
+    const razones = {
+      fuego: 'Lluvia ' + nom + ': el agua apaga el Fuego (×' + m + ')',
+      tierra: 'Lluvia ' + nom + ': el barro ayuda a la Tierra (×' + m + ')',
+      viento: 'Lluvia ' + nom + ': la lluvia frena el Viento (×' + m + ')',
+      rayo: 'Lluvia ' + nom + ': el agua conduce el Rayo (×' + m + ')'
+    };
+    return { m: m, razon: razones[elem] || '' };
+  },
+  crear(rng) { return { tipo: 'despejado', intensidad: 0, restante: 150 + (rng ? rng() * 90 : 60) }; },
+  de(E) {
+    const base = (E && E.clima && this.TIPOS[E.clima.tipo]) ? this.TIPOS[E.clima.tipo] : this.TIPOS.despejado;
+    if (!E || !E.clima || (E.clima.tipo !== 'lluvia' && E.clima.tipo !== 'tormenta')) return base;
+    const inten = this.intensidadGuardada(E); const nom = this.INTENSIDAD_NOMBRES[inten] || 'normal';
+    if (this.esInterior(E)) return Object.assign({}, base, { nombre: base.nombre + (E.clima.tipo === 'lluvia' ? ' ' + nom : ''), detalle: 'Afuera: ' + base.nombre.toLowerCase() + (E.clima.tipo === 'lluvia' ? ' ' + nom : '') + ' · Bajo techo: aquí no llueve ni cambian los costos' });
+    if (E.clima.tipo === 'tormenta') return Object.assign({}, base, { detalle: 'Tormenta (intensidad máxima) · Agua cuesta 1 · Rayo ×0.6 · Fuego ×2.5' });
+    const f = this.COSTOS_LLUVIA.fuego[inten - 1];
+    return Object.assign({}, base, { nombre: 'Lluvia ' + nom, detalle: 'Lluvia ' + nom + ' · Agua cuesta 1 · Fuego ×' + f + ' · Tierra y Rayo bajan · Viento sube' });
+  },
   elegir(E) {
     const h = U.Tiempo.hora(E); const z = E.zonaActual; const zid = z ? z.id : 'aldea';
     const pool = [['despejado', 30], ['nublado', 18], ['viento', 12]];
@@ -2172,9 +2257,10 @@ U.Clima = {
   fijar(E, tipo, silencioso) {
     if (!E.clima) E.clima = this.crear(null);
     E.clima.tipo = tipo; E.clima.restante = 150 + Math.random() * 150;
+    E.clima.intensidad = tipo === 'tormenta' ? 4 : tipo === 'lluvia' ? 1 + Math.floor(Math.random() * 3) : 0;
     if (!silencioso && U.HUD) { const c = this.TIPOS[tipo]; if (tipo === 'tormenta') U.HUD.banner('⛈ TORMENTA', 1.6); U.Audio.sfx(tipo === 'tormenta' ? 'rayo' : tipo === 'lluvia' ? 'agua' : 'zona'); }
     // Un vecino cercano comenta el clima EN VOZ ALTA, con su gusto personal (no todos igual).
-    if (!silencioso && U.Juego && U.Juego.estado && U.General) { const E2 = U.Juego.estado; const cerca = (E2.npcs || []).filter(n => !n.enCasa && !n.ocultoSparring).sort((a, b) => U.Grid.dist(a, E2.jugador) - U.Grid.dist(b, E2.jugador))[0]; if (cerca && U.Grid.dist(cerca, E2.jugador) < 11) E2.efectos.textos.push({ x: cerca.x, y: cerca.y, txt: cerca.nombre + ': ' + U.General.fraseCortaClima(cerca, E2), color: '#e8dcc8', escala: 1, vida: 2.6, max: 2.6 }); }
+    if (!silencioso && U.Juego && U.Juego.estado && U.General && !this.esInterior(U.Juego.estado)) { const E2 = U.Juego.estado; const cerca = (E2.npcs || []).filter(n => !n.enCasa && !n.ocultoSparring).sort((a, b) => U.Grid.dist(a, E2.jugador) - U.Grid.dist(b, E2.jugador))[0]; if (cerca && U.Grid.dist(cerca, E2.jugador) < 11) E2.efectos.textos.push({ x: cerca.x, y: cerca.y, txt: cerca.nombre + ': ' + U.General.fraseCortaClima(cerca, E2), color: '#e8dcc8', escala: 1, vida: 2.6, max: 2.6 }); }
   },
   alCambiarDia(E) { this.fijar(E, this.elegir(E), true); },
   actualizar(E, dt) {
@@ -3043,7 +3129,7 @@ U.HUD = {
       + '<div style="font-size:11px;color:var(--textoTenue)">Yin: cuerpo, cerca, casi sin Esencia (2/6/4). Yang (al despertar): energía blanca, lejos, cara (Haz 15, Onda 14, Esférico 18) y mejora tu recuperación. Inclinación de esta vida: ' + j.perfil.estilo.toUpperCase() + '.</div></section>';
     html += '<section><h3>Atributo · ' + a.nombre + ' (fijo por vida)</h3><div style="font-size:12px"><span style="color:var(--exito)">' + a.ventaja + '</span> · <span style="color:var(--aviso)">' + a.desventaja + '</span></div><div style="font-size:11px;color:var(--textoFrio);margin-top:4px">' + a.desc + ' La ventaja real es el ×2 en un camino largo.</div></section>';
     { const cl = E.clima ? U.Clima.de(E) : U.Clima.TIPOS.despejado; const ff2 = U.Tiempo.faseDe(U.Tiempo.hora(E));
-      html += '<section><h3>Calendario · clima · tu casa · memoria</h3><div style="font-size:12px">📅 <b>' + U.Tiempo.diaTexto(E.reloj) + '</b> · Momento: ' + ff2.nombre + ' (' + U.Tiempo.formato(E.reloj.minutos) + ') · 6 momentos por día, semana de Lunes a Domingo.<br>' + cl.icono + ' <b>Clima: ' + cl.nombre + '</b> · ' + cl.detalle + '. Cambia solo cada pocos minutos y ajusta costos (tormenta→Rayo −25%, viento fuerte→Viento, calor→Fuego, lluvia→Agua).<br>🏠 Tu casa (puerta de la casa azul): alarma fijada a las <b>' + U.Tiempo.formato(E.alarmaMin) + '</b> · Hechizo de Inversión: ' + (E.flags.hechizoInversion ? '<b style="color:var(--exito)">aprendido (tecla V)</b>' : 'sin aprender (obelisco de la Montaña Brumosa)') + '<br>Monedas: <b style="color:var(--rayo)">' + Math.floor(j.monedas || 0) + ' 🪙</b> (torneo 150 al campeón · oleadas · misiones de Lía · tienda de Marisol) · Torneos ganados: ' + (E.historial.torneos || 0) + ' · Misiones entregadas: ' + (E.historial.misiones || 0) + '<br>Historial de esta vida: victorias de arena ' + E.historial.victorias + ' · caídas ' + E.historial.derrotas + ' · retos superados ' + E.historial.retos + ' · entrenamientos completos ' + E.historial.entrenos + '. Los NPC recuerdan todo esto cuando hablas con ellos (tú hablas primero).</div></section>';
+      html += '<section><h3>Calendario · clima · tu casa · memoria</h3><div style="font-size:12px">📅 <b>' + U.Tiempo.diaTexto(E.reloj) + '</b> · Momento: ' + ff2.nombre + ' (' + U.Tiempo.formato(E.reloj.minutos) + ') · 6 momentos por día, semana de Lunes a Domingo.<br>' + cl.icono + ' <b>Clima: ' + cl.nombre + '</b> · ' + cl.detalle + '. Cambia solo cada pocos minutos y ajusta costos. La lluvia tiene intensidades (ligera, normal, fuerte y tormenta): bajo techo (tu casa, la Oficina) no llueve ni cambian los costos; afuera, el Agua cuesta 1 (solo controlas el agua que ya hay), el Fuego paga más cuanto más llueve, la Tierra y el Rayo bajan un poco y el Viento sube.<br>🏠 Tu casa (puerta de la casa azul): alarma fijada a las <b>' + U.Tiempo.formato(E.alarmaMin) + '</b> · Hechizo de Inversión: ' + (E.flags.hechizoInversion ? '<b style="color:var(--exito)">aprendido (tecla V)</b>' : 'sin aprender (obelisco de la Montaña Brumosa)') + '<br>Monedas: <b style="color:var(--rayo)">' + Math.floor(j.monedas || 0) + ' 🪙</b> (torneo 150 al campeón · oleadas · misiones de Lía · tienda de Marisol) · Torneos ganados: ' + (E.historial.torneos || 0) + ' · Misiones entregadas: ' + (E.historial.misiones || 0) + '<br>Historial de esta vida: victorias de arena ' + E.historial.victorias + ' · caídas ' + E.historial.derrotas + ' · retos superados ' + E.historial.retos + ' · entrenamientos completos ' + E.historial.entrenos + '. Los NPC recuerdan todo esto cuando hablas con ellos (tú hablas primero).</div></section>';
     }
     html += '<section><h3>Diario</h3><ul class="diario">' + E.objetivos.map(o => '<li class="' + o.estado + '">' + (o.estado === 'hecho' ? '✓ ' : o.estado === 'actual' ? '▶ ' : '○ ') + o.texto + '</li>').join('') + '</ul></section>';
     html += '<section><h3>Vecinos de Bruma · personalidad · dónde están ahora</h3>' + (E.roster || E.npcs).map(n => { const per = U.Personas ? U.Personas.de(n.id) : null; const donde = U.Vida ? U.Vida.dondeEstaTexto(n) : ''; return '<div style="font-size:12px;margin:4px 0"><b>' + n.nombre + '</b> · <span style="color:' + U.Emociones.tonos[n.emocion].color + '">' + n.emocion + '</span> · confianza ' + Math.round(n.estados.confianza) + (per ? '<br><span style="color:var(--textoFrio)">' + per.tipo + ' · le gusta: ' + per.gustos.join(', ') + '</span>' : '') + '<br><span style="color:var(--rayo)">📍 ' + n.nombre + ' ' + donde + '</span></div>'; }).join('') + '<div style="font-size:11px;color:var(--textoTenue)">Cada vecino tiene su rutina: trabaja, come en la plaza, entrena en el Bosque y vuelve a casa de noche (21:00; Pipo a las 20:00). Si alguien no está en su puesto, pregúntale a otro vecino «¿Dónde está…?» y te dirá dónde fue. Círculo de sparring del Bosque Susurrante: Kaelen–Marco 09:00–11:00 · Torin–Breno 14:00–17:00; entra en el círculo y te ofrecerán unirte.</div></section>';
@@ -3500,7 +3586,7 @@ U.Guardado = {
       maestria: Object.assign({}, j.maestria), estilos: Object.assign({}, j.estilos), tieneYang: !!j.tieneYang,
       elementoActivo: j.elementoActivo, tecnicaIdx: j.tecnicaIdx || 0, yangForma: j.yangForma || 'haz',
       pociones: j.pociones, monedas: Math.floor(j.monedas || 0), misionIdx: E.misionIdx || 0, mision: E.mision ? Object.assign({}, E.mision) : null, regenBonus: j.regenBonus || 0, crecimientoTotal: Object.assign({}, U.Crecimiento.total || {}),
-      relojMinutos: E.reloj ? E.reloj.minutos : 540, dia: E.reloj ? (E.reloj.dia || 1) : 1, diaSemana: E.reloj ? (E.reloj.diaSemana || 0) : 0, climaTipo: E.clima ? E.clima.tipo : 'despejado', alarmaMin: E.alarmaMin != null ? E.alarmaMin : 420, historial: Object.assign({}, E.historial || {}), dificultad: E.dificultad, ronda: E.arena.ronda,
+      relojMinutos: E.reloj ? E.reloj.minutos : 540, dia: E.reloj ? (E.reloj.dia || 1) : 1, diaSemana: E.reloj ? (E.reloj.diaSemana || 0) : 0, climaTipo: E.clima ? E.clima.tipo : 'despejado', climaIntensidad: E.clima ? (E.clima.intensidad || 0) : 0, alarmaMin: E.alarmaMin != null ? E.alarmaMin : 420, historial: Object.assign({}, E.historial || {}), dificultad: E.dificultad, ronda: E.arena.ronda,
       objetivos: E.objetivos.map(o => o.estado), objetivoIdx: E.objetivoIdx, flags: Object.assign({}, E.flags),
       npcs: (E.roster || E.npcs || []).map(n => ({ id: n.id, estados: Object.assign({}, n.estados), emocion: n.emocion, saludado: !!n.saludado, entreno: !!n.entreno, stockPociones: n.stockPociones, hechos: (n.hechos || []).slice(), veces: n.veces || 0, mapa: n.mapa || 'aldea', x: Math.round(n.x * 100) / 100, y: Math.round(n.y * 100) / 100 }))
     };
@@ -3564,7 +3650,7 @@ U.Guardado = {
     if (d.crecimientoTotal) U.Crecimiento.total = Object.assign({}, d.crecimientoTotal);
     if (E.reloj && d.relojMinutos != null) E.reloj.minutos = ((d.relojMinutos % 1440) + 1440) % 1440;
     if (E.reloj) { if (d.dia) E.reloj.dia = d.dia; if (d.diaSemana != null) E.reloj.diaSemana = d.diaSemana; }
-    if (d.climaTipo && U.Clima.TIPOS[d.climaTipo]) E.clima = { tipo: d.climaTipo, restante: 180 };
+    if (d.climaTipo && U.Clima.TIPOS[d.climaTipo]) E.clima = { tipo: d.climaTipo, intensidad: d.climaIntensidad != null ? d.climaIntensidad : (d.climaTipo === 'tormenta' ? 4 : d.climaTipo === 'lluvia' ? 2 : 0), restante: 180 };
     if (d.alarmaMin != null) E.alarmaMin = d.alarmaMin;
     if (d.historial) Object.assign(E.historial, d.historial);
     E.dificultad = d.dificultad || 1; E.arena.ronda = d.ronda || 1; Object.assign(E.flags, d.flags || {});
