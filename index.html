@@ -183,7 +183,7 @@ button{font-family:var(--fuente);color:var(--texto);cursor:pointer}
 #hudSup{position:absolute;top:calc(10px + env(safe-area-inset-top));left:10px;right:10px;display:flex;justify-content:space-between;align-items:flex-start;gap:14px;pointer-events:none}
 #hudSup>*{pointer-events:auto}
 #colIzq{display:flex;flex-direction:column;gap:6px;position:relative;min-width:0}
-#barrasFlotantes{width:min(252px,58vw);display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px;min-width:0;background:transparent;border:none;box-shadow:none;padding:0}
+#barrasFlotantes{width:min(296px,68vw);display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:5px;min-width:0;background:transparent;border:none;box-shadow:none;padding:0}
 #barrasFlotantes .barra{grid-column:1;min-width:0}
 #hud .panel{clip-path:none;border-radius:12px;box-shadow:0 0 0 2px var(--sombra),0 4px 12px rgba(0,0,0,.35)}
 #filaTopInfo{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
@@ -211,6 +211,11 @@ button{font-family:var(--fuente);color:var(--texto);cursor:pointer}
 #monedasHud{grid-column:2;grid-row:1/span 3;align-self:stretch;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;color:#ffe14d;font-size:13px;font-weight:700;line-height:1.15;text-shadow:1px 1px 0 #000,0 0 5px rgba(0,0,0,.7);padding:3px 7px;background:rgba(14,21,48,.55);border:1px solid rgba(255,225,77,.35);border-radius:8px;opacity:.92}
 #monedasHud .monIco{font-size:12px;line-height:1}
 #monedasHud small{color:var(--textoFrio);font-size:8px;font-weight:400;letter-spacing:.5px;text-transform:uppercase}
+/* Reloj junto a las monedas: solo un círculo con el símbolo; la hora y el clima salen en el panel al tocarlo */
+#btnReloj{grid-column:3;grid-row:1/span 3;align-self:center;width:40px;height:40px;border-radius:50%;border:2px solid var(--borde);background:rgba(14,21,48,.88);font-size:20px;line-height:1;display:grid;place-items:center;box-shadow:0 3px 0 var(--sombra);cursor:pointer;padding:0;transition:transform .08s,border-color .15s}
+#btnReloj:hover{border-color:var(--bordeClaro)}
+#btnReloj:active{transform:translateY(3px);box-shadow:none}
+#btnReloj.abierto{border-color:var(--rayo);box-shadow:0 3px 0 var(--sombra),0 0 10px rgba(255,225,77,.45)}
 #panelDerecho{display:grid;gap:8px;justify-items:end}
 .btnAjustes{width:40px;height:40px;border-radius:50%;border:2px solid var(--borde);background:rgba(14,21,48,.88);color:var(--textoFrio);font-size:20px;line-height:1;display:grid;place-items:center;box-shadow:0 3px 0 var(--sombra);transition:transform .08s,color .15s,border-color .15s}
 .btnAjustes:hover{color:var(--texto);border-color:var(--bordeClaro)}
@@ -223,7 +228,6 @@ button{font-family:var(--fuente);color:var(--texto);cursor:pointer}
 #objTexto{display:none}
 .objFlecha{color:var(--rayo);font-size:11px;transition:transform .2s;flex-shrink:0}
 #objetivo.abierto .objFlecha{transform:rotate(180deg)}
-#infoHud.abierto .objFlecha{transform:rotate(180deg)}
 #objetivoDetalle{position:absolute;top:calc(100% + 6px);left:0;width:min(380px,calc(100vw - 20px));padding:12px 14px;font-size:13px;display:grid;gap:8px;z-index:30}
 #objetivoDetalle h3{margin:0;font-size:11px;letter-spacing:1px;color:var(--rayo);text-transform:uppercase}
 #objDetalleTexto{margin:0;line-height:1.45;color:var(--texto)}
@@ -236,13 +240,6 @@ button{font-family:var(--fuente);color:var(--texto);cursor:pointer}
 #descansoInd{position:absolute;left:50%;bottom:calc(228px + env(safe-area-inset-bottom));transform:translateX(-50%);padding:8px 12px;display:grid;gap:4px;font-size:11px;text-align:center;min-width:220px}
 #descansoInd b{color:var(--exito);letter-spacing:1px}
 .barra.descanso{height:8px}.barra.descanso .relleno{background:var(--exito)}
-#infoHud{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;padding:6px 10px;background:rgba(14,21,48,.92);border:2px solid var(--borde);border-radius:999px;box-shadow:0 2px 0 var(--sombra);color:var(--texto);white-space:nowrap;cursor:pointer;font-family:var(--fuente)}
-#infoHud:hover{filter:brightness(1.2)}
-#infoHud:active{transform:translateY(2px)}
-#relojIcono{font-size:14px;line-height:1;color:var(--rayo)}
-#infoDia{font-size:13px;font-weight:700;letter-spacing:.3px;line-height:1;color:var(--texto)}
-#relojHora{font-size:13px;font-weight:700;letter-spacing:.5px;line-height:1;color:var(--texto)}
-#relojAmpm{font-size:10px;font-weight:700;letter-spacing:1px;line-height:1;color:var(--rayo)}
 #infoDetalle{width:min(320px,calc(100vw - 20px));padding:10px 12px;font-size:12.5px;display:grid;gap:7px;z-index:30}
 #infoDetalle .filaDet{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
 #infoDetalle .ic{font-size:15px;line-height:1}
@@ -315,10 +312,8 @@ button{font-family:var(--fuente);color:var(--texto);cursor:pointer}
   #joyKnob{width:44px;height:44px;margin:-22px 0 0 -22px}
 }
 @media (max-width:720px){
-  #barrasFlotantes{width:min(228px,52vw)}
-  #infoHud{padding:5px 8px;gap:5px}
-  #relojHora{font-size:12.5px}
-  #infoDia{font-size:12.5px}
+  #barrasFlotantes{width:min(264px,62vw)}
+  #btnReloj{width:36px;height:36px;font-size:18px}
   #minimapa{width:84px;height:63px}
   .btnAjustes{width:36px;height:36px;font-size:18px}
   #objetivo{font-size:11px;padding:6px 8px}
@@ -350,12 +345,12 @@ button{font-family:var(--fuente);color:var(--texto);cursor:pointer}
           <div class="barra cansancio" title="Condición: 100% es estar en perfecta forma. Cada 10 de Esencia gastada baja 1. Cuanto más baja, más lenta se recarga tu Esencia (nunca llega a cero). Se recupera muy lento fuera de combate, según tu atributo (por hora de juego); en combate no se recupera. Dormir en fogata o cama la deja al 100% de su máximo. Si cae por debajo de 25, tu máximo crece +5 (hasta +100). Cada nivel de Yin suma +20 al máximo (hasta 300)."><div class="relleno" id="rellCansancio"></div><span class="nums" id="numCansancio">CONDICIÓN 100/100</span></div>
           <button id="btnPocion" title="Poción: +50% de Vida (Q)" aria-label="Usar poción">🧪 <span>×0</span></button>
           <div id="monedasHud" title="Monedas: gana en torneo, oleadas y misiones; gasta en la tienda"><span class="monIco" aria-hidden="true">🪙</span><span id="numMonedas">30</span><small>monedas</small></div>
+          <button id="btnReloj" title="Reloj: toca para ver la hora actual y el clima" aria-label="Reloj: toca para ver la hora actual y el clima" aria-expanded="false">🕐</button>
         </div>
         <div id="filaTopInfo">
-          <button id="infoHud" title="Día y hora: toca para ver la fecha completa y el clima" aria-label="Día y hora: toca para ver la fecha completa y el clima" aria-expanded="false"><span id="relojIcono" aria-hidden="true">☀</span><span id="infoDia">Lunes</span><span aria-hidden="true">·</span><span id="relojHora">09:00</span><span id="relojAmpm">AM</span><span class="objFlecha" aria-hidden="true">▾</span></button>
           <button id="objetivo" class="panel pixel" title="Ver el objetivo completo" aria-label="Objetivo: toca para ver el detalle" aria-expanded="false"><span class="objEtq">OBJETIVO</span><span id="objTexto">—</span><span class="objFlecha" aria-hidden="true">▾</span></button>
         </div>
-        <div id="infoDetalle" class="panel pixel oculto"><h3>Fecha · hora · clima</h3><div class="filaDet"><span class="ic" aria-hidden="true">📅</span><b id="calTexto">Lunes · Día 1</b><small id="calMomento">Mañana</small></div><div class="filaDet"><span class="ic" id="climaIcono" aria-hidden="true">☀</span><b id="climaTexto">Despejado</b><small id="climaDetalle">Cielo limpio</small></div></div>
+        <div id="infoDetalle" class="panel pixel oculto"><h3>Reloj · clima</h3><div class="filaDet"><span class="ic" aria-hidden="true">🕐</span><b id="horaTexto">09:00 AM</b><small id="horaMomento">Mañana</small></div><div class="filaDet"><span class="ic" aria-hidden="true">📅</span><b id="calTexto">Lunes · Día 1</b></div><div class="filaDet"><span class="ic" id="climaIcono" aria-hidden="true">☀</span><b id="climaTexto">Despejado</b><small id="climaDetalle">Cielo limpio</small></div></div>
         <div id="objetivoDetalle" class="panel pixel oculto"><h3>Objetivo actual</h3><p id="objDetalleTexto">—</p><ul id="objDetalleLista"></ul></div>
       </div>
       <div id="panelDerecho">
@@ -858,7 +853,7 @@ U.Grid = {
       { id: 'bosque', nombre: 'Bosque Susurrante', x: 0, y: 0, w: W, h: H, humedad: 0.55, temp: 0.4, viento: 0.22, suelo: 'tierra', icono: 'bosque', tinte: [40, 90, 60, 0.05] }
     ];
     return { id: 'aldea', nombreMapa: 'Aldea de Bruma', ancho: W, alto: H, tiles, vari, objetos, solidos, zonas, arena: { x: AX, y: AY, r: AR }, ocultarRuna: false, inicio: { x: 16.5, y: 26.5 }, spawns: [[46, 31], [54, 31], [50, 38], [46, 37], [54, 37]], npcs: { kaelen: { x: 21.5, y: 22.5 }, sora: { x: 14.5, y: 26.5 }, torin: { x: 11.5, y: 20.5 }, marisol: { x: 22.5, y: 32.5 }, breno: { x: 18.5, y: 29.5 }, elena: { x: 8.5, y: 24.5 }, marco: { x: 27.5, y: 22.5 }, pipo: { x: 15.5, y: 21.5 } },
-      salidas: [{ x: 6.5, y: 0, w: 4, h: 1.4, destino: 'bosque', spawn: { x: 28.5, y: 41.5 }, etiqueta: 'Bosque Susurrante' },
+      salidas: [{ x: 6.5, y: 0, w: 4, h: 1.4, destino: 'bosque', spawn: { x: 28.5, y: 52.5 }, etiqueta: 'Bosque Susurrante' },
         { x: 82.4, y: 21, w: 1.6, h: 6, destino: 'desierto', spawn: { x: 2.5, y: 21.5 }, etiqueta: 'Desierto de Sal' },
         { x: 44, y: 0, w: 7, h: 1.4, destino: 'montana', spawn: { x: 27.5, y: 39.5 }, etiqueta: 'Montaña Brumosa' }] };
   },
@@ -873,34 +868,40 @@ U.Grid = {
     const get = (x, y) => (x >= 0 && y >= 0 && x < W && y < H) ? tiles[y * W + x] : T.SOTOBOSQUE;
     for (let i = 0; i < 260; i++) set(Math.floor(rng() * W), Math.floor(rng() * H), T.PASTO);
     const camino = (x1, y1, x2, y2) => { let x = x1, y = y1; while (x !== x2) { set(x, y, T.CAMINO); x += Math.sign(x2 - x); } while (y !== y2) { set(x, y, T.CAMINO); y += Math.sign(y2 - y); } set(x, y, T.CAMINO); };
-    camino(28, 43, 28, 14); camino(28, 26, 43, 26); camino(43, 26, 43, 29);
+    camino(28, 54, 28, 14); camino(28, 26, 43, 26); camino(43, 26, 43, 29);
     for (let y = 26; y <= 34; y++) for (let x = 39; x <= 47; x++) if (Math.hypot((x - 43) / 4.5, (y - 30) / 3.6) <= 1) set(x, y, T.AGUA);
     for (let y = 6; y <= 18; y++) for (let x = 20; x <= 36; x++) if (Math.hypot(x - 28, y - 12) <= 6.5) set(x, y, T.PASTO);
     for (let y = 10; y <= 14; y++) for (let x = 25; x <= 31; x++) set(x, y, T.ARENA);
     for (let y = 38; y <= 43; y++) for (let x = 24; x <= 32; x++) if (Math.hypot(x - 28, (y - 41) * 1.4) <= 5) set(x, y, T.PASTO);
+    // Claro de la ENTRADA PRINCIPAL, pegado al borde sur: ahí está el umbral a la Aldea.
+    for (let y = 47; y <= 55; y++) for (let x = 24; x <= 32; x++) if (Math.hypot(x - 28, (y - 52) * 1.4) <= 5) set(x, y, T.PASTO);
     const objetos = [];
     const obj = (tipo, x, y, w, h, solido, extra) => { const o = Object.assign({ tipo, x, y, w: w || 1, h: h || 1, solido: !!solido }, extra || {}); if (tipo === 'arbol') { o.vidaMax = 30; o.vida = 30; } else if (tipo === 'roca') { o.vidaMax = 55; o.vida = 55; } else if (tipo === 'cactus') { o.vidaMax = 22; o.vida = 22; } objetos.push(o); };
-    obj('cartel', 29, 40, 1, 1, true, { texto: 'BOSQUE SUSURRANTE · Has cambiado de mapa: esto ya no es la aldea. De día el bosque está tranquilo; de NOCHE salen los bandidos entre los árboles, sin campamento ni aviso, y al amanecer se retiran. El sendero del este lleva al estanque. El umbral del sur te devuelve a la Aldea de Bruma.' });
+    obj('cartel', 30, 50, 1, 1, true, { texto: 'BOSQUE SUSURRANTE · Entrada principal, al sur del bosque. De día el bosque está tranquilo; de NOCHE salen los bandidos entre los árboles, sin campamento ni aviso, y al amanecer se retiran. El sendero va al norte; a mitad de camino, el ramal del este lleva al estanque. El umbral dorado a tu espalda, en el borde sur, te devuelve a la Aldea de Bruma.' });
     obj('cartel', 29, 13, 1, 1, true, { texto: 'CLARO DEL NORTE · Aquí no hay campamento: los bandidos no viven en el bosque, solo lo cruzan de noche para asaltar el sendero. Si oscurece, vuelve a la aldea o prepárate. El bosque cerrado encarece el Viento (×1.5) y la humedad ayuda al Agua.' });
-    obj('fogata', 28, 38, 1, 1, true);
+    obj('fogata', 26, 51, 1, 1, true);
     obj('roca', 24, 10, 1, 1, true); obj('roca', 33, 16, 1, 1, true);
     for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) {
       const t = get(x, y); const cercaCamino = get(x + 1, y) === T.CAMINO || get(x - 1, y) === T.CAMINO || get(x, y + 1) === T.CAMINO || get(x, y - 1) === T.CAMINO;
-      const enClaro = (x >= 19 && x <= 37 && y >= 5 && y <= 19) || (x >= 23 && x <= 33 && y >= 37);
+      const enClaro = (x >= 19 && x <= 37 && y >= 5 && y <= 19) || (x >= 23 && x <= 33 && y >= 37) || (x >= 23 && x <= 33 && y >= 46);
       if ((t === T.SOTOBOSQUE || t === T.PASTO) && !enClaro && !cercaCamino) { const r = rng(); if (r < 0.17) obj('arbol', x, y, 1, 1, true, { v: Math.floor(rng() * 2) }); else if (r < 0.20) obj('roca', x, y, 1, 1, true); else if (r < 0.26) obj('flor', x, y, 1, 1, false, { v: Math.floor(rng() * 3) }); }
       if (t === T.PASTO && (get(x + 1, y) === T.AGUA || get(x - 1, y) === T.AGUA || get(x, y + 1) === T.AGUA || get(x, y - 1) === T.AGUA) && rng() < 0.4) obj('junco', x, y, 1, 1, false);
     }
+    // Borde sur cerrado: doble hilera de árboles en las dos últimas filas. El único
+    // hueco es el sendero de la entrada principal (x 25–31), donde está el umbral a
+    // la Aldea: ya no se puede bajar más allá ni rodear la salida por abajo.
+    for (let x = 1; x < W - 1; x++) { if (x >= 25 && x <= 31) continue; obj('arbol', x, 54, 1, 1, true, { v: Math.floor(rng() * 2) }); obj('arbol', x, 55, 1, 1, true, { v: Math.floor(rng() * 2) }); }
     const solidos = new Uint8Array(W * H);
     for (let i = 0; i < W * H; i++) if (tiles[i] === T.AGUA) solidos[i] = 1;
     objetos.forEach(o => { if (o.solido) for (let y = o.y; y < o.y + o.h; y++) for (let x = o.x; x < o.x + o.w; x++) if (x >= 0 && y >= 0 && x < W && y < H) solidos[y * W + x] = 1; });
     // Los puntos de aparición de bandidos y la entrada quedan siempre libres de sólidos
     const spawnsBandidos = [[24.5, 16.5], [32.5, 16.5], [28.5, 21.5], [21.5, 27.5], [36.5, 24.5]];
-    spawnsBandidos.concat([[28.5, 41.5]]).forEach(p => { const cx = Math.floor(p[0]), cy = Math.floor(p[1]); for (let y = cy - 1; y <= cy + 1; y++) for (let x = cx - 1; x <= cx + 1; x++) if (x >= 0 && y >= 0 && x < W && y < H) solidos[y * W + x] = 0; for (let i = objetos.length - 1; i >= 0; i--) { const o = objetos[i]; if (o.solido && Math.abs(o.x + (o.w || 1) / 2 - p[0]) < 1.6 && Math.abs(o.y + (o.h || 1) / 2 - p[1]) < 1.6) objetos.splice(i, 1); } });
+    spawnsBandidos.concat([[28.5, 41.5], [28.5, 52.5]]).forEach(p => { const cx = Math.floor(p[0]), cy = Math.floor(p[1]); for (let y = cy - 1; y <= cy + 1; y++) for (let x = cx - 1; x <= cx + 1; x++) if (x >= 0 && y >= 0 && x < W && y < H) solidos[y * W + x] = 0; for (let i = objetos.length - 1; i >= 0; i--) { const o = objetos[i]; if (o.solido && Math.abs(o.x + (o.w || 1) / 2 - p[0]) < 1.6 && Math.abs(o.y + (o.h || 1) / 2 - p[1]) < 1.6) objetos.splice(i, 1); } });
     const zonas = [
       { id: 'bosque', nombre: 'Bosque Susurrante', x: 0, y: 0, w: W, h: H, humedad: 0.62, temp: 0.35, viento: 0.15, suelo: 'tierra', icono: 'bosque', tinte: [20, 70, 40, 0.10] }
     ];
-    return { id: 'bosque', nombreMapa: 'Bosque Susurrante', ancho: W, alto: H, tiles, vari, objetos, solidos, zonas, arena: { x: 28, y: 12, r: 5 }, ocultarRuna: true, inicio: { x: 28.5, y: 41.5 }, spawns: [], spawnsBandidos: [[24.5, 16.5], [32.5, 16.5], [28.5, 21.5], [21.5, 27.5], [36.5, 24.5]], npcs: {},
-      salidas: [{ x: 25.5, y: 42.6, w: 6, h: 1.4, destino: 'aldea', spawn: { x: 8.5, y: 2.6 }, etiqueta: 'Aldea de Bruma' }] };
+    return { id: 'bosque', nombreMapa: 'Bosque Susurrante', ancho: W, alto: H, tiles, vari, objetos, solidos, zonas, arena: { x: 28, y: 12, r: 5 }, ocultarRuna: true, inicio: { x: 28.5, y: 52.5 }, spawns: [], spawnsBandidos: [[24.5, 16.5], [32.5, 16.5], [28.5, 21.5], [21.5, 27.5], [36.5, 24.5]], npcs: {},
+      salidas: [{ x: 25.5, y: 54.6, w: 6, h: 1.4, destino: 'aldea', spawn: { x: 8.5, y: 2.6 }, etiqueta: 'Aldea de Bruma' }] };
   },
   /* Tercer mapa: el Desierto de Sal. Calor extremo (el Fuego respira, el Agua se encarece),
      un oasis al noreste, cactus, y espejismos/ilusionistas que INVIERTEN tus controles. */
@@ -1365,9 +1366,10 @@ U.Render = {
   mundo(estado, dt) {
     this.tiempo += dt; const ctx = this.ctx, m = estado.mapa, j = estado.jugador, T = U.Grid.T, TS = 16;
     const cam = estado.camara; const vw = this.viewW, vh = this.viewH;
-    let cx = j.x * TS - vw / 2, cy = j.y * TS - vh / 2;
-    cx = Math.max(0, Math.min(m.ancho * TS - vw, cx)); cy = Math.max(0, Math.min(m.alto * TS - vh, cy));
-    if (m.ancho * TS < vw) cx = (m.ancho * TS - vw) / 2; if (m.alto * TS < vh) cy = (m.alto * TS - vh) / 2;
+    // Cámara SIEMPRE centrada en el jugador, sin sujetarse a los bordes del mapa:
+    // lo que quede fuera del mapa se pinta con el fondo oscuro, y el jugador nunca
+    // termina en una esquina tapado por las barras del HUD (p. ej. la cama en casa).
+    const cx = j.x * TS - vw / 2, cy = j.y * TS - vh / 2;
     cam.x += (cx - cam.x) * Math.min(1, dt * 8); cam.y += (cy - cam.y) * Math.min(1, dt * 8);
     cam.shake *= Math.exp(-dt * 9); const sx = (Math.random() - 0.5) * cam.shake * 6, sy = (Math.random() - 0.5) * cam.shake * 6;
     ctx.setTransform(this.dpr * this.zoom, 0, 0, this.dpr * this.zoom, 0, 0); ctx.imageSmoothingEnabled = false;
@@ -1381,8 +1383,11 @@ U.Render = {
     // Runa de la arena (pulso) — solo en mapas que la tienen (el bosque no)
     const ar = m.arena; if (ar && !m.ocultarRuna) { const pulse = 0.5 + 0.5 * Math.sin(this.tiempo * 3);
     ctx.strokeStyle = estado.arena.activa ? '#ff5470' : '#ffe14d'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(ar.x * TS + 8, ar.y * TS + 8, 6 + pulse * 3, 0, Math.PI * 2); ctx.stroke(); ctx.fillStyle = estado.arena.activa ? 'rgba(255,84,112,.4)' : 'rgba(255,225,77,.35)'; ctx.fillRect(ar.x * TS + 5, ar.y * TS + 5, 6, 6); }
-    // Círculo de entrenamiento del Bosque: anillo visible con su nombre
-    if (estado.mapaId === 'bosque') { const scp = { x: 28.5, y: 12.5 }; const pul = 0.5 + 0.5 * Math.sin(this.tiempo * 3); ctx.strokeStyle = estado.sparring && estado.sparring.fase === 'peleando' ? '#ff5470' : '#ffe14d'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(scp.x * TS, scp.y * TS, 5 * TS + pul * 2, 0, Math.PI * 2); ctx.stroke(); ctx.strokeStyle = 'rgba(255,225,77,.35)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(scp.x * TS, scp.y * TS, 5 * TS - 7, 0, Math.PI * 2); ctx.stroke(); this.texto(ctx, 'CÍRCULO DE ENTRENAMIENTO', scp.x * TS, (scp.y - 5.7) * TS, 1, '#ffe14d', 'center'); }
+    // Círculo de sparring: NO es un lugar fijo. Se forma alrededor de la pelea que
+    // esté ocurriendo (el punto medio vivo entre los dos que pelean), en el mapa
+    // que sea; si nadie está peleando, no hay círculo en ninguna parte.
+    const scp = (U.Sparring && U.Sparring.centroActual) ? U.Sparring.centroActual(estado) : null;
+    if (scp) { const pul = 0.5 + 0.5 * Math.sin(this.tiempo * 3); ctx.strokeStyle = estado.sparring && estado.sparring.fase === 'peleando' ? '#ff5470' : '#ffe14d'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(scp.x * TS, scp.y * TS, 5 * TS + pul * 2, 0, Math.PI * 2); ctx.stroke(); ctx.strokeStyle = 'rgba(255,225,77,.35)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(scp.x * TS, scp.y * TS, 5 * TS - 7, 0, Math.PI * 2); ctx.stroke(); this.texto(ctx, 'CÍRCULO DE ENTRENAMIENTO', scp.x * TS, (scp.y - 5.7) * TS, 1, '#ffe14d', 'center'); }
     // Salidas a otros mapas: umbral dorado pulsante con el destino escrito
     (m.salidas || []).forEach(s => { const a = 0.30 + 0.25 * Math.sin(this.tiempo * 4); const hh = Math.max(5, s.h * TS * 0.4); ctx.fillStyle = 'rgba(255,225,77,' + a + ')'; ctx.fillRect(s.x * TS, s.y * TS, s.w * TS, hh); ctx.strokeStyle = '#ffe14d'; ctx.lineWidth = 1; ctx.strokeRect(s.x * TS + 0.5, s.y * TS + 0.5, s.w * TS - 1, hh - 1); this.texto(ctx, 'A ' + s.etiqueta.toUpperCase(), (s.x + s.w / 2) * TS, s.y < 2 ? s.y * TS + hh + 5 : s.y * TS - 12, 1, '#ffe14d', 'center'); });
     // Dibujables ordenados por Y
@@ -1812,13 +1817,13 @@ U.Diccionario = {
 window.U = window.U || {};
 
 U.Vida = {
-  SALIDAS: { aldea: { x: 8.5, y: 1.6 }, bosque: { x: 28.5, y: 41.6 } },
-  ENTRADAS: { bosque: { x: 28.5, y: 40.4 }, aldea: { x: 8.5, y: 3.4 } },
+  SALIDAS: { aldea: { x: 8.5, y: 1.6 }, bosque: { x: 28.5, y: 53.8 } },
+  ENTRADAS: { bosque: { x: 28.5, y: 52.4 }, aldea: { x: 8.5, y: 3.4 } },
   // Rutina: [desde, hasta, mapa, x, y, lugar, actividad, opciones]
   RUTINAS: {
     kaelen: [
       { d: 5, h: 9, m: 'aldea', x: 8.5, y: 5.5, l: 'la entrada norte de la aldea', a: 'vigila la entrada del bosque' },
-      { d: 9, h: 11, m: 'bosque', x: 27, y: 12.5, l: 'el Círculo de Entrenamiento del Bosque', a: 'entrena en sparring con Marco', spar: true, fijo: true },
+      { d: 9, h: 11, m: 'bosque', x: 27, y: 12.5, l: 'un claro del Bosque Susurrante', a: 'entrena en sparring con Marco', spar: true, fijo: true },
       { d: 11, h: 14, m: 'aldea', x: 16.5, y: 24.5, l: 'la plaza de la aldea', a: 'hace su ronda de guardia' },
       { d: 14, h: 18, m: 'aldea', x: 41.5, y: 33.5, l: 'la puerta de la Arena de Ecos', a: 'vigila la arena y entrena la guardia', fijo: true },
       { d: 18, h: 21, m: 'aldea', x: 21.5, y: 22.5, l: 'la plaza, junto al pozo', a: 'cierra su ronda del día' }
@@ -1834,7 +1839,7 @@ U.Vida = {
       { d: 5, h: 11, m: 'aldea', x: 11.5, y: 20.5, l: 'su forja, al oeste de la plaza', a: 'trabaja el acero desde temprano', fijo: true },
       { d: 11, h: 13, m: 'aldea', x: 18.5, y: 24.5, l: 'la plaza de la aldea', a: 'entrega encargos de la forja' },
       { d: 13, h: 14, m: 'bosque', x: 28.5, y: 15.5, l: 'el Claro del Bosque', a: 'calienta entrenando solo' },
-      { d: 14, h: 17, m: 'bosque', x: 27, y: 12.5, l: 'el Círculo de Entrenamiento del Bosque', a: 'entrena en sparring con Breno', spar: true, fijo: true },
+      { d: 14, h: 17, m: 'bosque', x: 27, y: 12.5, l: 'un claro del Bosque Susurrante', a: 'entrena en sparring con Breno', spar: true, fijo: true },
       { d: 17, h: 20, m: 'aldea', x: 11.5, y: 20.5, l: 'su forja, al oeste de la plaza', a: 'cierra la forja y templa lo último', fijo: true },
       { d: 20, h: 21, m: 'aldea', x: 17.5, y: 25.5, l: 'la fogata de la plaza', a: 'descansa tras la jornada' }
     ],
@@ -1847,7 +1852,7 @@ U.Vida = {
       { d: 5, h: 8, m: 'aldea', x: 18.5, y: 29.5, l: 'el sur de la plaza', a: 'carga leña y afila el hacha' },
       { d: 8, h: 13, m: 'bosque', x: 19.5, y: 20.5, l: 'el oeste del Bosque Susurrante', a: 'tala árboles para la aldea' },
       { d: 13, h: 14, m: 'bosque', x: 28.5, y: 24.5, l: 'el sendero del Bosque', a: 'vuelve hacia el claro con la leña' },
-      { d: 14, h: 17, m: 'bosque', x: 30, y: 12.5, l: 'el Círculo de Entrenamiento del Bosque', a: 'entrena en sparring con Torin', spar: true, fijo: true },
+      { d: 14, h: 17, m: 'bosque', x: 30, y: 12.5, l: 'un claro del Bosque Susurrante', a: 'entrena en sparring con Torin', spar: true, fijo: true },
       { d: 17, h: 19, m: 'aldea', x: 12.5, y: 11.5, l: 'el claro norte de la aldea', a: 'parte la leña del día' },
       { d: 19, h: 21, m: 'aldea', x: 17.5, y: 25.5, l: 'la fogata de la plaza', a: 'descansa en silencio' }
     ],
@@ -1859,7 +1864,7 @@ U.Vida = {
     ],
     marco: [
       { d: 5, h: 9, m: 'aldea', x: 27.5, y: 22.5, l: 'el puente hacia la Ribera', a: 'prepara su mochila y mira el río' },
-      { d: 9, h: 11, m: 'bosque', x: 30, y: 12.5, l: 'el Círculo de Entrenamiento del Bosque', a: 'entrena en sparring con Kaelen', spar: true, fijo: true },
+      { d: 9, h: 11, m: 'bosque', x: 30, y: 12.5, l: 'un claro del Bosque Susurrante', a: 'entrena en sparring con Kaelen', spar: true, fijo: true },
       { d: 11, h: 16, m: 'bosque', x: 40.5, y: 27.5, l: 'el estanque del Bosque Susurrante', a: 'explora y dibuja su mapa' },
       { d: 16, h: 19, m: 'aldea', x: 36.5, y: 24.5, l: 'la Ribera Húmeda', a: 'vuelve de explorar y se lava las botas' },
       { d: 19, h: 21, m: 'aldea', x: 17.5, y: 25.5, l: 'la fogata de la plaza', a: 'cuenta sus historias, exagerando un poco' }
@@ -1875,9 +1880,9 @@ U.Vida = {
   slotDe(n, hora, E) {
     if (n.id === 'aldric') return { mapa: 'oficina', x: 12.5, y: 3.5, lugar: 'la Oficina del Guardián', actividad: 'atiende la Oficina', fijo: true };
     if (n.id === 'lia') return { mapa: 'oficina', x: 8.5, y: 7.5, lugar: 'la Oficina, junto al tablón', actividad: 'lleva el tablón de misiones', fijo: true };
-    if (E && E.sparring && E.sparring.fase === 'peleando' && E.sparring.pareja.indexOf(n.id) >= 0) return { mapa: 'bosque', x: 28.5, y: 15.5, lugar: 'el Círculo de Entrenamiento del Bosque', actividad: 'está en pleno sparring contigo', fijo: true };
+    if (E && E.sparring && E.sparring.fase === 'peleando' && E.sparring.pareja.indexOf(n.id) >= 0) return { mapa: n.mapa, x: n.x, y: n.y, lugar: 'el círculo de la pelea', actividad: 'está en pleno sparring contigo', fijo: true };
     if (this.esHoraCasa(n, hora)) return { enCasa: true, mapa: 'aldea', x: n.casaPos.x, y: n.casaPos.y, lugar: 'su casa', actividad: 'duerme en casa hasta el amanecer' };
-    if ((n.sparringCansado || 0) > 0) return { mapa: 'bosque', x: 28.5, y: 15.8, lugar: 'el borde del Círculo del Bosque', actividad: 'descansa tras el sparring, recuperándose', fijo: true };
+    if ((n.sparringCansado || 0) > 0) return { mapa: n.mapa, x: n.x, y: n.y, lugar: 'el borde del círculo de la pelea', actividad: 'descansa tras el sparring, recuperándose', fijo: true };
     const r = this.RUTINAS[n.id] || [];
     for (let i = 0; i < r.length; i++) { const s = r[i]; if (hora >= s.d && hora < s.h) return { mapa: s.m, x: s.x, y: s.y, lugar: s.l, actividad: s.a, fijo: !!s.fijo, spar: !!s.spar }; }
     return { mapa: 'aldea', x: n.home.x, y: n.home.y, lugar: 'su puesto de siempre', actividad: 'está en su puesto' };
@@ -1969,7 +1974,7 @@ U.Vida = {
     n.viaje = null;
     if (dest.enCasa) { if (this.caminarA(n, dt, n.casaPos, 2.3, E)) { n.enCasa = true; n.moviendo = false; } return; }
     const llego = this.caminarA(n, dt, dest, dest.fijo ? 2.5 : 2.1, E);
-    n.enCirculo = !!(dest.spar && E.mapaId === 'bosque');
+    n.enCirculo = !!dest.spar;
     if (llego) {
       n.moviendo = false;
       // Vida quieta con micro-movimiento: paseítos cortos alrededor de su puesto.
@@ -2003,8 +2008,9 @@ U.Vida = {
 </script>
 <script>
 /* === js/sistemas/sparring.js === */
-/* Unipar — CÍRCULO DE SPARRING del Bosque Susurrante.
-   Dos NPC entrenan peleando en el claro (Kaelen–Marco 09:00–11:00 · Torin–Breno 14:00–17:00).
+/* Unipar — CÍRCULO DE SPARRING: no es un lugar fijo, se forma alrededor de la pelea.
+   Dos NPC entrenan peleando (Kaelen–Marco 09:00–11:00 · Torin–Breno 14:00–17:00) y el
+   círculo se dibuja y se detecta alrededor de ELLOS, donde sea que estén peleando.
    RADIO: al entrar en el círculo paran, voltean hacia ti y te ofrecen unirte: contra los dos,
    del bando de uno, solo mirar o salir. REGLA DEL 10%: si tu Vida cae al 10%, la pelea se
    para, te dicen que te miras débil según su personalidad, te sacan del círculo y no te dejan
@@ -2013,7 +2019,26 @@ U.Vida = {
 window.U = window.U || {};
 
 U.Sparring = {
-  CENTRO: { x: 28.5, y: 12.5 }, RADIO: 5,
+  CENTRO: { x: 28.5, y: 12.5 }, RADIO: 5, // CENTRO solo queda como respaldo si una pelea arranca sin centro vivo
+  // Centro VIVO de la pelea actual: el punto medio entre los dos que están peleando,
+  // estén donde estén. Sin pelea en curso devuelve null (y no hay círculo en el mapa).
+  centroActual(E) {
+    if (!E || !E.sparring) return null; const S = E.sparring;
+    if (S.fase === 'peleando') {
+      const pts = E.enemigos.filter(e => e.esSparring && e.vida > 0).map(e => ({ x: e.x, y: e.y }));
+      const ali = S.aliado ? U.Vida.buscar(S.aliado) : null;
+      if (ali && !ali.ocultoSparring && ali.mapa === E.mapaId) pts.push({ x: ali.x, y: ali.y });
+      if (!pts.length) return S.centro || null;
+      let x = 0, y = 0; pts.forEach(p => { x += p.x; y += p.y; });
+      return { x: x / pts.length, y: y / pts.length };
+    }
+    const v = this.ventanaActual(E); if (!v) return null;
+    const A = U.Vida.buscar(v.a), B = U.Vida.buscar(v.b);
+    // Solo hay pelea (y círculo) cuando los dos ya están en su sitio, frente a frente
+    // y quietos: mientras vienen de camino no se forma ningún círculo.
+    if (A && B && A.mapa === E.mapaId && B.mapa === E.mapaId && !A.ocultoSparring && !B.ocultoSparring && A.enCirculo && B.enCirculo && !A.moviendo && !B.moviendo && Math.hypot(A.x - B.x, A.y - B.y) <= 4.5) return { x: (A.x + B.x) / 2, y: (A.y + B.y) / 2 };
+    return S.fase === 'ofrecido' ? (S.centro || null) : null;
+  },
   VENTANAS: [ { a: 'kaelen', b: 'marco', d: 9, h: 11 }, { a: 'torin', b: 'breno', d: 14, h: 17 } ],
   CLASES: { kaelen: 'veterano', torin: 'veterano', breno: 'bandido', marco: 'chaman' },
   ventanaActual(E) { const h = U.Tiempo.hora(E); for (let i = 0; i < this.VENTANAS.length; i++) { const v = this.VENTANAS[i]; if (h >= v.d && h < v.h) return v; } return null; },
@@ -2021,9 +2046,12 @@ U.Sparring = {
   actualizar(dt) {
     const E = U.Juego.estado; if (!E || !E.sparring) return; const S = E.sparring, j = E.jugador;
     S.ofrecidoCd = Math.max(0, (S.ofrecidoCd || 0) - dt);
-    if (E.mapaId !== 'bosque') { S.dentro = false; return; }
     const v = this.ventanaActual(E);
-    const distC = Math.hypot(j.x - this.CENTRO.x, j.y - this.CENTRO.y);
+    // El círculo rodea a la pelea, no a un punto fijo: la distancia se mide al
+    // centro vivo entre los dos que pelean (si no hay pelea, no hay círculo).
+    const centro = this.centroActual(E); if (centro) S.centro = centro;
+    const distC = centro ? Math.hypot(j.x - centro.x, j.y - centro.y) : 1e9;
+    if (!centro && S.fase === 'idle') { S.dentro = false; return; }
     // --- pelea en curso ---
     if (S.fase === 'peleando') {
       if (E.sparringJugadorDebil || j.vida <= j.stats.vida * 0.10) { E.sparringJugadorDebil = false; this.pararPorDebil(); return; }
@@ -2046,7 +2074,7 @@ U.Sparring = {
     // --- entrenamiento NPC contra NPC (sin ti): se pegan de verdad, sin bajar del 55% ---
     if (v && S.consumida !== this.claveVentana(E, v)) {
       const A = U.Vida.buscar(v.a), B = U.Vida.buscar(v.b);
-      if (A && B && A.mapa === 'bosque' && B.mapa === 'bosque' && !A.ocultoSparring && !B.ocultoSparring) {
+      if (A && B && A.mapa === E.mapaId && B.mapa === E.mapaId && !A.ocultoSparring && !B.ocultoSparring) {
         A.enCirculo = B.enCirculo = true;
         A.vidaSim = Math.min(100, (A.vidaSim || 100) + dt * 1.2); B.vidaSim = Math.min(100, (B.vidaSim || 100) + dt * 1.2);
         S.golpeT = (S.golpeT || 0) - dt;
@@ -2069,7 +2097,7 @@ U.Sparring = {
         S.dentro = true;
         const vv = v || this.VENTANAS[0]; const A = U.Vida.buscar(vv.a);
         const per = A ? U.Personas.de(A.id) : null;
-        j.x = this.CENTRO.x; j.y = this.CENTRO.y + this.RADIO + 2.2;
+        const cc = centro || this.CENTRO; j.x = cc.x; j.y = cc.y + this.RADIO + 2.2;
         U.Dialogo.mostrarTexto('CÍRCULO DE ENTRENAMIENTO', (A ? A.nombre + ': ' : '') + (per && per.expulsa ? per.expulsa : 'Te miras muy débil. Fuera del círculo.') + ' (Tu Vida está al ' + Math.round(j.vida / j.stats.vida * 100) + '%: vuelve cuando estés sobre el 50%.)');
         return;
       }
@@ -2078,11 +2106,12 @@ U.Sparring = {
     if (!v || S.dentro || S.ofrecidoCd > 0 || S.consumida === this.claveVentana(E, v)) { S.dentro = dentro; return; }
     S.dentro = true;
     const A2 = U.Vida.buscar(v.a), B2 = U.Vida.buscar(v.b);
-    if (A2 && B2 && A2.mapa === 'bosque' && B2.mapa === 'bosque') this.ofrecer(v);
+    if (A2 && B2 && A2.mapa === E.mapaId && B2.mapa === E.mapaId) this.ofrecer(v);
   },
   ofrecer(v) {
     const E = U.Juego.estado, S = E.sparring;
     S.fase = 'ofrecido'; S.pareja = [v.a, v.b]; S.ventana = v;
+    const c0 = this.centroActual(E); if (c0) S.centro = c0; // el círculo queda donde está la pelea
     const A = U.Vida.buscar(v.a), B = U.Vida.buscar(v.b), j = E.jugador;
     [A, B].forEach(n => { if (n) { n.dir = U.Grid.dir8(j.x - n.x, j.y - n.y); n.moviendo = false; } });
     U.HUD.banner('⚔ CÍRCULO DE ENTRENAMIENTO · ' + A.nombre.toUpperCase() + ' Y ' + B.nombre.toUpperCase() + ' TE MIRAN', 2);
@@ -2107,7 +2136,7 @@ U.Sparring = {
   restaurarNpc(id, alBorde) {
     const n = U.Vida.buscar(id); if (!n) return n;
     n.ocultoSparring = false; n.enCirculo = false;
-    if (alBorde) { const a = Math.random() * Math.PI * 2; n.x = this.CENTRO.x + Math.cos(a) * (this.RADIO + 0.9); n.y = this.CENTRO.y + Math.sin(a) * (this.RADIO + 0.9) * 0.7; n.ruta = []; n.rutaKey = ''; }
+    if (alBorde) { const E = U.Juego.estado; const cc = (E && E.sparring && E.sparring.centro) || this.CENTRO; const a = Math.random() * Math.PI * 2; n.x = cc.x + Math.cos(a) * (this.RADIO + 0.9); n.y = cc.y + Math.sin(a) * (this.RADIO + 0.9) * 0.7; n.ruta = []; n.rutaKey = ''; }
     return n;
   },
   retirar(e) {
@@ -2127,7 +2156,7 @@ U.Sparring = {
     E.enemigos = E.enemigos.filter(e => !e.esSparring); E.proyectiles = [];
     S.pareja.forEach(id => this.restaurarNpc(id, true));
     if (S.ventana) S.consumida = this.claveVentana(E, S.ventana);
-    S.fase = 'idle'; S.aliado = null; U.Audio.musica('bosque');
+    S.fase = 'idle'; S.aliado = null; S.centro = null; U.Audio.musica(E.mapaId === 'bosque' ? 'bosque' : E.mapaId === 'desierto' ? 'desierto' : E.mapaId === 'montana' ? 'montana' : 'aldea');
   },
   victoria() {
     const E = U.Juego.estado, S = E.sparring, j = E.jugador;
@@ -2142,10 +2171,11 @@ U.Sparring = {
   pararPorDebil() {
     const E = U.Juego.estado, S = E.sparring, j = E.jugador;
     const pareja = S.pareja.slice(); const bando = S.bando;
+    const cc = S.centro || this.CENTRO; // se captura antes de finComun: te sacan al borde del círculo de ESTA pelea
     this.finComun();
     S.bloqueado = true;
     j.vida = Math.max(1, Math.ceil(j.stats.vida * 0.10)); j.cargando = false; j.escudo = false;
-    j.x = this.CENTRO.x; j.y = this.CENTRO.y + this.RADIO + 2.2;
+    j.x = cc.x; j.y = cc.y + this.RADIO + 2.2;
     pareja.forEach(id => { const n = U.Vida.buscar(id); if (n) { if (!n.hechos) n.hechos = []; n.hechos.push('te sacó del círculo al verte al 10% de Vida'); } });
     U.HUD.banner('🛑 SPARRING DETENIDO · TE MIRAS MUY DÉBIL', 2.4); U.Audio.sfx('derrota');
     U.Dialogo.abrirResultadoSparring('debil', pareja, bando);
@@ -3166,7 +3196,7 @@ U.Dialogo = {
     document.getElementById('dialogo').classList.remove('oculto');
     const perA = U.Personas.de(A.id);
     this.decir(A.nombre + ' y ' + B.nombre + ' paran su entrenamiento y voltean hacia ti. ' + A.nombre + ' (' + perA.tipo.toLowerCase() + ') te mide con la mirada: «¿Entraste al círculo nomás a mirar? Aquí se vale unirse: contra los dos, del bando de uno, o salte y déjanos entrenar. Y ojo: esto es sparring, sin muerte: quien caiga al 10% de Vida, se retira.»');
-    this.razon = 'Círculo de Entrenamiento del Bosque · ' + A.nombre + ' y ' + B.nombre + ' entrenaban entre ellos';
+    this.razon = 'Círculo de la pelea · ' + A.nombre + ' y ' + B.nombre + ' entrenaban entre ellos, aquí mismo';
     this.opciones = [
       { t: '⚔ Unirme CONTRA los dos (yo solo contra ' + A.nombre + ' y ' + B.nombre + ')', spar: 'solo' },
       { t: '🤝 Unirme al bando de ' + A.nombre + ' (contra ' + B.nombre + ')', spar: 'a' },
@@ -3208,7 +3238,7 @@ U.Dialogo = {
       const aus = (E.roster || []).find(x => x.id !== npc.id && x.mapa !== E.mapaId && !x.enCasa);
       if (aus) return 'La novedad: ' + aus.nombre + ' no está en la aldea ahora. ' + U.Vida.dondeEstaTexto(aus) + '. Si lo buscas, pregúntame dónde está y te lo digo.';
       if (E.historial && E.historial.retos > 0) return 'La novedad eres tú: ya superaste ' + E.historial.retos + ' reto(s) de combate. Los guías te miran distinto.';
-      return 'Novedades: el Desierto de Sal arde al este, la Montaña Brumosa guarda un obelisco al norte de la Ceniza, y en el Bosque hay un Círculo de Entrenamiento donde los nuestros hacen sparring (09:00–11:00 y 14:00–17:00). El mundo creció.';
+      return 'Novedades: el Desierto de Sal arde al este, la Montaña Brumosa guarda un obelisco al norte de la Ceniza, y cuando dos de los nuestros hacen sparring en el Bosque (09:00–11:00 y 14:00–17:00) se forma un círculo alrededor de su pelea, donde sea que estén. El mundo creció.';
     }
     const lineas = g.saludo[npc.emocion] || g.saludo.neutral; const fraseSal = lineas[Math.floor(Math.random() * lineas.length)];
     if (tipo === 'saludo') return U.General.saludo(U.Tiempo.hora(E)).frase + ' ' + fraseSal;
@@ -3328,7 +3358,7 @@ window.U = window.U || {};
 U.HUD = {
   el: {}, tNum: 0, tMini: 0, bannerT: 0, joy: { activo: false, id: null, cx: 0, cy: 0, r: 60 },
   init() {
-    const $ = id => document.getElementById(id); this.el = { hud: $('hud'), rellVida: $('rellVida'), numVida: $('numVida'), rellEsencia: $('rellEsencia'), numEsencia: $('numEsencia'), rellCansancio: $('rellCansancio'), numCansancio: $('numCansancio'), agotado: $('agotado'), simbolos: $('simbolos'), pocion: $('btnPocion'), mini: $('minimapa'), obj: $('objTexto'), btnObj: $('objetivo'), objDetalle: $('objetivoDetalle'), objDetalleTexto: $('objDetalleTexto'), objDetalleLista: $('objDetalleLista'), banner: $('banner'), descanso: $('descansoInd'), rellDescanso: $('rellDescanso'), descansoTxt: $('descansoTxt'), relojIcono: $('relojIcono'), relojHora: $('relojHora'), relojAmpm: $('relojAmpm'), infoDia: $('infoDia'), btnInfo: $('infoHud'), infoDetalle: $('infoDetalle'), calTexto: $('calTexto'), calMomento: $('calMomento'), climaIcono: $('climaIcono'), climaTexto: $('climaTexto'), climaDetalle: $('climaDetalle'), btnA: $('btnA'), btnYin: $('btnYin'), btnYang: $('btnYang'), btnTec: $('btnTec'), btnDash: $('btnDash'), btnSobre: $('btnSobrecarga'), chipsTec: $('chipsTec'), chipsYang: $('chipsYang'), sonido: $('btnSonido'), pausa: $('pausa'), pausaCuerpo: $('pausaCuerpo'), fin: $('panelFin') };
+    const $ = id => document.getElementById(id); this.el = { hud: $('hud'), rellVida: $('rellVida'), numVida: $('numVida'), rellEsencia: $('rellEsencia'), numEsencia: $('numEsencia'), rellCansancio: $('rellCansancio'), numCansancio: $('numCansancio'), agotado: $('agotado'), simbolos: $('simbolos'), pocion: $('btnPocion'), mini: $('minimapa'), obj: $('objTexto'), btnObj: $('objetivo'), objDetalle: $('objetivoDetalle'), objDetalleTexto: $('objDetalleTexto'), objDetalleLista: $('objDetalleLista'), banner: $('banner'), descanso: $('descansoInd'), rellDescanso: $('rellDescanso'), descansoTxt: $('descansoTxt'), btnInfo: $('btnReloj'), infoDetalle: $('infoDetalle'), calTexto: $('calTexto'), horaTexto: $('horaTexto'), horaMomento: $('horaMomento'), climaIcono: $('climaIcono'), climaTexto: $('climaTexto'), climaDetalle: $('climaDetalle'), btnA: $('btnA'), btnYin: $('btnYin'), btnYang: $('btnYang'), btnTec: $('btnTec'), btnDash: $('btnDash'), btnSobre: $('btnSobrecarga'), chipsTec: $('chipsTec'), chipsYang: $('chipsYang'), sonido: $('btnSonido'), pausa: $('pausa'), pausaCuerpo: $('pausaCuerpo'), fin: $('panelFin') };
     // Iconos de acción (vectoriales suaves, sin pixelar)
     this.el.btnEscudo = $('btnEscudo'); if (this.el.btnEscudo) U.Render.iconoSuave(this.el.btnEscudo.querySelector('canvas'), 'yang', '#7cc4ff');
     U.Render.iconoSuave(this.el.btnA.querySelector('canvas'), 'a', '#a7f3c9'); U.Render.iconoSuave(this.el.btnYin.querySelector('canvas'), 'yin', '#e6c9a0'); U.Render.iconoSuave(this.el.btnYang.querySelector('canvas'), 'yang', '#f8fafc'); U.Render.iconoSuave(this.el.btnDash.querySelector('canvas'), 'dash', '#7ef0c0'); U.Render.iconoSuave(this.el.btnSobre.querySelector('canvas'), 'sobre', '#ffb3c0');
@@ -3395,7 +3425,7 @@ U.HUD = {
       el.btnA.querySelector('.lbl').textContent = j.trote ? 'TROTE +' : 'TROTE';
       el.descanso.classList.toggle('oculto', !j.descansando);
       if (j.descansando) { const durm = !!(E.reloj && E.reloj.durmiendo); el.rellDescanso.style.transform = 'scaleX(' + (durm ? Math.min(1, j.vida / j.stats.vida) : Math.min(1, j.vida / U.Recuperacion.techoVida())) + ')'; if (el.descansoTxt) el.descansoTxt.textContent = durm ? 'Durmiendo junto a la fogata… al despertar: Vida y Esencia al 100%' : 'Meditando · Esencia ×3 · Yang + · muévete para cancelar'; }
-      if (E.reloj && el.relojHora) { const hh = E.reloj.minutos / 60; const ff = U.Tiempo.faseDe(hh); el.relojHora.textContent = U.Tiempo.formatoHora(E.reloj.minutos); if (el.relojAmpm) el.relojAmpm.textContent = U.Tiempo.formatoAmpm(E.reloj.minutos); el.relojIcono.textContent = ff.icono; el.relojIcono.style.color = (ff.id === 'amanecer' || ff.id === 'manana' || ff.id === 'mediodia') ? 'var(--rayo)' : (ff.id === 'tarde' || ff.id === 'atardecer' ? 'var(--aviso)' : 'var(--textoFrio)'); if (el.infoDia) el.infoDia.textContent = U.Tiempo.DIAS[((E.reloj.diaSemana || 0) % 7 + 7) % 7]; if (el.calTexto) el.calTexto.textContent = U.Tiempo.diaTexto(E.reloj); if (el.calMomento) el.calMomento.textContent = ff.nombre + ' · ' + U.Tiempo.formato(E.reloj.minutos); if (E.clima && el.climaTexto) { const cl = U.Clima.de(E); el.climaIcono.textContent = cl.icono; el.climaTexto.textContent = cl.nombre; if (el.climaDetalle) el.climaDetalle.textContent = cl.detalle; } }
+      if (E.reloj && el.horaTexto) { const hh = E.reloj.minutos / 60; const ff = U.Tiempo.faseDe(hh); el.horaTexto.textContent = U.Tiempo.formato(E.reloj.minutos); if (el.horaMomento) el.horaMomento.textContent = ff.nombre; if (el.calTexto) el.calTexto.textContent = U.Tiempo.diaTexto(E.reloj); if (E.clima && el.climaTexto) { const cl = U.Clima.de(E); el.climaIcono.textContent = cl.icono; el.climaTexto.textContent = cl.nombre; if (el.climaDetalle) el.climaDetalle.textContent = cl.detalle; } }
       const ob = E.objetivos[E.objetivoIdx]; el.obj.textContent = ob ? ob.texto : 'Entrena libremente: la arena acepta rondas más difíciles.';
       if (!el.objDetalle.classList.contains('oculto')) this.refrescarObjetivoDetalle();
     }
@@ -3463,7 +3493,7 @@ U.HUD = {
       html += '<section><h3>Calendario · clima · tu casa · memoria</h3><div style="font-size:12px">📅 <b>' + U.Tiempo.diaTexto(E.reloj) + '</b> · Momento: ' + ff2.nombre + ' (' + U.Tiempo.formato(E.reloj.minutos) + ') · 6 momentos por día, semana de Lunes a Domingo.<br>' + cl.icono + ' <b>Clima: ' + cl.nombre + '</b> · ' + cl.detalle + '. Cambia solo cada pocos minutos y ajusta costos. La lluvia tiene intensidades (ligera, normal, fuerte y tormenta): bajo techo (tu casa, la Oficina) no llueve ni cambian los costos; afuera, el Agua es progresiva (ligera ×0.8, normal ×0.5, fuerte y tormenta = 1) y junto a ríos, estanques u oasis paga DECIMALES (×0.15): la Esencia baja poquito a poquito. El Fuego paga más cuanto más llueve, la Tierra y el Rayo bajan un poco y el Viento sube. La TEMPERATURA también pesa: con calor el Fuego paga ×0.85 y el Agua ×1.25; con frío, al revés (Fuego ×1.2, Agua ×0.9). Todos los costos viven en decimales.<br>🏠 Tu casa (puerta de la casa azul): alarma fijada a las <b>' + U.Tiempo.formato(E.alarmaMin) + '</b> · Hechizo de Inversión: ' + (E.flags.hechizoInversion ? '<b style="color:var(--exito)">aprendido (tecla V)</b>' : 'sin aprender (obelisco de la Montaña Brumosa)') + '<br>Monedas: <b style="color:var(--rayo)">' + Math.floor(j.monedas || 0) + ' 🪙</b> (torneo 150 al campeón · oleadas · misiones de Lía · tienda de Marisol) · Torneos ganados: ' + (E.historial.torneos || 0) + ' · Misiones entregadas: ' + (E.historial.misiones || 0) + '<br>Historial de esta vida: victorias de arena ' + E.historial.victorias + ' · caídas ' + E.historial.derrotas + ' · retos superados ' + E.historial.retos + ' · entrenamientos completos ' + E.historial.entrenos + '. Los NPC recuerdan todo esto cuando hablas con ellos (tú hablas primero).</div></section>';
     }
     html += '<section><h3>Diario</h3><ul class="diario">' + E.objetivos.map(o => '<li class="' + o.estado + '">' + (o.estado === 'hecho' ? '✓ ' : o.estado === 'actual' ? '▶ ' : '○ ') + o.texto + '</li>').join('') + '</ul></section>';
-    html += '<section><h3>Vecinos de Bruma · personalidad · dónde están ahora</h3>' + (E.roster || E.npcs).map(n => { const per = U.Personas ? U.Personas.de(n.id) : null; const donde = U.Vida ? U.Vida.dondeEstaTexto(n) : ''; return '<div style="font-size:12px;margin:4px 0"><b>' + n.nombre + '</b> · <span style="color:' + U.Emociones.tonos[n.emocion].color + '">' + n.emocion + '</span> · confianza ' + Math.round(n.estados.confianza) + (per ? '<br><span style="color:var(--textoFrio)">' + per.tipo + ' · le gusta: ' + per.gustos.join(', ') + '</span>' : '') + '<br><span style="color:var(--rayo)">📍 ' + n.nombre + ' ' + donde + '</span></div>'; }).join('') + '<div style="font-size:11px;color:var(--textoTenue)">Cada vecino tiene su rutina: trabaja, come en la plaza, entrena en el Bosque y vuelve a casa de noche (21:00; Pipo a las 20:00). Si alguien no está en su puesto, pregúntale a otro vecino «¿Dónde está…?» y te dirá dónde fue. Círculo de sparring del Bosque Susurrante: Kaelen–Marco 09:00–11:00 · Torin–Breno 14:00–17:00; entra en el círculo y te ofrecerán unirte.</div></section>';
+    html += '<section><h3>Vecinos de Bruma · personalidad · dónde están ahora</h3>' + (E.roster || E.npcs).map(n => { const per = U.Personas ? U.Personas.de(n.id) : null; const donde = U.Vida ? U.Vida.dondeEstaTexto(n) : ''; return '<div style="font-size:12px;margin:4px 0"><b>' + n.nombre + '</b> · <span style="color:' + U.Emociones.tonos[n.emocion].color + '">' + n.emocion + '</span> · confianza ' + Math.round(n.estados.confianza) + (per ? '<br><span style="color:var(--textoFrio)">' + per.tipo + ' · le gusta: ' + per.gustos.join(', ') + '</span>' : '') + '<br><span style="color:var(--rayo)">📍 ' + n.nombre + ' ' + donde + '</span></div>'; }).join('') + '<div style="font-size:11px;color:var(--textoTenue)">Cada vecino tiene su rutina: trabaja, come en la plaza, entrena en el Bosque y vuelve a casa de noche (21:00; Pipo a las 20:00). Si alguien no está en su puesto, pregúntale a otro vecino «¿Dónde está…?» y te dirá dónde fue. Sparring: Kaelen–Marco 09:00–11:00 · Torin–Breno 14:00–17:00. El círculo no está en un lugar fijo: se forma alrededor de la pelea, donde sea que esté pasando; acércate a ese círculo y te ofrecerán unirte.</div></section>';
     html += '<section><h3>Controles</h3><div class="controlesLista">WASD / joystick: mover (analógico)<br>E / botón A: trote +25% (mantén; el A ya no interactúa)<br>Interactuar: toca directamente al personaje u objeto cuando salga su globo (hablar, leer, beber, dormir…)<br>J / Yin: toca golpe 2 · mantén cargado 6<br>K / Yang: forma seleccionada<br>L / Técnica: técnica del elemento<br>Shift / Dash: esquiva con invulnerabilidad 4<br>Q: poción +50% · R: meditar (Esencia ×3, entrena Yang; la Vida automática sigue con techo 25%) · Fogata (tócala): dormir, despertar al 100%<br>F: cambiar forma Yang · 1-3: técnica<br>X: Sobrecarga (Yin 15) · V: Hechizo de Inversión (tras aprenderlo en el obelisco) · B: Escudo (tras aprenderlo con Kaelen; Nv.1 frente, Nv.2 frente y lados, Nv.3 cuatro lados; sin moverte) · M: sonido · Esc: pausa<br>Elemento: cámbialo aquí, en Ajustes (engrane)</div></section>';
     html += '<section><h3>Próximamente (no activo en el juego completo)</h3><div class="listaProx">' + ['Portal', 'Pasaporte', 'Entre-Mundos', 'Eco', 'Contrato de sangre', 'Contrato de alma', 'Pilotaje', 'Modo Alma', 'Teletransportación', 'Invisibilidad', 'Intangible', 'Arte Místico', 'Técnicas combinadas', 'Transformaciones Yin/Yang', 'Sangre · Plasma · Metal · Sonido · Magnetismo', 'Destello (Rayo)', 'Vuelo (Viento)', 'Disco Cortante (Yang)'].map(s => '<span>' + s + '</span>').join('') + '</div></section>';
     this.el.pausaCuerpo.innerHTML = html; document.getElementById('selDificultad').value = String(E.dificultad);
@@ -3651,7 +3681,7 @@ U.Juego = {
     this.estado = { ui: 'mundo', mapa, mapaId: 'aldea', mapas: { aldea: mapa }, npcsPorMapa: {}, cambioCd: 0, jugador: j, npcs, enemigos: [], proyectiles: [], orbes: [], efectos: { particulas: [], textos: [], haces: [], anillos: [], cadenas: [], cortes: [], telegrafos: [] }, camara: { x: j.x * 16 - U.Render.viewW / 2, y: j.y * 16 - U.Render.viewH / 2, shake: 0 }, tiempo: 0, reloj: U.Tiempo.crear(), clima: U.Clima.crear(rng), alarmaMin: 7 * 60, historial: { derrotas: 0, victorias: 0, retos: 0, entrenos: 0, torneos: 0, misiones: 0 }, reto: null, entreno: null, bandidoT: 0, hitstop: 0, dificultad: 1, semilla, rng,
       arena: { activa: false, ronda: 1, oleada: 1, total: 3, entre: 0, spawned: false, cuenta: 0 }, torneo: null, mision: null, misionIdx: 0, enCombate: false, zonaActual: null, interactuable: null, flags: {}, resumen: { daño: 0, recibido: 0, golpes: 0, tecnicas: 0, yang: 0, bajas: 0, esquives: 0, dashes: 0, crecimiento: {}, maestria: {} },
       objetivos: [ { texto: 'Habla con Kaelen, el guardia de la aldea.', estado: 'actual' }, { texto: 'Visita la Ribera Húmeda y el Campo de Ceniza: siente el costo ambiental.', estado: 'pendiente' }, { texto: 'Activa la runa de la Arena (sureste) y sobrevive 3 oleadas.', estado: 'pendiente' }, { texto: 'Vuelve con Kaelen y cuéntale tu victoria.', estado: 'pendiente' }, { texto: 'Cruza la entrada norte (umbral dorado) al Bosque Susurrante: de día tranquilo; de noche salen los bandidos.', estado: 'pendiente' }, { texto: 'Visita el Desierto de Sal (borde este) y la Montaña Brumosa (norte del Campo de Ceniza).', estado: 'pendiente' }, { texto: 'Toca el obelisco de la cima de la Montaña y aprende el Hechizo de Inversión (tecla V).', estado: 'pendiente' }, { texto: 'Entra en tu casa (puerta de la casa azul), fija la alarma y duerme en tu cama.', estado: 'pendiente' }, { texto: 'Visita la OFICINA DEL GUARDIÁN (edificio dorado al sur de la plaza): conoce a Aldric y pide una MISIÓN a su secretaria Lía.', estado: 'pendiente' }, { texto: 'Gana el TORNEO DE BRUMA en la Arena: octavos, cuartos, semifinal y final (te recuperas tras cada ronda). Premio: 150 monedas.', estado: 'pendiente' }, { texto: 'Rompe un árbol o una roca que te cierre el paso: tienen vida propia y al caer dejan el camino libre.', estado: 'pendiente' } ], objetivoIdx: 0, ambienteT: 0, pajaroT: 5 };
-    this.estado.roster = npcs; this.estado.sparring = { fase: 'idle', ventana: null, consumida: null, pareja: [], bando: null, aliado: null, retirados: [], bloqueado: false, dentro: false, ofrecidoCd: 0, golpeT: 0, turno: 0, allyT: 0 }; U.Crecimiento.reset(); U.HUD.mostrar(); U.HUD.refrescarSimbolos(); U.HUD.refrescarChips(); U.Audio.musica('aldea'); U.Ambiente.actualizar();
+    this.estado.roster = npcs; this.estado.sparring = { fase: 'idle', ventana: null, consumida: null, pareja: [], bando: null, aliado: null, retirados: [], bloqueado: false, dentro: false, ofrecidoCd: 0, golpeT: 0, turno: 0, allyT: 0, centro: null }; U.Crecimiento.reset(); U.HUD.mostrar(); U.HUD.refrescarSimbolos(); U.HUD.refrescarChips(); U.Audio.musica('aldea'); U.Ambiente.actualizar();
     if (U.Guardado) setTimeout(() => U.Guardado.guardarAuto(), 400); // la nueva vida queda guardada automáticamente desde el primer momento
     U.HUD.banner('UNA NUEVA VIDA', 2); U.HUD.toast('Bienvenido, ' + nombre + '. Tu elemento es ' + U.Elementos.nombre(j.elemento) + ': concéntrate en él.', 'exito');
     setTimeout(() => U.HUD.toast('Muévete con el joystick o WASD. Mantén A (E) para trotar. Para hablar, leer o descansar, toca directamente al personaje u objeto cuando salga su globo.', ''), 1200);
