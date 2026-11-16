@@ -730,7 +730,7 @@ U.Habilidades = {
     sobrecarga: { id: 'sobrecarga', nombre: 'Sobrecarga', umbral: 15, dur: 6, mult: 2, drain: 0.02, cd: 20, desc: 'Estilo Yin (Kaioken): Ataque y Velocidad ×2 por poco tiempo; drena Vida y al terminar quedas Agotado.' }
   },
 
-  // ---- PRÓXIMAMENTE (datos listos, lógica NO activa en la demo) ----
+  // ---- PRÓXIMAMENTE (datos listos, lógica NO activa en el juego completo) ----
   // Combinadas: automáticas cuando AMBOS elementos llegan a 15/40/70%. No hay modo de fusión.
   combinadas: {
     vapor:   { par: ['agua', 'fuego'], tec: ['Nube Hirviente', 'Ebullición', 'Vapor Cegador'] },
@@ -1547,7 +1547,7 @@ U.Ambiente = {
 window.U = window.U || {};
 
 U.Emociones = {
-  // Los 8 NPC del diseño; esta demo instancia Kaelen, Sora y Torin.
+  // Los 8 NPC del diseño; este juego completo instancia Kaelen, Sora y Torin.
   catalogo: {
     kaelen: { nombre: 'Kaelen', rol: 'Guardia de la aldea' }, sora: { nombre: 'Sora', rol: 'Curandera del pozo' }, torin: { nombre: 'Torin', rol: 'Herrero y maestro de Yin' },
     marisol: { nombre: 'Marisol', rol: 'Tendera de Bruma' }, breno: { nombre: 'Breno', rol: 'Leñador' }, elena: { nombre: 'Elena', rol: 'Granjera' }, marco: { nombre: 'Marco', rol: 'Explorador' }, pipo: { nombre: 'Pipo', rol: 'Niño de la plaza' }, aldric: { nombre: 'Aldric', rol: 'Guardián de Bruma (líder de la aldea)' }, lia: { nombre: 'Lía', rol: 'Secretaria del Guardián · misiones' },
@@ -2696,11 +2696,11 @@ U.Combate = {
 </script>
 <script>
 /* === js/sistemas/criaturas.js === */
-/* Unipar — criaturas y contratos: PRÓXIMAMENTE en la demo. Datos y contratos de API listos para añadir después. */
+/* Unipar — criaturas y contratos: PRÓXIMAMENTE en el juego completo. Datos y contratos de API listos para añadir después. */
 window.U = window.U || {};
 
 U.Criaturas = {
-  disponible: false, // La demo no implementa invocación, pilotaje ni Modo Alma.
+  disponible: false, // El juego completo no implementa invocación, pilotaje ni Modo Alma.
   catalogo: [
     { id: 'zorruna', nombre: 'Zorruna de Niebla', elemento: 'agua', insignia: ['Marea de Sangre'], modo: 'Paso de niebla', nota: 'Ve caminos ocultos como espíritu.' },
     { id: 'carbunco', nombre: 'Carbunco', elemento: 'tierra', insignia: ['Muro de Cristal'], modo: 'Coraza viva' },
@@ -2725,7 +2725,7 @@ U.Criaturas = {
 window.U = window.U || {};
 
 U.Portal = {
-  activo: false, // Recompensa de final de juego: aún no se gana en la demo.
+  activo: false, // Recompensa de final de juego: aún no se gana en el juego completo.
   // Pasaporte = archivo meta del usuario (JSON local, sin cuentas ni internet). El guardián del portal es la excepción con memoria completa entre mundos.
   pasaporte: null,
   guardian: { nombre: 'Guardián del Umbral', memoriaCompleta: true },
@@ -3134,7 +3134,7 @@ U.HUD = {
     html += '<section><h3>Diario</h3><ul class="diario">' + E.objetivos.map(o => '<li class="' + o.estado + '">' + (o.estado === 'hecho' ? '✓ ' : o.estado === 'actual' ? '▶ ' : '○ ') + o.texto + '</li>').join('') + '</ul></section>';
     html += '<section><h3>Vecinos de Bruma · personalidad · dónde están ahora</h3>' + (E.roster || E.npcs).map(n => { const per = U.Personas ? U.Personas.de(n.id) : null; const donde = U.Vida ? U.Vida.dondeEstaTexto(n) : ''; return '<div style="font-size:12px;margin:4px 0"><b>' + n.nombre + '</b> · <span style="color:' + U.Emociones.tonos[n.emocion].color + '">' + n.emocion + '</span> · confianza ' + Math.round(n.estados.confianza) + (per ? '<br><span style="color:var(--textoFrio)">' + per.tipo + ' · le gusta: ' + per.gustos.join(', ') + '</span>' : '') + '<br><span style="color:var(--rayo)">📍 ' + n.nombre + ' ' + donde + '</span></div>'; }).join('') + '<div style="font-size:11px;color:var(--textoTenue)">Cada vecino tiene su rutina: trabaja, come en la plaza, entrena en el Bosque y vuelve a casa de noche (21:00; Pipo a las 20:00). Si alguien no está en su puesto, pregúntale a otro vecino «¿Dónde está…?» y te dirá dónde fue. Círculo de sparring del Bosque Susurrante: Kaelen–Marco 09:00–11:00 · Torin–Breno 14:00–17:00; entra en el círculo y te ofrecerán unirte.</div></section>';
     html += '<section><h3>Controles</h3><div class="controlesLista">WASD / joystick: mover (analógico)<br>E / botón A: trote +25% (mantén; el A ya no interactúa)<br>Interactuar: toca directamente al personaje u objeto cuando salga su globo (hablar, leer, beber, dormir…)<br>J / Yin: toca golpe 2 · mantén cargado 6<br>K / Yang: forma seleccionada<br>L / Técnica: técnica del elemento<br>Shift / Dash: esquiva con invulnerabilidad 4<br>Q: poción +50% · R: meditar (Esencia ×3, entrena Yang; la Vida automática sigue con techo 25%) · Fogata (tócala): dormir, despertar al 100%<br>F: cambiar forma Yang · 1-3: técnica<br>X: Sobrecarga (Yin 15) · V: Hechizo de Inversión (tras aprenderlo en el obelisco) · M: sonido · Esc: pausa<br>Elemento: cámbialo aquí, en Ajustes (engrane)</div></section>';
-    html += '<section><h3>Próximamente (no activo en esta demo)</h3><div class="listaProx">' + ['Portal', 'Pasaporte', 'Entre-Mundos', 'Eco', 'Contrato de sangre', 'Contrato de alma', 'Pilotaje', 'Modo Alma', 'Teletransportación', 'Invisibilidad', 'Intangible', 'Arte Místico', 'Técnicas combinadas', 'Transformaciones Yin/Yang', 'Sangre · Plasma · Metal · Sonido · Magnetismo', 'Destello (Rayo)', 'Vuelo (Viento)', 'Disco Cortante (Yang)'].map(s => '<span>' + s + '</span>').join('') + '</div></section>';
+    html += '<section><h3>Próximamente (no activo en el juego completo)</h3><div class="listaProx">' + ['Portal', 'Pasaporte', 'Entre-Mundos', 'Eco', 'Contrato de sangre', 'Contrato de alma', 'Pilotaje', 'Modo Alma', 'Teletransportación', 'Invisibilidad', 'Intangible', 'Arte Místico', 'Técnicas combinadas', 'Transformaciones Yin/Yang', 'Sangre · Plasma · Metal · Sonido · Magnetismo', 'Destello (Rayo)', 'Vuelo (Viento)', 'Disco Cortante (Yang)'].map(s => '<span>' + s + '</span>').join('') + '</div></section>';
     this.el.pausaCuerpo.innerHTML = html; document.getElementById('selDificultad').value = String(E.dificultad);
     const bD = document.getElementById('btnDescargarPausa'); if (bD) bD.addEventListener('click', () => U.Guardado.descargar());
     const bCP = document.getElementById('btnCargarPausa'); if (bCP) bCP.addEventListener('click', () => U.Guardado.elegirArchivo());
@@ -3143,7 +3143,7 @@ U.HUD = {
   mostrarFin(tipo, datos) {
     const E = U.Juego.estado, j = E.jugador; const caja = this.el.fin.querySelector('.finCaja'); caja.classList.toggle('derrota', tipo === 'derrota');
     document.getElementById('finTitulo').textContent = tipo === 'victoria' ? '¡ARENA SUPERADA!' : 'HAS CAÍDO';
-    document.getElementById('finSub').textContent = tipo === 'victoria' ? 'Ronda ' + E.arena.ronda + ' · 3 oleadas. Tu cuerpo recuerda lo que hizo: mira lo que creció.' : 'En esta demo no hay muerte permanente: despiertas en la fogata con el 25% de Vida. Lo aprendido se queda.';
+    document.getElementById('finSub').textContent = tipo === 'victoria' ? 'Ronda ' + E.arena.ronda + ' · 3 oleadas. Tu cuerpo recuerda lo que hizo: mira lo que creció.' : 'En el juego completo no hay muerte permanente: despiertas en la fogata con el 25% de Vida. Lo aprendido se queda.';
     const r = E.resumen; let html = '';
     const item = (k, v) => '<div>' + k + '<b>' + v + '</b></div>';
     html += item('Daño infligido', Math.round(r.daño)) + item('Daño recibido', Math.round(r.recibido)) + item('Bajas', r.bajas) + item('Golpes Yin', r.golpes) + item('Técnicas', r.tecnicas) + item('Yang', r.yang) + item('Esquivas', r.esquives);
