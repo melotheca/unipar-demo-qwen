@@ -193,12 +193,15 @@ button{font-family:var(--fuente);color:var(--texto);cursor:pointer}
 .barra .relleno{position:absolute;inset:0;transform-origin:left;transition:transform .12s linear}
 .barra.vida .relleno{background:linear-gradient(180deg,#ff8a9c,var(--vida) 50%,#b8203a)}
 .barra.esencia .relleno{background:linear-gradient(180deg,#9ccfff,var(--esencia) 50%,#1f5fb8)}
+.barra.cansancio{height:7px;border-width:1px;border-radius:4px}
+.barra.cansancio .relleno{background:linear-gradient(180deg,#c4dcb0,#6f9a5e 55%,#44663c)}
+.barra.cansancio .nums{font-size:8.5px;line-height:6px;letter-spacing:.6px;font-weight:400;opacity:.95}
 .barra .nums{position:absolute;right:6px;top:0;font-size:13px;font-weight:700;line-height:19px;color:#fff;text-shadow:1px 1px 0 #000,0 0 4px #000}
 #agotado{position:absolute;left:50%;top:0;transform:translateX(-50%);font-size:11px;line-height:19px;color:var(--rayo);text-shadow:1px 1px 0 #000;animation:parpadeo .6s steps(2) infinite;letter-spacing:1px}
 #btnPocion{grid-column:1/-1;justify-self:start;display:inline-flex;align-items:center;gap:5px;background:transparent;border:none;box-shadow:none;color:#fff;font-size:15px;font-weight:700;line-height:1;padding:2px 2px 0;text-shadow:1px 1px 0 #000,0 0 5px rgba(0,0,0,.7);cursor:pointer}
 #btnPocion:active{transform:translateY(1px)}
 #btnPocion[disabled]{opacity:.45;cursor:default}
-#monedasHud{grid-column:2;grid-row:1/span 2;align-self:stretch;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;color:#ffe14d;font-size:13px;font-weight:700;line-height:1.15;text-shadow:1px 1px 0 #000,0 0 5px rgba(0,0,0,.7);padding:3px 7px;background:rgba(14,21,48,.55);border:1px solid rgba(255,225,77,.35);border-radius:8px;opacity:.92}
+#monedasHud{grid-column:2;grid-row:1/span 3;align-self:stretch;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;color:#ffe14d;font-size:13px;font-weight:700;line-height:1.15;text-shadow:1px 1px 0 #000,0 0 5px rgba(0,0,0,.7);padding:3px 7px;background:rgba(14,21,48,.55);border:1px solid rgba(255,225,77,.35);border-radius:8px;opacity:.92}
 #monedasHud .monIco{font-size:12px;line-height:1}
 #monedasHud small{color:var(--textoFrio);font-size:8px;font-weight:400;letter-spacing:.5px;text-transform:uppercase}
 #panelDerecho{display:grid;gap:8px;justify-items:end}
@@ -337,6 +340,7 @@ button{font-family:var(--fuente);color:var(--texto);cursor:pointer}
         <div id="barrasFlotantes">
           <div class="barra vida" title="Vida"><div class="relleno" id="rellVida"></div><span class="nums" id="numVida">0/0</span></div>
           <div class="barra esencia" title="Esencia"><div class="relleno" id="rellEsencia"></div><span class="nums" id="numEsencia">0/0</span><span id="agotado" class="oculto">AGOTADO</span></div>
+          <div class="barra cansancio" title="Cansancio: cada 10 de Esencia gastada baja 1. Cuanto más bajo, más lenta se recarga tu Esencia (nunca llega a cero). Se recupera fuera de combate, meditando y durmiendo."><div class="relleno" id="rellCansancio"></div><span class="nums" id="numCansancio">CANSANCIO 100</span></div>
           <button id="btnPocion" title="Poción: +50% de Vida (Q)" aria-label="Usar poción">🧪 <span>×0</span></button>
           <div id="monedasHud" title="Monedas: gana en torneo, oleadas y misiones; gasta en la tienda"><span class="monIco" aria-hidden="true">🪙</span><span id="numMonedas">30</span><small>monedas</small></div>
         </div>
@@ -363,13 +367,13 @@ button{font-family:var(--fuente);color:var(--texto);cursor:pointer}
         <div id="chipsYang" aria-label="Formas de Yang"></div>
         <button id="btnSobrecarga" class="boton small oculto" title="Sobrecarga Yin (X)"><canvas width="72" height="72"></canvas><span class="lbl">SOBRE</span></button>
         <button id="btnDash" class="boton small" title="Dash (Shift)"><canvas width="72" height="72"></canvas><span class="lbl">DASH</span></button>
-        <button id="btnEscudo" class="boton small" title="Escudo Mágico (B): te protege pero no puedes moverte y drena Esencia" style="right:142px;bottom:142px;border-color:#7cc4ff;background:linear-gradient(180deg,#2a4a7a,#162a4a)"><canvas width="72" height="72"></canvas><span class="lbl">ESCUDO</span></button>
+        <button id="btnEscudo" class="boton small" title="Escudo (B): técnica que se aprende de un maestro (Kaelen). Toma la naturaleza de tu elemento, no te deja moverte y drena Esencia" style="right:142px;bottom:142px;border-color:#7cc4ff;background:linear-gradient(180deg,#2a4a7a,#162a4a)"><canvas width="72" height="72"></canvas><span class="lbl">ESCUDO</span></button>
         <button id="btnTec" class="boton elem" title="Técnica del elemento (L)"><canvas width="96" height="96"></canvas><span class="lbl">TÉC</span><i class="cd"></i></button>
         <button id="btnYang" class="boton yang" title="Yang (K)"><canvas width="96" height="96"></canvas><span class="lbl">YANG</span><i class="cd"></i></button>
         <button id="btnYin" class="boton yin" title="Yin: toca = golpe, mantén = cargado (J)"><canvas width="96" height="96"></canvas><span class="lbl">YIN</span><i class="cd"></i></button>
         <button id="btnA" class="boton a" title="Trote: mantén para avanzar más rápido (E). No interactúa: para hablar o leer, toca al personaje u objeto en pantalla."><canvas width="96" height="96"></canvas><span class="lbl">TROTE</span></button>
       </div>
-      <div id="hintTeclado">WASD mover · E trote · Toca un personaje u objeto para interactuar · J Yin · K Yang · L técnica · B Escudo Mágico (no te mueves, drena Esencia) · V Inversión · Shift dash · Q poción · R meditar · F Yang · 1-3 técnica · Esc pausa · Torneo y misiones: Oficina del Guardián</div>
+      <div id="hintTeclado">WASD mover · E trote · Toca un personaje u objeto para interactuar · J Yin · K Yang · L técnica · B Escudo (se aprende con Kaelen; no te mueves, drena Esencia) · V Inversión · Shift dash · Q poción · R meditar · F Yang · 1-3 técnica · Esc pausa · Torneo y misiones: Oficina del Guardián</div>
     </div>
   </div>
 
@@ -722,7 +726,23 @@ U.Habilidades = {
   yangOrden: ['haz', 'onda', 'esferico'],
 
   // Yin: base universal, cuerpo a cuerpo, casi sin Esencia. La Velocidad decide la cadencia.
-  escudo: { id: 'escudo', nombre: 'Escudo Mágico', costoSeg: 9, desc: 'Burbuja que bloquea TODO el daño. No puedes moverte mientras está activo y drena 9 de Esencia por segundo. Los hechiceros enemigos (chamán e ilusionista) también lo usan: se quedan quietos y son intocables hasta que se les acaba.' },
+  // ESCUDO: es una TÉCNICA, no un don: hay que buscar a un maestro que te la enseñe (Kaelen, el guardia).
+  // Un solo botón (B). La naturaleza del escudo es la de TU elemento o estilo, y la tabla de ventajas
+  // le aplica como si el escudo fueras tú. Cobertura por nivel: Nv.1 solo de frente (y sin moverte),
+  // Nv.2 frente + lados, Nv.3 los cuatro lados. Sube bloqueando golpes reales (escudoExp).
+  //  Yang = energía: bloquea todo · Mágico (hechiceros enemigos): bloquea todo ·
+  //  Fuego = pared que quema: débil contra físico, los rayos lo traspasan y el Agua lo APAGA (la Esencia
+  //  se queda: hay que volver a levantarlo) · Agua = amortigua lo físico, pero el Rayo pasa por el agua
+  //  y pega con ventaja sin romperlo · Tierra = capa de roca: fuerte contra físico, el Agua lo EROSIONA
+  //  (se vuelve lodo y se rompe más rápido) · Viento = no es un muro: DESVÍA proyectiles, débil contra
+  //  cuerpo a cuerpo · Rayo = campo que CASTIGA al que lo toca cuerpo a cuerpo.
+  //  Ataque del mismo elemento que el escudo: el escudo lo ABSORBE (y devuelve un poco de Esencia).
+  escudo: { id: 'escudo', nombre: 'Escudo', costoSeg: 9, maestro: 'kaelen',
+    niveles: [null,
+      { nombre: 'Frontal', cobertura: 0.2, integridad: 34, bloquesParaSubir: 10 },
+      { nombre: 'Frente y lados', cobertura: -0.55, integridad: 52, bloquesParaSubir: 26 },
+      { nombre: 'Cuatro lados', cobertura: -2, integridad: 78, bloquesParaSubir: Infinity } ],
+    desc: 'Técnica que se aprende de un maestro (Kaelen). Un solo botón: el escudo toma la naturaleza de tu elemento o estilo. Nv.1 solo protege de frente y no te deja moverte; Nv.2 suma los lados; Nv.3 cubre los cuatro lados. La tabla de ventajas le aplica como a ti: el Agua apaga el escudo de Fuego, el Rayo atraviesa el de Agua, el Agua erosiona el de Tierra, y tu mismo elemento lo absorbe. Drena Esencia por segundo (menos si el clima favorece a tu elemento).' },
   yin: {
     normal:   { costo: 2, power: 1.0, forma: 'cono', alcance: 1.8, restaura: 6 },
     cargado:  { costo: 6, power: 1.9, forma: 'cono', alcance: 2.2, restaura: 12 },
@@ -1457,7 +1477,14 @@ U.Render = {
     const aura = j.buffs.sobrecarga > 0 ? '#ff5470' : (j.cargando ? el.claro : (j.maestria[j.elementoActivo] >= 40 ? el.color : null));
     for (let i = 0; i < j.rastro.length; i++) { const r = j.rastro[i]; ctx.globalAlpha = r.t * 0.5; this.humanoide(ctx, r.x * 16, r.y * 16, { paleta: { piel: el.claro, pelo: el.claro, ropa: el.color, ropa2: el.color }, dir: this.dirDe(j.dir), frame: 0 }); } ctx.globalAlpha = 1;
     this.humanoide(ctx, j.x * 16, j.y * 16, { paleta: p, dir: this.dirDe(j.dir), frame: Math.floor(j.anim * 8) % 4, moviendo: j.moviendo, flash: j.flash, atacando: j.ataqueAnim > 0, aura: aura, carga: j.cargando ? j.carga / 1.2 : 0, escala: j.atributo === 'pesado' ? 1.1 : (j.atributo === 'fragil' ? 0.95 : 1) });
-    if (j.escudo) { ctx.strokeStyle = 'rgba(124,196,255,.9)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(j.x * 16, j.y * 16 - 10, 15 + Math.sin(this.tiempo * 6) * 1.5, 0, Math.PI * 2); ctx.stroke(); ctx.fillStyle = 'rgba(124,196,255,.14)'; ctx.beginPath(); ctx.arc(j.x * 16, j.y * 16 - 10, 15, 0, Math.PI * 2); ctx.fill(); this.texto(ctx, 'ESCUDO', j.x * 16, j.y * 16 - 44, 1, '#7cc4ff', 'center'); }
+    if (j.escudo) { // Arco según NIVEL y mirada: Nv.1 solo el frente · Nv.2 frente y lados (hueco atrás) · Nv.3 círculo completo.
+      const colE = U.Combate ? U.Combate.escudoColor(j) : '#7cc4ff'; const nvE = j.escudoNv || 1;
+      const ang = Math.atan2(j.dir.y, j.dir.x); const amp = nvE >= 3 ? Math.PI * 2 : nvE === 2 ? Math.PI * 1.55 : Math.PI * 0.62;
+      const alfa = 0.35 + 0.65 * Math.max(0.15, (j.escudoVida || 1) / (U.Combate ? U.Combate.escudoMax(j) : 34));
+      ctx.strokeStyle = colE; ctx.globalAlpha = alfa; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(j.x * 16, j.y * 16 - 10, 15 + Math.sin(this.tiempo * 6) * 1.5, ang - amp / 2, ang + amp / 2); ctx.stroke();
+      ctx.globalAlpha = alfa * 0.16; ctx.fillStyle = colE; ctx.beginPath(); ctx.moveTo(j.x * 16, j.y * 16 - 10); ctx.arc(j.x * 16, j.y * 16 - 10, 15, ang - amp / 2, ang + amp / 2); ctx.closePath(); ctx.fill(); ctx.globalAlpha = 1;
+      this.texto(ctx, 'ESCUDO NV.' + nvE, j.x * 16, j.y * 16 - 44, 1, colE, 'center'); }
     if (j.descansando) this.texto(ctx, 'Z', j.x * 16 + 8, j.y * 16 - 36 - Math.sin(this.tiempo * 2) * 2, 1, '#67e08a', 'center');
     if (j.invuln > 0) { ctx.strokeStyle = 'rgba(126,240,192,.7)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(j.x * 16, j.y * 16 - 8, 12, 0, Math.PI * 2); ctx.stroke(); }
   },
@@ -1510,24 +1537,29 @@ U.Ambiente = {
     }
     return { m: 1, razon: 'Ambiente neutro' };
   },
-  // Costo final visible = base × ambiente × atributo (Inestable muestra rango)
-  costo(h, elem, z, atributo) {
+  // Factor numérico total SIN redondear (zona × clima): para drenajes y HUD.
+  factorNumerico(elem, z, atributo) {
     const mod = this.modificador(elem, z); const a = U.Atributos.de(atributo);
-    // Factor CLIMA: viento fuerte→Viento ×0.85 · calor extremo→Fuego ×0.85.
-    // LLUVIA CON INTENSIDAD (U.Clima.factorCosto): bajo techo no aplica NADA; afuera,
-    // el Agua cuesta 1 plano (solo controlas el agua que ya hay) y cada elemento paga
-    // según la intensidad: Fuego más, Tierra y Rayo un poco menos, Viento un poco más.
     const E = U.Juego.estado; const ct = E && E.clima ? E.clima.tipo : null;
-    if (ct === 'viento' && elem === 'viento') mod.m *= 0.85;
-    else if (ct === 'calor' && elem === 'fuego') mod.m *= 0.85;
-    const fc = (E && U.Clima && U.Clima.factorCosto) ? U.Clima.factorCosto(elem, E) : null;
+    let m = mod.m, razon = mod.razon;
+    if (ct === 'viento' && elem === 'viento') m *= 0.85;
+    const fc = (E && U.Clima && U.Clima.factorNumerico) ? U.Clima.factorNumerico(elem, E) : null;
     if (fc) {
-      if (fc.flat != null) return { costo: fc.flat, mod: 0, razon: fc.razon, plano: true };
-      mod.m *= fc.m; if (fc.razon) mod.razon = (mod.razon && mod.razon !== 'Ambiente neutro') ? mod.razon + ' · ' + fc.razon : fc.razon;
+      if (fc.flat != null) return { m: 0, flat: fc.flat, razon: fc.razon, atrib: a.costo === 'inestable' ? 1 : a.costo };
+      m *= fc.m; if (fc.razon) razon = (razon && razon !== 'Ambiente neutro') ? razon + ' · ' + fc.razon : fc.razon;
     }
-    const base = h.costo * mod.m;
-    if (a.costo === 'inestable') return { costo: Math.max(1, Math.round(base)), mod: mod.m, razon: mod.razon, inestable: true, min: Math.max(1, Math.round(base * 0.5)), max: Math.round(base * 2) };
-    return { costo: Math.max(1, Math.round(base * a.costo)), mod: mod.m, razon: mod.razon };
+    return { m: m, flat: null, razon: razon, atrib: a.costo === 'inestable' ? 1 : a.costo };
+  },
+  // Costo final visible = base × ambiente × atributo. YA NO se redondea a enteros:
+  // los costos viven en DECIMALES (2 decimales, mínimo 0.1) para que en ambientes
+  // favorables la Esencia baje poquito a poquito. Inestable muestra rango, también decimal.
+  costo(h, elem, z, atributo) {
+    const f = this.factorNumerico(elem, z, atributo); const a = U.Atributos.de(atributo);
+    if (f.flat != null) return { costo: f.flat, mod: 0, razon: f.razon, plano: true };
+    const base = h.costo * f.m;
+    const red = v => Math.round(v * 100) / 100;
+    if (a.costo === 'inestable') return { costo: Math.max(0.1, red(base)), mod: f.m, razon: f.razon, inestable: true, min: Math.max(0.1, red(base * 0.5)), max: red(base * 2) };
+    return { costo: Math.max(0.1, red(base * a.costo)), mod: f.m, razon: f.razon };
   },
   actualizar() {
     const E = U.Juego.estado, j = E.jugador; const z = this.zonaEn(j.x, j.y);
@@ -1618,13 +1650,13 @@ U.General = {
   },
   cortesia: ['¿Cómo te trata el día?', 'Pasa, pasa, no te quedes en la puerta.', 'Qué bueno verte por aquí.', 'Cuídate en los caminos, ¿eh?'],
   clima: {
-    despejado: ['Qué día tan limpio. Así da gusto salir.', 'Cielo claro: hoy todo se ve de lejos.', 'Un día despejado como este levanta el ánimo a cualquiera.'],
+    despejado: ['{dia_lindo}. Así da gusto salir.', 'Cielo claro: hoy todo se ve de lejos.', '{dia_lindo}: un día así levanta el ánimo a cualquiera.'],
     nublado: ['Está nublado. No llueve, pero el cielo anda pensativo.', 'Nubes densas hoy. Luz suave, paso tranquilo.', 'Con este nublado no se sabe si va a llover o no.'],
-    lluvia: ['Llueve. Todo Bruma huele a tierra mojada.', 'La lluvia no perdona: a mojarse o a guardarse.', 'Con esta lluvia los caminos se vuelven barro.'],
-    tormenta: ['Tormenta. Mejor no andar lejos de un techo.', 'Los truenos se oyen hasta en los huesos.', 'Tormenta fuerte: el cielo está de malas.'],
+    lluvia: ['Llueve. Todo Bruma huele a tierra mojada.', 'La lluvia no perdona: a mojarse o a guardarse.', 'Con esta lluvia los caminos se vuelven barro. Y ojo: con lluvia fuerte el Agua cuesta 1, y junto al río pagas decimales.'],
+    tormenta: ['Tormenta. Mejor no andar lejos de un techo.', 'Los truenos se oyen hasta en los huesos.', 'Tormenta fuerte: el cielo está de malas. El Agua cuesta 1 con tanta agua cayendo.'],
     viento: ['Qué viento. Agárrate el sombrero y las ideas.', 'El viento fuerte mueve hasta las veletas viejas.', 'Hoy el aire no deja quieto a nadie.'],
-    niebla: ['Niebla espesa. No se ve ni la otra orilla.', 'Con esta niebla hay que andar despacio y de memoria.', 'La niebla tapa el mundo: todo suena más lejos.'],
-    calor: ['Qué calor hace. El sol pega sin pedir permiso.', 'Calor extremo: ni las piedras quieren estar al sol.', 'Con este calor hay que buscar sombra y agua.']
+    niebla: ['Niebla espesa. No se ve ni la otra orilla.', 'Con esta niebla hay que andar despacio y de memoria: {mirar_bien}.', 'La niebla tapa el mundo: todo suena más lejos.'],
+    calor: ['Qué calor hace. El sol pega sin pedir permiso: con esta temperatura el Fuego paga menos y el Agua más.', 'Calor extremo: ni las piedras quieren estar al sol.', 'Con este calor hay que buscar sombra y agua.']
   },
   // Respuesta al comentar el clima: PRIMERO la frase personal del NPC (su gusto manda);
   // si su archivo no trae frase para ese clima, cae al archivo general.
@@ -1703,6 +1735,64 @@ U.Personas = {
     const p = this.de(npc.id);
     return p.desc + ' Me gusta: ' + p.gustos.join(', ') + '. No soporto: ' + p.disgustos.join(' ni ') + '. Mi forma de ser es esta: ' + p.tipo.toLowerCase() + ', y se me nota en todo, hasta en cómo comento el clima.';
   }
+};
+</script>
+<script>
+/* === js/datos/diccionario.js === */
+/* Unipar — DICCIONARIO DE VARIANTES: que los textos no suenen siempre igual.
+   Investigado antes de programarlo, y hecho de forma INTELIGENTE, no palabra por palabra a ciegas:
+   en español sustituir palabras sueltas rompe género, número y conjugación («brincar alto» no admite
+   cualquier cambio: «saltar» sí encaja, pero un adjetivo suelto puede dejar la frase coja). Por eso:
+   1) Las frases se escriben con RANURAS {así}, y cada ranura solo admite sustitutos que encajan
+      gramaticalmente en ESE hueco (frases verbales completas o palabras de la misma categoría).
+   2) Solo entran al diccionario las palabras/frases que SÍ tienen buen sustituto; el resto queda fijo.
+   3) La elección es DETERMINISTA por personaje y por conversación (hash de npc + nº de charla):
+      el mismo NPC no repite siempre la misma forma, pero tampoco cambia a mitad de una frase.
+   4) El tono manda: hay ranuras por registro (neutro / brusco / amable) para que un arrogante
+      no hable como un amable. U.Dialogo.decir() expande las ranuras al mostrar el texto. */
+window.U = window.U || {};
+
+U.Diccionario = {
+  // Cada ranura: lista de formas INTERCAMBIABLES en ese hueco exacto (misma función gramatical).
+  ranuras: {
+    brincar_alto: ['brincar alto', 'saltar alto', 'dar un salto bien alto', 'brincar hasta arriba', 'pegar un brinco alto'],
+    brincar: ['brincar', 'saltar', 'dar brincos', 'pegar saltos'],
+    entrenar_fuerte: ['entrenar fuerte', 'entrenar en serio', 'darle duro al entrenamiento', 'entrenar hasta sudar'],
+    descansar_bien: ['descansar bien', 'descansar como se debe', 'echarte un buen descanso', 'recuperarte bien'],
+    tener_cuidado: ['ten cuidado', 'cuídate', 've con cuidado', 'no te confíes'],
+    mirar_bien: ['mira bien', 'fíjate bien', 'abre bien los ojos', 'pon atención'],
+    volver_pronto: ['vuelve pronto', 'regresa cuando puedas', 'pásate seguido', 'no tardes en volver'],
+    pelear_bien: ['pelear bien', 'defenderte bien', 'plantarte bien en una pelea'],
+    dia_lindo: ['qué día tan lindo', 'qué buen día hace', 'un día de esos que levantan el ánimo'],
+    animo: ['ánimo', 'con todo', 'sin miedo'],
+    de_verdad: ['de verdad', 'en serio', 'sin exagerar'],
+    escudo_listo: ['levanta el escudo a tiempo', 'pon el escudo antes del golpe', 'cúbrete con el escudo a tiempo']
+  },
+  // Registro por tipo de personalidad (U.Personas.tipo): matiza las despedidas y los ánimos.
+  registroDe(npc) {
+    if (!npc || !U.Personas) return 'neutro';
+    const t = (U.Personas.de(npc.id).tipo || '').toLowerCase();
+    if (t.indexOf('brusco') >= 0 || t.indexOf('rudo') >= 0 || t.indexOf('arrogante') >= 0) return 'brusco';
+    if (t.indexOf('amable') >= 0 || t.indexOf('maternal') >= 0 || t.indexOf('inocente') >= 0) return 'amable';
+    return 'neutro';
+  },
+  despedidas: {
+    neutro: ['Cuídate en los caminos.', 'Nos vemos por la plaza.', 'Que te vaya bien.'],
+    brusco: ['Ya. A moverte.', 'Menos charla y más camino.', 'Ve. Y no vuelvas golpeado.'],
+    amable: ['Cuídate mucho, ¿sí?', 'Vuelve cuando quieras, aquí estoy.', 'Que el camino te trate bien.']
+  },
+  hash(s) { let h = 2166136261; s = String(s || ''); for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0); },
+  elegir(lista, clave) { if (!lista || !lista.length) return ''; return lista[this.hash(clave) % lista.length]; },
+  // Expande las ranuras {nombre} de un texto. Sin ranuras, el texto pasa intacto.
+  expandir(texto, npc) {
+    if (!texto || texto.indexOf('{') < 0) return texto;
+    const claveBase = (npc ? npc.id + ':' + (npc.veces || 0) + ':' : 'sin-npc:') + texto.length;
+    return texto.replace(/\{([a-z_]+)\}/g, (m, nombre) => {
+      const lista = this.ranuras[nombre];
+      return lista ? this.elegir(lista, claveBase + ':' + nombre) : m;
+    });
+  },
+  despedida(npc) { return this.elegir(this.despedidas[this.registroDe(npc)], (npc ? npc.id + ':' + (npc.veces || 0) : 'x') + ':despedida'); }
 };
 </script>
 <script>
@@ -2174,8 +2264,11 @@ U.Tiempo = {
    el viento fuerte abarata el Viento, el calor extremo abarata el Fuego (vía Ambiente.costo).
    LLUVIA CON INTENSIDADES (1 ligera · 2 normal · 3 fuerte · 4 tormenta): gotas, largo,
    velocidad, opacidad y salpicaduras crecen con la intensidad, y los costos también:
-   Agua cuesta 1 plano (solo controla el agua que ya hay), el Fuego paga cada vez más,
+   el Agua es PROGRESIVA (ligera ×0.8 · normal ×0.5 · fuerte y tormenta = 1 plano, y en
+   ambientes con muchísima agua paga DECIMALES ×0.15), el Fuego paga cada vez más,
    la Tierra y el Rayo bajan un poco, el Viento sube (tabla COSTOS_LLUVIA, vía Ambiente.costo).
+   La TEMPERATURA y la PRECIPITACIÓN también pesan: calor → Fuego ×0.85 y Agua ×1.25;
+   frío → Fuego ×1.2 y Agua ×0.9 (U.Clima.factorNumerico).
    BAJO TECHO NO LLUEVE: en los mapas interiores (tu casa, la Oficina) no caen gotas, no hay
    relámpagos, los costos no cambian por lluvia y nadie comenta la lluvia como si le cayera
    encima: solo se sabe que afuera llueve (U.Clima.esInterior lo decide todo). */
@@ -2186,7 +2279,7 @@ U.Clima = {
     despejado: { nombre: 'Despejado', icono: '☀', detalle: 'Cielo limpio, sin efectos' },
     nublado:   { nombre: 'Nublado', icono: '☁', detalle: 'Nubes densas, luz suave' },
     lluvia:    { nombre: 'Lluvia', icono: '🌧', detalle: 'Llueve: el mundo se moja y se oye el agua' },
-    tormenta:  { nombre: 'Tormenta', icono: '⛈', detalle: 'Tormenta (intensidad máxima): Agua cuesta 1 · Rayo ×0.6 · Fuego ×2.5' },
+    tormenta:  { nombre: 'Tormenta', icono: '⛈', detalle: 'Tormenta (precipitación máxima): Agua cuesta 1 · Rayo ×0.6 · Fuego ×2.5' },
     viento:    { nombre: 'Viento fuerte', icono: '🌬', detalle: 'Viento fuerte: el Viento cuesta −15%' },
     niebla:    { nombre: 'Niebla', icono: '🌫', detalle: 'Niebla espesa: se ve poco y todo suena lejos' },
     calor:     { nombre: 'Calor extremo', icono: '🌡', detalle: 'Calor extremo: el Fuego cuesta −15%' }
@@ -2194,14 +2287,73 @@ U.Clima = {
   // Mapas bajo techo: dentro de una casa o lugar con techo NO debe llover.
   INTERIORES: ['casa', 'oficina'],
   INTENSIDAD_NOMBRES: { 1: 'ligera', 2: 'normal', 3: 'fuerte', 4: 'tormenta' },
-  // Costos bajo lluvia por intensidad (índice = intensidad − 1). Agua va aparte: plano 1.
-  // Fuego: la lluvia lo apaga, paga más cuanto más llueve. Tierra: el barro ayuda.
-  // Viento: la lluvia lo frena. Rayo: el agua conduce; en tormenta, ×0.6.
+  // Costos bajo lluvia por intensidad (índice = intensidad − 1).
+  // AGUA ES PROGRESIVA, ya no plano 1 con cualquier lluvia: ligera ×0.8 (un poco menos),
+  // normal ×0.5 (la mitad), fuerte y tormenta = 1 plano (hay muchísima agua: solo la controlas).
+  // Y donde ABUNDA el agua sin llover (río, estanque, oasis, zona muy húmeda) el Agua paga en
+  // DECIMALES (×0.15, mínimo 0.5): la barra de Esencia baja poquito a poquito, como debe ser
+  // cuando el ambiente te favorece. Fuego: la lluvia lo apaga, paga más cuanto más llueve.
+  // Tierra: el barro ayuda. Viento: la lluvia lo frena. Rayo: el agua conduce; en tormenta, ×0.6.
   COSTOS_LLUVIA: {
+    agua:   [0.8, 0.5, 0, 0],
     fuego:  [1.3, 1.6, 2.0, 2.5],
     tierra: [0.95, 0.9, 0.85, 0.8],
     viento: [1.1, 1.2, 1.35, 1.5],
     rayo:   [0.95, 0.9, 0.85, 0.6]
+  },
+  // TEMPERATURA ambiente 0..1: la de la zona, ajustada por el clima (el calor extremo sube,
+  // la lluvia y la tormenta enfrían) y un poco por el momento del día. Bajo techo, neutra.
+  temperatura(E) {
+    if (!E) return 0.5;
+    if (this.esInterior(E)) return 0.5;
+    let t = E.zonaActual ? (E.zonaActual.temp != null ? E.zonaActual.temp : 0.5) : 0.5;
+    const ct = E.clima ? E.clima.tipo : 'despejado';
+    if (ct === 'calor') t += 0.3; else if (ct === 'lluvia') t -= 0.15; else if (ct === 'tormenta') t -= 0.2; else if (ct === 'niebla') t -= 0.08;
+    const h = U.Tiempo.hora(E); if (h >= 11 && h < 16) t += 0.06; if (h >= 21 || h < 5) t -= 0.08;
+    return Math.max(0, Math.min(1, t));
+  },
+  // PRECIPITACIÓN 0..1: intensidad de lluvia / 4 afuera; bajo techo, 0 (no llueve dentro).
+  precipitacion(E) { return this.intensidadDe(E) / 4; },
+  // ¿El jugador está en un ambiente donde ABUNDA el agua? (junto a un río/estanque/oasis,
+  // o en una zona de humedad altísima). Ahí el Agua paga decimales aunque no llueva.
+  aguaAbundante(E) {
+    if (!E || !E.jugador || !E.mapa) return false;
+    const j = E.jugador, z = E.zonaActual;
+    if (z && z.humedad >= 0.9) return true;
+    const T = U.Grid.T, m = E.mapa;
+    for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+      const x = Math.floor(j.x) + dx, y = Math.floor(j.y) + dy;
+      if (x >= 0 && y >= 0 && x < m.ancho && y < m.alto && m.tiles[y * m.ancho + x] === T.AGUA) return true;
+    }
+    return false;
+  },
+  // Factor NUMÉRICO completo (sin redondear: los costos ya viven en decimales): precipitación
+  // + temperatura. Lo usan Ambiente.costo (técnicas) y el drenaje del escudo.
+  factorNumerico(elem, E) {
+    const inten = this.intensidadDe(E); const temp = this.temperatura(E); const razones = [];
+    let m = 1, flat = null;
+    if (inten > 0) {
+      const nom = this.INTENSIDAD_NOMBRES[inten];
+      if (elem === 'agua') {
+        if (inten >= 3) { flat = 1; razones.push('Lluvia ' + nom + ': agua por todos lados, solo la controlas (costo 1)'); }
+        else { m *= this.COSTOS_LLUVIA.agua[inten - 1]; razones.push('Lluvia ' + nom + ': el Agua paga menos (×' + this.COSTOS_LLUVIA.agua[inten - 1] + ')'); }
+      } else {
+        const tabla = this.COSTOS_LLUVIA[elem];
+        if (tabla) { m *= tabla[inten - 1]; razones.push('Lluvia ' + nom + ' (×' + tabla[inten - 1] + ' para ' + U.Elementos.nombre(elem) + ')'); }
+      }
+    }
+    if (flat == null && elem === 'agua' && this.aguaAbundante(E)) { m *= 0.15; razones.push('Agua por todos lados: pagas decimales (×0.15)'); }
+    // Temperatura: el calor alimenta al Fuego y evapora el Agua; el frío, al revés.
+    if (temp >= 0.75) {
+      if (elem === 'fuego') { m *= 0.85; razones.push('Temperatura alta: el calor alimenta el Fuego (×0.85)'); }
+      if (elem === 'agua') { m *= 1.25; razones.push('Temperatura alta: el calor evapora el Agua (×1.25)'); }
+      if (elem === 'viento') { m *= 0.95; razones.push('Temperatura alta: el aire caliente se mueve (×0.95)'); }
+    } else if (temp <= 0.25) {
+      if (elem === 'fuego') { m *= 1.2; razones.push('Temperatura baja: el frío ahoga el Fuego (×1.2)'); }
+      if (elem === 'agua') { m *= 0.9; razones.push('Temperatura baja: el Agua fluye densa y barata (×0.9)'); }
+      if (elem === 'rayo') { m *= 0.95; razones.push('Temperatura baja: el aire frío conduce el Rayo (×0.95)'); }
+    }
+    return { m: m, flat: flat, razon: razones.join(' · '), temp: temp, precip: this.precipitacion(E) };
   },
   esInterior(E) { return !!(E && this.INTERIORES.indexOf(E.mapaId) >= 0); },
   // Intensidad que TE AFECTA: 0 bajo techo o sin lluvia; 1–3 en lluvia; 4 en tormenta.
@@ -2218,19 +2370,11 @@ U.Clima = {
     if (E.clima.tipo === 'lluvia') return Math.max(1, Math.min(3, E.clima.intensidad || 2));
     return 0;
   },
+  // Compatibilidad: el factor de costo del clima es factorNumerico (precipitación + temperatura).
   factorCosto(elem, E) {
-    const inten = this.intensidadDe(E); if (!inten) return null;
-    const nom = this.INTENSIDAD_NOMBRES[inten];
-    if (elem === 'agua') return { flat: 1, m: 0, razon: 'Lluvia ' + nom + ': agua por todos lados, solo la controlas (costo 1)' };
-    const tabla = this.COSTOS_LLUVIA[elem]; if (!tabla) return null;
-    const m = tabla[inten - 1];
-    const razones = {
-      fuego: 'Lluvia ' + nom + ': el agua apaga el Fuego (×' + m + ')',
-      tierra: 'Lluvia ' + nom + ': el barro ayuda a la Tierra (×' + m + ')',
-      viento: 'Lluvia ' + nom + ': la lluvia frena el Viento (×' + m + ')',
-      rayo: 'Lluvia ' + nom + ': el agua conduce el Rayo (×' + m + ')'
-    };
-    return { m: m, razon: razones[elem] || '' };
+    const f = this.factorNumerico(elem, E);
+    if (f.flat == null && Math.abs(f.m - 1) < 0.001) return null;
+    return f;
   },
   crear(rng) { return { tipo: 'despejado', intensidad: 0, restante: 150 + (rng ? rng() * 90 : 60) }; },
   de(E) {
@@ -2238,9 +2382,10 @@ U.Clima = {
     if (!E || !E.clima || (E.clima.tipo !== 'lluvia' && E.clima.tipo !== 'tormenta')) return base;
     const inten = this.intensidadGuardada(E); const nom = this.INTENSIDAD_NOMBRES[inten] || 'normal';
     if (this.esInterior(E)) return Object.assign({}, base, { nombre: base.nombre + (E.clima.tipo === 'lluvia' ? ' ' + nom : ''), detalle: 'Afuera: ' + base.nombre.toLowerCase() + (E.clima.tipo === 'lluvia' ? ' ' + nom : '') + ' · Bajo techo: aquí no llueve ni cambian los costos' });
-    if (E.clima.tipo === 'tormenta') return Object.assign({}, base, { detalle: 'Tormenta (intensidad máxima) · Agua cuesta 1 · Rayo ×0.6 · Fuego ×2.5' });
+    if (E.clima.tipo === 'tormenta') return Object.assign({}, base, { detalle: 'Tormenta (precipitación máxima) · Agua cuesta 1 · Rayo ×0.6 · Fuego ×2.5' });
     const f = this.COSTOS_LLUVIA.fuego[inten - 1];
-    return Object.assign({}, base, { nombre: 'Lluvia ' + nom, detalle: 'Lluvia ' + nom + ' · Agua cuesta 1 · Fuego ×' + f + ' · Tierra y Rayo bajan · Viento sube' });
+    const fa = inten >= 3 ? 'Agua cuesta 1' : 'Agua ×' + this.COSTOS_LLUVIA.agua[inten - 1];
+    return Object.assign({}, base, { nombre: 'Lluvia ' + nom, detalle: 'Lluvia ' + nom + ' · ' + fa + ' · Fuego ×' + f + ' · Tierra y Rayo bajan · Viento sube' });
   },
   elegir(E) {
     const h = U.Tiempo.hora(E); const z = E.zonaActual; const zid = z ? z.id : 'aldea';
@@ -2281,13 +2426,29 @@ U.Recuperacion = {
   capacidad() { const j = U.Juego.estado.jugador; const a = U.Atributos.de(j.atributo); return a.regen + (j.regenBonus || 0); },
   velDescanso() { return U.Atributos.de(U.Juego.estado.jugador.atributo).descanso; },
   techoVida() { const j = U.Juego.estado.jugador; return j.stats.vida * 0.25; },
+  // CANSANCIO: barra fina bajo la Esencia (100 = fresco). Cada 10 de Esencia GASTADA en total
+  // baja 1 de Cansancio (gastar 500 en una pelea larga te deja a la mitad). La recarga de
+  // Esencia se multiplica por el cansancio: lleno = ritmo normal, a la mitad = mitad de ritmo,
+  // en cero = muy lento pero NUNCA cero (mínimo ×0.15). El cansancio NUNCA bloquea lanzar
+  // poderes: solo hace la recarga más lenta. El atributo Fluido gasta más Esencia por técnica
+  // (×1.18), así que acumula gasto — y cansancio — más rápido: su desventaja pesa de verdad.
+  // Se recupera: durmiendo (fogata o cama) al 100%, meditando rápido, y poquito a poquito
+  // fuera de combate para no quedarse atascado.
+  multCansancio() { const j = U.Juego.estado.jugador; const c = j.cansancio != null ? j.cansancio : 100; return Math.max(0.15, c / 100); },
+  registrarGasto(c) {
+    const j = U.Juego.estado.jugador; if (!j || !(c > 0)) return;
+    if (j.cansancio == null) j.cansancio = 100;
+    j.gastoFatiga = (j.gastoFatiga || 0) + c;
+    while (j.gastoFatiga >= 10) { j.gastoFatiga -= 10; j.cansancio = Math.max(0, j.cansancio - 1); }
+  },
   // Gastar Esencia. 'ajustado' = el costo ya incluye ambiente y atributo (técnicas).
+  // Los costos viven en DECIMALES: ya no se redondea a enteros (mínimo 0.1).
   gastar(cantidad, opts) {
     const j = U.Juego.estado.jugador; opts = opts || {};
     if (j.agotado) { U.HUD.toast('Agotado: recupera el 25% de Esencia antes de gastar.', 'aviso'); U.Audio.sfx('fail'); return false; }
-    let c = cantidad; if (!opts.ajustado) c *= U.Atributos.multCosto(j.atributo); c = Math.max(1, Math.round(c));
+    let c = cantidad; if (!opts.ajustado) c *= U.Atributos.multCosto(j.atributo); c = Math.max(0.1, Math.round(c * 100) / 100);
     if (j.esencia < c) { U.HUD.toast('Esencia insuficiente (' + c + ').', 'aviso'); U.Audio.sfx('fail'); return false; }
-    const antes = j.esencia; j.esencia -= c;
+    const antes = j.esencia; j.esencia -= c; this.registrarGasto(c);
     if (j.esencia <= 0.01) { j.esencia = 0; j.agotado = true; U.Crecimiento.stat('esencia', 0.8, 1); U.HUD.toast('¡AGOTADO! Sin Esencia hasta recuperar 25%.', 'peligro'); U.Audio.sfx('derrota'); j.cargando = false; }
     else if (j.esencia < j.stats.esencia * 0.1 && antes >= j.stats.esencia * 0.1) U.Crecimiento.stat('esencia', 0.4, 1); // vaciar el tanque hace crecer el tanque
     return true;
@@ -2337,7 +2498,7 @@ U.Recuperacion = {
     r.t += dt;
     if (r.fase === 1 && r.t >= 0.8) {
       // Pantalla en negro: curación completa + avance del reloj + el entreno de meditación de siempre.
-      j.vida = j.stats.vida; j.esencia = j.stats.esencia; j.agotado = false; j.dot = null;
+      j.vida = j.stats.vida; j.esencia = j.stats.esencia; j.agotado = false; j.dot = null; j.cansancio = 100; j.gastoFatiga = 0;
       if (j.estilos.yang < 100) U.Crecimiento.estilo('yang', 0.8, 1);
       if (j.flags.peleaDura) { j.flags.peleaDura = false; U.Crecimiento.stat('vida', 0.8, 1); }
       U.Tiempo.aplicarSalto(r);
@@ -2362,7 +2523,11 @@ U.Recuperacion = {
     // desplomaba y parecía detenerse, y un jugador Agotado cerca de un enemigo no tenía forma de recuperarla.
     // Ahora: fuera de combate ritmo completo, en combate 40% (nunca cero), descansar triplica.
     // Golpear con Yin sigue devolviendo Esencia extra, como siempre.
-    { const cap = this.capacidad(); let r = E.enCombate ? cap * 0.4 : cap; if (j.descansando) r *= 3; j.esencia = Math.min(j.stats.esencia, j.esencia + r * dt); }
+    { const cap = this.capacidad(); let r = E.enCombate ? cap * 0.4 : cap; if (j.descansando) r *= 3; r *= this.multCansancio(); j.esencia = Math.min(j.stats.esencia, j.esencia + r * dt); }
+    // Cansancio: se recupera poquito a poquito fuera de combate (más si meditas descansando);
+    // en combate no se recupera. Dormir lo deja al 100% (ver actualizarFogata).
+    if (j.cansancio == null) j.cansancio = 100;
+    if (!E.enCombate && j.cansancio < 100) j.cansancio = Math.min(100, j.cansancio + (j.descansando ? 3 : 0.5) * dt);
     // Vida: recuperación AUTOMÁTICA, sin necesidad de descansar. Sube SOLO cuando está debajo del 25%
     // y el 25% es el TOPE exacto: Math.min(techo, …) garantiza que la recuperación natural nunca pase
     // de ahí. Si la Vida ya está en o sobre el 25% (p. ej. tras una poción), esta vía no suma nada.
@@ -2410,11 +2575,98 @@ U.Combate = {
     m.objetos.slice().forEach(o => { if (!U.Grid.esDestructible(o)) return; for (let y = o.y; y < o.y + (o.h || 1); y++) for (let x = o.x; x < o.x + (o.w || 1); x++) if (set[x + ',' + y]) { U.Grid.danarObjeto(m, o, dmg); return; } });
   },
   golpearObjetoEn(x, y, dmg) { const E = U.Juego.estado; const o = U.Grid.objetoEn(E.mapa, x, y); if (o && U.Grid.esDestructible(o)) { U.Grid.danarObjeto(E.mapa, o, dmg); return true; } return false; },
+  // ---------- ESCUDO (técnica aprendida de un maestro) ----------
+  // La naturaleza del escudo del jugador: su elemento activo. Si despertó el Yang y su
+  // inclinación de vida es Yang, su escudo es de ENERGÍA (bloquea todo). Los hechiceros
+  // enemigos usan escudo MÁGICO (el suyo, temporizado, se queda como estaba).
+  escudoTipo(j) {
+    if (j.tieneYang && j.perfil && j.perfil.estilo === 'yang') return 'yang';
+    return j.elementoActivo;
+  },
+  escudoColor(j) { const t = this.escudoTipo(j); return t === 'yang' ? '#f8fafc' : U.Elementos.color(t); },
+  escudoNombre(j) { const t = this.escudoTipo(j); return t === 'yang' ? 'Escudo de energía (Yang)' : 'Escudo de ' + U.Elementos.nombre(t).toLowerCase(); },
+  escudoMax(j) { const nv = U.Habilidades.escudo.niveles[j.escudoNv || 1]; return nv ? nv.integridad : 34; },
+  aprenderEscudo() {
+    const j = U.Juego.estado.jugador;
+    if (j.escudoAprendido) return false;
+    j.escudoAprendido = true; j.escudoNv = 1; j.escudoExp = 0; j.escudoVida = this.escudoMax(j);
+    U.HUD.banner('🛡 ¡ESCUDO APRENDIDO! · NIVEL 1 · SOLO DE FRENTE', 2.4); U.Audio.sfx('unlock');
+    return true;
+  },
+  // ¿El ataque viene de una dirección que el escudo cubre a este nivel?
+  // dot = coseno entre tu mirada y la dirección al atacante: 1 = de frente, −1 = a tu espalda.
+  escudoCubre(j, ox, oy) {
+    const nv = U.Habilidades.escudo.niveles[j.escudoNv || 1]; if (!nv) return false;
+    if (nv.cobertura <= -1.5) return true; // Nv.3: los cuatro lados
+    const dx = ox - j.x, dy = oy - j.y, d = Math.hypot(dx, dy);
+    if (d < 0.01) return true;
+    const dl = Math.hypot(j.dir.x, j.dir.y) || 1;
+    const dot = (dx / d) * (j.dir.x / dl) + (dy / d) * (j.dir.y / dl);
+    return dot >= nv.cobertura;
+  },
+  escudoBloqueo(j, ganado) {
+    const nv = U.Habilidades.escudo.niveles[j.escudoNv || 1];
+    this.texto(j, 'ESCUDO', this.escudoColor(j), 1); this.particulas(j.x, j.y - 0.6, 5, this.escudoColor(j), 'chispa'); U.Audio.sfx('esquiva');
+    if (ganado) {
+      j.escudoExp = (j.escudoExp || 0) + 1;
+      const sig = U.Habilidades.escudo.niveles[(j.escudoNv || 1) + 1];
+      if (sig && j.escudoExp >= nv.bloquesParaSubir) {
+        j.escudoNv++; j.escudoExp = 0; j.escudoVida = this.escudoMax(j);
+        const cob = j.escudoNv >= 3 ? 'AHORA TE PROTEGE DE LOS CUATRO LADOS' : 'AHORA TE PROTEGE DE FRENTE Y DE LOS LADOS';
+        U.HUD.banner('🛡 ¡ESCUDO NIVEL ' + j.escudoNv + '! · ' + cob, 2.4); U.Audio.sfx('unlock');
+        U.HUD.toast('Tu escudo subió al nivel ' + j.escudoNv + ' (' + U.Habilidades.escudo.niveles[j.escudoNv].nombre + '). Sigue bloqueando para dominarlo.', 'exito');
+      }
+    }
+  },
+  // Resuelve un golpe contra el escudo activo. Devuelve el daño que SÍ pasa al jugador
+  // (0 = bloqueado/absorbido). info: {elemento (null = físico), proyectil, ox, oy, atacante}.
+  // La tabla de ventajas le aplica al escudo como si fuera el jugador.
+  resolverEscudo(base, info) {
+    const E = U.Juego.estado, j = E.jugador;
+    const tipo = this.escudoTipo(j), col = this.escudoColor(j);
+    const ox = info.ox != null ? info.ox : j.x + j.dir.x, oy = info.oy != null ? info.oy : j.y - 1;
+    if (!this.escudoCubre(j, ox, oy)) { this.texto(j, '¡POR LA ESPALDA!', '#ff4d4d', 1); this.particulas(j.x, j.y - 0.6, 4, '#ff4d4d', 'chispa'); return base; }
+    const atk = info.elemento || null, fisico = !atk;
+    const melee = !info.proyectil;
+    // Yang (energía) y Mágico: bloquean todo lo que cubren.
+    if (tipo === 'yang') { j.escudoVida -= base * 0.5; this.escudoBloqueo(j, true); if (j.escudoVida <= 0) this.romperEscudo('Tu escudo de energía se disipó: bloqueó demasiado.'); return 0; }
+    // Mismo elemento: el escudo lo ABSORBE y devuelve un poco de Esencia.
+    if (atk && atk === tipo) { U.Recuperacion.restaurar(2); this.texto(j, 'ABSORBIDO +2 ESE', col, 1); this.escudoBloqueo(j, true); return 0; }
+    // Naturalezas por elemento (lo que cada escudo hace distinto):
+    if (tipo === 'viento' && info.proyectil) { this.texto(j, 'DESVIADO', col, 1); this.escudoBloqueo(j, true); return 0; } // el viento desvía proyectiles
+    if (tipo === 'rayo' && melee && info.atacante && info.atacante.vida > 0) { const castigo = Math.max(2, Math.round(base * 0.35)); info.atacante.vida -= castigo; this.texto(info.atacante, '-' + castigo + ' ⚡', '#ffe14d', 1); this.particulas(info.atacante.x, info.atacante.y - 0.6, 6, '#ffe14d', 'chispa'); if (info.atacante.vida <= 0 && !info.atacante.esSparring) this.morir(info.atacante); } // el campo de rayo castiga al que lo toca
+    if (atk) {
+      const m = U.Elementos.multiplica(atk, tipo);
+      if (m > 1) { // el ataque le GANA al escudo: casos con nombre propio primero
+        if (atk === 'agua' && tipo === 'fuego') { this.escudoBloqueo(j, false); this.romperEscudo('¡El agua APAGÓ tu escudo de fuego! Tu Esencia se queda: vuelve a levantarlo.'); return 0; }
+        if (atk === 'rayo' && tipo === 'agua') { this.texto(j, '¡EL RAYO PASA POR EL AGUA!', '#ffe14d', 1); return Math.round(base * 1.5); } // pasa con ventaja; el escudo NO se rompe
+        if (atk === 'agua' && tipo === 'tierra') { j.escudoVida -= base * 1.6; this.texto(j, '¡SE VUELVE LODO!', '#d9a441', 1); this.escudoBloqueo(j, true); if (j.escudoVida <= 0) this.romperEscudo('El agua erosionó tu capa de roca hasta volverla lodo: escudo roto.'); return 0; }
+        j.escudoVida -= base * 1.5; this.escudoBloqueo(j, true); if (j.escudoVida <= 0) { this.romperEscudo('Un ataque con ventaja deshizo tu escudo de ' + U.Elementos.nombre(tipo).toLowerCase() + '.'); return Math.round(base * 0.5); } return 0;
+      }
+      if (m < 1) { j.escudoVida -= base * 0.4; this.escudoBloqueo(j, true); if (j.escudoVida <= 0) this.romperEscudo('Tu escudo aguantó todo lo que pudo y cayó.'); return 0; } // tu elemento le gana al ataque: aguanta bien (p. ej. Tierra contra escudo de Agua lo amortigua)
+      j.escudoVida -= base * 0.8; this.escudoBloqueo(j, true); if (j.escudoVida <= 0) this.romperEscudo('Tu escudo se rompió de tanto aguantar.'); return 0;
+    }
+    // Físico (Yin / cuerpo a cuerpo / área): cada naturaleza amortigua distinto.
+    const pasa = { fuego: 0.7, agua: 0.25, tierra: 0.15, viento: 0.7, rayo: 0.45 }[tipo];
+    const p = pasa != null ? pasa : 0.4;
+    j.escudoVida -= base * (1 - p) * 0.9 + 2;
+    this.escudoBloqueo(j, p <= 0.3);
+    if (j.escudoVida <= 0) { this.romperEscudo('Tu escudo cayó bajo los golpes.'); return Math.round(base * p); }
+    if (p > 0) this.texto(j, 'EL ESCUDO CEDE', '#ffb347', 1);
+    return Math.round(base * p);
+  },
+  romperEscudo(msg) {
+    const j = U.Juego.estado.jugador; j.escudo = false; j.escudoVida = 0;
+    if (msg) U.HUD.toast(msg, 'peligro'); U.Audio.sfx('fail');
+  },
   toggleEscudo() {
     const E = U.Juego.estado, j = E.jugador;
-    if (j.escudo) { j.escudo = false; U.HUD.toast('Escudo Mágico desactivado.', ''); U.Audio.sfx('click'); return; }
-    if (j.agotado || j.esencia < 10) { U.HUD.toast('Escudo Mágico: necesitas al menos 10 de Esencia.', 'aviso'); U.Audio.sfx('fail'); return; }
-    j.escudo = true; j.cargando = false; j.descansando = false; U.Audio.sfx('yang'); U.HUD.toast('Escudo Mágico ACTIVO: no recibes daño, pero NO puedes moverte y drena 9 Esencia/s. Pulsa B para bajarlo.', 'exito');
+    if (j.escudo) { j.escudo = false; U.HUD.toast('Escudo desactivado.', ''); U.Audio.sfx('click'); return; }
+    if (!j.escudoAprendido) { U.HUD.toast('Aún no conoces el Escudo: es una TÉCNICA y se aprende de un maestro. Kaelen, el guardia de la aldea, puede enseñártela (habla con él).', 'aviso'); U.Audio.sfx('fail'); return; }
+    if (j.agotado || j.esencia < 10) { U.HUD.toast('Escudo: necesitas al menos 10 de Esencia.', 'aviso'); U.Audio.sfx('fail'); return; }
+    j.escudo = true; j.escudoVida = this.escudoMax(j); j.cargando = false; j.descansando = false; U.Audio.sfx('yang');
+    const nv = U.Habilidades.escudo.niveles[j.escudoNv || 1];
+    U.HUD.toast(this.escudoNombre(j) + ' ACTIVO · Nv.' + (j.escudoNv || 1) + ' (' + nv.nombre + '): NO puedes moverte y drena Esencia/s. Pulsa B para bajarlo.', 'exito');
   },
   // ---------- acciones del jugador ----------
   puedeYin() { const j = U.Juego.estado.jugador; return !j.agotado && j.esencia >= 2 && j.cdYin <= 0; },
@@ -2502,9 +2754,14 @@ U.Combate = {
     if (e.esSparring) { const minS = Math.max(1, Math.ceil(e.stats.vida * 0.10)); if (e.vida <= minS) { e.vida = minS; e.retirarSparring = true; } }
     else if (e.vida <= 0) this.morir(e);
   },
-  dañoJugador(base, atacante, efecto) {
+  dañoJugador(base, atacante, efecto, info) {
     const E = U.Juego.estado, j = E.jugador;
-    if (j.escudo) { this.texto(j, 'ESCUDO', '#7cc4ff', 1); this.particulas(j.x, j.y - 0.6, 5, '#7cc4ff', 'chispa'); U.Audio.sfx('esquiva'); return; }
+    if (j.escudo) {
+      info = info || {};
+      const resuelto = this.resolverEscudo(base, { elemento: info.elemento != null ? info.elemento : null, proyectil: !!info.proyectil, ox: info.ox != null ? info.ox : (atacante ? atacante.x : null), oy: info.oy != null ? info.oy : (atacante ? atacante.y : null), atacante: atacante || null });
+      if (resuelto <= 0) return;
+      base = resuelto; // lo que el escudo dejó pasar sigue su curso normal (defensa, etc.)
+    }
     if (j.invuln > 0) { this.texto(j, 'ESQUIVA', '#7ef0c0', 1); U.Audio.sfx('esquiva'); U.Crecimiento.stat('velocidad', 0.15, atacante ? this.desafio(atacante) : 1); E.resumen.esquives++; return; }
     const d = Math.max(1, Math.round(U.Estadisticas.formulaDaño(base, j.stats.defensa))); j.vida -= d; j.flash = 0.15; j.descansando = false; E.resumen.recibido += d;
     this.texto(j, '-' + d, '#ff5470', d > j.stats.vida * 0.1 ? 2 : 1); this.particulas(j.x, j.y - 0.6, 8, '#ff5470', 'chispa'); U.Audio.sfx('daño'); this.sacudir(0.9); E.hitstop = 0.03;
@@ -2564,7 +2821,7 @@ U.Combate = {
     else if (c.forma === 'linea') { E.efectos.haces.push({ celdas: e.tele, color: el.color, t: 0.25, max: 0.25 }); U.Audio.sfx('viento'); }
     else { E.efectos.haces.push({ celdas: e.tele, color: el.color, t: 0.25, max: 0.25 }); U.Audio.sfx(e.elemento); }
     this.particulas(e.x + e.dir.x, e.y + e.dir.y - 0.5, 8, el.claro, 'chispa');
-    if (U.Grid.enCeldas(e.tele, j)) this.dañoJugador(e.stats.ataque * c.power, e, c.efecto);
+    if (U.Grid.enCeldas(e.tele, j)) { const esFisico = c.forma === 'cono' || c.forma === 'circulo'; this.dañoJugador(e.stats.ataque * c.power, e, c.efecto, { elemento: esFisico ? null : e.elemento, proyectil: false, ox: e.x, oy: e.y }); }
     e.ataqueAnim = 0.2;
   },
   actualizarProyectiles(dt) {
@@ -2572,10 +2829,10 @@ U.Combate = {
     E.proyectiles.forEach(p => {
       p.vida -= dt; p.x += p.dx * p.vel * dt; p.y += p.dy * p.vel * dt;
       if (Math.random() < dt * 30) this.particulas(p.x, p.y - 0.5, 1, p.color, p.cometa ? 'chispa' : 'polvo');
-      const estallar = () => { if (p.explora) { const celdas = U.Grid.forma('circulo', p.x, p.y, { x: 1, y: 0 }, 0, p.explora.radio); E.efectos.haces.push({ celdas, color: p.color, t: 0.3, max: 0.3 }); E.efectos.anillos.push({ x: p.x, y: p.y, radio: p.explora.radio, color: p.color, t: 0.4, max: 0.4 }); this.sacudir(0.6); U.Audio.sfx(p.elemento || 'yang'); if (p.dueño === 'jugador') this.vivos().forEach(e => { if (U.Grid.enCeldas(celdas, e)) this.dañoEnemigo(e, p.base * (p.explora.power / 1.4), p.elemento, Object.assign({ desafio: this.desafio(e) }, p.efecto || {})); }); else if (U.Grid.enCeldas(celdas, j)) this.dañoJugador(p.base, null, p.efecto); } p.vida = 0; };
+      const estallar = () => { if (p.explora) { const celdas = U.Grid.forma('circulo', p.x, p.y, { x: 1, y: 0 }, 0, p.explora.radio); E.efectos.haces.push({ celdas, color: p.color, t: 0.3, max: 0.3 }); E.efectos.anillos.push({ x: p.x, y: p.y, radio: p.explora.radio, color: p.color, t: 0.4, max: 0.4 }); this.sacudir(0.6); U.Audio.sfx(p.elemento || 'yang'); if (p.dueño === 'jugador') this.vivos().forEach(e => { if (U.Grid.enCeldas(celdas, e)) this.dañoEnemigo(e, p.base * (p.explora.power / 1.4), p.elemento, Object.assign({ desafio: this.desafio(e) }, p.efecto || {})); }); else if (U.Grid.enCeldas(celdas, j)) this.dañoJugador(p.base, null, p.efecto, { elemento: p.elemento || null, proyectil: true, ox: p.x - p.dx, oy: p.y - p.dy }); } p.vida = 0; };
       if (U.Grid.solidoEn(E.mapa, p.x, p.y)) { if (p.dueño === 'jugador') this.golpearObjetoEn(p.x, p.y, p.base * 0.9); estallar(); return; }
       if (p.dueño === 'jugador') { for (const e of this.vivos()) { if (p.golpeados.indexOf(e) >= 0) continue; if (Math.hypot(e.x - p.x, e.y - p.y) < 0.65) { p.golpeados.push(e); this.dañoEnemigo(e, p.base, p.elemento, Object.assign({ desafio: this.desafio(e) }, p.efecto || {})); if (p.explora) estallar(); else if (!p.cometa) p.vida = 0; else { /* la onda perfora y empuja */ } break; } } }
-      else if (Math.hypot(j.x - p.x, j.y - p.y) < 0.65) { this.dañoJugador(p.base, null, p.efecto); estallar(); }
+      else if (Math.hypot(j.x - p.x, j.y - p.y) < 0.65) { this.dañoJugador(p.base, null, p.efecto, { elemento: p.elemento || null, proyectil: true, ox: p.x - p.dx, oy: p.y - p.dy }); estallar(); }
     });
     E.proyectiles = E.proyectiles.filter(p => p.vida > 0);
   },
@@ -2625,7 +2882,7 @@ U.Combate = {
     const E = U.Juego.estado, j = E.jugador; if (E.torneo || E.arena.activa || E.reto) { U.HUD.toast('Ya hay un combate organizado en curso.', 'aviso'); return; }
     if (U.Grid.dist(j, { x: E.mapa.arena.x + 0.5, y: E.mapa.arena.y + 0.5 }) > E.mapa.arena.r + 3 && E.mapaId !== 'aldea') { /* se puede inscribir desde Kaelen/Aldric y pelear en la arena */ }
     E.torneo = { idx: 0, entre: 2.5, spawned: false, activo: true };
-    j.vida = j.stats.vida; j.esencia = j.stats.esencia; j.agotado = false; j.escudo = false;
+    j.vida = j.stats.vida; j.esencia = j.stats.esencia; j.agotado = false; j.escudo = false; j.cansancio = 100; j.gastoFatiga = 0;
     U.HUD.banner('🏆 TORNEO DE BRUMA · OCTAVOS DE FINAL', 2.4); U.Audio.sfx('oleada'); U.Audio.musica('arena');
     U.HUD.toast('Torneo: 4 rondas de 1 contra 1 (octavos, cuartos, semifinal y final). Entre rondas te recuperas AL COMPLETO. Premio del campeón: 150 monedas y 2 pociones. Ve a la Arena de Ecos (sureste) para pelear.', 'exito');
   },
@@ -2640,7 +2897,7 @@ U.Combate = {
     if (T.entre > 0) { T.entre -= dt; if (T.entre <= 0) this.spawnTorneo(); return; }
     if (T.spawned && this.vivos().filter(e => e.esTorneo).length === 0) {
       T.idx++; T.spawned = false;
-      j.vida = j.stats.vida; j.esencia = j.stats.esencia; j.agotado = false; // recuperación total entre rondas
+      j.vida = j.stats.vida; j.esencia = j.stats.esencia; j.agotado = false; j.cansancio = 100; j.gastoFatiga = 0; // recuperación total entre rondas (también el Cansancio)
       if (T.idx >= this.TORNEO.length) { E.torneo = null; E.historial.torneos = (E.historial.torneos || 0) + 1; j.monedas = (j.monedas || 0) + 150; j.pociones = Math.min(9, j.pociones + 2); U.HUD.banner('🏆 ¡CAMPEÓN DEL TORNEO DE BRUMA! · +150 🪙 · +2 POCIONES', 3); U.Audio.sfx('victoria'); U.Audio.musica('aldea'); U.HUD.toast('Campeón: te recuperaste tras cada ronda y el premio ya está en tu bolsa.', 'exito'); }
       else { T.entre = 3; U.HUD.banner('✅ RONDA SUPERADA · TE RECUPERAS AL 100% · SIGUE: ' + this.TORNEO[T.idx].fase, 2.2); U.Audio.sfx('cura'); this.particulas(j.x, j.y - 1, 16, '#67e08a', 'cura'); }
     }
@@ -2675,7 +2932,12 @@ U.Combate = {
   },
   actualizar(dt) {
     const E = U.Juego.estado, j = E.jugador;
-    if (j.escudo) { j.esencia -= 9 * dt; if (j.esencia <= 0) { j.esencia = 0; j.escudo = false; j.agotado = true; U.HUD.toast('Escudo caído: te quedaste sin Esencia y estás Agotado.', 'peligro'); U.Audio.sfx('fail'); } else if (Math.random() < dt * 8) this.particulas(j.x, j.y - 0.8, 1, '#7cc4ff', 'chispa'); }
+    if (j.escudo) { // Drenaje del escudo: base 9/s × ambiente × clima de SU elemento (en decimales:
+      // con el clima a favor drena poquito a poquito). También cuenta como gasto para el Cansancio.
+      const tipoE = this.escudoTipo(j); const fE = tipoE === 'yang' ? { m: 1, flat: null } : U.Ambiente.factorNumerico(tipoE, E.zonaActual, j.atributo);
+      const dren = fE.flat != null ? Math.min(9, fE.flat) : 9 * fE.m * (fE.atrib || 1);
+      j.esencia -= dren * dt; U.Recuperacion.registrarGasto(dren * dt);
+      if (j.esencia <= 0) { j.esencia = 0; j.escudo = false; j.agotado = true; U.HUD.toast('Escudo caído: te quedaste sin Esencia y estás Agotado.', 'peligro'); U.Audio.sfx('fail'); } else if (Math.random() < dt * 8) this.particulas(j.x, j.y - 0.8, 1, this.escudoColor(j), 'chispa'); }
     if (this.actualizarTorneo) this.actualizarTorneo(dt);
     j.cdYin = Math.max(0, j.cdYin - dt); j.cdYang = Math.max(0, j.cdYang - dt); for (const k in j.cdTec) j.cdTec[k] = Math.max(0, j.cdTec[k] - dt);
     j.dash.cd = Math.max(0, j.dash.cd - dt); j.invuln = Math.max(0, j.invuln - dt); j.flash = Math.max(0, j.flash - dt); j.ataqueAnim = Math.max(0, j.ataqueAnim - dt);
@@ -2755,6 +3017,7 @@ U.Dialogo = {
         { t: 'Reto de combate de Kaelen (duelo con tiempo)', realidad: 66, energia: 15, resp: { pos: 'Acepto el reto.', neg: 'Sin reto.' }, accion: 'reto', et: 'reto' },
         { t: '🏆 Inscribirme al TORNEO DE BRUMA (octavos → final, en la Arena)', realidad: 70, energia: 15, resp: { pos: 'Inscrito. Ve a la Arena de Ecos: allí saldrá tu rival de octavos.', neg: 'Inscrito.' }, accion: 'torneo', et: 'torneo' },
         { t: 'Entrenar con Kaelen: guardia y esquiva (guía)', realidad: 66, energia: 12, resp: { pos: 'Dash, dash, dash. Tres esquivas con dash y tu cuerpo aprende. Ya empezó: mira el contador en pantalla.', neg: 'Muévete.' }, accion: 'entrenoGuia', et: 'entrenar' },
+        { t: '🛡 Aprender el ESCUDO (técnica de maestro)', realidad: 68, energia: 10, resp: { pos: 'El escudo no se regala: se aprende.', neg: 'El escudo se aprende, no se pide.' }, accion: 'aprenderEscudo', et: 'escudo' },
         { t: 'Presumir de tu poder', realidad: 66, energia: 15, resp: { pos: '¡Eso quiero ver! Que la arena lo confirme.', neg: 'Sí, sí. Todos son fuertes hasta que reciben.' }, et: 'presumir' },
         { t: 'Provocarlo', realidad: 18, energia: 25, resp: { pos: '…¿Estás bien de la cabeza?', neg: 'Repite eso y te saco yo mismo de la aldea.' }, et: 'provocar' }
       ]
@@ -2765,7 +3028,7 @@ U.Dialogo = {
         { t: 'Saludarla con calidez', realidad: 74, energia: 4, resp: { pos: 'Quédate un momento. La calma también cura.', neg: '…hola.' }, et: 'saludo' },
         { t: 'Pedir una poción', realidad: 62, energia: 5, resp: { pos: 'Toma. Una poción cura la mitad de tu Vida máxima. La recuperación automática solo llega al 25%: úsala cuando de verdad importe.', neg: 'Te la doy, pero no las desperdicies.' }, accion: 'pocion', et: 'pocion' },
         { t: 'Entrenar con Sora: meditación guiada (guía)', realidad: 66, energia: 8, resp: { pos: 'Siéntate conmigo en la calma: medita (tecla R) un total de 8 segundos y tu Mente y tu Yang respiran. Ya empezó: mira el contador.', neg: 'Respira.' }, accion: 'entrenoGuia', et: 'entrenar' },
-        { t: 'Preguntar por el descanso', realidad: 60, energia: 3, resp: { pos: 'Tu Vida se recupera sola siempre que estés bajo una cuarta parte de tu máximo, y se detiene justo ahí: el 25% es el tope de la recuperación automática en campo abierto. Pero si duermes en la fogata —interactúa con ella— el tiempo avanza hasta el siguiente momento del día (Amanecer, Mañana, Mediodía, Tarde, Atardecer o Noche) y despiertas con Vida y Esencia al cien por ciento, en la fase que toque. Un día completo dura veinte minutos y tiene 6 momentos: Amanecer 5–8, Mañana 8–12, Mediodía 12–15, Tarde 15–19, Atardecer 19–21 y Noche 21–5. La semana corre en el calendario: Lunes a Domingo, y cada medianoche suma un día a tu vida. La Esencia vuelve sola siempre, a ritmo constante: rápida fuera de combate, más lenta en combate, y golpeando con Yin recuperas aún más. Y quieto, meditando, también entrenas el Yang poco a poco: así se alcanza aunque el test no te haya dado afinidad.', neg: 'Vida sola hasta el veinticinco por ciento. Para el cien: duerme en la fogata.' }, et: 'pregunta' },
+        { t: 'Preguntar por el descanso', realidad: 60, energia: 3, resp: { pos: 'Tu Vida se recupera sola siempre que estés bajo una cuarta parte de tu máximo, y se detiene justo ahí: el 25% es el tope de la recuperación automática en campo abierto. Pero si duermes en la fogata —interactúa con ella— el tiempo avanza hasta el siguiente momento del día (Amanecer, Mañana, Mediodía, Tarde, Atardecer o Noche) y despiertas con Vida y Esencia al cien por ciento, en la fase que toque. Un día completo dura veinte minutos y tiene 6 momentos: Amanecer 5–8, Mañana 8–12, Mediodía 12–15, Tarde 15–19, Atardecer 19–21 y Noche 21–5. La semana corre en el calendario: Lunes a Domingo, y cada medianoche suma un día a tu vida. La Esencia vuelve sola siempre, a ritmo constante: rápida fuera de combate, más lenta en combate, y golpeando con Yin recuperas aún más. Y quieto, meditando, también entrenas el Yang poco a poco: así se alcanza aunque el test no te haya dado afinidad. Y mira la barrita verde bajo tu Esencia: es tu CANSANCIO. Cada 10 de Esencia que gastas en total, baja 1; y entre más bajo esté, más lento se recarga tu Esencia (nunca deja de recargarse, pero se nota). Dormir te lo deja lleno; fuera de combate se recupera despacito. Así que {descansar_bien}: pelear cansado es pelear a media máquina.', neg: 'Vida sola hasta el veinticinco por ciento. Para el cien: duerme en la fogata. Y ojo con la barrita verde: es tu cansancio, y frena tu recarga.' }, et: 'pregunta' },
         { t: 'Provocarla', realidad: 15, energia: 25, resp: { pos: '…¿Por qué harías eso?', neg: 'Fuera. Ahora.' }, et: 'provocar' }
       ]
     },
@@ -2773,7 +3036,7 @@ U.Dialogo = {
       saludo: { alegre: ['¡Ese es el espíritu! El cuerpo primero, la energía después. Ven, te enseño algo.', 'Je. Se te ve firme. Bien.'], sereno: ['El martillo y el puño tienen el mismo secreto: repetir hasta que duela y un poco más.'], neutral: ['Torin, herrero. Aquí se aprende Yin: golpe normal 2 de Esencia, cargado 6, dash 4. Pegar te devuelve Esencia.'], triste: ['Hoy el fuego está bajo… como yo. ¿Qué necesitas?'], enojado: ['No tengo tiempo para tonterías. Habla claro.'], asustado: ['¡Por las brasas! Avísame antes de aparecer.'] },
       opciones: [
         { t: 'Saludarlo con respeto', realidad: 70, energia: 5, resp: { pos: 'Respeto al oficio. Eso me gusta.', neg: 'Ajá.' }, et: 'saludo' },
-        { t: 'Pedir consejo de estilo', realidad: 62, energia: 4, resp: { pos: 'Yin es el cuerpo: barato, cercano, siempre tuyo. Yang es energía blanca a distancia y cara: el Haz perfora 10 celdas en línea, pero te vacía rápido. Entrenar Yang mejora tu recuperación de Esencia.', neg: 'Yin cerca. Yang lejos y caro. Fin.' }, et: 'pregunta' },
+        { t: 'Pedir consejo de estilo', realidad: 62, energia: 4, resp: { pos: 'Yin es el cuerpo: barato, cercano, siempre tuyo. Yang es energía blanca a distancia y cara: el Haz perfora 10 celdas en línea, pero te vacía rápido. Entrenar Yang mejora tu recuperación de Esencia. ¿Y defenderte? El ESCUDO se lo aprendes a Kaelen, no a mí: es su oficio. Y {mirar_bien} tu cansancio: la barrita verde bajo la Esencia. Gastar mucho te cansa y la recarga se vuelve lenta.', neg: 'Yin cerca. Yang lejos y caro. El escudo, con Kaelen. Fin.' }, et: 'pregunta' },
         { t: 'Entrenar un momento con él', realidad: 68, energia: 20, resp: { pos: '¡Eso! Mantén presionado Yin hasta sentir el peso, suelta y golpea. Tu estilo Yin crece con cada golpe.', neg: 'Una vez. Y no me hagas perder el tiempo.' }, accion: 'entrenar', et: 'entrenar' },
         { t: 'Entrenar el Yang (meditación guiada)', realidad: 64, energia: 20, resp: { pos: 'Siéntate. Respira. La energía blanca no se agarra: se deja pasar. Cuesta Esencia y tiempo, pero cualquiera puede despertarla entrenando, tenga o no afinidad.', neg: 'Respira y concéntrate. Es todo.' }, accion: 'entrenarYang', et: 'entrenar' },
         { t: 'Reto de combate de Torin (puño y brasa)', realidad: 66, energia: 15, resp: { pos: 'Acepto el reto.', neg: 'Sin reto.' }, accion: 'reto', et: 'reto' },
@@ -2807,7 +3070,7 @@ U.Dialogo = {
     marco: {
       saludo: { alegre: ['¡Vengo del desierto! ¡Vi un espejismo que caminaba!'], sereno: ['Cada mapa guarda algo. El desierto, una reliquia que Lía busca.'], neutral: ['Marco, explorador. Crucé bosque, desierto y montaña: los caminos ahora son más largos y hay más mundo que antes.'], triste: ['Me perdí dos días en la sal…'], enojado: ['No toques mi mapa.'], asustado: ['¡El ilusionista me invirtió los pies!'] },
       opciones: [
-        { t: 'Preguntar por el desierto', realidad: 62, energia: 4, resp: { pos: 'Al este, por el borde. Oasis al noreste, calor que ayuda al Fuego y una reliquia perdida que brilla si Lía te encarga buscarla. Los hechiceros de allí levantan ESCUDO MÁGICO: quietos e intocables unos segundos; espera a que caiga.', neg: 'Este. Oasis. Cuidado con los escudos.' }, et: 'pregunta' },
+        { t: 'Preguntar por el desierto', realidad: 62, energia: 4, resp: { pos: 'Al este, por el borde. Oasis al noreste, calor que ayuda al Fuego y una reliquia perdida que brilla si Lía te encarga buscarla. Los hechiceros de allí levantan su ESCUDO MÁGICO: quietos e intocables unos segundos; espera a que caiga. El TUYO es otra cosa: se lo aprendes a Kaelen y toma la naturaleza de tu elemento.', neg: 'Este. Oasis. Cuidado con los escudos.' }, et: 'pregunta' },
         { t: 'Saludarlo', realidad: 70, energia: 4, resp: { pos: '¡Buen camino!', neg: 'Ajá.' }, et: 'saludo' }
       ]
     },
@@ -2815,6 +3078,7 @@ U.Dialogo = {
       saludo: { alegre: ['¡Cuando sea grande gano el TORNEO! ¡Octavos, cuartos, semi y la FINAL!'], sereno: ['Estoy contando las casas: ¡ya hay muchas más que antes!'], neutral: ['Soy Pipo. De noche me meto en casa porque mi mamá dice que salen bandidos. ¿Tú no tienes miedo?'], triste: ['Me regañaron por jugar en la arena…'], enojado: ['¡No soy un niño chico! …bueno, sí.'], asustado: ['¡De noche no salgo NI LOCO!'] },
       opciones: [
         { t: 'Preguntar por el torneo', realidad: 62, energia: 6, resp: { pos: '¡Se pelea en la Arena! Primero octavos, luego cuartos, la semi y la FINAL. Después de cada pelea te curan TODO. ¡Y el campeón gana 150 monedas!', neg: 'Arena. Cuatro peleas. Premio grande.' }, et: 'pregunta' },
+        { t: 'Jugar a saltar con Pipo', realidad: 74, energia: 8, resp: { pos: '¡Regla del juego: tienes que {brincar_alto}, más que yo! ¡Y sin caerte! ¡Otra vez, otra vez: {brincar} conmigo hasta que nos cansemos!', neg: 'Tienes que {brincar_alto}. Es la regla. ¡Yo ya voy ganando!' }, et: 'jugar' },
         { t: 'Saludarlo', realidad: 72, energia: 5, resp: { pos: '¡Hola, héroe!', neg: '…hola.' }, et: 'saludo' }
       ]
     },
@@ -2968,7 +3232,7 @@ U.Dialogo = {
     const cv = document.getElementById('dlgCara'); const ctx = cv.getContext('2d'); ctx.fillStyle = '#0e1530'; ctx.fillRect(0, 0, 64, 64); U.Render.iconoCanvas(cv, 'aldea', '#d9a441');
     this.decir(texto); this.razon = ''; this.pintarRazon(); this.opciones = []; this.pintarOpciones(); U.Audio.sfx('click');
   },
-  decir(t) { const tono = this.npc ? U.Emociones.tonos[this.npc.emocion] : U.Emociones.tonos.neutral; this.textoCompleto = t; this.mostrado = 0; this.vel = tono.vel * (this.npc && U.Personas ? (U.Personas.de(this.npc.id).ritmo || 1) : 1); const p = document.getElementById('dlgTexto'); p.textContent = ''; p.style.color = this.npc ? tono.color : '#e8dcc8'; },
+  decir(t) { const tono = this.npc ? U.Emociones.tonos[this.npc.emocion] : U.Emociones.tonos.neutral; this.textoCompleto = (U.Diccionario && t) ? U.Diccionario.expandir(t, this.npc) : t; this.mostrado = 0; this.vel = tono.vel * (this.npc && U.Personas ? (U.Personas.de(this.npc.id).ritmo || 1) : 1); const p = document.getElementById('dlgTexto'); p.textContent = ''; p.style.color = this.npc ? tono.color : '#e8dcc8'; },
   pintarCara() {
     const n = this.npc; if (!n) return; const cv = document.getElementById('dlgCara'); const ctx = cv.getContext('2d'); ctx.imageSmoothingEnabled = false; ctx.clearRect(0, 0, 64, 64); U.Render.cara(ctx, n.id, n.emocion, 0, 0, 4);
     document.getElementById('dlgNombre').textContent = n.nombre.toUpperCase() + ' · ' + n.rol; const ch = document.getElementById('dlgEmocion'); ch.textContent = n.emocion; ch.style.color = U.Emociones.tonos[n.emocion].color; ch.style.borderColor = U.Emociones.tonos[n.emocion].color;
@@ -3011,6 +3275,10 @@ U.Dialogo = {
     if (o.accion === 'entregarMision') { resp = U.Juego.entregarMision(); }
     if (o.accion === 'arena') { const E = U.Juego.estado; if (E.objetivos[1].estado === 'actual') { E.objetivos[1].estado = 'hecho'; U.Juego.siguienteObjetivo(); } resp += ' (Objetivo actualizado)'; }
     if (n.id === 'torin' && o.et === 'pregunta' && !U.Juego.estado.jugador.tieneYang) resp += ' Y escucha: tu test no reveló afinidad Yang, pero no está cerrado: se alcanza entrenando, como dominar otro elemento. Medita al descansar o entrena conmigo hasta Yang ' + U.Habilidades.yangDespertar + ' y despertará.';
+    if (o.accion === 'aprenderEscudo') { const j = U.Juego.estado.jugador;
+      if (j.escudoAprendido) resp = 'Ya te enseñé el escudo y vas en el nivel ' + (j.escudoNv || 1) + ' (' + U.Habilidades.escudo.niveles[j.escudoNv || 1].nombre + '). Recuerda cómo funciona: un solo botón (B), la naturaleza de TU elemento, y la tabla de ventajas le pega como si fueras tú. ' + (j.elementoActivo === 'fuego' ? 'El tuyo es de FUEGO: quema, pero lo físico lo atraviesa, los rayos lo traspasan y el AGUA te lo apaga aunque traigas la Esencia llena: la Esencia se queda, el escudo no.' : j.elementoActivo === 'agua' ? 'El tuyo es de AGUA: amortigua lo físico, pero el RAYO pasa por el agua y te pega con ventaja (el escudo no se rompe, nomás no sirve contra eso). Contra Tierra aguantas bien: la piedra se amortigua.' : j.elementoActivo === 'tierra' ? 'El tuyo es CAPA DE ROCA: fuertísimo contra lo físico. Pero el AGUA lo erosiona: se vuelve lodo y se rompe más rápido.' : j.elementoActivo === 'viento' ? 'El tuyo es de VIENTO: no es un muro, es una corriente. DESVÍA proyectiles, pero cuerpo a cuerpo te entra casi todo. Úsalo contra tiradores, no contra puños.' : 'El tuyo es un CAMPO DE RAYO: castiga al que te toca cuerpo a cuerpo. Y ojo: el Agua y la Tierra le ganan en la tabla.') + ' Tu mismo elemento lo absorbe y te devuelve Esencia. Y {escudo_listo}: al nivel 1 solo cubre tu frente y no te deja moverte; bloqueando golpes subes: nivel 2, frente y lados; nivel 3, los cuatro lados.';
+      else if (U.Combate.aprenderEscudo()) resp = 'Escucha, porque esto se aprende una vez y se domina en años. El escudo es una TÉCNICA: un solo botón (B) y toma la naturaleza de TU elemento, ' + U.Elementos.nombre(j.elementoActivo) + ' en tu caso. La tabla de ventajas le aplica como si el escudo fueras tú: tu contra te lo rompe o te lo atraviesa, y tu mismo elemento lo absorbe. Al principio solo te cubre DE FRENTE y no te deja moverte: si te pegan por la espalda, es como si no trajeras nada. Bloquea golpes reales y subirá: nivel 2 cubre frente y lados; nivel 3, los cuatro lados. Drena Esencia por segundo, menos si el clima favorece a tu elemento. Ahora practica: {escudo_listo}, y {tener_cuidado} con lo que venga por detrás.';
+    }
     if (o.accion === 'gustos') resp = U.Personas.presentarse(n);
     if (o.accion === 'preguntarPor') { const t2 = U.Vida.buscar(o.target); resp = t2 ? U.Vida.respuestaDonde(n, t2) : 'No lo he visto hoy.'; if (!n.hechos) n.hechos = []; n.hechos.push('preguntaste por ' + (t2 ? t2.nombre : 'un vecino')); }
     this.decir(resp); this.pintarRazon(); this.pintarCara(); U.Audio.sfx('dialogo');
@@ -3032,7 +3300,7 @@ window.U = window.U || {};
 U.HUD = {
   el: {}, tNum: 0, tMini: 0, bannerT: 0, joy: { activo: false, id: null, cx: 0, cy: 0, r: 60 },
   init() {
-    const $ = id => document.getElementById(id); this.el = { hud: $('hud'), rellVida: $('rellVida'), numVida: $('numVida'), rellEsencia: $('rellEsencia'), numEsencia: $('numEsencia'), agotado: $('agotado'), simbolos: $('simbolos'), pocion: $('btnPocion'), mini: $('minimapa'), obj: $('objTexto'), btnObj: $('objetivo'), objDetalle: $('objetivoDetalle'), objDetalleTexto: $('objDetalleTexto'), objDetalleLista: $('objDetalleLista'), banner: $('banner'), descanso: $('descansoInd'), rellDescanso: $('rellDescanso'), descansoTxt: $('descansoTxt'), relojIcono: $('relojIcono'), relojHora: $('relojHora'), relojAmpm: $('relojAmpm'), infoDia: $('infoDia'), btnInfo: $('infoHud'), infoDetalle: $('infoDetalle'), calTexto: $('calTexto'), calMomento: $('calMomento'), climaIcono: $('climaIcono'), climaTexto: $('climaTexto'), climaDetalle: $('climaDetalle'), btnA: $('btnA'), btnYin: $('btnYin'), btnYang: $('btnYang'), btnTec: $('btnTec'), btnDash: $('btnDash'), btnSobre: $('btnSobrecarga'), chipsTec: $('chipsTec'), chipsYang: $('chipsYang'), sonido: $('btnSonido'), pausa: $('pausa'), pausaCuerpo: $('pausaCuerpo'), fin: $('panelFin') };
+    const $ = id => document.getElementById(id); this.el = { hud: $('hud'), rellVida: $('rellVida'), numVida: $('numVida'), rellEsencia: $('rellEsencia'), numEsencia: $('numEsencia'), rellCansancio: $('rellCansancio'), numCansancio: $('numCansancio'), agotado: $('agotado'), simbolos: $('simbolos'), pocion: $('btnPocion'), mini: $('minimapa'), obj: $('objTexto'), btnObj: $('objetivo'), objDetalle: $('objetivoDetalle'), objDetalleTexto: $('objDetalleTexto'), objDetalleLista: $('objDetalleLista'), banner: $('banner'), descanso: $('descansoInd'), rellDescanso: $('rellDescanso'), descansoTxt: $('descansoTxt'), relojIcono: $('relojIcono'), relojHora: $('relojHora'), relojAmpm: $('relojAmpm'), infoDia: $('infoDia'), btnInfo: $('infoHud'), infoDetalle: $('infoDetalle'), calTexto: $('calTexto'), calMomento: $('calMomento'), climaIcono: $('climaIcono'), climaTexto: $('climaTexto'), climaDetalle: $('climaDetalle'), btnA: $('btnA'), btnYin: $('btnYin'), btnYang: $('btnYang'), btnTec: $('btnTec'), btnDash: $('btnDash'), btnSobre: $('btnSobrecarga'), chipsTec: $('chipsTec'), chipsYang: $('chipsYang'), sonido: $('btnSonido'), pausa: $('pausa'), pausaCuerpo: $('pausaCuerpo'), fin: $('panelFin') };
     // Iconos de acción (vectoriales suaves, sin pixelar)
     this.el.btnEscudo = $('btnEscudo'); if (this.el.btnEscudo) U.Render.iconoSuave(this.el.btnEscudo.querySelector('canvas'), 'yang', '#7cc4ff');
     U.Render.iconoSuave(this.el.btnA.querySelector('canvas'), 'a', '#a7f3c9'); U.Render.iconoSuave(this.el.btnYin.querySelector('canvas'), 'yin', '#e6c9a0'); U.Render.iconoSuave(this.el.btnYang.querySelector('canvas'), 'yang', '#f8fafc'); U.Render.iconoSuave(this.el.btnDash.querySelector('canvas'), 'dash', '#7ef0c0'); U.Render.iconoSuave(this.el.btnSobre.querySelector('canvas'), 'sobre', '#ffb3c0');
@@ -3083,14 +3351,16 @@ U.HUD = {
   actualizar(dt) {
     const E = U.Juego.estado, j = E.jugador, el = this.el;
     el.rellVida.style.transform = 'scaleX(' + Math.max(0, j.vida / j.stats.vida) + ')'; el.rellEsencia.style.transform = 'scaleX(' + Math.max(0, j.esencia / j.stats.esencia) + ')';
+    if (el.rellCansancio) { const can = j.cansancio != null ? j.cansancio : 100; el.rellCansancio.style.transform = 'scaleX(' + Math.max(0, can / 100) + ')'; if (el.numCansancio) el.numCansancio.textContent = 'CANSANCIO ' + Math.floor(can) + ' · RECARGA ×' + U.Recuperacion.multCansancio().toFixed(2); }
     const m = j.maestria[j.elementoActivo] || 0;
     el.agotado.classList.toggle('oculto', !j.agotado);
     this.tNum += dt; if (this.tNum > 0.1) { this.tNum = 0;
-      el.numVida.textContent = Math.ceil(j.vida) + '/' + Math.round(j.stats.vida); el.numEsencia.textContent = Math.ceil(j.esencia) + '/' + Math.round(j.stats.esencia);
-      el.pocion.textContent = '🧪 ×' + j.pociones; el.pocion.disabled = j.pociones <= 0; const nm = document.getElementById('numMonedas'); if (nm) nm.textContent = Math.floor(j.monedas || 0); if (el.btnEscudo) el.btnEscudo.classList.toggle('apagado', !j.escudo && (j.agotado || j.esencia < 10)); if (el.btnEscudo) el.btnEscudo.style.filter = j.escudo ? 'brightness(1.5)' : '';
+      el.numVida.textContent = Math.ceil(j.vida) + '/' + Math.round(j.stats.vida); el.numEsencia.textContent = (Math.round(j.esencia * 10) / 10) + '/' + Math.round(j.stats.esencia);
+      el.pocion.textContent = '🧪 ×' + j.pociones; el.pocion.disabled = j.pociones <= 0; const nm = document.getElementById('numMonedas'); if (nm) nm.textContent = Math.floor(j.monedas || 0); if (el.btnEscudo) { el.btnEscudo.classList.toggle('apagado', !j.escudoAprendido || (!j.escudo && (j.agotado || j.esencia < 10))); el.btnEscudo.style.filter = j.escudo ? 'brightness(1.5)' : ''; el.btnEscudo.style.borderColor = j.escudoAprendido ? U.Combate.escudoColor(j) : '#7cc4ff'; el.btnEscudo.title = j.escudoAprendido ? U.Combate.escudoNombre(j) + ' (B) · Nv.' + (j.escudoNv || 1) + ' (' + U.Habilidades.escudo.niveles[j.escudoNv || 1].nombre + ') · integridad ' + Math.max(0, Math.round(j.escudoVida || 0)) + '/' + U.Combate.escudoMax(j) + ' · no te mueves, drena Esencia/s' : 'Escudo (B): aún no lo conoces. Es una técnica: Kaelen, el guardia, puede enseñártela.'; }
       const h = U.Habilidades.elementos[j.elementoActivo][j.tecnicaIdx]; const z = E.zonaActual; const c = U.Ambiente.costo(h, j.elementoActivo, z, j.atributo);
       const y = U.Habilidades.yang[j.yangForma];
       el.btnTec.classList.toggle('apagado', m < h.umbral || j.agotado); el.btnYang.classList.toggle('apagado', j.agotado || j.estilos.yang < y.umbral); el.btnYin.classList.toggle('apagado', j.agotado); el.btnDash.classList.toggle('apagado', j.agotado);
+      el.btnTec.title = h.nombre + ' (L) · costo ' + c.costo + ' Esencia' + (c.plano ? ' (plano por el clima)' : '') + ' · ' + (c.razon || 'ambiente neutro') + ' · Temp. ' + Math.round(U.Clima.temperatura(E) * 100) + '% · Precip. ' + Math.round(U.Clima.precipitacion(E) * 100) + '%';
       el.btnSobre.classList.toggle('apagado', j.buffs.sobrecargaCd > 0);
       el.btnTec.querySelector('.cd').style.height = (h.cd ? Math.min(1, (j.cdTec[h.id] || 0) / h.cd) * 100 : 0) + '%'; el.btnYang.querySelector('.cd').style.height = Math.min(1, j.cdYang / y.cd) * 100 + '%'; el.btnYin.querySelector('.cd').style.height = Math.min(1, j.cdYin / 0.4) * 100 + '%';
       Array.from(el.chipsTec.children).forEach((b, i) => { const hh = U.Habilidades.elementos[j.elementoActivo][i]; b.querySelector('i').style.height = Math.min(1, (j.cdTec[hh.id] || 0) / hh.cd) * 100 + '%'; });
@@ -3117,7 +3387,12 @@ U.HUD = {
     html += '<section><h3>Estadísticas · ' + j.nombre + ' · semilla ' + E.semilla + '</h3>';
     for (const k in j.stats) { const v = j.stats[k]; const ref = (k === 'vida' || k === 'esencia') ? 200 : 20; html += '<div class="statFila" style="grid-template-columns:86px 1fr 118px" title="' + U.Estadisticas.descrip[k] + '"><span>' + U.Estadisticas.etiquetas[k] + '</span><div class="bar"><i style="transform:scaleX(' + Math.min(1, v / ref) + ')"></i></div><span class="val">' + v.toFixed(2) + ' / 3000</span></div>'; }
     { const tot = U.Crecimiento.total || {}; const crec = Object.keys(tot).filter(k => tot[k] >= 0.01).map(k => U.Estadisticas.etiquetas[k] + ' +' + tot[k].toFixed(2)).join(' · '); html += '<div style="font-size:11px;color:var(--exito);margin-top:6px">Crecimiento en esta vida (sube peleando): ' + (crec || 'todavía nada — golpea, recibe, esquiva y vence enemigos para que suba') + '</div>'; }
-    html += '<div style="font-size:11px;color:var(--textoTenue);margin-top:6px">Sin niveles: cada acción relacionada suma un poco. Tope de las 6 estadísticas: 3000 (al llegar, esa estadística deja de crecer). Recuperación de Esencia: ' + U.Recuperacion.capacidad().toFixed(1) + '/s · Vida automática ' + (a.descanso * 100).toFixed(1) + '%/s solo bajo el 25% (tope: 25% en campo abierto) · Dormir en la fogata: Vida y Esencia al 100% y el reloj avanza al siguiente momento del día. Día de 20 min reales con 6 momentos: Amanecer 05–08 · Mañana 08–12 · Mediodía 12–15 · Tarde 15–19 · Atardecer 19–21 · Noche 21–05. Calendario semanal: Lunes a Domingo.</div></section>';
+    html += '<div style="font-size:11px;color:var(--textoTenue);margin-top:6px">Sin niveles: cada acción relacionada suma un poco. Tope de las 6 estadísticas: 3000 (al llegar, esa estadística deja de crecer). Recuperación de Esencia: ' + U.Recuperacion.capacidad().toFixed(1) + '/s · Vida automática ' + (a.descanso * 100).toFixed(1) + '%/s solo bajo el 25% (tope: 25% en campo abierto) · Dormir en la fogata: Vida y Esencia al 100% y el reloj avanza al siguiente momento del día. Día de 20 min reales con 6 momentos: Amanecer 05–08 · Mañana 08–12 · Mediodía 12–15 · Tarde 15–19 · Atardecer 19–21 · Noche 21–05. Calendario semanal: Lunes a Domingo.</div>'
+    + '<div class="statFila" style="grid-template-columns:86px 1fr 118px" title="Cansancio: cada 10 de Esencia gastada baja 1; frena la recarga de Esencia (mínimo ×0.15, nunca cero). Se recupera durmiendo, meditando y fuera de combate."><span style="color:#a9c795">Cansancio</span><div class="bar"><i style="transform:scaleX(' + ((j.cansancio != null ? j.cansancio : 100) / 100) + ');background:linear-gradient(90deg,#6f9a5e,#a9c795)"></i></div><span class="val">' + Math.floor(j.cansancio != null ? j.cansancio : 100) + ' / 100 · recarga ×' + U.Recuperacion.multCansancio().toFixed(2) + '</span></div>'
+    + '<div style="font-size:11px;color:var(--textoTenue)">Cansancio: cada 10 de Esencia que gastas en total (técnicas, Yang, dash… y también el drenaje del escudo) baja 1 punto. A la mitad, tu Esencia se recarga a la mitad de velocidad; en cero, muy lento pero nunca cero. Nunca te bloquea lanzar poderes. El Fluido gasta más Esencia por técnica, así que se cansa más rápido. Dormir (fogata o cama) lo restablece al 100%.</div></section>';
+    html += '<section><h3>Escudo · técnica de maestro</h3>' + (j.escudoAprendido
+      ? '<div style="font-size:12px"><b style="color:' + U.Combate.escudoColor(j) + '">' + U.Combate.escudoNombre(j) + '</b> · Nivel ' + (j.escudoNv || 1) + ' de 3 (' + U.Habilidades.escudo.niveles[j.escudoNv || 1].nombre + ') · Integridad ' + U.Combate.escudoMax(j) + ' · Bloqueos para subir: ' + (j.escudoNv >= 3 ? 'nivel máximo' : (j.escudoExp || 0) + '/' + U.Habilidades.escudo.niveles[j.escudoNv || 1].bloquesParaSubir) + '</div><div style="font-size:11px;color:var(--textoFrio);margin-top:4px">Un solo botón (B). Sin moverte mientras está activo; drena Esencia por segundo según el clima de tu elemento. La tabla de ventajas le aplica como a ti: el Agua apaga el de Fuego (tu Esencia se queda; vuelve a levantarlo), el Rayo atraviesa el de Agua con ventaja sin romperlo, el Agua erosiona el de Tierra hasta volverlo lodo, la Tierra se amortigua contra el de Agua, el Viento desvía proyectiles pero cede cuerpo a cuerpo, el campo de Rayo castiga al que lo toca, y tu mismo elemento lo absorbe. Si cambias de elemento activo, cambia la naturaleza de tu escudo.</div>'
+      : '<div style="font-size:12px;color:var(--aviso)">Aún no conoces el Escudo. Es una TÉCNICA: hay que buscar a alguien que te la enseñe. Kaelen, el guardia de la aldea, es el maestro de guardia: habla con él y elige «Aprender el ESCUDO».</div>') + '</section>';
     html += '<section><h3>Maestría elemental · técnicas 15 / 40 / 70%</h3>';
     U.Elementos.ids.forEach(id => { const m = j.maestria[id] || 0; const propio = j.elementos.indexOf(id) >= 0; html += '<div class="statFila" style="opacity:' + (propio ? 1 : 0.45) + '"><span style="color:' + U.Elementos.color(id) + '">' + U.Elementos.nombre(id) + '</span><div class="bar"><i style="transform:scaleX(' + m / 100 + ');background:' + U.Elementos.color(id) + '"></i></div><span class="val">' + m.toFixed(1) + '%</span></div>'; });
     html += '<div style="font-size:11px;color:var(--textoTenue)">Etapa actual: ' + U.Elementos.etapa(j.maestria[j.elementoActivo] || 0) + '. Dominar UN elemento es el trabajo de una vida; los 5, como cinco vidas.</div></section>';
@@ -3129,11 +3404,11 @@ U.HUD = {
       + '<div style="font-size:11px;color:var(--textoTenue)">Yin: cuerpo, cerca, casi sin Esencia (2/6/4). Yang (al despertar): energía blanca, lejos, cara (Haz 15, Onda 14, Esférico 18) y mejora tu recuperación. Inclinación de esta vida: ' + j.perfil.estilo.toUpperCase() + '.</div></section>';
     html += '<section><h3>Atributo · ' + a.nombre + ' (fijo por vida)</h3><div style="font-size:12px"><span style="color:var(--exito)">' + a.ventaja + '</span> · <span style="color:var(--aviso)">' + a.desventaja + '</span></div><div style="font-size:11px;color:var(--textoFrio);margin-top:4px">' + a.desc + ' La ventaja real es el ×2 en un camino largo.</div></section>';
     { const cl = E.clima ? U.Clima.de(E) : U.Clima.TIPOS.despejado; const ff2 = U.Tiempo.faseDe(U.Tiempo.hora(E));
-      html += '<section><h3>Calendario · clima · tu casa · memoria</h3><div style="font-size:12px">📅 <b>' + U.Tiempo.diaTexto(E.reloj) + '</b> · Momento: ' + ff2.nombre + ' (' + U.Tiempo.formato(E.reloj.minutos) + ') · 6 momentos por día, semana de Lunes a Domingo.<br>' + cl.icono + ' <b>Clima: ' + cl.nombre + '</b> · ' + cl.detalle + '. Cambia solo cada pocos minutos y ajusta costos. La lluvia tiene intensidades (ligera, normal, fuerte y tormenta): bajo techo (tu casa, la Oficina) no llueve ni cambian los costos; afuera, el Agua cuesta 1 (solo controlas el agua que ya hay), el Fuego paga más cuanto más llueve, la Tierra y el Rayo bajan un poco y el Viento sube.<br>🏠 Tu casa (puerta de la casa azul): alarma fijada a las <b>' + U.Tiempo.formato(E.alarmaMin) + '</b> · Hechizo de Inversión: ' + (E.flags.hechizoInversion ? '<b style="color:var(--exito)">aprendido (tecla V)</b>' : 'sin aprender (obelisco de la Montaña Brumosa)') + '<br>Monedas: <b style="color:var(--rayo)">' + Math.floor(j.monedas || 0) + ' 🪙</b> (torneo 150 al campeón · oleadas · misiones de Lía · tienda de Marisol) · Torneos ganados: ' + (E.historial.torneos || 0) + ' · Misiones entregadas: ' + (E.historial.misiones || 0) + '<br>Historial de esta vida: victorias de arena ' + E.historial.victorias + ' · caídas ' + E.historial.derrotas + ' · retos superados ' + E.historial.retos + ' · entrenamientos completos ' + E.historial.entrenos + '. Los NPC recuerdan todo esto cuando hablas con ellos (tú hablas primero).</div></section>';
+      html += '<section><h3>Calendario · clima · tu casa · memoria</h3><div style="font-size:12px">📅 <b>' + U.Tiempo.diaTexto(E.reloj) + '</b> · Momento: ' + ff2.nombre + ' (' + U.Tiempo.formato(E.reloj.minutos) + ') · 6 momentos por día, semana de Lunes a Domingo.<br>' + cl.icono + ' <b>Clima: ' + cl.nombre + '</b> · ' + cl.detalle + '. Cambia solo cada pocos minutos y ajusta costos. La lluvia tiene intensidades (ligera, normal, fuerte y tormenta): bajo techo (tu casa, la Oficina) no llueve ni cambian los costos; afuera, el Agua es progresiva (ligera ×0.8, normal ×0.5, fuerte y tormenta = 1) y junto a ríos, estanques u oasis paga DECIMALES (×0.15): la Esencia baja poquito a poquito. El Fuego paga más cuanto más llueve, la Tierra y el Rayo bajan un poco y el Viento sube. La TEMPERATURA también pesa: con calor el Fuego paga ×0.85 y el Agua ×1.25; con frío, al revés (Fuego ×1.2, Agua ×0.9). Todos los costos viven en decimales.<br>🏠 Tu casa (puerta de la casa azul): alarma fijada a las <b>' + U.Tiempo.formato(E.alarmaMin) + '</b> · Hechizo de Inversión: ' + (E.flags.hechizoInversion ? '<b style="color:var(--exito)">aprendido (tecla V)</b>' : 'sin aprender (obelisco de la Montaña Brumosa)') + '<br>Monedas: <b style="color:var(--rayo)">' + Math.floor(j.monedas || 0) + ' 🪙</b> (torneo 150 al campeón · oleadas · misiones de Lía · tienda de Marisol) · Torneos ganados: ' + (E.historial.torneos || 0) + ' · Misiones entregadas: ' + (E.historial.misiones || 0) + '<br>Historial de esta vida: victorias de arena ' + E.historial.victorias + ' · caídas ' + E.historial.derrotas + ' · retos superados ' + E.historial.retos + ' · entrenamientos completos ' + E.historial.entrenos + '. Los NPC recuerdan todo esto cuando hablas con ellos (tú hablas primero).</div></section>';
     }
     html += '<section><h3>Diario</h3><ul class="diario">' + E.objetivos.map(o => '<li class="' + o.estado + '">' + (o.estado === 'hecho' ? '✓ ' : o.estado === 'actual' ? '▶ ' : '○ ') + o.texto + '</li>').join('') + '</ul></section>';
     html += '<section><h3>Vecinos de Bruma · personalidad · dónde están ahora</h3>' + (E.roster || E.npcs).map(n => { const per = U.Personas ? U.Personas.de(n.id) : null; const donde = U.Vida ? U.Vida.dondeEstaTexto(n) : ''; return '<div style="font-size:12px;margin:4px 0"><b>' + n.nombre + '</b> · <span style="color:' + U.Emociones.tonos[n.emocion].color + '">' + n.emocion + '</span> · confianza ' + Math.round(n.estados.confianza) + (per ? '<br><span style="color:var(--textoFrio)">' + per.tipo + ' · le gusta: ' + per.gustos.join(', ') + '</span>' : '') + '<br><span style="color:var(--rayo)">📍 ' + n.nombre + ' ' + donde + '</span></div>'; }).join('') + '<div style="font-size:11px;color:var(--textoTenue)">Cada vecino tiene su rutina: trabaja, come en la plaza, entrena en el Bosque y vuelve a casa de noche (21:00; Pipo a las 20:00). Si alguien no está en su puesto, pregúntale a otro vecino «¿Dónde está…?» y te dirá dónde fue. Círculo de sparring del Bosque Susurrante: Kaelen–Marco 09:00–11:00 · Torin–Breno 14:00–17:00; entra en el círculo y te ofrecerán unirte.</div></section>';
-    html += '<section><h3>Controles</h3><div class="controlesLista">WASD / joystick: mover (analógico)<br>E / botón A: trote +25% (mantén; el A ya no interactúa)<br>Interactuar: toca directamente al personaje u objeto cuando salga su globo (hablar, leer, beber, dormir…)<br>J / Yin: toca golpe 2 · mantén cargado 6<br>K / Yang: forma seleccionada<br>L / Técnica: técnica del elemento<br>Shift / Dash: esquiva con invulnerabilidad 4<br>Q: poción +50% · R: meditar (Esencia ×3, entrena Yang; la Vida automática sigue con techo 25%) · Fogata (tócala): dormir, despertar al 100%<br>F: cambiar forma Yang · 1-3: técnica<br>X: Sobrecarga (Yin 15) · V: Hechizo de Inversión (tras aprenderlo en el obelisco) · M: sonido · Esc: pausa<br>Elemento: cámbialo aquí, en Ajustes (engrane)</div></section>';
+    html += '<section><h3>Controles</h3><div class="controlesLista">WASD / joystick: mover (analógico)<br>E / botón A: trote +25% (mantén; el A ya no interactúa)<br>Interactuar: toca directamente al personaje u objeto cuando salga su globo (hablar, leer, beber, dormir…)<br>J / Yin: toca golpe 2 · mantén cargado 6<br>K / Yang: forma seleccionada<br>L / Técnica: técnica del elemento<br>Shift / Dash: esquiva con invulnerabilidad 4<br>Q: poción +50% · R: meditar (Esencia ×3, entrena Yang; la Vida automática sigue con techo 25%) · Fogata (tócala): dormir, despertar al 100%<br>F: cambiar forma Yang · 1-3: técnica<br>X: Sobrecarga (Yin 15) · V: Hechizo de Inversión (tras aprenderlo en el obelisco) · B: Escudo (tras aprenderlo con Kaelen; Nv.1 frente, Nv.2 frente y lados, Nv.3 cuatro lados; sin moverte) · M: sonido · Esc: pausa<br>Elemento: cámbialo aquí, en Ajustes (engrane)</div></section>';
     html += '<section><h3>Próximamente (no activo en el juego completo)</h3><div class="listaProx">' + ['Portal', 'Pasaporte', 'Entre-Mundos', 'Eco', 'Contrato de sangre', 'Contrato de alma', 'Pilotaje', 'Modo Alma', 'Teletransportación', 'Invisibilidad', 'Intangible', 'Arte Místico', 'Técnicas combinadas', 'Transformaciones Yin/Yang', 'Sangre · Plasma · Metal · Sonido · Magnetismo', 'Destello (Rayo)', 'Vuelo (Viento)', 'Disco Cortante (Yang)'].map(s => '<span>' + s + '</span>').join('') + '</div></section>';
     this.el.pausaCuerpo.innerHTML = html; document.getElementById('selDificultad').value = String(E.dificultad);
     const bD = document.getElementById('btnDescargarPausa'); if (bD) bD.addEventListener('click', () => U.Guardado.descargar());
@@ -3180,7 +3455,8 @@ U.TestUI = {
   intro() {
     const c = document.getElementById('testContenido'); document.getElementById('testProgreso').innerHTML = '';
     const auto = (window.U && U.Guardado) ? U.Guardado.leerAuto() : null;
-    const bloqueAuto = auto ? '<div class="introInfo" style="border-color:var(--exito)"><b style="color:var(--exito)">● Guardado automático: tienes una partida en curso.</b><br>' + (auto.nombre || 'Sin nombre') + ' · ' + U.Elementos.nombre(auto.perfil.elemento) + ' · guardada el ' + U.Guardado.fechaTexto(auto.guardadoEn) + '. Tu partida se guarda sola en este navegador: entra y sigues donde ibas, sin descargar ni subir ningún archivo.</div><button class="grande" id="btnContinuarAuto" style="background:linear-gradient(180deg,#2f7d4f,#1d5233);border-color:#a7f3c9;box-shadow:0 5px 0 var(--sombra),0 0 22px rgba(103,224,138,.4)">Continuar partida</button>' : '';
+    const escHtml = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    const bloqueAuto = auto ? '<div class="introInfo" style="border-color:var(--exito)"><b style="color:var(--exito)">● Guardado automático: tienes una partida en curso.</b><br>' + escHtml(auto.nombre || 'Sin nombre') + ' · ' + U.Elementos.nombre(auto.perfil.elemento) + ' · guardada el ' + U.Guardado.fechaTexto(auto.guardadoEn) + '. Tu partida se guarda sola en este navegador: entra y sigues donde ibas, sin descargar ni subir ningún archivo.</div><button class="grande" id="btnContinuarAuto" style="background:linear-gradient(180deg,#2f7d4f,#1d5233);border-color:#a7f3c9;box-shadow:0 5px 0 var(--sombra),0 0 22px rgba(103,224,138,.4)">Continuar partida</button>' : '';
     c.innerHTML = '<div class="intro"><canvas id="logoCanvas" width="360" height="110"></canvas><p class="sub">Una vida. Un elemento. Universos paralelos.</p>' + bloqueAuto + '<div class="introInfo"><b>Antes de nacer en este mundo:</b> 8 preguntas y 2 escenas. Responde con instinto: no hay respuestas correctas y nadie te dirá qué elemento busca cada opción. El test decide tu elemento, tu atributo, tus estadísticas iniciales y tu inclinación de estilo. Una prueba por vida.<br><br><b>Recuerda:</b> dominar UN elemento es el trabajo de una vida. Concéntrate en él. El Yang es un estilo más: con afinidad naces despierto; sin ella, puedes alcanzarlo entrenando, como un segundo elemento.</div><div class="semillaFila">Semilla del mundo <input id="inpSemilla" maxlength="8" value="' + this.semilla + '"><button class="mini" id="btnDado">DADO</button></div><button class="grande" id="btnComenzarTest">' + (auto ? 'Nueva vida (repetir test)' : 'Comenzar el test') + '</button><button class="mini" id="btnCargarIntro" style="font-size:12px;padding:8px 14px">CARGAR DESDE ARCHIVO (RESPALDO)</button><p class="nota">100% offline · móvil (touch) y escritorio · juego completo: 5 mapas, calendario semanal, clima, casa con cama y alarma, retos y hechizo de inversión<br>Guardado automático activado: tu progreso se guarda solo en este navegador. Si quieres un respaldo para otro teléfono, en Opciones (⚙) tienes DESCARGAR PARTIDA.</p></div>';
     document.getElementById('btnComenzarTest').addEventListener('click', () => { const v = document.getElementById('inpSemilla').value.trim().toUpperCase(); this.semilla = v || this.nuevaSemilla(); document.getElementById('semillaTxt').textContent = this.semilla; this.comenzar(); });
     const bCA = document.getElementById('btnContinuarAuto'); if (bCA) bCA.addEventListener('click', () => { U.Audio.init(); U.Audio.reanudar(); U.Guardado.cargarAuto(); });
@@ -3313,7 +3589,7 @@ U.Juego = {
     const rng = U.TestUI.rngSemilla(semilla); const mapa = U.Grid.crearMapa(rng);
     const j = { tipo: 'jugador', nombre, perfil, elemento: perfil.elemento, elemento2: perfil.elemento2, elementos: perfil.elemento2 ? [perfil.elemento, perfil.elemento2] : [perfil.elemento], elementoActivo: perfil.elemento, atributo: perfil.atributo,
       stats: Object.assign({}, perfil.stats), vida: perfil.stats.vida, esencia: perfil.stats.esencia, maestria: Object.assign({}, perfil.maestria), estilos: Object.assign({}, perfil.estilos), regenBonus: 0,
-      x: mapa.inicio.x, y: mapa.inicio.y, dir: { x: 0, y: 1 }, anim: 0, moviendo: false, trote: false, agotado: false, invuln: 0, flash: 0, carga: 0, cargando: false, ataqueAnim: 0, cdYin: 0, cdYang: 0, cdTec: {}, dash: { t: 0, cd: 0, dx: 0, dy: 0 }, rastro: [], tecnicaIdx: 0, yangForma: 'haz', tieneYang: !!perfil.yangAfin, buffs: { sobrecarga: 0, sobrecargaCd: 0 }, descansando: false, pociones: 1, monedas: 30, escudo: false, dot: null, invertido: 0, flags: {} };
+      x: mapa.inicio.x, y: mapa.inicio.y, dir: { x: 0, y: 1 }, anim: 0, moviendo: false, trote: false, agotado: false, invuln: 0, flash: 0, carga: 0, cargando: false, ataqueAnim: 0, cdYin: 0, cdYang: 0, cdTec: {}, dash: { t: 0, cd: 0, dx: 0, dy: 0 }, rastro: [], tecnicaIdx: 0, yangForma: 'haz', tieneYang: !!perfil.yangAfin, buffs: { sobrecarga: 0, sobrecargaCd: 0 }, descansando: false, pociones: 1, monedas: 30, escudo: false, escudoAprendido: false, escudoNv: 0, escudoExp: 0, escudoVida: 0, cansancio: 100, gastoFatiga: 0, dot: null, invertido: 0, flags: {} };
     // tieneYang = Yang DESPERTADO: con afinidad naces despierto; sin ella, despierta al entrenar el estilo hasta el umbral (5).
     const npcs = ['kaelen', 'sora', 'torin', 'marisol', 'breno', 'elena', 'marco', 'pipo'].map(id => U.Emociones.crear(id, rng, mapa.npcs[id]));
     this.estado = { ui: 'mundo', mapa, mapaId: 'aldea', mapas: { aldea: mapa }, npcsPorMapa: {}, cambioCd: 0, jugador: j, npcs, enemigos: [], proyectiles: [], orbes: [], efectos: { particulas: [], textos: [], haces: [], anillos: [], cadenas: [], cortes: [], telegrafos: [] }, camara: { x: j.x * 16 - U.Render.viewW / 2, y: j.y * 16 - U.Render.viewH / 2, shake: 0 }, tiempo: 0, reloj: U.Tiempo.crear(), clima: U.Clima.crear(rng), alarmaMin: 7 * 60, historial: { derrotas: 0, victorias: 0, retos: 0, entrenos: 0, torneos: 0, misiones: 0 }, reto: null, entreno: null, bandidoT: 0, hitstop: 0, dificultad: 1, semilla, rng,
@@ -3417,7 +3693,7 @@ U.Juego = {
     if (E.mision.tipo === 'reliquia' && E.mapaId === 'desierto') { const md = E.mapa; const ri = md.objetos.findIndex(o => o.tipo === 'reliquia'); if (ri >= 0 && Math.hypot(j.x - (md.objetos[ri].x + 0.5), j.y - (md.objetos[ri].y + 0.5)) < 1.4) { md.objetos.splice(ri, 1); U.Combate.particulas(j.x, j.y - 1, 20, '#ffe14d', 'chispa'); U.HUD.toast('¡Reliquia encontrada! Brilla en tu bolsa: vuelve con Lía.', 'exito'); this.progresoMision('reliquia', 1); } }
   },
   siguienteObjetivo() { const E = this.estado; while (E.objetivoIdx < E.objetivos.length && E.objetivos[E.objetivoIdx].estado === 'hecho') E.objetivoIdx++; const o = E.objetivos[E.objetivoIdx]; if (o && o.estado === 'pendiente') o.estado = 'actual'; if (o) U.HUD.toast('Nuevo objetivo: ' + o.texto, 'exito'); },
-  despertar() { const E = this.estado, j = E.jugador; if (E.mapaId !== 'aldea') this.cambiarMapa('aldea', null, true); U.Combate.limpiar(); j.x = E.mapa.inicio.x; j.y = E.mapa.inicio.y; j.vida = Math.max(1, j.stats.vida * 0.25); j.esencia = j.stats.esencia * 0.5; j.agotado = false; j.dot = null; j.buffs.sobrecarga = 0; j.invuln = 1; U.Audio.musica('aldea'); U.HUD.toast('Despiertas junto a la fogata. Sora te mira de reojo.', ''); E.historial.derrotas++; E.npcs.forEach(n => { if (!n.hechos) n.hechos = []; if (n.hechos.indexOf('te vieron caer') < 0) n.hechos.push('te vieron caer'); U.Emociones.evento(n, { realidad: 40, energia: 10, etiqueta: 'te vieron caer' }); }); },
+  despertar() { const E = this.estado, j = E.jugador; if (E.mapaId !== 'aldea') this.cambiarMapa('aldea', null, true); U.Combate.limpiar(); j.x = E.mapa.inicio.x; j.y = E.mapa.inicio.y; j.vida = Math.max(1, j.stats.vida * 0.25); j.esencia = j.stats.esencia * 0.5; j.agotado = false; j.dot = null; j.escudo = false; j.buffs.sobrecarga = 0; j.invuln = 1; U.Audio.musica('aldea'); U.HUD.toast('Despiertas junto a la fogata. Sora te mira de reojo.', ''); E.historial.derrotas++; E.npcs.forEach(n => { if (!n.hechos) n.hechos = []; if (n.hechos.indexOf('te vieron caer') < 0) n.hechos.push('te vieron caer'); U.Emociones.evento(n, { realidad: 40, energia: 10, etiqueta: 'te vieron caer' }); }); },
   fin(tipo) { const E = this.estado; if (E.ui === 'fin') return; if (tipo === 'derrota') { U.Audio.sfx('derrota'); U.Audio.musica('aldea'); } if (tipo === 'victoria' && E.historial) { E.historial.victorias++; E.npcs.forEach(n => { if (!n.hechos) n.hechos = []; if (n.hechos.indexOf('te vieron ganar la arena') < 0) n.hechos.push('te vieron ganar la arena'); }); } U.Combate.cancelarArena(); U.HUD.mostrarFin(tipo); },
   togglePausa() { const E = this.estado; if (!E) return; if (E.ui === 'pausa') { E.ui = 'mundo'; U.HUD.el.pausa.classList.add('oculto'); if (U.Guardado) U.Guardado.guardarAuto(); } else if (E.ui === 'mundo') { if (U.Guardado) U.Guardado.guardarAuto(); E.ui = 'pausa'; U.HUD.construirPausa(); U.HUD.el.pausa.classList.remove('oculto'); this.input.teclas = {}; E.jugador.cargando = false; } U.Audio.sfx('click'); },
   toggleSonido() { U.Audio.init(); const s = U.Audio.toggleSilencio(); U.HUD.el.sonido.textContent = 'SONIDO: ' + (s ? 'OFF' : 'ON'); U.HUD.el.sonido.style.color = s ? 'var(--peligro)' : ''; if (!s) U.Audio.sfx('click'); },
@@ -3586,6 +3862,7 @@ U.Guardado = {
       maestria: Object.assign({}, j.maestria), estilos: Object.assign({}, j.estilos), tieneYang: !!j.tieneYang,
       elementoActivo: j.elementoActivo, tecnicaIdx: j.tecnicaIdx || 0, yangForma: j.yangForma || 'haz',
       pociones: j.pociones, monedas: Math.floor(j.monedas || 0), misionIdx: E.misionIdx || 0, mision: E.mision ? Object.assign({}, E.mision) : null, regenBonus: j.regenBonus || 0, crecimientoTotal: Object.assign({}, U.Crecimiento.total || {}),
+      escudoAprendido: !!j.escudoAprendido, escudoNv: j.escudoNv || 0, escudoExp: j.escudoExp || 0, cansancio: Math.round((j.cansancio != null ? j.cansancio : 100) * 10) / 10, gastoFatiga: Math.round((j.gastoFatiga || 0) * 100) / 100,
       relojMinutos: E.reloj ? E.reloj.minutos : 540, dia: E.reloj ? (E.reloj.dia || 1) : 1, diaSemana: E.reloj ? (E.reloj.diaSemana || 0) : 0, climaTipo: E.clima ? E.clima.tipo : 'despejado', climaIntensidad: E.clima ? (E.clima.intensidad || 0) : 0, alarmaMin: E.alarmaMin != null ? E.alarmaMin : 420, historial: Object.assign({}, E.historial || {}), dificultad: E.dificultad, ronda: E.arena.ronda,
       objetivos: E.objetivos.map(o => o.estado), objetivoIdx: E.objetivoIdx, flags: Object.assign({}, E.flags),
       npcs: (E.roster || E.npcs || []).map(n => ({ id: n.id, estados: Object.assign({}, n.estados), emocion: n.emocion, saludado: !!n.saludado, entreno: !!n.entreno, stockPociones: n.stockPociones, hechos: (n.hechos || []).slice(), veces: n.veces || 0, mapa: n.mapa || 'aldea', x: Math.round(n.x * 100) / 100, y: Math.round(n.y * 100) / 100 }))
@@ -3646,6 +3923,8 @@ U.Guardado = {
     const E = U.Juego.estado, j = E.jugador;
     j.vida = Math.min(j.stats.vida, d.vida != null ? d.vida : j.stats.vida); j.esencia = Math.min(j.stats.esencia, d.esencia != null ? d.esencia : j.stats.esencia);
     j.pociones = d.pociones != null ? d.pociones : 1; j.monedas = d.monedas != null ? d.monedas : 30; E.misionIdx = d.misionIdx || 0; if (d.mision) E.mision = Object.assign({}, d.mision); j.regenBonus = d.regenBonus || 0; j.tieneYang = !!d.tieneYang;
+    // Escudo aprendido y Cansancio: las partidas viejas no los traen → escudo sin aprender (se aprende con Kaelen) y cansancio lleno.
+    j.escudoAprendido = !!d.escudoAprendido; j.escudoNv = d.escudoNv || (j.escudoAprendido ? 1 : 0); j.escudoExp = d.escudoExp || 0; j.escudoVida = 0; j.escudo = false; j.cansancio = d.cansancio != null ? Math.max(0, Math.min(100, d.cansancio)) : 100; j.gastoFatiga = d.gastoFatiga || 0;
     j.tecnicaIdx = d.tecnicaIdx || 0; j.yangForma = d.yangForma || 'haz'; if (d.elementoActivo && j.elementos.indexOf(d.elementoActivo) >= 0) j.elementoActivo = d.elementoActivo;
     if (d.crecimientoTotal) U.Crecimiento.total = Object.assign({}, d.crecimientoTotal);
     if (E.reloj && d.relojMinutos != null) E.reloj.minutos = ((d.relojMinutos % 1440) + 1440) % 1440;
