@@ -865,7 +865,7 @@ U.Grid = {
     obj('casa', 24, 17, 3, 3, true, { techo: '#7c3b2e' }); obj('casa', 5, 36, 3, 3, true, { techo: '#5b4a8a' }); obj('casa', 26, 28, 3, 3, true, { techo: '#3b6b7c' }); obj('casa', 62, 16, 3, 3, true, { techo: '#7c3b2e' }); obj('casa', 68, 36, 3, 3, true, { techo: '#5b4a8a' }); obj('casa', 58, 44, 3, 3, true, { techo: '#3b6b7c' }); obj('casa', 72, 20, 3, 3, true, { techo: '#7c3b2e' });
     obj('oficina', 13, 34, 5, 4, true, { techo: '#d9a441' }); obj('puertaOficina', 15, 37, 1, 1, false); obj('tienda', 20, 34, 3, 3, true, { techo: '#2a7f5c' }); obj('puertaTienda', 21, 36, 1, 1, false);
     obj('cartel', 16, 33, 1, 1, true, { texto: 'OFICINA DEL GUARDIÁN DE BRUMA · El Guardián Aldric gobierna la aldea (como un Hokage o un Kamisama, pero de Bruma). Dentro, su secretaria Lía lleva el TABLÓN: 5 misiones nuevas cada día, por RANGO (D a S), pagadas solo por el rango. Entra por la puerta dorada. Al lado está la TIENDA de Marisol: pociones A MEDIDA (tú eliges las unidades), comida, polainas y el permiso de viajero.' });
-    obj('fogata', 16, 24, 1, 1, true); obj('pozo', 19, 21, 1, 1, true); obj('puertaCasa', 10, 29, 1, 1, false); obj('cartel', 57, 24, 1, 1, true, { texto: 'AL ESTE, POR EL BORDE DEL MAPA: DESIERTO DE SAL · Sol brutal, un oasis al noreste y espejismos que invierten tus controles. Al norte del Campo de Ceniza espera la MONTAÑA BRUMOSA y su obelisco.' }); obj('cartel', 46, 6, 1, 1, true, { texto: 'AL NORTE DE LA CENIZA: MONTAÑA BRUMOSA · Cruza el umbral del borde norte. Arriba hay nieve, ilusionistas y un obelisco antiguo que enseña el Hechizo de Inversión.' }); obj('cartel', 9, 4, 1, 1, true, { texto: 'ENTRADA AL BOSQUE SUSURRANTE · Sigue el sendero hasta el borde norte y cruza el umbral dorado: cambiarás de mapa. Dentro ya no hay arena ni reglas: los bandidos acampan al norte y atacan en abierto. Vuelve por el sur cuando quieras.' }); obj('cartel', 23, 24, 1, 1, true, { texto: 'ALDEA DE BRUMA · Al este, el puente lleva a la Ribera Húmeda: el Agua allí cuesta menos. Más al norte, el Campo de Ceniza: el Fuego respira y el Agua se encarece. La Arena está al sureste.' });
+    obj('fogata', 16, 24, 1, 1, true); obj('pozo', 19, 21, 1, 1, true); obj('puertaCasa', 10, 29, 1, 1, false); obj('cartel', 57, 24, 1, 1, true, { texto: 'AL SUR, POR EL CAMINO GRANDE: DESIERTO DE SAL · Sol brutal, un oasis y espejismos que invierten tus controles. Todo es un solo mapa continuo: se llega caminando, sin entradas ni avisos. Al noreste espera la MONTAÑA BRUMOSA y su obelisco; al este, cruzando el puente del río, PUERTO BRISA AZUL.' }); obj('cartel', 46, 6, 1, 1, true, { texto: 'AL NORESTE, SIGUIENDO EL CAMINO: MONTAÑA BRUMOSA · Se llega caminando por el mapa continuo, sin transiciones. Arriba hay nieve, ilusionistas y un obelisco antiguo que enseña el Hechizo de Inversión.' }); obj('cartel', 9, 4, 1, 1, true, { texto: 'CAMINO AL BOSQUE SUSURRANTE · El sendero del noroeste lleva directo al bosque: todo es un solo mapa continuo, caminas y llegas, sin entradas ni avisos. Dentro ya no hay arena ni reglas: los bandidos salen de noche entre los árboles. Vuelve por el sur cuando quieras.' }); obj('cartel', 23, 24, 1, 1, true, { texto: 'ALDEA DE BRUMA · Al este, el puente lleva a la Ribera Húmeda: el Agua allí cuesta menos. Más al norte, el Campo de Ceniza: el Fuego respira y el Agua se encarece. La Arena está al sureste.' });
     obj('cartel', 40, 24, 1, 1, true, { texto: 'RIBERA HÚMEDA · La humedad abarata el Agua (−25%) y encarece el Fuego (+50%). Siempre puedes usar tu elemento: solo cambia el costo.' });
     obj('cartel', 59, 44, 1, 1, true, { texto: 'AL SUR Y AL ESTE, TIERRA NUEVA · El Lago del Sur (Agua cruza gratis; los demás gastan Esencia o rodean por tierra), el Suelo Quemado (el Fuego es inmune; los demás se queman), la Zona Rocosa de Tierra y el Acantilado de Viento (el Viento levita unos segundos). Todo se alcanza por caminos de tierra.' });
     obj('cartel', 45, 17, 1, 1, true, { texto: 'CAMPO DE CENIZA · Calor extremo: el Fuego cuesta −25%, el Agua +50%. El suelo seco no ayuda a la Tierra. Observa el costo ajustado en tu HUD.' });
@@ -924,7 +924,7 @@ U.Grid = {
     for (let y = 47; y <= 55; y++) for (let x = 24; x <= 32; x++) if (Math.hypot(x - 28, (y - 52) * 1.4) <= 5) set(x, y, T.PASTO);
     const objetos = [];
     const obj = (tipo, x, y, w, h, solido, extra) => { const o = Object.assign({ tipo, x, y, w: w || 1, h: h || 1, solido: !!solido }, extra || {}); if (tipo === 'arbol') { o.vidaMax = 30; o.vida = 30; } else if (tipo === 'roca') { o.vidaMax = 55; o.vida = 55; } else if (tipo === 'cactus') { o.vidaMax = 22; o.vida = 22; } objetos.push(o); };
-    obj('cartel', 30, 50, 1, 1, true, { texto: 'BOSQUE SUSURRANTE · Entrada principal, al sur del bosque. De día el bosque está tranquilo; de NOCHE salen los bandidos entre los árboles, sin campamento ni aviso, y al amanecer se retiran. El sendero va al norte; a mitad de camino, el ramal del este lleva al estanque. El umbral dorado a tu espalda, en el borde sur, te devuelve a la Aldea de Bruma.' });
+    obj('cartel', 30, 50, 1, 1, true, { texto: 'BOSQUE SUSURRANTE · Entrada principal, al sur del bosque. De día el bosque está tranquilo; de NOCHE salen los bandidos entre los árboles, sin campamento ni aviso, y al amanecer se retiran. El sendero va al norte; a mitad de camino, el ramal del este lleva al estanque. El sendero del sur vuelve caminando a la Aldea de Bruma: no hay puertas ni umbrales, todo es un solo mapa continuo.' });
     obj('cartel', 29, 13, 1, 1, true, { texto: 'CLARO DEL NORTE · Aquí no hay campamento: los bandidos no viven en el bosque, solo lo cruzan de noche para asaltar el sendero. Si oscurece, vuelve a la aldea o prepárate. El bosque cerrado encarece el Viento (×1.5) y la humedad ayuda al Agua.' });
     obj('fogata', 26, 51, 1, 1, true);
     obj('roca', 24, 10, 1, 1, true); obj('roca', 33, 16, 1, 1, true);
@@ -965,7 +965,7 @@ U.Grid = {
     camino(1, 21, 30, 21); camino(30, 21, 30, 11); camino(30, 11, 41, 11);
     const objetos = [];
     const obj = (tipo, x, y, w, h, solido, extra) => { const o = Object.assign({ tipo, x, y, w: w || 1, h: h || 1, solido: !!solido }, extra || {}); if (tipo === 'arbol') { o.vidaMax = 30; o.vida = 30; } else if (tipo === 'roca') { o.vidaMax = 55; o.vida = 55; } else if (tipo === 'cactus') { o.vidaMax = 22; o.vida = 22; } objetos.push(o); };
-    obj('cartel', 4, 20, 1, 1, true, { texto: 'DESIERTO DE SAL · El calor alimenta al Fuego y seca el Agua. Al noreste hay un oasis. Cuidado con los espejismos: el Ilusionista del desierto lanza el Hechizo de Inversión y tus controles se dan la vuelta unos segundos. El umbral del oeste vuelve a la Aldea de Bruma.' });
+    obj('cartel', 4, 20, 1, 1, true, { texto: 'DESIERTO DE SAL · El calor alimenta al Fuego y seca el Agua. Al noreste hay un oasis. Cuidado con los espejismos: el Ilusionista del desierto lanza el Hechizo de Inversión y tus controles se dan la vuelta unos segundos. El camino del oeste vuelve caminando a la Aldea de Bruma, y el del sureste lleva a Aldea Ceniza Viva: todo es un solo mapa continuo, sin transiciones.' });
     obj('cartel', 42, 14, 1, 1, true, { texto: 'OASIS · Agua en medio de la sal. Aquí la humedad ayuda a tu Agua aunque todo arda alrededor.' });
     obj('fogata', 28, 22, 1, 1, true);
     for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) {
@@ -1052,7 +1052,93 @@ U.Grid = {
     return { id: 'casa', nombreMapa: 'Tu casa', ancho: W, alto: H, tiles, vari, objetos, solidos, zonas, arena: { x: 11, y: 8, r: 3 }, ocultarRuna: true, inicio: { x: 10.5, y: 13.5 }, spawns: [], npcs: {},
       salidas: [{ x: 9, y: 14.4, w: 4, h: 1.6, destino: 'aldea', spawn: { x: 10.5, y: 31.5 }, etiqueta: 'Aldea de Bruma' }] };
   },
-  crearMapaPorId(id, rng) { if (id === 'bosque') return this.crearMapaBosque(rng); if (id === 'desierto') return this.crearMapaDesierto(rng); if (id === 'montana') return this.crearMapaMontana(rng); if (id === 'casa') return this.crearMapaCasa(rng); if (id === 'oficina') return this.crearMapaOficina(rng); return this.crearMapa(rng); },
+  /* MAPA CONTINUO: un solo mapa al aire libre de 200×180. La Aldea de Bruma queda en el
+     centro como eje; el Bosque Susurrante al NOROESTE; la Montaña Brumosa (nieve) al
+     NORESTE; el Desierto de Sal al SUR; un río recorre la aldea de norte a sur y otro río
+     cruza el este hasta el Lago Brisa Azul, junto al que nace el pueblo de AGUA (Puerto
+     Brisa Azul); al SURESTE, sobre la Tierra Quemada, está el pueblo de FUEGO (Aldea
+     Ceniza Viva). Todo se compone pegando los generadores de siempre con un desplazamiento
+     (offset) sobre una sola cuadrícula: NO hay salidas ni umbrales al aire libre — se
+     camina de una región a otra sin transición ni aviso. Solo los interiores (tu casa y
+     la Oficina) siguen siendo mapas aparte con su puerta. La RAM no es problema: la
+     cuadrícula entera son 36 000 celdas (unos cientos de KB) y el render solo dibuja la
+     vista, así que no hace falta precargar nada como en el GBA. */
+  crearMapaContinuo(rng) {
+    const T = this.T, W = 200, H = 180;
+    const tiles = new Uint8Array(W * H), vari = new Uint8Array(W * H);
+    const solidos = new Uint8Array(W * H);
+    for (let i = 0; i < W * H; i++) { tiles[i] = T.PASTO; vari[i] = Math.floor(rng() * 4); }
+    // set() solo se usa DESPUÉS de pegar las regiones: mantiene solidos al día con el
+    // terreno nuevo (el agua nueva bloquea; caminos, puentes y plazas liberan).
+    const set = (x, y, tt) => { if (x >= 0 && y >= 0 && x < W && y < H) { tiles[y * W + x] = tt; solidos[y * W + x] = tt === T.AGUA ? 1 : 0; } };
+    const get = (x, y) => (x >= 0 && y >= 0 && x < W && y < H) ? tiles[y * W + x] : T.PASTO;
+    const OFF = { aldea: { x: 58, y: 60 }, bosque: { x: 4, y: 4 }, desierto: { x: 58, y: 126 }, montana: { x: 128, y: 4 } };
+    const objetos = [];
+    const obj = (tipo, x, y, w, h, solido, extra) => { const o = Object.assign({ tipo, x, y, w: w || 1, h: h || 1, solido: !!solido }, extra || {}); if (tipo === 'arbol') { o.vidaMax = 30; o.vida = 30; } else if (tipo === 'roca') { o.vidaMax = 55; o.vida = 55; } else if (tipo === 'cactus') { o.vidaMax = 22; o.vida = 22; } objetos.push(o); if (o.solido) for (let yy = o.y; yy < o.y + o.h; yy++) for (let xx = o.x; xx < o.x + o.w; xx++) if (xx >= 0 && yy >= 0 && xx < W && yy < H) solidos[yy * W + xx] = 1; };
+    const zonas = []; const npcsPos = {};
+    const blit = (sub, off, esAldea) => {
+      for (let y = 0; y < sub.alto; y++) for (let x = 0; x < sub.ancho; x++) { const si = y * sub.ancho + x, di = (y + off.y) * W + (x + off.x); tiles[di] = sub.tiles[si]; vari[di] = sub.vari[si]; solidos[di] = sub.solidos[si]; }
+      sub.objetos.forEach(o => objetos.push(Object.assign({}, o, { x: o.x + off.x, y: o.y + off.y })));
+      (sub.zonas || []).forEach(z => { const nz = Object.assign({}, z, { x: z.x + off.x, y: z.y + off.y }); if (esAldea && z.id === 'bosque') { nz.id = 'campos'; nz.nombre = 'Campos de Bruma'; } zonas.push(nz); });
+      if (sub.npcs) for (const id in sub.npcs) npcsPos[id] = { x: sub.npcs[id].x + off.x, y: sub.npcs[id].y + off.y };
+    };
+    const mAldea = this.crearMapa(rng), mBosque = this.crearMapaBosque(rng), mDes = this.crearMapaDesierto(rng), mMon = this.crearMapaMontana(rng);
+    blit(mBosque, OFF.bosque, false); blit(mMon, OFF.montana, false); blit(mAldea, OFF.aldea, true); blit(mDes, OFF.desierto, false);
+    // --- Río del Este y Lago Brisa Azul (el agua que cruza el mapa) ---
+    for (let y = 40; y < 162; y++) { const cx = 148 + Math.round(Math.sin(y * 0.15) * 2); for (let x = cx - 1; x <= cx + 1; x++) set(x, y, T.AGUA); }
+    for (let y = 94; y <= 114; y++) for (let x = 158; x <= 186; x++) if (Math.hypot((x - 172) / 11, (y - 104) / 7) <= 1) set(x, y, T.AGUA);
+    // --- Tierra Quemada del sureste (suelo del pueblo de Fuego) ---
+    for (let y = 126; y <= 164; y++) for (let x = 144; x <= 194; x++) if (rng() > 0.12) set(x, y, T.CENIZA);
+    // --- Caminos que cosen las regiones (sobre el agua dejan PUENTE de madera) ---
+    const camino = (x1, y1, x2, y2) => { let x = x1, y = y1; const paso = () => { const tt = get(x, y); if (tt === T.AGUA) set(x, y, T.PUENTE); else set(x, y, T.CAMINO); }; paso(); while (x !== x2) { x += Math.sign(x2 - x); paso(); } while (y !== y2) { y += Math.sign(y2 - y); paso(); } };
+    camino(66, 82, 66, 57); camino(66, 57, 32, 57);                 // Aldea → Bosque (noroeste)
+    camino(105, 62, 105, 44); camino(105, 44, 155, 44);            // Aldea → Montaña (noreste)
+    camino(88, 121, 88, 147); camino(88, 147, 61, 147);            // Aldea → Desierto (sur)
+    camino(138, 84, 180, 84);                                      // Aldea → Puerto Brisa Azul (este, cruza el río por el puente)
+    camino(132, 147, 132, 142); camino(132, 142, 168, 142);        // Desierto → Aldea Ceniza Viva (sureste)
+    camino(76, 32, 127, 32);                                       // Ruta del norte: Bosque → Montaña sin bajar a la aldea
+    camino(20, 56, 20, 147); camino(20, 147, 60, 147);             // Ruta del oeste: Bosque → Desierto por el borde
+    camino(160, 57, 160, 70); camino(160, 70, 165, 70);            // Montaña → Puerto Brisa Azul
+    camino(180, 84, 180, 112); camino(180, 112, 178, 112); camino(178, 112, 178, 148); // Ruta del este: Puerto → lago → Ceniza Viva
+    // --- PUERTO BRISA AZUL (pueblo de Agua, al este, junto al lago) ---
+    for (let y = 78; y <= 90; y++) for (let x = 160; x <= 180; x++) if (get(x, y) !== T.AGUA) set(x, y, T.PIEDRA);
+    camino(170, 90, 170, 96); for (let y = 97; y <= 102; y++) set(170, y, T.PUENTE); // muelle sobre el lago
+    obj('casa', 156, 72, 3, 3, true, { techo: '#3b6b7c' }); obj('casa', 165, 70, 3, 3, true, { techo: '#2a7f5c' }); obj('casa', 174, 72, 3, 3, true, { techo: '#3b6b7c' }); obj('casa', 181, 86, 3, 3, true, { techo: '#5b4a8a' });
+    obj('fogata', 176, 88, 1, 1, true); obj('pozo', 162, 80, 1, 1, true);
+    obj('cartel', 163, 84, 1, 1, true, { texto: 'PUERTO BRISA AZUL · Pueblo de Agua, a la orilla del Lago Brisa Azul. Aquí el Agua respira: cuesta menos y cruza gratis. Nami pesca en el muelle y Orin cuida la orilla. Al oeste, el puente de madera cruza el Río del Este y el camino vuelve a la Aldea de Bruma sin ninguna transición: todo es un solo mapa.' });
+    obj('cartel', 167, 93, 1, 1, true, { texto: 'LAGO BRISA AZUL · El lago grande del este. El Río del Este lo alimenta desde el norte y sigue hacia el sur. Desde el muelle se pesca y se mira el agua; cruzarlo ya es cosa de tu elemento (o de tu botón de caminar sobre el agua).' });
+    npcsPos.nami = { x: 170.5, y: 99.5 }; npcsPos.orin = { x: 163.5, y: 85.5 };
+    // --- ALDEA CENIZA VIVA (pueblo de Fuego, al sureste, sobre la Tierra Quemada) ---
+    for (let y = 136; y <= 148; y++) for (let x = 160; x <= 176; x++) set(x, y, T.PIEDRA);
+    camino(168, 136, 168, 142);
+    obj('casa', 158, 131, 3, 3, true, { techo: '#7c3b2e' }); obj('casa', 169, 130, 3, 3, true, { techo: '#8a4a2a' }); obj('casa', 179, 134, 3, 3, true, { techo: '#7c3b2e' }); obj('casa', 156, 150, 3, 3, true, { techo: '#8a4a2a' }); obj('casa', 173, 151, 3, 3, true, { techo: '#7c3b2e' });
+    obj('brasero', 162, 138, 1, 1, true); obj('brasero', 174, 146, 1, 1, true); obj('brasero', 166, 150, 1, 1, true); obj('fogata', 164, 139, 1, 1, true);
+    obj('cartel', 161, 142, 1, 1, true, { texto: 'ALDEA CENIZA VIVA · Pueblo de Fuego, levantado sobre la Tierra Quemada del sureste. Aquí el Fuego cuesta menos y la ceniza no quema a los suyos; a los demás sí (3 de Vida por segundo sobre ceniza). Zara guarda las brasas y Varek trabaja su forja de ceniza. Al oeste, el camino lleva al Desierto de Sal y de ahí a la Aldea de Bruma, todo caminando, sin transiciones.' });
+    npcsPos.zara = { x: 168.5, y: 140.5 }; npcsPos.varek = { x: 162.5, y: 145.5 };
+    // --- Naturaleza de relleno en los campos entre regiones ---
+    const enPuebloAgua = (x, y) => x >= 152 && x <= 188 && y >= 66 && y <= 118;
+    const enRegion = (x, y) => (x >= OFF.aldea.x && x < OFF.aldea.x + 84 && y >= OFF.aldea.y && y < OFF.aldea.y + 62) || (x >= OFF.bosque.x && x < OFF.bosque.x + 72 && y >= OFF.bosque.y && y < OFF.bosque.y + 56) || (x >= OFF.desierto.x && x < OFF.desierto.x + 74 && y >= OFF.desierto.y && y < OFF.desierto.y + 54) || (x >= OFF.montana.x && x < OFF.montana.x + 68 && y >= OFF.montana.y && y < OFF.montana.y + 54);
+    for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) {
+      const tt = get(x, y); if (enPuebloAgua(x, y) || enRegion(x, y)) continue;
+      const cercaCamino = get(x + 1, y) === T.CAMINO || get(x - 1, y) === T.CAMINO || get(x, y + 1) === T.CAMINO || get(x, y - 1) === T.CAMINO || tt === T.CAMINO;
+      if (tt === T.PASTO && !cercaCamino) { const r = rng(); if (r < 0.05) obj('arbol', x, y, 1, 1, true, { v: Math.floor(rng() * 2) }); else if (r < 0.065) obj('roca', x, y, 1, 1, true); else if (r < 0.11) obj('flor', x, y, 1, 1, false, { v: Math.floor(rng() * 3) }); }
+      if (tt === T.CENIZA && rng() < 0.03) obj('roca', x, y, 1, 1, true, { quemada: true });
+      if ((tt === T.PASTO || tt === T.SOTOBOSQUE) && (get(x + 1, y) === T.AGUA || get(x - 1, y) === T.AGUA || get(x, y + 1) === T.AGUA || get(x, y - 1) === T.AGUA) && rng() < 0.3) obj('junco', x, y, 1, 1, false);
+    }
+    // Ningún árbol/roca/cactus puede quedar sobre un camino o un puente: el paso queda libre.
+    for (let i = objetos.length - 1; i >= 0; i--) { const o = objetos[i]; if ((o.tipo === 'arbol' || o.tipo === 'roca' || o.tipo === 'cactus') && o.solido) { const tt = get(o.x, o.y); if (tt === T.CAMINO || tt === T.PUENTE) { objetos.splice(i, 1); for (let yy = o.y; yy < o.y + (o.h || 1); yy++) for (let xx = o.x; xx < o.x + (o.w || 1); xx++) if (xx >= 0 && yy >= 0 && xx < W && yy < H && tiles[yy * W + xx] !== T.AGUA) solidos[yy * W + xx] = 0; } } }
+    [[32.5, 56.5], [155.5, 43.5], [60.5, 147.5], [74.5, 86.5], [170.5, 84.5], [168.5, 142.5], [32.5, 16.5], [36.5, 16.5], [23.5, 24.5], [32.5, 28.5], [32.5, 19.5], [44.5, 31.5], [70.5, 71.5], [170.5, 99.5], [148.5, 84.5], [168.5, 140.5], [162.5, 145.5]].forEach(p => { for (let i = objetos.length - 1; i >= 0; i--) { const o = objetos[i]; if (o.solido && (o.tipo === 'arbol' || o.tipo === 'roca' || o.tipo === 'cactus') && Math.abs(o.x + 0.5 - p[0]) < 1.7 && Math.abs(o.y + 0.5 - p[1]) < 1.7) objetos.splice(i, 1); } const cx = Math.floor(p[0]), cy = Math.floor(p[1]); for (let yy = cy - 1; yy <= cy + 1; yy++) for (let xx = cx - 1; xx <= cx + 1; xx++) if (xx >= 0 && yy >= 0 && xx < W && yy < H && tiles[yy * W + xx] !== T.AGUA) solidos[yy * W + xx] = 0; });
+    // Colisiones: los solidos ya vienen pegados de cada región (con sus claros de
+    // aparición intactos) y actualizados por set()/obj() en el terreno nuevo.
+    zonas.push({ id: 'rioEste', nombre: 'Río del Este', x: 142, y: 38, w: 13, h: 126, humedad: 0.92, temp: 0.42, viento: 0.5, suelo: 'tierra', icono: 'agua', tinte: [60, 160, 255, 0.07] });
+    zonas.push({ id: 'puebloAgua', nombre: 'Puerto Brisa Azul', x: 154, y: 66, w: 38, h: 32, humedad: 0.9, temp: 0.45, viento: 0.55, suelo: 'pavimento', icono: 'agua', tinte: [60, 160, 255, 0.06] });
+    zonas.push({ id: 'lagoEste', nombre: 'Lago Brisa Azul', x: 156, y: 94, w: 34, h: 24, humedad: 0.95, temp: 0.45, viento: 0.5, suelo: 'tierra', icono: 'agua', tinte: [60, 160, 255, 0.07] });
+    zonas.push({ id: 'puebloFuego', nombre: 'Aldea Ceniza Viva', x: 154, y: 126, w: 30, h: 30, humedad: 0.07, temp: 0.96, viento: 0.5, suelo: 'ceniza', icono: 'fuego', tinte: [255, 120, 40, 0.09] });
+    zonas.push({ id: 'quemadaSur', nombre: 'Tierra Quemada', x: 140, y: 120, w: 58, h: 48, humedad: 0.08, temp: 0.95, viento: 0.55, suelo: 'ceniza', icono: 'fuego', tinte: [255, 120, 40, 0.07] });
+    zonas.push({ id: 'camino', nombre: 'Tierras de Bruma', x: 0, y: 0, w: W, h: H, humedad: 0.5, temp: 0.5, viento: 0.4, suelo: 'tierra', icono: 'bosque', tinte: [120, 160, 90, 0.03] });
+    return { id: 'aldea', nombreMapa: 'Tierras de Bruma · Mapa continuo', ancho: W, alto: H, tiles, vari, objetos, solidos, zonas, arena: { x: mAldea.arena.x + OFF.aldea.x, y: mAldea.arena.y + OFF.aldea.y, r: mAldea.arena.r }, ocultarRuna: false, inicio: { x: mAldea.inicio.x + OFF.aldea.x, y: mAldea.inicio.y + OFF.aldea.y }, spawns: (mAldea.spawns || []).map(p => [p[0] + OFF.aldea.x, p[1] + OFF.aldea.y]), spawnsBandidos: (mBosque.spawnsBandidos || []).map(p => [p[0] + OFF.bosque.x, p[1] + OFF.bosque.y]), spawnsAbiertos: (mDes.spawnsAbiertos || []).map(s => [s[0], s[1] + OFF.desierto.x, s[2] + OFF.desierto.y]).concat((mMon.spawnsAbiertos || []).map(s => [s[0], s[1] + OFF.montana.x, s[2] + OFF.montana.y])), npcs: npcsPos, salidas: [], offsets: OFF, continuo: true };
+  },
+  crearMapaPorId(id, rng) { if (id === 'casa') return this.crearMapaCasa(rng); if (id === 'oficina') return this.crearMapaOficina(rng); return this.crearMapaContinuo(rng); },
 
   objetoEn(m, x, y) { const cx = Math.floor(x), cy = Math.floor(y); for (let i = 0; i < m.objetos.length; i++) { const o = m.objetos[i]; if (cx >= o.x && cx < o.x + (o.w || 1) && cy >= o.y && cy < o.y + (o.h || 1)) return o; } return null; },
   esDestructible(o) { return o && (o.tipo === 'arbol' || o.tipo === 'roca' || o.tipo === 'cactus') && o.vidaMax != null; },
@@ -1654,7 +1740,7 @@ U.Emociones = {
   catalogo: {
     kaelen: { nombre: 'Kaelen', rol: 'Guardia de la aldea' }, sora: { nombre: 'Sora', rol: 'Curandera del pozo' }, torin: { nombre: 'Torin', rol: 'Herrero y maestro de Yin' },
     marisol: { nombre: 'Marisol', rol: 'Tendera de Bruma' }, breno: { nombre: 'Breno', rol: 'Leñador' }, elena: { nombre: 'Elena', rol: 'Granjera' }, marco: { nombre: 'Marco', rol: 'Explorador' }, pipo: { nombre: 'Pipo', rol: 'Niño de la plaza' }, aldric: { nombre: 'Aldric', rol: 'Guardián de Bruma (líder de la aldea)' }, lia: { nombre: 'Lía', rol: 'Secretaria del Guardián · misiones' },
-    lyra: { nombre: 'Lyra', rol: 'Próximamente' }, varek: { nombre: 'Varek', rol: 'Próximamente' }, nami: { nombre: 'Nami', rol: 'Próximamente' }, orin: { nombre: 'Orin', rol: 'Próximamente' }, zara: { nombre: 'Zara', rol: 'Próximamente' }
+    lyra: { nombre: 'Lyra', rol: 'Próximamente' }, varek: { nombre: 'Varek', rol: 'Herrero de Aldea Ceniza Viva' }, nami: { nombre: 'Nami', rol: 'Pescadora de Puerto Brisa Azul' }, orin: { nombre: 'Orin', rol: 'Guardián de la orilla del Lago Brisa Azul' }, zara: { nombre: 'Zara', rol: 'Guardiana de las Brasas de Ceniza Viva' }
   },
   tonos: {
     alegre: { color: '#ffe14d', suf: '!', vel: 34 }, sereno: { color: '#7ef0c0', suf: '.', vel: 28 }, neutral: { color: '#9fb3d9', suf: '.', vel: 30 },
@@ -1663,7 +1749,7 @@ U.Emociones = {
   crear(id, rng, pos) {
     const c = this.catalogo[id]; const confBase = 35 + Math.round(rng() * 30);
     return { id, nombre: c.nombre, rol: c.rol, x: pos.x, y: pos.y, home: { x: pos.x, y: pos.y }, dir: { x: 0, y: 1 }, anim: 0, moviendo: false, fase: rng() * 6,
-      casaPos: ({ kaelen: { x: 10.5, y: 20.5 }, sora: { x: 18.5, y: 19.5 }, torin: { x: 10.5, y: 30.5 }, marisol: { x: 21.5, y: 37.5 }, breno: { x: 25.5, y: 20.5 }, elena: { x: 6.5, y: 39.5 }, marco: { x: 27.5, y: 31.5 }, pipo: { x: 10.5, y: 30.5 } })[id] || { x: pos.x, y: pos.y }, enCasa: false,
+      casaPos: ({ kaelen: { x: 68.5, y: 80.5 }, sora: { x: 76.5, y: 79.5 }, torin: { x: 68.5, y: 90.5 }, marisol: { x: 79.5, y: 97.5 }, breno: { x: 83.5, y: 80.5 }, elena: { x: 64.5, y: 99.5 }, marco: { x: 85.5, y: 91.5 }, pipo: { x: 68.5, y: 90.5 } })[id] || { x: pos.x, y: pos.y }, enCasa: false,
       rasgos: { perdon: 0.2 + rng() * 0.6, sensibilidad: 0.7 + rng() * 0.6, confianzaBase: confBase },
       estados: { animo: 50, energia: 30, confianza: confBase, expectativa: 50 }, emocion: 'neutral', memoria: [], objetivo: null, tObj: 2 + rng() * 4, bumpCd: 0, stockPociones: id === 'sora' ? 2 : 0, entreno: false, saludado: false, hechos: [], veces: 0, mapa: (id === 'aldric' || id === 'lia') ? 'oficina' : 'aldea', ruta: [], rutaKey: '', rutaT: 0, viaje: null, destinoActual: null, vidaSim: 100, atacando: 0, ocultoSparring: false, enCirculo: false, sparringCansado: 0, idleT: 0, microPunto: null, microT: 0 };
   },
@@ -1798,7 +1884,27 @@ U.Personas = {
       desc: 'Secretaria del Guardián. Lleva el tablón, las misiones y la agenda de media aldea. Su cariño se expresa en listas completadas.',
       gustos: ['las listas tachadas', 'los días despejados sin sorpresas', 'que le entreguen a tiempo'], disgustos: ['la niebla que desordena sus rutas', 'las misiones a medias'],
       frases: { calor: ['Calor: agenda ajustada, pausas de agua cada hora. Ya lo anoté.', 'Con este calor reprogramé todo a la sombra. Eficiencia.'], lluvia: ['Lluvia: tres rutas del tablón se retrasan. Ya las reorganicé.', 'Que llueva: el papel se guarda, las misiones se reordenan.'], tormenta: ['Tormenta: cancelo salidas, aviso a los vecinos, listo. En ese orden.', 'Truenos. El tablón espera; la seguridad, no.'], viento: ['¡El viento me voló dos papeles! Ya los recuperé. Casi pierdo el orden del día.', 'Viento: papeles con peso encima. Solucionado.'], niebla: ['La niebla desordena TODAS mis rutas. Hoy tocará rehacer la lista dos veces.', 'Con niebla nadie llega a su hora. Lo anoto con lápiz, por si acaso.'], despejado: ['Día despejado: todo el tablón puede cumplirse. Mi clima favorito, y no lo escondo.', 'Cielo claro, lista clara. A trabajar.'], nublado: ['Nublado: sin cambios en la agenda. Perfecto.', 'Gris estable: se trabaja igual de bien.'] },
-      victoria: 'Victoria verificada y anotada: ganaste en forma. Felicidades, sin exagerar.', derrota: 'Anotado: esta vez no. Revisa qué falló, ajústalo y vuelve. Así se mejora.', debil: 'Estoy débil. Me retiro del círculo y lo dejo asentado.', expulsa: 'Detente. Estás al 10%: queda prohibido seguir. Fuera del círculo, a recuperarte, y luego reprogramamos.', cortoDebil: 'Estoy débil. Me retiro.' }
+      victoria: 'Victoria verificada y anotada: ganaste en forma. Felicidades, sin exagerar.', derrota: 'Anotado: esta vez no. Revisa qué falló, ajústalo y vuelve. Así se mejora.', debil: 'Estoy débil. Me retiro del círculo y lo dejo asentado.', expulsa: 'Detente. Estás al 10%: queda prohibido seguir. Fuera del círculo, a recuperarte, y luego reprogramamos.', cortoDebil: 'Estoy débil. Me retiro.' },
+    nami: { tipo: 'Serena y paciente', elemento: 'agua', ritmo: 0.9, horaCasa: 21,
+      desc: 'Pescadora de Puerto Brisa Azul. Puede mirar el lago una hora sin decir nada y llamarlo conversación. Conoce cada corriente del Río del Este.',
+      gustos: ['el amanecer sobre el lago', 'pescar en silencio', 'la lluvia suave sobre el agua'], disgustos: ['el calor que enturbia el lago', 'la prisa sin motivo'],
+      frases: { calor: ['Este calor enturbia el lago. Los peces bajan al fondo y yo busco sombra.', 'Calor: el agua aguanta, pero yo no tanto.'], lluvia: ['Lluvia sobre el lago: mil círculos a la vez. Mi espectáculo favorito.', 'Que llueva. El río crece y el puerto huele a agua limpia.'], tormenta: ['Tormenta sobre el lago es respeto: nadie pesca con truenos.', 'Los truenos espantan a los peces por un día entero.'], viento: ['El viento riza el lago. Hoy la pesca se mueve sola.', 'Viento en la orilla: las redes se secan rápido.'], niebla: ['Niebla sobre el agua: el puerto desaparece y solo queda el sonido.', 'Con niebla pesco de memoria, como los viejos del puerto.'], despejado: ['Día claro: el lago se ve hasta el fondo. Así da gusto.', 'Cielo limpio, agua limpia. Buen día en Brisa Azul.'], nublado: ['Nublado y quieto. Los peces pican mejor así, aunque no lo creas.', 'Día gris sobre el lago: calma entera.'] },
+      victoria: 'Me ganaste. El agua también sabe perder: se retira y vuelve.', derrota: 'Te falta corriente. Ven al lago, pesca un rato y vuelve con la cabeza fría.', debil: 'Estoy débil… me retiro a la orilla a respirar.', expulsa: 'Alto. Te miras muy débil: fuera del círculo, a mojarte la cara al lago y a recuperarte.', cortoDebil: 'Estoy débil… me salgo.' },
+    orin: { tipo: 'Callado y vigilante', elemento: 'agua', ritmo: 0.95, horaCasa: 21,
+      desc: 'Guardián de la orilla del Lago Brisa Azul. Vigila el muelle, el puente del Río del Este y a los que cruzan el agua sin saber nadar en su elemento.',
+      gustos: ['la orilla al atardecer', 'el puente firme y seco', 'los viajeros que saludan al pasar'], disgustos: ['que dejen basura en la orilla', 'la niebla que tapa el faro'],
+      frases: { calor: ['Calor: la orilla se llena de pies buscando agua. Yo vigilo.', 'Con este calor hasta las piedras del muelle queman.'], lluvia: ['Lluvia: el nivel del lago sube. Lo anoto mentalmente, como siempre.', 'Que llueva: la orilla se lava sola.'], tormenta: ['Tormenta: fuera del agua, todos. Es la única regla del lago.', 'Truenos sobre el lago: ni los patos se quedan.'], viento: ['Viento: el lago se pica. Los botes chicos, amarrados.', 'Este viento mueve el muelle. Firme, pero se mueve.'], niebla: ['Niebla en el lago: vigilo de oído. Cada chapoteo cuenta.', 'Con niebla no se ve la otra orilla. Yo la guardo igual.'], despejado: ['Día claro: se ve Bruma entera desde la orilla. Buen puesto, el mío.', 'Cielo limpio: el lago, espejo.'], nublado: ['Nublado: día tranquilo de orilla.', 'Gris y en calma: así vigilo mejor.'] },
+      victoria: 'Me ganaste. Bien. La orilla toma nota.', derrota: 'Te falta pie firme. Practica en la orilla y vuelve.', debil: 'Estoy débil. Me retiro a sentarme al muelle.', expulsa: '¡Alto! Estás muy débil. Fuera del círculo: a la orilla, a recuperarte con agua fresca.', cortoDebil: 'Estoy débil. Me salgo.' },
+    zara: { tipo: 'Intensa y directa', elemento: 'fuego', ritmo: 1.2, horaCasa: 21,
+      desc: 'Guardiana de las Brasas de Aldea Ceniza Viva. Mantiene encendidos los braseros del pueblo y decide qué fuego se aviva y cuál se apaga.',
+      gustos: ['las brasas al rojo vivo', 'el calor seco de la Tierra Quemada', 'la gente que no le teme al fuego'], disgustos: ['la lluvia que apaga sus braseros', 'el frío de la montaña'],
+      frases: { calor: ['¿Calor? Esto es Ceniza Viva en su punto. Así me gusta.', 'Con este calor mis brasas ni parpadean.'], lluvia: ['La lluvia me apaga un brasero y me enoja dos horas. Que pase.', 'Lluvia sobre ceniza: barro negro y humo triste.'], tormenta: ['Tormenta: el cielo también tiene brasas, parece. Que truene lejos de mis braseros.', 'Los rayos avivan lo que tocan. Interesante y peligroso.'], viento: ['El viento aviva las brasas si lo dejas. Yo lo dejo, con cuidado.', 'Viento en la Tierra Quemada: ceniza volando por todo el pueblo.'], niebla: ['Niebla aquí es rara: la ceniza la quema antes de que baje.', 'Con niebla los braseros se ven como ojos en la oscuridad.'], despejado: ['Día claro sobre la ceniza: todo brilla, hasta el suelo quemado.', 'Sol y brasas: mi día completo.'], nublado: ['Nublado: mis braseros ponen la luz que falta.', 'Gris arriba, rojo abajo. Así es Ceniza Viva.'] },
+      victoria: 'Me ganaste. El fuego respeta al fuego: bien peleado.', derrota: 'Te falta brasa. Ven a Ceniza Viva, caliéntate y vuelve.', debil: 'Estoy débil… esta brasa se retira antes de apagarse.', expulsa: '¡ALTO! Te miras muy débil. Fuera del círculo: nadie se apaga en mi pueblo; a recuperarte.', cortoDebil: 'Estoy débil… me salgo.' },
+    varek: { tipo: 'Brusco y orgulloso de su oficio', elemento: 'fuego', ritmo: 1.05, horaCasa: 21,
+      desc: 'Herrero de Aldea Ceniza Viva. Forja con el calor de la propia Tierra Quemada y dice que su acero huele a volcán dormido.',
+      gustos: ['el acero al rojo cereza', 'el calor constante de la ceniza', 'las herramientas que duran generaciones'], disgustos: ['la lluvia que le enfría la fragua', 'el acero barato de fuera'],
+      frases: { calor: ['¿Calor? Mi fragua trabaja sola con este sol. Día perfecto.', 'Este calor me ahorra leña. Que dure.'], lluvia: ['La lluvia me enfría la fragua. En Ceniza Viva eso es casi un insulto.', 'Lluvia: a tapar el acero y a esperar.'], tormenta: ['Tormenta: el cielo forja rayos. Yo forjo lo mío, más despacio.', 'Que truene. Mi martillo responde.'], viento: ['El viento me desordena la ceniza de la fragua. Molesto.', 'Viento: chispas por todos lados. Cuidado al pasar.'], niebla: ['Niebla sobre la ceniza: ni se ve la fragua hasta que estás encima.', 'Con niebla trabajo de memoria. El martillo sabe el camino.'], despejado: ['Día claro: a forjar. La ceniza da el calor y yo doy las manos.', 'Buen día. El acero no espera.'], nublado: ['Nublado: la fragua pone el sol que falta.', 'Gris o no gris: se forja igual.'] },
+      victoria: 'Me ganaste. Acero contra acero: el tuyo aguantó. Respeto.', derrota: 'Te falta temple. Forja tu golpe como yo forjo: con calor y paciencia.', debil: 'Estoy débil. Me salgo: la fragua me espera mañana.', expulsa: '¡Alto! Estás al límite, se te nota en los brazos. Fuera del círculo, a recuperarte, y luego hablamos.', cortoDebil: 'Estoy débil. Me salgo.' }
   },
   de(id) { return this.datos[id] || { tipo: 'Vecino de Bruma', elemento: null, ritmo: 1, horaCasa: 21, desc: '', gustos: [], disgustos: [], frases: {} }; },
   fraseClima(npc, tipo) { const p = this.de(npc.id); const f = p.frases ? p.frases[tipo] : null; return f && f.length ? f[(npc.veces || 0) % f.length] : null; },
@@ -1957,7 +2063,7 @@ U.Vida = {
     if (n.enCasa) return 'está en su casa, durmiendo (sale al amanecer, 05:00)';
     const E = U.Juego.estado; const dest = n.destinoActual || this.slotDe(n, E ? U.Tiempo.hora(E) : 9, E);
     if (n.viaje) return 'va DE CAMINO hacia ' + dest.lugar + ' (' + dest.actividad + '): te lo puedes cruzar por el sendero';
-    const mapaTxt = dest.mapa === 'bosque' ? 'en el Bosque Susurrante, ' : dest.mapa === 'oficina' ? '' : 'en la aldea, ';
+    const mapaTxt = dest.mapa === 'oficina' ? '' : '';
     return 'está ' + mapaTxt + 'en ' + dest.lugar + ': ' + dest.actividad;
   },
   respuestaDonde(hablante, target) {
@@ -1975,22 +2081,45 @@ U.Vida = {
     if (target.enCasa) cierra = ' Si es urgente, vuelve al amanecer.';
     return abre + target.nombre + ' ' + donde + '.' + cierra;
   },
-  // Ruta con puntos de paso para no atascarse con casas ni con el río.
+  // Ruta con puntos de paso para no atascarse con casas ni con el río. En el MAPA
+  // CONTINUO las regiones se detectan por coordenadas y cada región tiene sus puntos
+  // de paso por los caminos (la entrada del bosque, el puente de la montaña, el camino
+  // del sur al desierto, el puente del Río del Este…): el NPC cose su viaje por esos
+  // puntos y llega caminando, sin cambiar de mapa.
   rutaPara(n, p) {
     const pts = [];
-    if (n.mapa === 'aldea') {
-      const este = n.x > 32, pEste = p.x > 32;
-      if (este && !pEste) { pts.push({ x: 36.5, y: 24.5 }, { x: 24.5, y: 24.5 }); }
-      if (!este && pEste) { if (Math.hypot(n.x - 16.5, n.y - 24.5) > 3) pts.push({ x: 16.5, y: 24.5 }); pts.push({ x: 24.5, y: 24.5 }, { x: 36.5, y: 24.5 }); }
-      else if (p.x < 15 && p.y < 15) { if (Math.hypot(n.x - 16.5, n.y - 24.5) > 3.5) pts.push({ x: 16.5, y: 24.5 }); pts.push({ x: 11.5, y: 22.5 }, { x: 8.5, y: 22.5 }, { x: 8.5, y: 10 }); }
-      else if (n.y < 15 && n.x < 15 && !(p.x < 15 && p.y < 15)) { pts.push({ x: 8.5, y: 22.5 }, { x: 13, y: 23.5 }); }
-      else if (p.y > 31 && n.y <= 31) { pts.push({ x: 16.5, y: 28.5 }); }
-      else if (p.y <= 31 && n.y > 31) { pts.push({ x: 16.5, y: 28.5 }, { x: 16.5, y: 24.5 }); }
-    } else if (n.mapa === 'bosque') {
-      if (p.y < 18 && n.y >= 20) pts.push({ x: 28.5, y: 26.5 }, { x: 28.5, y: 18 });
-      else if (p.y >= 34 && n.y < 20) pts.push({ x: 28.5, y: 18 }, { x: 28.5, y: 26.5 }, { x: 28.5, y: 38 });
-      else if (p.x > 34 && n.x <= 34) pts.push({ x: 28.5, y: 26.5 }, { x: 35.5, y: 26.5 });
-      else if (p.x < 24 && n.x >= 24 && n.y > 18) pts.push({ x: 25, y: 24.5 });
+    const enBosque = q => q.x < 78 && q.y < 60;
+    const enMontana = q => q.x >= 126 && q.y < 60;
+    const enDesierto = q => q.y >= 124 && q.x < 140;
+    const enFuego = q => q.x >= 140 && q.y >= 120;
+    const enAgua = q => q.x >= 142 && q.y >= 58 && q.y < 120;
+    const region = q => enBosque(q) ? 'bosque' : enMontana(q) ? 'montana' : enDesierto(q) ? 'desierto' : enFuego(q) ? 'fuego' : enAgua(q) ? 'agua' : 'aldea';
+    const rn = region(n), rp = region(p);
+    if (rn !== rp) {
+      const puerta = { bosque: [{ x: 66.5, y: 64.5 }, { x: 32.5, y: 56.5 }], montana: [{ x: 105.5, y: 64.5 }, { x: 155.5, y: 44.5 }], desierto: [{ x: 88.5, y: 123.5 }, { x: 60.5, y: 147.5 }], agua: [{ x: 148.5, y: 84.5 }, { x: 166.5, y: 84.5 }], fuego: [{ x: 132.5, y: 142.5 }, { x: 166.5, y: 142.5 }], aldea: [{ x: 74.5, y: 84.5 }] };
+      const sale = puerta[rn] ? puerta[rn].slice().reverse() : [];
+      let entra = puerta[rp] || [];
+      let ruta = sale.slice();
+      if (rn === 'fuego' && rp !== 'desierto') ruta = ruta.concat([{ x: 60.5, y: 147.5 }, { x: 88.5, y: 123.5 }]);
+      if (rn !== 'aldea' && rp !== 'aldea' && rn !== 'fuego') ruta.push({ x: 74.5, y: 84.5 });
+      ruta = ruta.concat(entra);
+      ruta.forEach(q => pts.push(q));
+      pts.push({ x: p.x, y: p.y });
+      return pts;
+    }
+    if (rn === 'bosque') {
+      if (p.y < 22 && n.y >= 24) pts.push({ x: 32.5, y: 30.5 }, { x: 32.5, y: 22 });
+      else if (p.y >= 36 && n.y < 24) pts.push({ x: 32.5, y: 22 }, { x: 32.5, y: 30.5 }, { x: 32.5, y: 40 });
+      else if (p.x > 38 && n.x <= 38) pts.push({ x: 32.5, y: 30.5 }, { x: 39.5, y: 30.5 });
+      else if (p.x < 28 && n.x >= 28 && n.y > 22) pts.push({ x: 29, y: 28.5 });
+    } else if (rn === 'aldea') {
+      const este = n.x > 91, pEste = p.x > 91;
+      if (este && !pEste) { pts.push({ x: 94.5, y: 84.5 }, { x: 82.5, y: 84.5 }); }
+      if (!este && pEste) { if (Math.hypot(n.x - 74.5, n.y - 84.5) > 3) pts.push({ x: 74.5, y: 84.5 }); pts.push({ x: 82.5, y: 84.5 }, { x: 94.5, y: 84.5 }); }
+      else if (p.x < 73 && p.y < 75) { if (Math.hypot(n.x - 74.5, n.y - 84.5) > 3.5) pts.push({ x: 74.5, y: 84.5 }); pts.push({ x: 69.5, y: 82.5 }, { x: 66.5, y: 82.5 }, { x: 66.5, y: 70 }); }
+      else if (n.y < 75 && n.x < 73 && !(p.x < 73 && p.y < 75)) { pts.push({ x: 66.5, y: 82.5 }, { x: 71, y: 83.5 }); }
+      else if (p.y > 91 && n.y <= 91) { pts.push({ x: 74.5, y: 88.5 }); }
+      else if (p.y <= 91 && n.y > 91) { pts.push({ x: 74.5, y: 88.5 }, { x: 74.5, y: 84.5 }); }
     }
     pts.push({ x: p.x, y: p.y });
     return pts;
@@ -2092,7 +2221,7 @@ U.Vida = {
     n.rutaT = (n.rutaT || 0) + dt;
     const wp = n.ruta[0];
     const esFinal = n.ruta.length === 1;
-    if (this.caminarDirecto(n, dt, wp, vel, E) || n.rutaT > (esFinal ? 14 : 7)) { n.ruta.shift(); n.rutaT = 0; if (!n.ruta.length) { n.moviendo = false; return true; } }
+    if (this.caminarDirecto(n, dt, wp, vel, E) || n.rutaT > (esFinal ? 45 : 25)) { n.ruta.shift(); n.rutaT = 0; if (!n.ruta.length) { n.moviendo = false; return true; } }
     return false;
   },
   // Movimiento de los NPC que están en el mapa del jugador.
@@ -2149,6 +2278,41 @@ U.Vida = {
     });
   }
 };
+
+/* MAPA CONTINUO: las rutinas de arriba se escribieron con coordenadas de los mapas
+   viejos. Aquí se convierten UNA vez a coordenadas del mapa continuo (aldea +58,+60 ·
+   bosque +4,+4) y todas pasan a ser mapa 'aldea': los NPC ya no cambian de mapa, caminan
+   por el mismo mundo abierto hasta su puesto, cruzándose contigo por los caminos. */
+(function () {
+  const OFFR = { aldea: { x: 58, y: 60 }, bosque: { x: 4, y: 4 } };
+  Object.keys(U.Vida.RUTINAS).forEach(id => {
+    U.Vida.RUTINAS[id].forEach(s => { const o = OFFR[s.m]; if (o) { s.x += o.x; s.y += o.y; s.m = 'aldea'; } });
+  });
+  U.Vida.RUTINAS.elena.forEach(s => { if (s.l === 'la huerta del sur') { s.x = 73.5; s.y = 98.5; } });
+  // Los puestos de «la plaza» caían justo sobre la baldosa de la fogata (sólida): se
+  // mueven a la baldosa libre de la plaza, pegada a la fogata, para que nadie se atasque.
+  Object.keys(U.Vida.RUTINAS).forEach(id => { U.Vida.RUTINAS[id].forEach(s => { if (s.x === 74.5 && s.y === 84.5) { s.x = 73.5; s.y = 85.5; } }); }); // en el mapa viejo ese puesto caía dentro del edificio de la Oficina; en el continuo queda en la huerta, al sur de la Oficina
+  U.Vida.RUTINAS.nami = [
+    { d: 5, h: 11, m: 'aldea', x: 170.5, y: 99.5, l: 'el muelle de Puerto Brisa Azul', a: 'pesca en el muelle del lago', fijo: true },
+    { d: 11, h: 17, m: 'aldea', x: 166.5, y: 84.5, l: 'la plaza de Puerto Brisa Azul', a: 'vende la pesca del día' },
+    { d: 17, h: 21, m: 'aldea', x: 172.5, y: 88.5, l: 'la orilla del Lago Brisa Azul', a: 'mira el atardecer sobre el lago' }
+  ];
+  U.Vida.RUTINAS.orin = [
+    { d: 5, h: 12, m: 'aldea', x: 148.5, y: 84.5, l: 'el puente del Río del Este', a: 'vigila el puente y a los que cruzan', fijo: true },
+    { d: 12, h: 18, m: 'aldea', x: 163.5, y: 85.5, l: 'la plaza de Puerto Brisa Azul', a: 'hace su ronda por el puerto' },
+    { d: 18, h: 21, m: 'aldea', x: 170.5, y: 97.5, l: 'el muelle del Lago Brisa Azul', a: 'cierra el muelle al caer el sol' }
+  ];
+  U.Vida.RUTINAS.zara = [
+    { d: 5, h: 12, m: 'aldea', x: 168.5, y: 140.5, l: 'la plaza de Aldea Ceniza Viva', a: 'aviva los braseros del pueblo', fijo: true },
+    { d: 12, h: 18, m: 'aldea', x: 178.5, y: 134.5, l: 'la Tierra Quemada, al este de Ceniza Viva', a: 'recoge brasas y ceniza buena' },
+    { d: 18, h: 21, m: 'aldea', x: 166.5, y: 144.5, l: 'la plaza de Aldea Ceniza Viva', a: 'deja los braseros a punto para la noche' }
+  ];
+  U.Vida.RUTINAS.varek = [
+    { d: 5, h: 13, m: 'aldea', x: 162.5, y: 145.5, l: 'su forja de ceniza, en Aldea Ceniza Viva', a: 'forja con el calor de la Tierra Quemada', fijo: true },
+    { d: 13, h: 18, m: 'aldea', x: 168.5, y: 142.5, l: 'la plaza de Aldea Ceniza Viva', a: 'entrega herramientas y presume su acero' },
+    { d: 18, h: 21, m: 'aldea', x: 160.5, y: 138.5, l: 'su forja de ceniza, en Aldea Ceniza Viva', a: 'templa lo último del día', fijo: true }
+  ];
+})();
 </script>
 <script>
 /* === js/sistemas/sparring.js === */
@@ -2163,7 +2327,7 @@ U.Vida = {
 window.U = window.U || {};
 
 U.Sparring = {
-  CENTRO: { x: 28.5, y: 12.5 }, RADIO: 5, // CENTRO solo queda como respaldo si una pelea arranca sin centro vivo
+  CENTRO: { x: 32.5, y: 16.5 }, RADIO: 5, // CENTRO solo queda como respaldo si una pelea arranca sin centro vivo
   // Centro VIVO de la pelea actual: el punto medio entre los dos que están peleando,
   // estén donde estén. Sin pelea en curso devuelve null (y no hay círculo en el mapa).
   centroActual(E) {
@@ -3963,7 +4127,7 @@ U.HUD = {
       html += '<div style="font-size:11px;color:var(--textoTenue)">Con las polainas NO eres más rápido: vas más lento. Lo que crece es tu nivel de Velocidad (en combates y un poco por pasos; el dash nunca cuenta). Al quitártelas, eres más rápido porque el nivel ya subió, y es permanente.</div></section>';
     } else if (sec === 'mapa') {
       html += '<section><h3>🗺 Mapa · ' + (E.mapa ? E.mapa.nombreMapa : '') + '</h3><div style="text-align:center"><canvas id="mapaCompleto" width="512" height="384" style="width:min(512px,100%);image-rendering:pixelated;border:3px solid var(--borde);background:#0e1530"></canvas></div>'
-        + '<div style="font-size:12px;color:var(--textoFrio);margin-top:6px">Pueblos y lugares: <b>Aldea de Bruma</b> (oficina, tienda, tu casa, la Arena) · <b>Bosque Susurrante</b> (norte) · <b>Desierto de Sal</b> (este, con su oasis) · <b>Montaña Brumosa</b> (norte del Campo de Ceniza, con el obelisco). Cada lugar tiene su zona elemental: la Ribera y el lago para Agua, el Campo de Ceniza para Fuego, el acantilado ventoso para Viento, la zona rocosa para Tierra. Siempre hay un camino de tierra a cualquier lugar: el atajo elemental es opcional. Viajar a otro pueblo cuesta 10 🪙 por cruce (el permiso lo cubre). El minimapa sigue visible en el juego, como siempre.</div></section>';
+        + '<div style="font-size:12px;color:var(--textoFrio);margin-top:6px">Pueblos y lugares (TODO en un solo mapa continuo, sin transiciones entre regiones): <b>Aldea de Bruma</b> en el centro (oficina, tienda, tu casa, la Arena) · <b>Bosque Susurrante</b> al noroeste · <b>Montaña Brumosa</b> al noreste, con nieve y el obelisco · <b>Desierto de Sal</b> al sur, con su oasis · <b>Puerto Brisa Azul</b> (pueblo de Agua) al este, junto al Lago Brisa Azul y el Río del Este · <b>Aldea Ceniza Viva</b> (pueblo de Fuego) al sureste, sobre la Tierra Quemada. Caminos cosen todo: pueblo-bosque, pueblo-montaña, pueblo-desierto, la ruta del norte bosque-montaña, la ruta del oeste, la del este por el lago y el puente del río. Solo tu casa y la Oficina son interiores: ahí sí entras por su puerta. Cada lugar tiene su zona elemental: la Ribera, el río y el lago para Agua, el Campo de Ceniza y la Tierra Quemada para Fuego, el acantilado ventoso para Viento, la zona rocosa para Tierra. Siempre hay un camino de tierra a cualquier lugar: el atajo elemental es opcional. El minimapa sigue visible en el juego, como siempre.</div></section>';
     } else if (sec === 'reputacion') {
       html += '<section><h3>✦ Reputación · tu KARMA por pueblo</h3><div style="font-size:12px;color:var(--textoFrio)">El karma va de −100 a +100 y es POR PUEBLO: donde no te conocen empiezas en 0, neutral. En precios: 3% por cada 10 de karma (máximo 30% de descuento o de recargo). A −80 o menos, ese pueblo se niega a venderte.</div>';
       Object.keys(U.Economia.PUEBLOS).forEach(pid => { const k = j.karma[pid] || 0; const pct = Math.max(0, Math.min(100, 50 + k / 2)); html += '<div style="margin:8px 0"><div style="display:flex;justify-content:space-between;font-size:13px"><b>' + U.Economia.PUEBLOS[pid] + '</b><span>Karma <b style="color:' + (k > 0 ? 'var(--exito)' : k < 0 ? 'var(--peligro)' : 'var(--texto)') + '">' + k + '</b> · ' + U.Economia.factorTexto(k) + (k <= -80 ? ' · 🚫 NO TE VENDEN' : '') + '</span></div><div class="karmaBar"><i style="left:' + (k >= 0 ? 50 : pct) + '%;width:' + Math.abs(k) / 2 + '%;background:' + (k >= 0 ? 'var(--exito)' : 'var(--peligro)') + '"></i></div></div>'; });
@@ -4040,7 +4204,7 @@ U.TestUI = {
     const auto = (window.U && U.Guardado) ? U.Guardado.leerAuto() : null;
     const escHtml = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     const bloqueAuto = auto ? '<div class="introInfo" style="border-color:var(--exito)"><b style="color:var(--exito)">● Guardado automático: tienes una partida en curso.</b><br>' + escHtml(auto.nombre || 'Sin nombre') + ' · ' + U.Elementos.nombre(auto.perfil.elemento) + ' · guardada el ' + U.Guardado.fechaTexto(auto.guardadoEn) + '. Tu partida se guarda sola en este navegador: entra y sigues donde ibas, sin descargar ni subir ningún archivo.</div><button class="grande" id="btnContinuarAuto" style="background:linear-gradient(180deg,#2f7d4f,#1d5233);border-color:#a7f3c9;box-shadow:0 5px 0 var(--sombra),0 0 22px rgba(103,224,138,.4)">Continuar partida</button>' : '';
-    c.innerHTML = '<div class="intro"><canvas id="logoCanvas" width="360" height="110"></canvas><p class="sub">Una vida. Un elemento. Universos paralelos.</p>' + bloqueAuto + '<div class="introInfo"><b>Antes de nacer en este mundo:</b> 8 preguntas y 2 escenas. Responde con instinto: no hay respuestas correctas y nadie te dirá qué elemento busca cada opción. El test decide tu elemento, tu atributo, tus estadísticas iniciales y tu inclinación de estilo. Una prueba por vida.<br><br><b>Recuerda:</b> dominar UN elemento es el trabajo de una vida. Concéntrate en él. El Yang es un estilo más: con afinidad naces despierto; sin ella, puedes alcanzarlo entrenando, como un segundo elemento.</div><div class="semillaFila">Semilla del mundo <input id="inpSemilla" maxlength="8" value="' + this.semilla + '"><button class="mini" id="btnDado">DADO</button></div><button class="grande" id="btnComenzarTest">' + (auto ? 'Nueva vida (repetir test)' : 'Comenzar el test') + '</button><button class="mini" id="btnCargarIntro" style="font-size:12px;padding:8px 14px">CARGAR DESDE ARCHIVO (RESPALDO)</button><p class="nota">100% offline · móvil (touch) y escritorio · juego completo: 5 mapas, calendario semanal, clima, casa con cama y alarma, retos y hechizo de inversión<br>Guardado automático activado: tu progreso se guarda solo en este navegador. Si quieres un respaldo para otro teléfono, en Opciones (⚙) tienes DESCARGAR PARTIDA.</p></div>';
+    c.innerHTML = '<div class="intro"><canvas id="logoCanvas" width="360" height="110"></canvas><p class="sub">Una vida. Un elemento. Universos paralelos.</p>' + bloqueAuto + '<div class="introInfo"><b>Antes de nacer en este mundo:</b> 8 preguntas y 2 escenas. Responde con instinto: no hay respuestas correctas y nadie te dirá qué elemento busca cada opción. El test decide tu elemento, tu atributo, tus estadísticas iniciales y tu inclinación de estilo. Una prueba por vida.<br><br><b>Recuerda:</b> dominar UN elemento es el trabajo de una vida. Concéntrate en él. El Yang es un estilo más: con afinidad naces despierto; sin ella, puedes alcanzarlo entrenando, como un segundo elemento.</div><div class="semillaFila">Semilla del mundo <input id="inpSemilla" maxlength="8" value="' + this.semilla + '"><button class="mini" id="btnDado">DADO</button></div><button class="grande" id="btnComenzarTest">' + (auto ? 'Nueva vida (repetir test)' : 'Comenzar el test') + '</button><button class="mini" id="btnCargarIntro" style="font-size:12px;padding:8px 14px">CARGAR DESDE ARCHIVO (RESPALDO)</button><p class="nota">100% offline · móvil (touch) y escritorio · juego completo: 1 mapa continuo gigante (aldea, bosque, desierto, montaña de nieve y 2 pueblos nuevos: Puerto Brisa Azul y Aldea Ceniza Viva) + interiores, calendario semanal, clima, casa con cama y alarma, retos y hechizo de inversión<br>Guardado automático activado: tu progreso se guarda solo en este navegador. Si quieres un respaldo para otro teléfono, en Opciones (⚙) tienes DESCARGAR PARTIDA.</p></div>';
     document.getElementById('btnComenzarTest').addEventListener('click', () => { const v = document.getElementById('inpSemilla').value.trim().toUpperCase(); this.semilla = v || this.nuevaSemilla(); document.getElementById('semillaTxt').textContent = this.semilla; this.comenzar(); });
     const bCA = document.getElementById('btnContinuarAuto'); if (bCA) bCA.addEventListener('click', () => { U.Audio.init(); U.Audio.reanudar(); U.Guardado.cargarAuto(); });
     const bcI = document.getElementById('btnCargarIntro'); if (bcI) bcI.addEventListener('click', () => { U.Audio.init(); U.Audio.reanudar(); U.Guardado.elegirArchivo(); });
@@ -4197,7 +4361,7 @@ U.Economia = {
     mediana: { nombre: 'Polainas medianas', precio: 250, velMult: 0.8, crecMult: 2.0, pasosPunto: 75,  condCada: 40 },
     pesada:  { nombre: 'Polainas pesadas',  precio: 500, velMult: 0.7, crecMult: 2.5, pasosPunto: 50,  condCada: 30 }
   },
-  PUEBLOS: { aldea: 'Aldea de Bruma', bosque: 'Bosque Susurrante', desierto: 'Desierto de Sal', montana: 'Montaña Brumosa' },
+  PUEBLOS: { aldea: 'Aldea de Bruma', bosque: 'Bosque Susurrante', desierto: 'Desierto de Sal', montana: 'Montaña Brumosa', puerto: 'Puerto Brisa Azul', fuego: 'Aldea Ceniza Viva' },
   puebloDeMapa(mapaId) { if (mapaId === 'oficina' || mapaId === 'casa') return 'aldea'; return this.PUEBLOS[mapaId] ? mapaId : 'aldea'; },
   puebloActual() { const E = U.Juego.estado; return E ? this.puebloDeMapa(E.mapaId) : 'aldea'; },
   karma(j, pueblo) { j.karma = j.karma || {}; return j.karma[pueblo] || 0; },
@@ -4246,12 +4410,14 @@ U.Economia = {
   },
   RAZONES: { agua: 'porque vas a la región del lago', fuego: 'porque vas a la zona quemada', tierra: 'porque vas a la zona rocosa', viento: 'porque vas a el acantilado de viento', rayo: 'porque vas a la montaña de las tormentas' },
   DESTINOS: [
-    { mapa: 'desierto', x: 45.5, y: 10.5, lugar: 'el Oasis del Desierto de Sal' },
-    { mapa: 'bosque', x: 43.5, y: 30.5, lugar: 'el estanque del Bosque Susurrante' },
-    { mapa: 'montana', x: 20.5, y: 12.5, lugar: 'la cima de la Montaña Brumosa' },
-    { mapa: 'aldea', x: 40.5, y: 24.5, lugar: 'la Ribera Húmeda' },
-    { mapa: 'aldea', x: 51.5, y: 12.5, lugar: 'el Campo de Ceniza' },
-    { mapa: 'bosque', x: 28.5, y: 12.5, lugar: 'el claro norte del Bosque Susurrante' }
+    { mapa: 'aldea', x: 103.5, y: 131.5, lugar: 'la orilla del Oasis del Desierto de Sal' },
+    { mapa: 'aldea', x: 47.5, y: 29.5, lugar: 'la orilla del estanque del Bosque Susurrante' },
+    { mapa: 'aldea', x: 148.5, y: 16.5, lugar: 'la cima de la Montaña Brumosa' },
+    { mapa: 'aldea', x: 98.5, y: 84.5, lugar: 'la Ribera Húmeda' },
+    { mapa: 'aldea', x: 109.5, y: 72.5, lugar: 'el Campo de Ceniza' },
+    { mapa: 'aldea', x: 32.5, y: 16.5, lugar: 'el claro norte del Bosque Susurrante' },
+    { mapa: 'aldea', x: 170.5, y: 92.5, lugar: 'el Lago Brisa Azul, junto a Puerto Brisa Azul' },
+    { mapa: 'aldea', x: 168.5, y: 141.5, lugar: 'la plaza de Aldea Ceniza Viva' }
   ],
   generarTablon(rng) {
     const tipos = Object.keys(this.TIPOS); const out = [];
@@ -4303,15 +4469,15 @@ U.Juego = {
   },
   // ---------- nueva vida ----------
   comenzarMundo(perfil, semilla, nombre) {
-    const rng = U.TestUI.rngSemilla(semilla); const mapa = U.Grid.crearMapa(rng);
+    const rng = U.TestUI.rngSemilla(semilla); const mapa = U.Grid.crearMapaContinuo(rng);
     const j = { tipo: 'jugador', nombre, perfil, elemento: perfil.elemento, elemento2: perfil.elemento2, elementos: perfil.elemento2 ? [perfil.elemento, perfil.elemento2] : [perfil.elemento], elementoActivo: perfil.elemento, atributo: perfil.atributo,
       stats: Object.assign({}, perfil.stats), vida: perfil.stats.vida, esencia: perfil.stats.esencia, maestria: Object.assign({}, perfil.maestria), estilos: Object.assign({}, perfil.estilos), regenBonus: 0,
       x: mapa.inicio.x, y: mapa.inicio.y, dir: { x: 0, y: 1 }, anim: 0, moviendo: false, trote: false, agotado: false, invuln: 0, flash: 0, carga: 0, cargando: false, ataqueAnim: 0, cdYin: 0, cdYang: 0, cdTec: {}, dash: { t: 0, cd: 0, dx: 0, dy: 0 }, rastro: [], tecnicaIdx: 0, yangForma: 'haz', tieneYang: !!perfil.yangAfin, buffs: { sobrecarga: 0, sobrecargaCd: 0 }, descansando: false, pociones: 0, bolsaPociones: [], bolsaComida: [], karma: {}, sabores: (perfil.sabores || U.Economia.SABORES.slice()), polainas: {}, polainaEquipada: null, polainaMultCrec: 1, pasosPolainas: 0, condPolainas: 0, comidasHoy: 0, permisoHasta: 0, permisoUsos: 0, promesas: [], monedas: 0, ultimaOrilla: null, levitT: 0, enAguaT: 0, caminarAgua: false, cercaAgua: false, sobreAgua: false, escudo: false, escudoAprendido: false, escudoNv: 0, escudoExp: 0, escudoVida: 0, cansancio: 100, condicionExtra: 0, gastoFatiga: 0, dot: null, invertido: 0, flags: {} };
     // tieneYang = Yang DESPERTADO: con afinidad naces despierto; sin ella, despierta al entrenar el estilo hasta el umbral (5).
-    const npcs = ['kaelen', 'sora', 'torin', 'marisol', 'breno', 'elena', 'marco', 'pipo'].map(id => U.Emociones.crear(id, rng, mapa.npcs[id]));
+    const npcs = ['kaelen', 'sora', 'torin', 'marisol', 'breno', 'elena', 'marco', 'pipo', 'nami', 'orin', 'zara', 'varek'].map(id => U.Emociones.crear(id, rng, mapa.npcs[id]));
     this.estado = { ui: 'mundo', mapa, mapaId: 'aldea', mapas: { aldea: mapa }, npcsPorMapa: {}, cambioCd: 0, jugador: j, npcs, enemigos: [], proyectiles: [], orbes: [], efectos: { particulas: [], textos: [], haces: [], anillos: [], cadenas: [], cortes: [], telegrafos: [] }, camara: { x: j.x * 16 - U.Render.viewW / 2, y: j.y * 16 - U.Render.viewH / 2, shake: 0 }, tiempo: 0, reloj: U.Tiempo.crear(), clima: U.Clima.crear(rng), alarmaMin: 7 * 60, historial: { derrotas: 0, victorias: 0, retos: 0, entrenos: 0, torneos: 0, misiones: 0 }, reto: null, entreno: null, bandidoT: 0, hitstop: 0, dificultad: 1, semilla, rng,
       arena: { activa: false, ronda: 1, oleada: 1, total: 3, entre: 0, spawned: false, cuenta: 0 }, torneo: null, mision: null, misionIdx: 0, tablon: null, escolta: null, ultimoDia: 1, peticionT: 40, peticion: null, enCombate: false, zonaActual: null, interactuable: null, flags: {}, resumen: { daño: 0, recibido: 0, golpes: 0, tecnicas: 0, yang: 0, bajas: 0, esquives: 0, dashes: 0, crecimiento: {}, maestria: {} },
-      objetivos: [ { texto: 'Habla con Kaelen, el guardia de la aldea.', estado: 'actual' }, { texto: 'Visita la Ribera Húmeda y el Campo de Ceniza: siente el costo ambiental.', estado: 'pendiente' }, { texto: 'Activa la runa de la Arena (sureste) y sobrevive 3 oleadas.', estado: 'pendiente' }, { texto: 'Vuelve con Kaelen y cuéntale tu victoria.', estado: 'pendiente' }, { texto: 'Cruza la entrada norte (umbral dorado) al Bosque Susurrante: de día tranquilo; de noche salen los bandidos.', estado: 'pendiente' }, { texto: 'Visita el Desierto de Sal (borde este) y la Montaña Brumosa (norte del Campo de Ceniza).', estado: 'pendiente' }, { texto: 'Toca el obelisco de la cima de la Montaña y aprende el Hechizo de Inversión (tecla V).', estado: 'pendiente' }, { texto: 'Entra en tu casa (puerta de la casa azul), fija la alarma y duerme en tu cama.', estado: 'pendiente' }, { texto: 'Visita la OFICINA DEL GUARDIÁN (edificio dorado al sur de la plaza): conoce a Aldric y pide una MISIÓN a su secretaria Lía.', estado: 'pendiente' }, { texto: 'Gana el TORNEO DE BRUMA en la Arena (entrada 50): solo cobra el podio — 1º 300, 2º 150, 3º 80 — y te recuperas tras cada ronda.', estado: 'pendiente' }, { texto: 'Rompe un árbol o una roca que te cierre el paso: tienen vida propia y al caer dejan el camino libre.', estado: 'pendiente' } ], objetivoIdx: 0, ambienteT: 0, pajaroT: 5 };
+      objetivos: [ { texto: 'Habla con Kaelen, el guardia de la aldea.', estado: 'actual' }, { texto: 'Visita la Ribera Húmeda y el Campo de Ceniza: siente el costo ambiental.', estado: 'pendiente' }, { texto: 'Activa la runa de la Arena (sureste) y sobrevive 3 oleadas.', estado: 'pendiente' }, { texto: 'Vuelve con Kaelen y cuéntale tu victoria.', estado: 'pendiente' }, { texto: 'Camina al noroeste hasta el Bosque Susurrante (todo es un solo mapa continuo, sin transiciones): de día tranquilo; de noche salen los bandidos.', estado: 'pendiente' }, { texto: 'Visita el Desierto de Sal (al sur, por el camino grande) y la Montaña Brumosa (al noreste). Todo caminando por el mapa continuo: no hay transiciones.', estado: 'pendiente' }, { texto: 'Toca el obelisco de la cima de la Montaña y aprende el Hechizo de Inversión (tecla V).', estado: 'pendiente' }, { texto: 'Entra en tu casa (puerta de la casa azul), fija la alarma y duerme en tu cama.', estado: 'pendiente' }, { texto: 'Visita la OFICINA DEL GUARDIÁN (edificio dorado al sur de la plaza): conoce a Aldric y pide una MISIÓN a su secretaria Lía.', estado: 'pendiente' }, { texto: 'Gana el TORNEO DE BRUMA en la Arena (entrada 50): solo cobra el podio — 1º 300, 2º 150, 3º 80 — y te recuperas tras cada ronda.', estado: 'pendiente' }, { texto: 'Rompe un árbol o una roca que te cierre el paso: tienen vida propia y al caer dejan el camino libre.', estado: 'pendiente' } ], objetivoIdx: 0, ambienteT: 0, pajaroT: 5 };
     this.estado.roster = npcs; this.estado.sparring = { fase: 'idle', ventana: null, consumida: null, pareja: [], bando: null, aliado: null, retirados: [], bloqueado: false, dentro: false, ofrecidoCd: 0, golpeT: 0, turno: 0, allyT: 0, centro: null }; U.Crecimiento.reset(); U.HUD.mostrar(); U.HUD.refrescarSimbolos(); U.HUD.refrescarChips(); U.Audio.musica('aldea'); U.Ambiente.actualizar();
     if (U.Guardado) setTimeout(() => U.Guardado.guardarAuto(), 400); // la nueva vida queda guardada automáticamente desde el primer momento
     U.HUD.banner('UNA NUEVA VIDA', 2); U.HUD.toast('Bienvenido, ' + nombre + '. Tu elemento es ' + U.Elementos.nombre(j.elemento) + ': concéntrate en él.', 'exito');
@@ -4319,10 +4485,19 @@ U.Juego = {
     setTimeout(() => { if ((j.maestria[j.elementoActivo] || 0) < 15) U.HUD.toast('Maestría ' + j.maestria[j.elementoActivo] + '%: golpea con Yin en combate para canalizar hasta 15% y desbloquear ' + U.Habilidades.elementos[j.elementoActivo][0].nombre + '.', 'aviso'); else U.HUD.toast(U.Habilidades.elementos[j.elementoActivo][0].nombre + ' listo (L). El HUD muestra su costo según la zona.', ''); }, 2600);
   },
   // ---------- mundo de varios mapas conectados por umbrales ----------
-  mapaPorId(id) { const E = this.estado; if (!E.mapas[id]) { const rngM = U.TestUI.rngSemilla(E.semilla + '-' + id); E.mapas[id] = U.Grid.crearMapaPorId(id, rngM); } return E.mapas[id]; },
+  mapaPorId(id) { const E = this.estado; if (id === 'bosque' || id === 'desierto' || id === 'montana') id = 'aldea'; if (!E.mapas[id]) { const rngM = U.TestUI.rngSemilla(E.semilla + '-' + id); E.mapas[id] = U.Grid.crearMapaPorId(id, rngM); } return E.mapas[id]; },
   refrescarNpcs() { const E = this.estado; if (!E) return; if (E.mapaId === 'oficina') { E.npcs = E.npcsPorMapa.oficina || []; return; } if (E.roster) { E.npcs = E.roster.filter(n => n.mapa === E.mapaId); E.npcsPorMapa.aldea = E.roster.filter(n => n.mapa === 'aldea'); } },
   cambiarMapa(destino, spawn, silencioso) {
     const E = this.estado; if (!E) return;
+    // MAPA CONTINUO: bosque, desierto y montaña ya NO son mapas aparte, son regiones del
+    // mismo mapa 'aldea'. Una llamada vieja (guardados anteriores, misiones) se traduce a
+    // la región correspondiente sumando el offset de esa región; al aire libre ya nadie
+    // cambia de mapa caminando: solo quedan como mapas aparte tu casa y la Oficina.
+    if (destino === 'bosque' || destino === 'desierto' || destino === 'montana') {
+      const OFFM = { bosque: { x: 4, y: 4, e: { x: 32.5, y: 56.5 } }, desierto: { x: 58, y: 126, e: { x: 60.5, y: 147.5 } }, montana: { x: 128, y: 4, e: { x: 155.5, y: 43.5 } } }[destino];
+      spawn = spawn ? { x: spawn.x + OFFM.x, y: spawn.y + OFFM.y } : OFFM.e;
+      destino = 'aldea';
+    }
     if (E.mapaId === destino) { if (spawn) { E.jugador.x = spawn.x; E.jugador.y = spawn.y; } return; }
     if (U.Sparring) U.Sparring.cancelarPorSalida();
     const origenMapa = E.mapaId;
@@ -4505,7 +4680,12 @@ U.Juego = {
   },
   // BANDIDOS SOLO DE NOCHE y SIN CAMPAMENTO: aparecen al caer la Noche en el bosque (una vez por noche) y se retiran al amanecer.
   gestionarBandidos() {
-    const E = this.estado; if (!E || E.mapaId !== 'bosque') return;
+    const E = this.estado; if (!E || E.mapaId !== 'aldea') return;
+    // En el mapa continuo el bosque es una REGIÓN (noroeste): los bandidos salen de noche
+    // cuando estás en ella y se retiran al amanecer, igual que antes.
+    const jB = E.jugador; const enBosque = jB.x < 78 && jB.y < 60;
+    if (enBosque) { E.flags.visitoBosque = true; if (E.objetivos[4] && E.objetivos[4].estado !== 'hecho') { E.objetivos[4].estado = 'hecho'; if (E.objetivoIdx === 4) this.siguienteObjetivo(); } }
+    if (!enBosque) { const r0 = E.reloj; if (r0 && !U.Tiempo.esNoche(r0.minutos / 60) && E.enemigos.some(e => e.nocturno && e.vida > 0)) E.enemigos = E.enemigos.filter(e => !e.nocturno); return; }
     const r = E.reloj; const h = r.minutos / 60; const noche = U.Tiempo.esNoche(h);
     const clave = h >= 21 ? r.dia : (h < 5 ? r.dia - 1 : null);
     if (noche && clave != null && E.flags.nocheBandidos !== clave) {
@@ -4570,9 +4750,9 @@ U.Juego = {
     const E = this.estado; if (!E || !E.mision) return;
     const npc = (E.roster || []).find(n => n.id === 'elena') || (E.roster || [])[0]; if (!npc) return;
     npc.enEscolta = true; npc.vidaEscolta = 100; npc.mapa = 'aldea'; npc.enCasa = false; npc.x = E.jugador.x + 1.5; npc.y = E.jugador.y + 0.5; npc.ruta = []; npc.rutaKey = '';
-    E.escolta = { activa: true, npc, destino: { x: 80.5, y: 24.5 }, oleadaT: 10, bandidosTotal: 5, bandidosFuera: 0, nombre: npc.nombre };
+    E.escolta = { activa: true, npc, destino: { x: 164.5, y: 84.5 }, oleadaT: 10, bandidosTotal: 5, bandidosFuera: 0, nombre: npc.nombre };
     if (E.mapaId !== 'aldea') U.HUD.toast('La escolta empieza en la Aldea de Bruma: ' + npc.nombre + ' te espera junto a la plaza para caminar a su pueblo (la entrada este).', 'aviso');
-    else U.HUD.toast(npc.nombre + ' camina hacia su pueblo por el camino del este. No te alejes: si sale un bandido, se pondrá detrás de ti y tú peleas.', 'exito');
+    else U.HUD.toast(npc.nombre + ' camina hacia Puerto Brisa Azul por el camino del este, cruzando el puente del Río del Este. No te alejes: si sale un bandido, se pondrá detrás de ti y tú peleas.', 'exito');
     this.refrescarNpcs();
   },
   tickEscolta(dt) {
@@ -4589,7 +4769,7 @@ U.Juego = {
     if (esc.oleadaT <= 0 && !bandidos.length && esc.bandidosFuera + bandidos.length < esc.bandidosTotal) {
       esc.oleadaT = 16 + Math.random() * 8;
       const n = Math.min(esc.bandidosTotal - esc.bandidosFuera, Math.random() < 0.5 ? 1 : 2);
-      for (let i = 0; i < n; i++) { const e = U.Combate.crearEnemigo('bandido', Math.min(82, npc.x + 5 + i * 1.6), Math.max(2, npc.y + (i ? 2 : -2)), E.dificultad); e.esEscolta = true; E.enemigos.push(e); }
+      for (let i = 0; i < n; i++) { const e = U.Combate.crearEnemigo('bandido', Math.min(E.mapa.ancho - 2, npc.x + 5 + i * 1.6), Math.max(2, npc.y + (i ? 2 : -2)), E.dificultad); e.esEscolta = true; E.enemigos.push(e); }
       U.HUD.banner('⚠ ¡BANDIDOS EN EL CAMINO! · ' + npc.nombre.toUpperCase() + ' SE PONE DETRÁS DE TI', 2); U.Audio.sfx('oleada');
     }
   },
@@ -4627,7 +4807,7 @@ U.Juego = {
     if (E.peticion) { const n = E.peticion.npc; if (!n || n.mapa !== E.mapaId || n.enCasa) { E.peticion = null; return; } if (U.Grid.dist(n, E.jugador) < 1.7) { const pet = E.peticion; E.peticion = null; n.buscaJugador = false; U.Dialogo.abrirPeticion(n, pet); } return; }
     E.peticionT = (E.peticionT || 60) - dt; if (E.peticionT > 0) return; E.peticionT = 80 + Math.random() * 60;
     const h = U.Tiempo.hora(E); if (h < 6 || h > 20) return;
-    const cands = E.npcs.filter(n => !n.enCasa && !n.enEscolta && !n.ocultoSparring && n.id !== 'pipo');
+    const cands = E.npcs.filter(n => !n.enCasa && !n.enEscolta && !n.ocultoSparring && n.id !== 'pipo' && ['nami', 'orin', 'zara', 'varek'].indexOf(n.id) < 0);
     if (!cands.length) return;
     const n = cands[Math.floor(Math.random() * cands.length)];
     const esComida = Math.random() < 0.45;
@@ -4686,7 +4866,7 @@ U.Juego = {
   candidatos() {
     const E = this.estado, m = E.mapa; const cand = [];
     E.npcs.forEach(n => { if (!n.enCasa && !n.ocultoSparring) cand.push({ tipo: 'npc', obj: n, r: 1.8, corto: 'HABLAR', label: 'Hablar con ' + n.nombre }); });
-    if (E.mapaId === 'aldea' && E.roster) { const torN = E.roster.find(n => n.id === 'torin'); if (torN && torN.mapa !== 'aldea' && !torN.enCasa) cand.push({ tipo: 'notaForja', obj: { x: 10.5, y: 19.5, w: 1, h: 1 }, r: 2.0, corto: 'NOTA', label: 'Nota en la forja de Torin (no está)' }); }
+    if (E.mapaId === 'aldea' && E.roster) { const torN = E.roster.find(n => n.id === 'torin'); if (torN && !torN.enCasa && Math.hypot(torN.x - 69.5, torN.y - 80.5) > 12) cand.push({ tipo: 'notaForja', obj: { x: 68.5, y: 79.5, w: 1, h: 1 }, r: 2.0, corto: 'NOTA', label: 'Nota en la forja de Torin (no está)' }); }
     m.objetos.forEach(o => { if (o.tipo === 'fogata') cand.push({ tipo: 'fogata', obj: o, r: 2.0, corto: 'DESCANSAR', label: 'Fogata · dormir y despertar al 100%' }); else if (o.tipo === 'runa' && !E.arena.activa) cand.push({ tipo: 'runa', obj: o, r: 2.0, corto: 'OLEADA', label: 'Runa de la arena' }); else if (o.tipo === 'cama') cand.push({ tipo: 'cama', obj: o, r: 2.0, corto: 'DORMIR', label: 'Tu cama · dormir hasta la alarma' }); else if (o.tipo === 'puertaCasa') cand.push({ tipo: 'puertaCasa', obj: o, r: 1.8, corto: 'ENTRAR', label: 'Puerta de tu casa' }); else if (o.tipo === 'puertaOficina') cand.push({ tipo: 'puertaOficina', obj: o, r: 1.9, corto: 'OFICINA', label: 'Oficina del Guardián · Aldric y Lía (misiones)' }); else if (o.tipo === 'puertaTienda') cand.push({ tipo: 'puertaTienda', obj: o, r: 1.9, corto: 'TIENDA', label: 'Tienda de Marisol · pociones por monedas' }); else if (o.tipo === 'reliquia') cand.push({ tipo: 'cartel', obj: { x: o.x, y: o.y, w: 1, h: 1, texto: 'RELIQUIA PERDIDA · Brilla con luz antigua. Acércate para recogerla y vuelve con Lía a la Oficina.' }, r: 1.6, corto: 'RELIQUIA', label: 'Reliquia perdida' }); else if (o.tipo === 'obelisco') cand.push({ tipo: 'obelisco', obj: o, r: 2.0, corto: 'HECHIZO', label: 'Obelisco de la Inversión' }); else if (o.tipo === 'cartel') cand.push({ tipo: 'cartel', obj: o, r: 1.7, corto: 'LEER', label: 'Cartel' }); else if (o.tipo === 'pozo') cand.push({ tipo: 'pozo', obj: o, r: 1.7, corto: 'BEBER', label: 'Pozo' }); else if (o.tipo === 'encargo') cand.push({ tipo: 'cartel', obj: { x: o.x, y: o.y, w: 1, h: 1, texto: 'ENCARGO DE LA OFICINA · Un paquete que espera ser recogido. Acércate para tomarlo y vuelve con Lía.' }, r: 1.6, corto: 'RECOGER', label: 'Encargo por recoger' }); else if (o.tipo === 'perdido') cand.push({ tipo: 'cartel', obj: { x: o.x, y: o.y, w: 1, h: 1, texto: 'OBJETO PERDIDO · Brilla entre la hierba: es lo que alguien perdió. Acércate para tomarlo y devuélvelo con Lía.' }, r: 1.6, corto: '¡ES ESTO!', label: 'Objeto perdido' }); else if (o.tipo === 'pista') cand.push({ tipo: 'cartel', obj: { x: o.x, y: o.y, w: 1, h: 1, texto: 'PISTA · Huellas frescas y cosas revueltas: alguien merodea por aquí de noche. Acércate para registrarla.' }, r: 1.6, corto: 'PISTA', label: 'Pista de la investigación' }); else if (o.tipo === 'cautivo') cand.push({ tipo: 'cartel', obj: { x: o.x, y: o.y, w: 1, h: 1, texto: 'CAUTIVO · Está atado y asustado. Derrota a sus bandidos y acércate para liberarlo.' }, r: 1.7, corto: 'RESCATAR', label: 'Cautivo por rescatar' }); });
     return cand;
   },
@@ -4805,7 +4985,7 @@ U.Guardado = {
   serializar() {
     const E = U.Juego.estado; if (!E || !E.jugador) return null; const j = E.jugador;
     return {
-      juego: 'unipar', version: 1, guardadoEn: new Date().toISOString(), semilla: E.semilla,
+      juego: 'unipar', version: 1, mundoContinuo: true, guardadoEn: new Date().toISOString(), semilla: E.semilla,
       nombre: j.nombre, mapaId: E.mapaId, x: Math.round(j.x * 100) / 100, y: Math.round(j.y * 100) / 100,
       perfil: { elemento: j.perfil.elemento, elemento2: j.perfil.elemento2 || null, atributo: j.atributo, estilo: j.perfil.estilo, yangAfin: !!j.perfil.yangAfin },
       stats: Object.assign({}, j.stats), vida: Math.round(j.vida * 100) / 100, esencia: Math.round(j.esencia * 100) / 100,
@@ -4886,8 +5066,9 @@ U.Guardado = {
     E.dificultad = d.dificultad || 1; E.arena.ronda = d.ronda || 1; Object.assign(E.flags, d.flags || {});
     if (Array.isArray(d.objetivos)) d.objetivos.forEach((s, i) => { if (E.objetivos[i]) E.objetivos[i].estado = s; });
     E.objetivoIdx = Math.min(d.objetivoIdx || 0, E.objetivos.length - 1);
-    (d.npcs || []).forEach(sn => { const n = (E.roster || E.npcs).find(x => x.id === sn.id); if (n) { Object.assign(n.estados, sn.estados || {}); n.emocion = sn.emocion || n.emocion; n.saludado = !!sn.saludado; n.entreno = !!sn.entreno; if (sn.stockPociones != null) n.stockPociones = sn.stockPociones; if (Array.isArray(sn.hechos)) n.hechos = sn.hechos.slice(); if (sn.veces) n.veces = sn.veces; if (sn.mapa) n.mapa = sn.mapa; if (sn.x != null && sn.y != null) { n.x = sn.x; n.y = sn.y; } n.ruta = []; n.rutaKey = ''; n.viaje = null; } }); if (U.Juego.refrescarNpcs) U.Juego.refrescarNpcs();
+    (d.npcs || []).forEach(sn => { const n = (E.roster || E.npcs).find(x => x.id === sn.id); if (n) { Object.assign(n.estados, sn.estados || {}); n.emocion = sn.emocion || n.emocion; n.saludado = !!sn.saludado; n.entreno = !!sn.entreno; if (sn.stockPociones != null) n.stockPociones = sn.stockPociones; if (Array.isArray(sn.hechos)) n.hechos = sn.hechos.slice(); if (sn.veces) n.veces = sn.veces; if (sn.mapa) n.mapa = sn.mapa; if (sn.x != null && sn.y != null) { n.x = sn.x; n.y = sn.y; } if (!d.mundoContinuo) { if (n.mapa === 'bosque') { n.x += 4; n.y += 4; n.mapa = 'aldea'; } else if (n.mapa === 'aldea') { n.x += 58; n.y += 60; } } n.ruta = []; n.rutaKey = ''; n.viaje = null; } }); if (U.Juego.refrescarNpcs) U.Juego.refrescarNpcs();
     if (d.mapaId && d.mapaId !== 'aldea') U.Juego.cambiarMapa(d.mapaId, { x: d.x, y: d.y }, true);
+    else if (!d.mundoContinuo && d.x != null && d.y != null && d.x < 84 && d.y < 62) { j.x = d.x + 58; j.y = d.y + 60; }
     else { j.x = d.x != null ? d.x : j.x; j.y = d.y != null ? d.y : j.y; }
     E.camara.x = j.x * 16 - U.Render.viewW / 2; E.camara.y = j.y * 16 - U.Render.viewH / 2;
     E.ui = 'mundo';
