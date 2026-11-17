@@ -301,10 +301,11 @@ button{font-family:var(--fuente);color:var(--texto);cursor:pointer}
 
 /* Diálogo */
 #dialogo{position:absolute;inset:0;z-index:30;display:flex;align-items:flex-end;justify-content:center;padding:12px;background:linear-gradient(180deg,transparent 40%,rgba(5,7,15,.7))}
-.dlgCaja{width:min(720px,100%);display:flex;gap:12px;padding:12px;animation:dlgIn .25s ease-out;margin-bottom:calc(150px + env(safe-area-inset-bottom))}
+.dlgCaja{width:min(720px,100%);display:flex;gap:12px;padding:12px;animation:dlgIn .25s ease-out;margin-bottom:calc(150px + env(safe-area-inset-bottom));max-height:calc(100dvh - 174px - env(safe-area-inset-bottom));min-height:0}
 @keyframes dlgIn{from{opacity:0;transform:translateY(20px)}}
 #dlgCara{width:96px;height:96px;flex:0 0 96px;image-rendering:pixelated;border:3px solid var(--borde);background:#0e1530;align-self:flex-start}
-.dlgCuerpo{flex:1;min-width:0;display:grid;gap:6px}
+.dlgCuerpo{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column;gap:6px}
+.dlgCuerpo>*{flex:0 0 auto}
 .dlgCab{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .dlgCab b{font-size:15px;letter-spacing:1px}
 #dlgConfTxt{font-size:10px;color:var(--textoTenue);margin-left:auto}
@@ -312,11 +313,17 @@ button{font-family:var(--fuente);color:var(--texto);cursor:pointer}
 #dlgConfianza i{display:block;height:100%;width:50%;background:linear-gradient(90deg,var(--magenta),var(--exito));transition:width .3s}
 #dlgTexto{margin:0;font-size:14px;min-height:42px;color:var(--texto)}
 #dlgRazon{font-size:11px;color:var(--viento);min-height:14px}
-#dlgOpciones{display:grid;gap:5px}
+#dlgOpciones{display:grid;gap:5px;flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;touch-action:pan-y;overscroll-behavior:contain;padding-right:4px;scrollbar-width:thin;scrollbar-color:var(--agua) #0a0f24}
+#dlgOpciones::-webkit-scrollbar{width:9px}
+#dlgOpciones::-webkit-scrollbar-track{background:#0a0f24;border:1px solid var(--borde)}
+#dlgOpciones::-webkit-scrollbar-thumb{background:var(--agua);border:2px solid #0a0f24;border-radius:5px}
 #dlgOpciones button{text-align:left;background:#0e1530;border:2px solid var(--borde);padding:7px 10px;font-size:12px;color:var(--texto);box-shadow:0 3px 0 var(--sombra)}
 #dlgOpciones button:hover{border-color:var(--agua);background:var(--superficie)}
 #dlgOpciones button:active{transform:translateY(3px);box-shadow:none}
 #dlgOpciones button .k{color:var(--rayo);margin-right:6px}
+#dlgScrollAviso{display:none;text-align:center;font-size:11.5px;font-weight:bold;letter-spacing:.4px;color:#0b1020;background:var(--rayo);border:2px solid var(--borde);padding:5px 6px;animation:avisoPulso 1.5s ease-in-out infinite}
+#dlgScrollAviso.visible{display:block}
+@keyframes avisoPulso{0%,100%{filter:brightness(.88)}50%{filter:brightness(1.12)}}
 
 @media (hover:hover) and (pointer:fine){
   #joystick{opacity:.55;width:104px;height:104px}
@@ -331,12 +338,14 @@ button{font-family:var(--fuente);color:var(--texto);cursor:pointer}
   #objetivoDetalle{width:min(360px,calc(100vw - 20px))}
   #hintTeclado{display:none}
   #joystick{width:112px;height:112px}
-  .dlgCaja{margin-bottom:calc(160px + env(safe-area-inset-bottom));gap:8px;padding:8px}
+  .dlgCaja{margin-bottom:calc(160px + env(safe-area-inset-bottom));gap:8px;padding:8px;max-height:calc(100dvh - 184px - env(safe-area-inset-bottom))}
+  #dlgOpciones button{font-size:12.5px;padding:8px 10px}
   #dlgCara{width:64px;height:64px;flex-basis:64px}
   #dlgTexto{font-size:13px}
   #descansoInd{bottom:calc(268px + env(safe-area-inset-bottom))}
 }
 @media (max-height:460px){
+  .dlgCaja{margin-bottom:10px;max-height:calc(100dvh - 34px)}
   #controles{height:180px} #botones{transform:scale(.82);transform-origin:bottom right}
   #joystick{width:92px;height:92px} #objetivo{display:none} #objetivoDetalle{display:none}
 }
@@ -407,6 +416,7 @@ button{font-family:var(--fuente);color:var(--texto);cursor:pointer}
         <p id="dlgTexto"></p>
         <div id="dlgRazon"></div>
         <div id="dlgOpciones"></div>
+        <div id="dlgScrollAviso" role="note">▼ HAY MÁS OPCIONES ABAJO · DESLIZA PARA VERLAS ▼</div>
       </div>
     </div>
   </div>
@@ -3410,6 +3420,7 @@ U.Dialogo = {
     Object.keys(U.Economia.POLAINAS).forEach(clave => { const pd = U.Economia.POLAINAS[clave]; const tiene = j.polainas && j.polainas[clave]; mk((tiene ? '✓ Ya tienes: ' : 'Comprar ') + pd.nombre + ' · ' + pd.precio + ' 🪙 (vas ' + Math.round((1 - pd.velMult) * 100) + '% más lento; Velocidad crece ×' + pd.crecMult + ' en combate)', () => this.comprarPolainas(clave)); });
     mk(U.Economia.permisoVigente() ? '✓ Permiso de viajero vigente hasta el día ' + j.permisoHasta + ' (cubre viajes y arena; NO el torneo)' : 'Comprar PERMISO de viajero · 200 🪙 · 28 días (cubre viajes entre pueblos y la entrada a la arena; NO el torneo; se paga solo con 20 usos o más)', () => this.comprarPermiso());
     const s2 = document.createElement('button'); s2.innerHTML = '<span class="k">✕</span>Salir de la tienda'; s2.addEventListener('click', () => this.cerrar()); c.appendChild(s2);
+    c.scrollTop = 0; this.refrescarScroll();
   },
   pintarTiendaPrecios() {
     const E = U.Juego.estado, j = E.jugador; const u = Math.max(10, Math.min(1000, this.tiendaUnidades || 50));
@@ -3576,11 +3587,17 @@ U.Dialogo = {
     document.getElementById('dlgConfTxt').textContent = 'Confianza ' + Math.round(n.estados.confianza); document.getElementById('dlgConfianza').firstElementChild.style.width = n.estados.confianza + '%';
   },
   pintarRazon() { document.getElementById('dlgRazon').textContent = this.razon; },
+  refrescarScroll() {
+    const c = document.getElementById('dlgOpciones'); const a = document.getElementById('dlgScrollAviso'); if (!c || !a) return;
+    if (!this._scrollLigado) { this._scrollLigado = true; c.addEventListener('scroll', () => this.refrescarScroll(), { passive: true }); window.addEventListener('resize', () => this.refrescarScroll()); }
+    requestAnimationFrame(() => { const sobra = c.scrollHeight > c.clientHeight + 6; const falta = c.scrollHeight - c.scrollTop - c.clientHeight > 6; a.classList.toggle('visible', sobra && falta); });
+  },
   pintarOpciones() {
     const c = document.getElementById('dlgOpciones'); c.innerHTML = '';
-    if (this.esCartel) { const b = document.createElement('button'); b.innerHTML = '<span class="k">1</span>Cerrar'; b.addEventListener('click', () => this.cerrar()); c.appendChild(b); return; }
+    if (this.esCartel) { const b = document.createElement('button'); b.innerHTML = '<span class="k">1</span>Cerrar'; b.addEventListener('click', () => this.cerrar()); c.appendChild(b); c.scrollTop = 0; this.refrescarScroll(); return; }
     this.opciones.forEach((o, i) => { const b = document.createElement('button'); b.innerHTML = '<span class="k">' + (i + 1) + '</span>' + o.t; b.addEventListener('click', () => this.elegir(i)); c.appendChild(b); });
     const s = document.createElement('button'); s.innerHTML = '<span class="k">' + (this.opciones.length + 1) + '</span>Despedirse'; s.addEventListener('click', () => this.cerrar()); c.appendChild(s);
+    c.scrollTop = 0; this.refrescarScroll();
   },
   elegir(i) {
     const o = this.opciones[i]; if (!o) { this.cerrar(); return; }
