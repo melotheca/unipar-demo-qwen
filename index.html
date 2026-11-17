@@ -54,7 +54,9 @@ button{font-family:var(--fuente);color:var(--texto);cursor:pointer}
 #pausa,#panelFin{position:absolute;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;background:rgba(5,7,15,.78);backdrop-filter:blur(2px);padding:12px}
 .pausaCaja,.finCaja{width:min(680px,100%);max-height:92vh;display:flex;flex-direction:column}
 .pausaCab,.finCaja h2{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:var(--px) solid var(--borde);background:#0e1530;letter-spacing:1px;margin:0}
-.pausaCuerpo{padding:12px 14px;overflow-y:auto;display:grid;gap:12px}
+.pausaCuerpo{padding:12px 14px;overflow-y:auto;display:grid;gap:12px;flex:1 1 auto;min-height:0;-webkit-overflow-scrolling:touch;touch-action:pan-y;overscroll-behavior:contain}
+#pausaScrollAviso{display:none;text-align:center;font-size:11.5px;font-weight:bold;letter-spacing:.4px;color:#0b1020;background:var(--rayo);border-top:var(--px) solid var(--borde);border-bottom:var(--px) solid var(--borde);padding:5px 6px;animation:avisoPulso 1.5s ease-in-out infinite}
+#pausaScrollAviso.visible{display:block}
 .pausaCuerpo h3{margin:0 0 6px;font-size:12px;letter-spacing:1px;color:var(--rayo);text-transform:uppercase}
 .pausaCuerpo section{background:#0e1530;border:2px solid var(--borde);padding:8px 10px}
 .pausaPie{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:10px 14px;border-top:var(--px) solid var(--borde);background:#0e1530}
@@ -76,7 +78,7 @@ button{font-family:var(--fuente);color:var(--texto);cursor:pointer}
 .diario{list-style:none;margin:0;padding:0;font-size:12px}
 .diario li{padding:3px 0;color:var(--textoTenue)} .diario li.hecho{color:var(--exito)} .diario li.actual{color:var(--rayo)}
 .controlesLista{font-size:11px;color:var(--textoFrio);columns:2;column-gap:16px}
-.finCaja{padding-bottom:12px}
+.finCaja{padding-bottom:12px;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;touch-action:pan-y;overscroll-behavior:contain}
 .finCaja h2{font-size:20px;letter-spacing:2px;color:var(--rayo);border-bottom:var(--px) solid var(--borde)}
 .finCaja.derrota h2{color:var(--peligro)}
 #finSub{padding:8px 14px 0;margin:0;color:var(--textoFrio);font-size:13px}
@@ -126,7 +128,7 @@ button{font-family:var(--fuente);color:var(--texto);cursor:pointer}
 #testProgreso i.hecho{background:var(--agua);border-color:var(--agua)}
 #testProgreso i.actual{background:var(--rayo);border-color:var(--rayo);animation:parpadeo 1s steps(2) infinite}
 @keyframes parpadeo{50%{opacity:.4}}
-#testContenido{padding:14px;overflow-y:auto}
+#testContenido{padding:14px;overflow-y:auto;overflow-x:hidden;flex:1 1 auto;min-height:0;-webkit-overflow-scrolling:touch;touch-action:pan-y;overscroll-behavior:contain}
 #testPie{position:relative;margin-top:10px;font-size:11px;color:var(--textoTenue);letter-spacing:1px;text-transform:uppercase}
 
 /* Intro / título */
@@ -239,7 +241,7 @@ button{font-family:var(--fuente);color:var(--texto);cursor:pointer}
 #objTexto{display:none}
 .objFlecha{color:var(--rayo);font-size:11px;transition:transform .2s;flex-shrink:0}
 #objetivo.abierto .objFlecha{transform:rotate(180deg)}
-#objetivoDetalle{position:absolute;top:calc(100% + 6px);left:0;width:min(380px,calc(100vw - 20px));padding:12px 14px;font-size:13px;display:grid;gap:8px;z-index:30}
+#objetivoDetalle{position:absolute;top:calc(100% + 6px);left:0;width:min(380px,calc(100vw - 20px));padding:12px 14px;font-size:13px;display:grid;gap:8px;z-index:30;max-height:min(52dvh,480px);overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;touch-action:pan-y;overscroll-behavior:contain}
 #objetivoDetalle h3{margin:0;font-size:11px;letter-spacing:1px;color:var(--rayo);text-transform:uppercase}
 #objDetalleTexto{margin:0;line-height:1.45;color:var(--texto)}
 #objDetalleLista{list-style:none;margin:0;padding:0;display:grid;gap:4px;font-size:12px}
@@ -251,7 +253,7 @@ button{font-family:var(--fuente);color:var(--texto);cursor:pointer}
 #descansoInd{position:absolute;left:50%;bottom:calc(228px + env(safe-area-inset-bottom));transform:translateX(-50%);padding:8px 12px;display:grid;gap:4px;font-size:11px;text-align:center;min-width:220px}
 #descansoInd b{color:var(--exito);letter-spacing:1px}
 .barra.descanso{height:8px}.barra.descanso .relleno{background:var(--exito)}
-#infoDetalle{width:min(320px,calc(100vw - 20px));padding:10px 12px;font-size:12.5px;display:grid;gap:7px;z-index:30}
+#infoDetalle{width:min(320px,calc(100vw - 20px));padding:10px 12px;font-size:12.5px;display:grid;gap:7px;z-index:30;max-height:calc(100dvh - 130px);overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;touch-action:pan-y;overscroll-behavior:contain}
 #infoDetalle .filaDet{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
 #infoDetalle .ic{font-size:15px;line-height:1}
 #infoDetalle b{letter-spacing:.3px}
@@ -317,8 +319,11 @@ button{font-family:var(--fuente);color:var(--texto);cursor:pointer}
 #dlgConfTxt{font-size:10px;color:var(--textoTenue);margin-left:auto}
 #dlgConfianza{height:6px;background:#05070f;border:2px solid var(--borde)}
 #dlgConfianza i{display:block;height:100%;width:50%;background:linear-gradient(90deg,var(--magenta),var(--exito));transition:width .3s}
-#dlgTexto{margin:0;font-size:14px;min-height:42px;color:var(--texto)}
-#dlgRazon{font-size:11px;color:var(--viento);min-height:14px}
+#dlgTexto{margin:0;font-size:14px;min-height:42px;color:var(--texto);flex:0 1 auto;max-height:26dvh;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;touch-action:pan-y;overscroll-behavior:contain;padding-right:4px;scrollbar-width:thin;scrollbar-color:var(--agua) #0a0f24}
+#dlgTexto::-webkit-scrollbar{width:9px}
+#dlgTexto::-webkit-scrollbar-track{background:#0a0f24;border:1px solid var(--borde)}
+#dlgTexto::-webkit-scrollbar-thumb{background:var(--agua);border:2px solid #0a0f24;border-radius:5px}
+#dlgRazon{font-size:11px;color:var(--viento);min-height:14px;flex:0 1 auto;max-height:12dvh;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;touch-action:pan-y;overscroll-behavior:contain;padding-right:4px}
 #dlgOpciones{display:grid;gap:5px;flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;touch-action:pan-y;overscroll-behavior:contain;padding-right:4px;scrollbar-width:thin;scrollbar-color:var(--agua) #0a0f24}
 #dlgOpciones::-webkit-scrollbar{width:9px}
 #dlgOpciones::-webkit-scrollbar-track{background:#0a0f24;border:1px solid var(--borde)}
@@ -327,8 +332,8 @@ button{font-family:var(--fuente);color:var(--texto);cursor:pointer}
 #dlgOpciones button:hover{border-color:var(--agua);background:var(--superficie)}
 #dlgOpciones button:active{transform:translateY(3px);box-shadow:none}
 #dlgOpciones button .k{color:var(--rayo);margin-right:6px}
-#dlgScrollAviso{display:none;text-align:center;font-size:11.5px;font-weight:bold;letter-spacing:.4px;color:#0b1020;background:var(--rayo);border:2px solid var(--borde);padding:5px 6px;animation:avisoPulso 1.5s ease-in-out infinite}
-#dlgScrollAviso.visible{display:block}
+#dlgScrollAviso,#dlgTextoAviso{display:none;text-align:center;font-size:11.5px;font-weight:bold;letter-spacing:.4px;color:#0b1020;background:var(--rayo);border:2px solid var(--borde);padding:5px 6px;animation:avisoPulso 1.5s ease-in-out infinite}
+#dlgScrollAviso.visible,#dlgTextoAviso.visible{display:block}
 @keyframes avisoPulso{0%,100%{filter:brightness(.88)}50%{filter:brightness(1.12)}}
 
 @media (hover:hover) and (pointer:fine){
@@ -423,6 +428,7 @@ button{font-family:var(--fuente);color:var(--texto);cursor:pointer}
         <div id="dlgConfianza"><i></i></div>
         <p id="dlgTexto"></p>
         <div id="dlgRazon"></div>
+        <div id="dlgTextoAviso" role="note">▼ HAY MÁS TEXTO ABAJO · DESLIZA PARA LEERLO ▼</div>
         <div id="dlgOpciones"></div>
         <div id="dlgScrollAviso" role="note">▼ HAY MÁS OPCIONES ABAJO · DESLIZA PARA VERLAS ▼</div>
       </div>
@@ -435,6 +441,7 @@ button{font-family:var(--fuente);color:var(--texto);cursor:pointer}
       <div class="pausaCab"><b>⚙ AJUSTES · ESTA VIDA</b><button id="btnCerrarPausa" class="mini">✕</button></div>
       <div id="ajusteElemento"><div class="ajusteElemCaja"><h3>Elemento activo</h3><div id="simbolos" aria-label="Elementos (toca el símbolo para cambiar)"></div><p>Toca un símbolo para cambiar de elemento.</p></div></div>
       <div class="pausaCuerpo" id="pausaCuerpo"></div>
+      <div id="pausaScrollAviso" role="note">▼ HAY MÁS ABAJO · DESLIZA PARA VERLO ▼</div>
       <div class="pausaPie">
         <button id="btnSonido" class="mini" title="Silenciar / activar (M)">SONIDO: ON</button>
         <label>Dificultad <select id="selDificultad"><option value="0.75">Fácil</option><option value="1" selected>Normal</option><option value="1.35">Difícil</option></select></label>
@@ -3588,7 +3595,7 @@ U.Dialogo = {
     const cv = document.getElementById('dlgCara'); const ctx = cv.getContext('2d'); ctx.fillStyle = '#0e1530'; ctx.fillRect(0, 0, 64, 64); U.Render.iconoCanvas(cv, 'aldea', '#d9a441');
     this.decir(texto); this.razon = ''; this.pintarRazon(); this.opciones = []; this.pintarOpciones(); U.Audio.sfx('click');
   },
-  decir(t) { const tono = this.npc ? U.Emociones.tonos[this.npc.emocion] : U.Emociones.tonos.neutral; this.textoCompleto = (U.Diccionario && t) ? U.Diccionario.expandir(t, this.npc) : t; this.mostrado = 0; this.vel = tono.vel * (this.npc && U.Personas ? (U.Personas.de(this.npc.id).ritmo || 1) : 1); const p = document.getElementById('dlgTexto'); p.textContent = ''; p.style.color = this.npc ? tono.color : '#e8dcc8'; },
+  decir(t) { const tono = this.npc ? U.Emociones.tonos[this.npc.emocion] : U.Emociones.tonos.neutral; this.textoCompleto = (U.Diccionario && t) ? U.Diccionario.expandir(t, this.npc) : t; this.mostrado = 0; this.vel = tono.vel * (this.npc && U.Personas ? (U.Personas.de(this.npc.id).ritmo || 1) : 1); const p = document.getElementById('dlgTexto'); p.textContent = ''; p.scrollTop = 0; p.style.color = this.npc ? tono.color : '#e8dcc8'; this._textoListo = false; this._pasoScroll = 0; },
   pintarCara() {
     const n = this.npc; if (!n) return; const cv = document.getElementById('dlgCara'); const ctx = cv.getContext('2d'); ctx.imageSmoothingEnabled = false; ctx.clearRect(0, 0, 64, 64); U.Render.cara(ctx, n.id, n.emocion, 0, 0, 4);
     document.getElementById('dlgNombre').textContent = n.nombre.toUpperCase() + ' · ' + n.rol; const ch = document.getElementById('dlgEmocion'); ch.textContent = n.emocion; ch.style.color = U.Emociones.tonos[n.emocion].color; ch.style.borderColor = U.Emociones.tonos[n.emocion].color;
@@ -3597,8 +3604,9 @@ U.Dialogo = {
   pintarRazon() { document.getElementById('dlgRazon').textContent = this.razon; },
   refrescarScroll() {
     const c = document.getElementById('dlgOpciones'); const a = document.getElementById('dlgScrollAviso'); if (!c || !a) return;
-    if (!this._scrollLigado) { this._scrollLigado = true; c.addEventListener('scroll', () => this.refrescarScroll(), { passive: true }); window.addEventListener('resize', () => this.refrescarScroll()); }
-    requestAnimationFrame(() => { const sobra = c.scrollHeight > c.clientHeight + 6; const falta = c.scrollHeight - c.scrollTop - c.clientHeight > 6; a.classList.toggle('visible', sobra && falta); });
+    const t = document.getElementById('dlgTexto'); const at = document.getElementById('dlgTextoAviso');
+    if (!this._scrollLigado) { this._scrollLigado = true; c.addEventListener('scroll', () => this.refrescarScroll(), { passive: true }); if (t) t.addEventListener('scroll', () => this.refrescarScroll(), { passive: true }); window.addEventListener('resize', () => this.refrescarScroll()); }
+    requestAnimationFrame(() => { const sobra = c.scrollHeight > c.clientHeight + 6; const falta = c.scrollHeight - c.scrollTop - c.clientHeight > 6; a.classList.toggle('visible', sobra && falta); if (t && at) { const sobraT = t.scrollHeight > t.clientHeight + 6; const faltaT = t.scrollHeight - t.scrollTop - t.clientHeight > 6; at.classList.toggle('visible', sobraT && faltaT); } });
   },
   pintarOpciones() {
     const c = document.getElementById('dlgOpciones'); c.innerHTML = '';
@@ -3654,7 +3662,8 @@ U.Dialogo = {
   tecla(num) { if (!this.abierto) return; if (this.esCartel) { this.cerrar(); return; } if (num <= this.opciones.length) this.elegir(num - 1); else this.cerrar(); },
   actualizar(dt) {
     if (!this.abierto) return;
-    if (this.mostrado < this.textoCompleto.length) { this.mostrado = Math.min(this.textoCompleto.length, this.mostrado + this.vel * dt); document.getElementById('dlgTexto').textContent = this.textoCompleto.slice(0, Math.floor(this.mostrado)); if (Math.random() < dt * 8) U.Audio.sfx('dialogo'); }
+    if (this.mostrado < this.textoCompleto.length) { this.mostrado = Math.min(this.textoCompleto.length, this.mostrado + this.vel * dt); document.getElementById('dlgTexto').textContent = this.textoCompleto.slice(0, Math.floor(this.mostrado)); if (Math.random() < dt * 8) U.Audio.sfx('dialogo'); const paso = Math.floor(this.mostrado / 30); if (paso !== this._pasoScroll) { this._pasoScroll = paso; this.refrescarScroll(); } }
+    else if (!this._textoListo) { this._textoListo = true; this.refrescarScroll(); }
     if (this.npc) this.pintarCara();
   }
 };
@@ -3875,6 +3884,12 @@ U.HUD = {
     const bD = document.getElementById('btnDescargarPausa'); if (bD && !bD.dataset.cable) { bD.dataset.cable = '1'; bD.addEventListener('click', () => U.Guardado.descargar()); }
     const bCP = document.getElementById('btnCargarPausa'); if (bCP && !bCP.dataset.cable) { bCP.dataset.cable = '1'; bCP.addEventListener('click', () => U.Guardado.elegirArchivo()); }
     const bB = document.getElementById('btnBorrarAuto'); if (bB && !bB.dataset.cable) { bB.dataset.cable = '1'; bB.addEventListener('click', () => { if (bB.dataset.armado) { U.Guardado.borrarAuto(); bB.textContent = 'BORRADO ✓'; return; } bB.dataset.armado = '1'; bB.textContent = '¿SEGURO? TOCA OTRA VEZ'; setTimeout(() => { delete bB.dataset.armado; bB.textContent = 'BORRAR GUARDADO'; }, 3000); }); }
+    this.refrescarScrollPausa();
+  },
+  refrescarScrollPausa() {
+    const c = this.el.pausaCuerpo; const a = document.getElementById('pausaScrollAviso'); if (!c || !a) return;
+    if (!this._pausaScrollLigado) { this._pausaScrollLigado = true; c.addEventListener('scroll', () => this.refrescarScrollPausa(), { passive: true }); window.addEventListener('resize', () => this.refrescarScrollPausa()); }
+    requestAnimationFrame(() => { const sobra = c.scrollHeight > c.clientHeight + 6; const falta = c.scrollHeight - c.scrollTop - c.clientHeight > 6; a.classList.toggle('visible', sobra && falta); });
   },
   mostrarFin(tipo, datos) {
     const E = U.Juego.estado, j = E.jugador; const caja = this.el.fin.querySelector('.finCaja'); caja.classList.toggle('derrota', tipo === 'derrota');
