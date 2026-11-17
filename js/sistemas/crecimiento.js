@@ -25,7 +25,11 @@ U.Crecimiento = {
     const j = U.Juego.estado.jugador; const d = desafio == null ? 1 : desafio; const a = U.Atributos.de(j.atributo);
     const antes = j.maestria[elem] || 0; const c = base * d * (a.maestriaMult || 1) * ((j.reliquias && j.reliquias.artefactos && j.reliquias.artefactos.indexOf('fragmento') >= 0) ? 1.5 : 1) * 0.62 / this.curvaDiv(antes); // ✦ Fragmento del Meteorito: +50% · curva multiplicativa: cada tramo cuesta más que el anterior
     j.maestria[elem] = Math.min(100, antes + c); U.Juego.estado.resumen.maestria[elem] = (U.Juego.estado.resumen.maestria[elem] || 0) + (j.maestria[elem] - antes);
-    U.Habilidades.UMBRALES.forEach((u, i) => { if (antes < u && j.maestria[elem] >= u) { const h = U.Habilidades.elementos[elem][i]; U.HUD.toast('¡Maestría mínima alcanzada (' + u + '%): ya puedes aprender ' + h.nombre + ' de un Guía, por tarea! Las técnicas son POCAS y se aprenden, no caen solas.', 'exito'); U.HUD.banner(h.nombre.toUpperCase(), 1.6); U.Audio.sfx('unlock'); U.HUD.refrescarChips(); } });
+    // Aviso por TÉCNICA (no por umbral genérico): cada técnica tiene su propio umbral,
+    // así un elemento con 2 técnicas en el mismo umbral (Rayo: Destello y Relámpago en
+    // cadena, ambas al 40%) avisa las dos, y Juicio (70%) no se pierde ni se confunde
+    // con la anterior. UMBRALES [15,40,70] queda como dato histórico en habilidades.js.
+    U.Habilidades.elementos[elem].forEach(h => { if (antes < h.umbral && j.maestria[elem] >= h.umbral) { U.HUD.toast('¡Maestría mínima alcanzada (' + h.umbral + '%): ya puedes aprender ' + h.nombre + ' de un Guía, por tarea! Las técnicas son POCAS y se aprenden, no caen solas.', 'exito'); U.HUD.banner(h.nombre.toUpperCase(), 1.6); U.Audio.sfx('unlock'); U.HUD.refrescarChips(); } });
     if (antes < 100 && j.maestria[elem] >= 100) { U.HUD.banner('DOMINACIÓN DE ' + U.Elementos.nombre(elem).toUpperCase(), 2.5); U.Audio.sfx('victoria'); }
     return j.maestria[elem] - antes;
   },

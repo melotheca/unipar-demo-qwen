@@ -10,10 +10,10 @@ window.U = window.U || {};
 
 U.General = {
   saludo(h) {
-    if (h >= 5 && h < 12) return { palabra: 'Buenos días', frase: 'Buenos días.' };
-    if (h >= 12 && h < 19) return { palabra: 'Buenas tardes', frase: 'Buenas tardes.' };
-    if (h >= 19 && h < 21) return { palabra: 'Buenas tardes', frase: 'Buenas tardes, ya cae el sol.' };
-    return { palabra: 'Buenas noches', frase: 'Buenas noches.' };
+    if (h >= 20 || h < 4) return { palabra: 'Buenas noches', frase: 'Buenas noches.' };
+    if (h >= 4 && h < 12) return { palabra: 'Buenos días', frase: 'Buenos días.' };
+    if (h >= 12 && h < 16) return { palabra: 'Buenas tardes', frase: 'Buenas tardes.' };
+    return { palabra: 'Buenas tardes', frase: 'Buenas tardes, ya cae el sol.' };
   },
   cortesia: ['¿Cómo te trata el día?', 'Pasa, pasa, no te quedes en la puerta.', 'Qué bueno verte por aquí.', 'Cuídate en los caminos, ¿eh?'],
   clima: {

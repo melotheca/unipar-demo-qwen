@@ -66,7 +66,7 @@ U.Vida = {
       { d: 17, h: 20, m: 'aldea', x: 22.5, y: 32.5, l: 'la puerta de la tienda de Marisol', a: 'mira las pociones como si fueran tesoros' }
     ]
   },
-  esHoraCasa(n, h) { const per = U.Personas.de(n.id); const hc = per.horaCasa != null ? per.horaCasa : 21; return h >= hc || h < 5; },
+  esHoraCasa(n, h) { const per = U.Personas.de(n.id); const hc = per.horaCasa != null ? per.horaCasa : 21; return h >= hc || h < 4; },
   slotDe(n, hora, E) {
     if (n.id === 'aldric') return { mapa: 'oficina', x: 12.5, y: 3.5, lugar: 'la Oficina del Guardián', actividad: 'atiende la Oficina', fijo: true };
     if (n.id === 'lia') return { mapa: 'oficina', x: 8.5, y: 7.5, lugar: 'la Oficina, junto al tablón', actividad: 'lleva el tablón de misiones', fijo: true };
@@ -85,7 +85,7 @@ U.Vida = {
   },
   dondeEstaTexto(n) {
     if (!n) return 'no se sabe';
-    if (n.enCasa) return 'está en su casa, durmiendo (sale al amanecer, 05:00)';
+    if (n.enCasa) return 'está en su casa, durmiendo (sale al amanecer, 04:00)';
     const E = U.Juego.estado; const dest = n.destinoActual || this.slotDe(n, E ? U.Tiempo.hora(E) : 9, E);
     if (n.viaje) return 'va DE CAMINO hacia ' + dest.lugar + ' (' + dest.actividad + '): te lo puedes cruzar por el sendero';
     const mapaTxt = dest.mapa === 'oficina' ? '' : '';
@@ -121,12 +121,12 @@ U.Vida = {
     const region = q => enBosque(q) ? 'bosque' : enMontana(q) ? 'montana' : enDesierto(q) ? 'desierto' : enFuego(q) ? 'fuego' : enAgua(q) ? 'agua' : 'aldea';
     const rn = region(n), rp = region(p);
     if (rn !== rp) {
-      const puerta = { bosque: [{ x: 104.5, y: 110.5 }, { x: 68.5, y: 96.5 }], montana: [{ x: 280.5, y: 116.5 }, { x: 327.5, y: 75.5 }], desierto: [{ x: 120.5, y: 272.5 }, { x: 46.5, y: 265.5 }], agua: [{ x: 330.5, y: 196.5 }, { x: 360.5, y: 196.5 }], fuego: [{ x: 300.5, y: 290.5 }, { x: 330.5, y: 312.5 }], aldea: [{ x: 150.5, y: 246.5 }] };
+      const puerta = { bosque: [{ x: 104.5, y: 110.5 }, { x: 68.5, y: 96.5 }], montana: [{ x: 280.5, y: 116.5 }, { x: 327.5, y: 75.5 }], desierto: [{ x: 120.5, y: 272.5 }, { x: 46.5, y: 265.5 }], agua: [{ x: 330.5, y: 196.5 }, { x: 360.5, y: 196.5 }], fuego: [{ x: 300.5, y: 290.5 }, { x: 330.5, y: 312.5 }], aldea: [{ x: 149.5, y: 247.5 }] };
       const sale = puerta[rn] ? puerta[rn].slice().reverse() : [];
       let entra = puerta[rp] || [];
       let ruta = sale.slice();
       if (rn === 'fuego' && rp !== 'desierto') ruta = ruta.concat([{ x: 46.5, y: 265.5 }, { x: 120.5, y: 272.5 }]);
-      if (rn !== 'aldea' && rp !== 'aldea' && rn !== 'fuego') ruta.push({ x: 150.5, y: 246.5 });
+      if (rn !== 'aldea' && rp !== 'aldea' && rn !== 'fuego') ruta.push({ x: 149.5, y: 247.5 });
       ruta = ruta.concat(entra);
       ruta.forEach(q => pts.push(q));
       pts.push({ x: p.x, y: p.y });
@@ -140,11 +140,11 @@ U.Vida = {
     } else if (rn === 'aldea') {
       const este = n.x > 167, pEste = p.x > 167;
       if (este && !pEste) { pts.push({ x: 170.5, y: 246.5 }, { x: 158.5, y: 246.5 }); }
-      if (!este && pEste) { if (Math.hypot(n.x - 150.5, n.y - 246.5) > 3) pts.push({ x: 150.5, y: 246.5 }); pts.push({ x: 158.5, y: 246.5 }, { x: 170.5, y: 246.5 }); }
-      else if (p.x < 149 && p.y < 237) { if (Math.hypot(n.x - 150.5, n.y - 246.5) > 3.5) pts.push({ x: 150.5, y: 246.5 }); pts.push({ x: 145.5, y: 244.5 }, { x: 142.5, y: 244.5 }, { x: 142.5, y: 232 }); }
+      if (!este && pEste) { if (Math.hypot(n.x - 149.5, n.y - 247.5) > 3) pts.push({ x: 149.5, y: 247.5 }); pts.push({ x: 158.5, y: 246.5 }, { x: 170.5, y: 246.5 }); }
+      else if (p.x < 149 && p.y < 237) { if (Math.hypot(n.x - 149.5, n.y - 247.5) > 3.5) pts.push({ x: 149.5, y: 247.5 }); pts.push({ x: 145.5, y: 244.5 }, { x: 142.5, y: 244.5 }, { x: 142.5, y: 232 }); }
       else if (n.y < 237 && n.x < 149 && !(p.x < 149 && p.y < 237)) { pts.push({ x: 142.5, y: 244.5 }, { x: 147, y: 245.5 }); }
       else if (p.y > 253 && n.y <= 253) { pts.push({ x: 150.5, y: 250.5 }); }
-      else if (p.y <= 253 && n.y > 253) { pts.push({ x: 150.5, y: 250.5 }, { x: 150.5, y: 246.5 }); }
+      else if (p.y <= 253 && n.y > 253) { pts.push({ x: 150.5, y: 250.5 }, { x: 149.5, y: 247.5 }); }
     }
     pts.push({ x: p.x, y: p.y });
     return pts;
@@ -349,7 +349,7 @@ U.Vida = {
     { d: 17, h: 23, m: 'aldea', x: 214.5, y: 206.5, l: 'la plaza sur de la Metrópolis', a: 'cuenta el día y los encargos', fijo: true }
   ];
   U.Vida.RUTINAS.bram = [
-    { d: 5, h: 21, m: 'aldea', x: 150.5, y: 246.5, l: 'la huerta de Bruma, al sur de la Oficina', a: 'cuenta piedras y mira la plaza de lejos', fijo: true }
+    { d: 5, h: 21, m: 'aldea', x: 149.5, y: 247.5, l: 'la huerta de Bruma, al sur de la Oficina', a: 'cuenta piedras y mira la plaza de lejos', fijo: true }
   ];
   U.Vida.RUTINAS.dario = [
     { d: 5, h: 24, m: 'aldea', x: 297.5, y: 171.5, l: 'la plaza de Pueblo Tres Cruces', a: 'observa a los viajeros que cruzan', fijo: true }
@@ -361,5 +361,152 @@ U.Vida = {
   ];
   U.Vida.RUTINAS.petra = [
     { d: 5, h: 22, m: 'aldea', x: 68.5, y: 162.5, l: 'su tienda de antigüedades de Arcana', a: 'cataloga reliquias y recibe vendedores discretos', fijo: true }
+  ];
+  // Vecinos nuevos (H): un puesto de trabajo por la mañana, la plaza o la fogata
+  // de su pueblo al mediodía y un tercer lugar por la tarde. Coordenadas CONTINUAS
+  // directas (ya en el mapa continuo): se añaden DESPUÉS de la conversión OFFR de
+  // arriba, como nami/orin/zara/varek, para que no se les sume el desplazamiento.
+  // --- Bruma ---
+  U.Vida.RUTINAS.ines = [
+    { d: 5, h: 12, m: 'aldea', x: 171.5, y: 241.5, l: 'su panadería de Bruma', a: 'hornea el pan del día desde antes del amanecer', fijo: true },
+    { d: 12, h: 17, m: 'aldea', x: 149.5, y: 247.5, l: 'la plaza de Bruma, junto a la fogata', a: 'reparte el pan que sobró y escucha a los vecinos' },
+    { d: 17, h: 21, m: 'aldea', x: 152.5, y: 244.5, l: 'la plaza de Bruma, junto al pozo', a: 'cierra la panadería y charla con quien pasa' }
+  ];
+  U.Vida.RUTINAS.ramiro = [
+    { d: 5, h: 12, m: 'aldea', x: 173.5, y: 253.5, l: 'su taller de carpintería de Bruma', a: 'corta y lija en silencio, puerta a puerta', fijo: true },
+    { d: 12, h: 17, m: 'aldea', x: 149.5, y: 247.5, l: 'la plaza de Bruma, junto a la fogata', a: 'entrega un encargo y mira el día' },
+    { d: 17, h: 21, m: 'aldea', x: 152.5, y: 248.5, l: 'la plaza de Bruma', a: 'mira la plaza al caer el sol, con las manos quietas' }
+  ];
+  U.Vida.RUTINAS.carmen = [
+    { d: 5, h: 12, m: 'aldea', x: 141.5, y: 258.5, l: 'su telar de Bruma', a: 'teje mantas sin prisa, nudo a nudo', fijo: true },
+    { d: 12, h: 17, m: 'aldea', x: 150.5, y: 248.5, l: 'la plaza de Bruma, junto a la fogata', a: 'tiende una manta al sol y teje al aire libre' },
+    { d: 17, h: 21, m: 'aldea', x: 146.5, y: 243.5, l: 'la plaza de Bruma, junto al pozo', a: 'teje junto al pozo mientras cae la tarde' }
+  ];
+  U.Vida.RUTINAS.felipe = [
+    { d: 5, h: 12, m: 'aldea', x: 159.5, y: 258.5, l: 'la huerta del sur de Bruma', a: 'riega y siembra con Elena, surco a surco', fijo: true },
+    { d: 12, h: 17, m: 'aldea', x: 149.5, y: 247.5, l: 'la plaza de Bruma, junto a la fogata', a: 'descansa a la sombra y presume su cosecha' },
+    { d: 17, h: 21, m: 'aldea', x: 148.5, y: 249.5, l: 'la plaza de Bruma', a: 'recoge el día y riega por última vez' }
+  ];
+  U.Vida.RUTINAS.lucia = [
+    { d: 5, h: 12, m: 'aldea', x: 169.5, y: 263.5, l: 'su cesto de hierbas de Bruma', a: 'prepara remedios y seca lo recogido', fijo: true },
+    { d: 12, h: 17, m: 'aldea', x: 150.5, y: 248.5, l: 'la plaza de Bruma, junto a la fogata', a: 'reparte remedios a quien los pide' },
+    { d: 17, h: 21, m: 'aldea', x: 170.5, y: 246.5, l: 'la Ribera Húmeda, cruzando el puente', a: 'recoge hierbas junto al río al atardecer' }
+  ];
+  U.Vida.RUTINAS.tomas = [
+    { d: 5, h: 11, m: 'aldea', x: 155.5, y: 265.5, l: 'su casa de Bruma', a: 'practica la guardia con su palo, una y otra vez', fijo: true },
+    { d: 11, h: 16, m: 'aldea', x: 150.5, y: 248.5, l: 'la plaza de Bruma, junto a la fogata', a: 'mira entrenar a los grandes y toma notas' },
+    { d: 16, h: 20, m: 'aldea', x: 170.5, y: 246.5, l: 'el camino grande de Bruma', a: 'corre y entrena la guardia hasta que se pone el sol' }
+  ];
+  // --- Metrópolis ---
+  U.Vida.RUTINAS.elvira = [
+    { d: 5, h: 12, m: 'aldea', x: 223.5, y: 217.5, l: 'su herbolaria de la Metrópolis', a: 'pesa hierbas y prepara remedios sin regatear', fijo: true },
+    { d: 12, h: 17, m: 'aldea', x: 220.5, y: 200.5, l: 'la plaza de la Metrópolis', a: 'pasea por la plaza y huele el mercado' },
+    { d: 17, h: 21, m: 'aldea', x: 211.5, y: 191.5, l: 'la plaza de la Metrópolis, junto al pozo', a: 'recoge agua del pozo para los tés' }
+  ];
+  U.Vida.RUTINAS.rodrigo = [
+    { d: 5, h: 12, m: 'aldea', x: 197.5, y: 181.5, l: 'su fragua de la Metrópolis', a: 'forja acero al rojo cereza, martillo y paciencia', fijo: true },
+    { d: 12, h: 17, m: 'aldea', x: 220.5, y: 200.5, l: 'la plaza de la Metrópolis', a: 'entrega encargos y presume su acero' },
+    { d: 17, h: 21, m: 'aldea', x: 218.5, y: 204.5, l: 'la plaza de la Metrópolis', a: 'templa lo último del día y cierra la fragua' }
+  ];
+  U.Vida.RUTINAS.camila = [
+    { d: 5, h: 12, m: 'aldea', x: 213.5, y: 179.5, l: 'su taller de sastre de la Metrópolis', a: 'cose trajes de torneo junto a la ventana', fijo: true },
+    { d: 12, h: 17, m: 'aldea', x: 220.5, y: 200.5, l: 'la plaza de la Metrópolis', a: 'toma medidas en la plaza y enseña telas' },
+    { d: 17, h: 21, m: 'aldea', x: 216.5, y: 194.5, l: 'la plaza norte de la Metrópolis', a: 'cose al atardecer, puntada a puntada' }
+  ];
+  U.Vida.RUTINAS.andres = [
+    { d: 5, h: 12, m: 'aldea', x: 237.5, y: 181.5, l: 'su panadería de la Metrópolis', a: 'hornea para media ciudad desde antes del amanecer', fijo: true },
+    { d: 12, h: 17, m: 'aldea', x: 220.5, y: 200.5, l: 'la plaza de la Metrópolis', a: 'vende pan en la plaza y regala el del día anterior' },
+    { d: 17, h: 21, m: 'aldea', x: 240.5, y: 196.5, l: 'la plaza este de la Metrópolis', a: 'reparte pan por la plaza este' }
+  ];
+  U.Vida.RUTINAS.valeria = [
+    { d: 5, h: 12, m: 'aldea', x: 213.5, y: 189.5, l: 'la academia de la Metrópolis', a: 'enseña teoría de los elementos a los aspirantes', fijo: true },
+    { d: 12, h: 17, m: 'aldea', x: 220.5, y: 200.5, l: 'la plaza de la Metrópolis', a: 'revisa cuadernos en la plaza, sin excusas' },
+    { d: 17, h: 21, m: 'aldea', x: 219.5, y: 186.5, l: 'la plaza de la Metrópolis, junto al cartel', a: 'relee sus apuntes junto al cartel' }
+  ];
+  U.Vida.RUTINAS.jorge = [
+    { d: 5, h: 12, m: 'aldea', x: 233.5, y: 193.5, l: 'la puerta oeste de la Metrópolis', a: 'vigila quién entra y quién sale de la ciudad', fijo: true },
+    { d: 12, h: 17, m: 'aldea', x: 220.5, y: 200.5, l: 'la plaza de la Metrópolis', a: 'hace su ronda por la plaza' },
+    { d: 17, h: 21, m: 'aldea', x: 226.5, y: 210.5, l: 'la plaza sur de la Metrópolis', a: 'entrena la guardia en la plaza sur' }
+  ];
+  U.Vida.RUTINAS.sofia = [
+    { d: 5, h: 12, m: 'aldea', x: 207.5, y: 197.5, l: 'su rincón de trovadora de la Metrópolis', a: 'afina la voz y apunta historias de viajeros', fijo: true },
+    { d: 12, h: 17, m: 'aldea', x: 220.5, y: 200.5, l: 'la plaza de la Metrópolis', a: 'canta en la plaza por monedas y por gusto' },
+    { d: 17, h: 21, m: 'aldea', x: 197.5, y: 197.5, l: 'la puerta oeste de la Metrópolis', a: 'canta en la puerta oeste para los que llegan' }
+  ];
+  U.Vida.RUTINAS.diego = [
+    { d: 5, h: 12, m: 'aldea', x: 233.5, y: 209.5, l: 'su puesto de especias de la Metrópolis', a: 'vende pimienta y comino que huelen a otros continentes', fijo: true },
+    { d: 12, h: 17, m: 'aldea', x: 220.5, y: 200.5, l: 'la plaza de la Metrópolis', a: 'vocea sus especias en la plaza' },
+    { d: 17, h: 21, m: 'aldea', x: 237.5, y: 217.5, l: 'la plaza de la Metrópolis, junto al brasero', a: 'cuenta las monedas del día junto al brasero' }
+  ];
+  U.Vida.RUTINAS.paola = [
+    { d: 5, h: 12, m: 'aldea', x: 213.5, y: 213.5, l: 'su taller de alquimia de la Metrópolis', a: 'mezcla hierbas y minerales con medida exacta', fijo: true },
+    { d: 12, h: 17, m: 'aldea', x: 220.5, y: 200.5, l: 'la plaza de la Metrópolis', a: 'vende pociones que funcionan, sin sonreír' },
+    { d: 17, h: 21, m: 'aldea', x: 205.5, y: 217.5, l: 'la plaza de la Metrópolis, junto al brasero', a: 'destila junto al brasero al caer el sol' }
+  ];
+  // --- Vuelo Alto ---
+  U.Vida.RUTINAS.ariel = [
+    { d: 5, h: 12, m: 'aldea', x: 208.5, y: 47.5, l: 'su puesto de vigía de Vuelo Alto', a: 'mira el horizonte y lee lo que trae el viento', fijo: true },
+    { d: 12, h: 17, m: 'aldea', x: 219.5, y: 50.5, l: 'la plaza de Vuelo Alto, junto a la fogata', a: 'avisa si viene tormenta o viajeros' },
+    { d: 17, h: 21, m: 'aldea', x: 230.5, y: 52.5, l: 'la plaza alta de Vuelo Alto', a: 'vuela la cometa hasta que el viento se duerme' }
+  ];
+  U.Vida.RUTINAS.nora = [
+    { d: 5, h: 12, m: 'aldea', x: 226.5, y: 47.5, l: 'su telar de Vuelo Alto', a: 'teje mantas ligeras que abrigan mucho', fijo: true },
+    { d: 12, h: 17, m: 'aldea', x: 219.5, y: 50.5, l: 'la plaza de Vuelo Alto, junto a la fogata', a: 'tiende mantas al sol de la meseta' },
+    { d: 17, h: 21, m: 'aldea', x: 221.5, y: 52.5, l: 'la plaza de Vuelo Alto, junto al pozo', a: 'teje junto al pozo mientras cae la tarde' }
+  ];
+  // --- Chispa Alta ---
+  U.Vida.RUTINAS.ivan = [
+    { d: 5, h: 12, m: 'aldea', x: 345.5, y: 133.5, l: 'su fragua de Chispa Alta', a: 'forja con el calor de los rayos de la meseta', fijo: true },
+    { d: 12, h: 17, m: 'aldea', x: 355.5, y: 135.5, l: 'la plaza de Chispa Alta, junto a la fogata', a: 'entrega herramientas y presume su acero' },
+    { d: 17, h: 21, m: 'aldea', x: 349.5, y: 138.5, l: 'la plaza de Chispa Alta, junto al pozo', a: 'enfría el acero junto al pozo' }
+  ];
+  U.Vida.RUTINAS.lena = [
+    { d: 5, h: 12, m: 'aldea', x: 359.5, y: 143.5, l: 'su rincón de cantante de Chispa Alta', a: 'calienta la voz esperando el trueno', fijo: true },
+    { d: 12, h: 17, m: 'aldea', x: 355.5, y: 135.5, l: 'la plaza de Chispa Alta, junto a la fogata', a: 'canta en la plaza, con truenos o sin ellos' },
+    { d: 17, h: 21, m: 'aldea', x: 362.5, y: 143.5, l: 'la plaza este de Chispa Alta', a: 'canta al atardecer en la plaza este' }
+  ];
+  // --- Puerto Brisa Azul ---
+  U.Vida.RUTINAS.omar = [
+    { d: 5, h: 12, m: 'aldea', x: 363.5, y: 193.5, l: 'su rincón de pescador de Puerto Brisa Azul', a: 'prepara la caña y mira el lago en silencio', fijo: true },
+    { d: 12, h: 17, m: 'aldea', x: 368.5, y: 236.5, l: 'el muelle del Lago Brisa Azul', a: 'pesca en el muelle, sin prisa y sin palabras' },
+    { d: 17, h: 21, m: 'aldea', x: 364.5, y: 202.5, l: 'la plaza de Puerto Brisa Azul', a: 'mira el lago al atardecer desde la plaza' }
+  ];
+  U.Vida.RUTINAS.rosa = [
+    { d: 5, h: 12, m: 'aldea', x: 373.5, y: 191.5, l: 'su cocina de Puerto Brisa Azul', a: 'cocina pescado fresco para todo el puerto', fijo: true },
+    { d: 12, h: 17, m: 'aldea', x: 364.5, y: 202.5, l: 'la plaza de Puerto Brisa Azul', a: 'sirve caldo caliente en la plaza' },
+    { d: 17, h: 21, m: 'aldea', x: 372.5, y: 204.5, l: 'la plaza de Puerto Brisa Azul', a: 'cocina para el puerto al atardecer' }
+  ];
+  // --- Ceniza Viva ---
+  U.Vida.RUTINAS.hugo = [
+    { d: 5, h: 12, m: 'aldea', x: 318.5, y: 308.5, l: 'su horno de carbón de Ceniza Viva', a: 'hace carbón con la madera quemada, en silencio', fijo: true },
+    { d: 12, h: 17, m: 'aldea', x: 325.5, y: 309.5, l: 'la plaza de Aldea Ceniza Viva', a: 'vende carbón a las forjas en la plaza' },
+    { d: 17, h: 21, m: 'aldea', x: 313.5, y: 301.5, l: 'la Tierra Quemada, al oeste de Ceniza Viva', a: 'recoge madera quemada para el carbón de mañana' }
+  ];
+  U.Vida.RUTINAS.emma = [
+    { d: 5, h: 12, m: 'aldea', x: 332.5, y: 314.5, l: 'su torno de alfarera de Ceniza Viva', a: 'amasa barro y cuece ollas en los braseros', fijo: true },
+    { d: 12, h: 17, m: 'aldea', x: 325.5, y: 309.5, l: 'la plaza de Aldea Ceniza Viva', a: 'vende ollas y cántaros en la plaza' },
+    { d: 17, h: 21, m: 'aldea', x: 321.5, y: 313.5, l: 'la plaza oeste de Aldea Ceniza Viva', a: 'seca ollas al sol de la tarde' }
+  ];
+  // --- Raíz de Piedra ---
+  U.Vida.RUTINAS.pablo = [
+    { d: 5, h: 12, m: 'aldea', x: 145.5, y: 333.5, l: 'su cantera de Raíz de Piedra', a: 'corta piedra para las casas y los caminos', fijo: true },
+    { d: 12, h: 17, m: 'aldea', x: 148.5, y: 332.5, l: 'la plaza de Aldea Raíz de Piedra', a: 'entrega piedra y mira la plaza en silencio' },
+    { d: 17, h: 21, m: 'aldea', x: 156.5, y: 321.5, l: 'la plaza norte de Aldea Raíz de Piedra', a: 'deja piedra lista junto a la casa del norte' }
+  ];
+  U.Vida.RUTINAS.ana = [
+    { d: 5, h: 12, m: 'aldea', x: 151.5, y: 325.5, l: 'su cesto de raíces de Raíz de Piedra', a: 'prepara remedios con las raíces de entre las rocas', fijo: true },
+    { d: 12, h: 17, m: 'aldea', x: 148.5, y: 332.5, l: 'la plaza de Aldea Raíz de Piedra', a: 'reparte remedios en la plaza' },
+    { d: 17, h: 21, m: 'aldea', x: 139.5, y: 331.5, l: 'la plaza de Aldea Raíz de Piedra, junto al pozo', a: 'recoge raíces junto al pozo al atardecer' }
+  ];
+  // --- Arcana ---
+  U.Vida.RUTINAS.esteban = [
+    { d: 5, h: 12, m: 'aldea', x: 61.5, y: 157.5, l: 'su biblioteca de Arcana', a: 'ordena libros viejos y anota quién se lleva cuál', fijo: true },
+    { d: 12, h: 18, m: 'aldea', x: 64.5, y: 160.5, l: 'la plaza de Arcana, junto a la fogata', a: 'lee en la plaza y responde preguntas exactas' },
+    { d: 18, h: 22, m: 'aldea', x: 73.5, y: 153.5, l: 'la plaza de Arcana, junto al pozo', a: 'lee junto al pozo hasta que se apaga la luz' }
+  ];
+  U.Vida.RUTINAS.miriam = [
+    { d: 5, h: 12, m: 'aldea', x: 81.5, y: 169.5, l: 'su torre de astróloga de Arcana', a: 'anota lo que vio en el cielo y prepara el té', fijo: true },
+    { d: 12, h: 18, m: 'aldea', x: 64.5, y: 160.5, l: 'la plaza de Arcana, junto a la fogata', a: 'cuenta lo que dicen las estrellas, sin certezas' },
+    { d: 18, h: 22, m: 'aldea', x: 77.5, y: 169.5, l: 'la plaza de Arcana, junto al brasero', a: 'mira las estrellas desde la plaza, con té' }
   ];
 })();

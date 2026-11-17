@@ -84,7 +84,7 @@ U.Juego = {
     if (destino === 'bosque') {
       E.flags.visitoBosque = true;
       this.gestionarBandidos();
-      if (!silencioso) U.HUD.toast(U.Tiempo.esNoche(U.Tiempo.hora(E)) ? 'Bosque Susurrante de noche: los bandidos ya están entre los árboles.' : 'Bosque Susurrante de día: tranquilo. Los bandidos solo salen de noche (21:00–05:00) y sin campamento.', 'aviso');
+      if (!silencioso) U.HUD.toast(U.Tiempo.esNoche(U.Tiempo.hora(E)) ? 'Bosque Susurrante de noche: los bandidos ya están entre los árboles.' : 'Bosque Susurrante de día: tranquilo. Los bandidos solo salen de noche (20:00–04:00) y sin campamento.', 'aviso');
       if (E.objetivos[4] && E.objetivos[4].estado !== 'hecho') { E.objetivos[4].estado = 'hecho'; if (E.objetivoIdx === 4) this.siguienteObjetivo(); }
     }
     if (nuevo.spawnsAbiertos) nuevo.spawnsAbiertos.forEach(sp => { E.enemigos.push(U.Combate.crearEnemigo(sp[0], sp[1], sp[2], E.dificultad)); });
@@ -575,7 +575,7 @@ U.Juego = {
     // Partículas ambientales por zona (visibles, ligadas al clima de la zona)
     const z = E.zonaActual; E.ambienteT += dt;
     if (z && E.ambienteT > 0.08) { E.ambienteT = 0; const cx = E.camara.x / 16, cy = E.camara.y / 16, vw = U.Render.viewW / 16, vh = U.Render.viewH / 16; const rx = cx + Math.random() * vw, ry = cy + Math.random() * vh; const P = E.efectos.particulas;
-      if (z.id === 'cenizar' && P.length < 380) P.push({ x: rx, y: ry, dx: (Math.random() - 0.5) * 0.4, dy: -0.8 - Math.random() * 0.6, vida: 1.5, max: 1.5, color: Math.random() < 0.5 ? '#ff7a2f' : '#ffb347', tam: 1, grav: -0.2 });
+      if ((z.id === 'cenizar' || z.id === 'quemadaSur' || z.id === 'volcanes' || z.id === 'puebloFuego') && P.length < 380) P.push({ x: rx, y: ry, dx: (Math.random() - 0.5) * 0.4, dy: -0.8 - Math.random() * 0.6, vida: 1.5, max: 1.5, color: Math.random() < 0.5 ? '#ff7a2f' : '#ffb347', tam: 1, grav: -0.2 });
       else if (z.id === 'ribera' && P.length < 380) P.push({ x: rx, y: ry, dx: (Math.random() - 0.5) * 0.5, dy: (Math.random() - 0.5) * 0.3, vida: 2, max: 2, color: Math.random() < 0.5 ? '#bfefff' : '#7ef0c0', tam: 1, grav: 0 });
       else if (z.id === 'bosque' && P.length < 380 && Math.random() < 0.5) P.push({ x: rx, y: cy - 1, dx: 0.6 + Math.random() * 0.5, dy: 0.5 + Math.random() * 0.4, vida: 3, max: 3, color: Math.random() < 0.5 ? '#46a06a' : '#d9a441', tam: 2, grav: 0 });
       else if (z.id === 'arena' && P.length < 380 && Math.random() < 0.6) P.push({ x: cx - 1, y: ry, dx: 2 + Math.random(), dy: (Math.random() - 0.5) * 0.3, vida: 2.5, max: 2.5, color: 'rgba(219,191,133,.7)', tam: 1, grav: 0 });

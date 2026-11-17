@@ -89,7 +89,7 @@ U.Audio = {
     const z = E.zonaActual;
     this.musica(z && z.id === 'bosque' ? 'bosque' : z && z.id === 'desierto' ? 'desierto' : z && z.id === 'montana' ? 'montana' : 'aldea');
   },
-  ambiente(zona) { if (!this.ambGain) return; let g = 0; if (zona) { if (zona.id === 'ribera') g = 0.05; else if (zona.id === 'bosque') g = 0.02; else if (zona.id === 'cenizar') g = 0.025; else if (zona.id === 'arena') g = 0.015; } this.ambGain.gain.setTargetAtTime(g, this.ctx.currentTime, 0.5); },
+  ambiente(zona) { if (!this.ambGain) return; let g = 0; if (zona) { if (zona.id === 'ribera') g = 0.05; else if (zona.id === 'bosque') g = 0.02; else if (zona.id === 'cenizar' || zona.id === 'quemadaSur' || zona.id === 'volcanes' || zona.id === 'puebloFuego') g = 0.025; else if (zona.id === 'arena') g = 0.015; } this.ambGain.gain.setTargetAtTime(g, this.ctx.currentTime, 0.5); },
   actualizar() {
     if (!this.listo || this.silenciado || !this.escena) return; const p = this.patrones[this.escena]; if (!p) return; const c = this.ctx; const dur = 60 / p.bpm / 2;
     while (this.nextNota < c.currentTime + 0.25) {

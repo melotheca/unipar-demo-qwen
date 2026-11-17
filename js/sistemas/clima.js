@@ -118,7 +118,7 @@ U.Clima = {
     let t = E.zonaActual ? (E.zonaActual.temp != null ? E.zonaActual.temp : 0.5) : 0.5;
     const ct = E.clima ? E.clima.tipo : 'despejado';
     if (ct === 'calor') t += 0.3; else if (ct === 'lluvia') t -= 0.15; else if (ct === 'tormenta') t -= 0.2; else if (ct === 'niebla') t -= 0.08;
-    const h = U.Tiempo.hora(E); if (h >= 11 && h < 16) t += 0.06; if (h >= 21 || h < 5) t -= 0.08;
+    const h = U.Tiempo.hora(E); if (h >= 11 && h < 16) t += 0.06; if (U.Tiempo.esNoche(h)) t -= 0.08;
     return Math.max(0, Math.min(1, t));
   },
   // PRECIPITACIÓN 0..1: intensidad de lluvia / 4 afuera; bajo techo, 0 (no llueve dentro).

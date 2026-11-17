@@ -24,7 +24,7 @@ U.Dialogo = {
         { t: 'Saludarla con calidez', realidad: 74, energia: 4, resp: { pos: 'Quédate un momento. La calma también cura.', neg: '…hola.' }, et: 'saludo' },
         { t: 'Pedir una poción', realidad: 62, energia: 5, resp: { pos: 'Toma. Es una poción de +50 unidades, preparada a medida: cura 50 de Vida, y lo que sobre al tomarla se pierde. La recuperación automática solo llega al 25%: úsala cuando de verdad importe.', neg: 'Te la doy, pero no las desperdicies.' }, accion: 'pocion', et: 'pocion' },
         { t: 'Entrenar con Sora: meditación guiada (guía)', realidad: 66, energia: 8, resp: { pos: 'Siéntate conmigo en la calma: medita (tecla R) un total de 8 segundos y tu Mente y tu Yang respiran. Ya empezó: mira el contador.', neg: 'Respira.' }, accion: 'entrenoGuia', et: 'entrenar' },
-        { t: 'Preguntar por el descanso', realidad: 60, energia: 3, resp: { pos: 'Tu Vida se recupera sola siempre que estés bajo una cuarta parte de tu máximo, y se detiene justo ahí: el 25% es el tope de la recuperación automática en campo abierto. Pero si duermes en la fogata —interactúa con ella— el tiempo avanza hasta el siguiente momento del día (Amanecer, Mañana, Mediodía, Tarde, Atardecer o Noche) y despiertas con Vida y Esencia al cien por ciento, en la fase que toque. Un día completo dura veinte minutos y tiene 6 momentos: Amanecer 5–8, Mañana 8–12, Mediodía 12–15, Tarde 15–19, Atardecer 19–21 y Noche 21–5. La semana corre en el calendario: Lunes a Domingo, y cada medianoche suma un día a tu vida. La Esencia vuelve sola siempre, a ritmo constante: rápida fuera de combate, más lenta en combate, y golpeando con Yin recuperas aún más. Y quieto, meditando, también entrenas el Yang poco a poco: así se alcanza aunque el test no te haya dado afinidad. Y mira la barrita verde bajo tu Esencia: es tu CONDICIÓN — cien por ciento es estar en perfecta forma. Cada 10 de Esencia que gastas en total, baja 1; y entre más baja esté, más lento se recarga tu Esencia (nunca deja de recargarse, pero se nota). Se recupera muy despacio fuera de combate, según tu atributo, por hora de juego; en combate no se recupera. Dormir te la deja al cien por ciento de su máximo. Y si de verdad te cansas —si cae por debajo de 25— tu máximo crece 5, y dominar el Yin te da todavía más barra. Así que {descansar_bien}: pelear en mala condición es pelear a media máquina.', neg: 'Vida sola hasta el veinticinco por ciento. Para el cien: duerme en la fogata. Y ojo con la barrita verde: es tu condición, y frena tu recarga.' }, et: 'pregunta' },
+        { t: 'Preguntar por el descanso', realidad: 60, energia: 3, resp: { pos: 'Tu Vida se recupera sola siempre que estés bajo una cuarta parte de tu máximo, y se detiene justo ahí: el 25% es el tope de la recuperación automática en campo abierto. Pero si duermes en la fogata —interactúa con ella— el tiempo avanza hasta el siguiente momento del día (Madrugada, Amanecer, Mañana, Tarde, Atardecer o Noche) y despiertas con Vida y Esencia al cien por ciento, en la fase que toque. Un día completo dura veinte minutos y tiene 6 momentos: Madrugada 0–4, Amanecer 4–8, Mañana 8–12, Tarde 12–16, Atardecer 16–20 y Noche 20–0. La semana corre en el calendario: Lunes a Domingo, y cada medianoche suma un día a tu vida. La Esencia vuelve sola siempre, a ritmo constante: rápida fuera de combate, más lenta en combate, y golpeando con Yin recuperas aún más. Y quieto, meditando, también entrenas el Yang poco a poco: así se alcanza aunque el test no te haya dado afinidad. Y mira la barrita verde bajo tu Esencia: es tu CONDICIÓN — cien por ciento es estar en perfecta forma. Cada 10 de Esencia que gastas en total, baja 1; y entre más baja esté, más lento se recarga tu Esencia (nunca deja de recargarse, pero se nota). Se recupera muy despacio fuera de combate, según tu atributo, por hora de juego; en combate no se recupera. Dormir te la deja al cien por ciento de su máximo. Y si de verdad te cansas —si cae por debajo de 25— tu máximo crece 5, y dominar el Yin te da todavía más barra. Así que {descansar_bien}: pelear en mala condición es pelear a media máquina.', neg: 'Vida sola hasta el veinticinco por ciento. Para el cien: duerme en la fogata. Y ojo con la barrita verde: es tu condición, y frena tu recarga.' }, et: 'pregunta' },
         { t: 'Provocarla', realidad: 15, energia: 25, resp: { pos: '…¿Por qué harías eso?', neg: 'Fuera. Ahora.' }, et: 'provocar' }
       ]
     },
@@ -58,7 +58,7 @@ U.Dialogo = {
     elena: {
       saludo: { alegre: ['¡La huerta crece y yo con ella!'], sereno: ['Las plantas no tienen prisa. Nosotros tampoco deberíamos.'], neutral: ['Elena, granjera. De noche nos metemos todos en casa: a las 21:00 la aldea se vacía, no nos busques por la plaza.'], triste: ['La cosecha viene floja…'], enojado: ['No pises lo sembrado.'], asustado: ['¡Los bandidos del bosque… de noche ni me asomo!'] },
       opciones: [
-        { t: 'Preguntar por los horarios de la aldea', realidad: 62, energia: 4, resp: { pos: 'De día estamos fuera: plaza, tienda, huerta. Al caer la Noche (21:00) cada quien camina a SU casa y se mete dentro hasta el amanecer (05:00). El Guardián y Lía se quedan en la Oficina. Si nos necesitas, ven de día.', neg: 'De noche, en casa. De día, fuera.' }, et: 'pregunta' },
+        { t: 'Preguntar por los horarios de la aldea', realidad: 62, energia: 4, resp: { pos: 'De día estamos fuera: plaza, tienda, huerta. Al caer la Noche (20:00) cada quien camina a SU casa y se mete dentro hasta el amanecer (04:00). El Guardián y Lía se quedan en la Oficina. Si nos necesitas, ven de día.', neg: 'De noche, en casa. De día, fuera.' }, et: 'pregunta' },
         { t: 'Saludarla con calidez', realidad: 72, energia: 4, resp: { pos: 'Pasa, pasa. ¿Un té?', neg: '…hola.' }, et: 'saludo' }
       ]
     },
@@ -149,6 +149,223 @@ U.Dialogo = {
         { t: '💰 «Quiero trabajar para tu comprador.» (unirte)', realidad: 58, energia: 8, resp: { pos: '', neg: '' }, accion: 'orgPetraUnirse', et: 'pregunta' },
         { t: 'Dejar de trabajar para ellos (abandonar)', realidad: 55, energia: 6, resp: { pos: '', neg: '' }, accion: 'orgSalir', et: 'pregunta' },
         { t: 'Saludarla con elegancia', realidad: 70, energia: 4, resp: { pos: 'Modales. Qué raro y qué agradable.', neg: '…asiente con la cabeza.' }, et: 'saludo' }
+      ]
+    },
+    // --- Vecinos nuevos (H): guion propio, con su voz según personas.js ---
+    ines: {
+      saludo: { alegre: ['¡Pasa, pasa! El pan acaba de salir: todavía canta.', 'Buen día. Huele a pan, ¿verdad? Es que acaba de salir del horno.'], sereno: ['La masa ya está en el horno. Mientras sube, dime: ¿qué necesitas?'], neutral: ['Soy Inés, la panadera de Bruma. Me levanto antes que el sol para que la aldea despierte con pan caliente.'], triste: ['Hoy la masa salió floja… el calor la agria. Pero pan hay, no te preocupes.'] },
+      opciones: [
+        { t: 'Preguntar por su pan', realidad: 64, energia: 4, resp: { pos: 'Mi pan es de harina buena y horno de leña: cruje por fuera y es suave por dentro. El secreto es levantarse temprano y no tenerle miedo al fuego. ¿Quieres probar uno? Hoy salió redondo.', neg: 'Pan de horno de leña. Eso es todo el secreto.' }, et: 'pregunta' },
+        { t: 'Preguntar por la mañana en Bruma', realidad: 62, energia: 4, resp: { pos: 'A las cuatro ya estoy en el horno. El olor del pan despierta a media aldea antes que el sol: esa es mi forma de decir buenos días. Un día sin pan recién hecho es un día a medias, te lo digo yo.', neg: 'Madrugo. Huele a pan. Eso es la mañana.' }, et: 'pregunta' },
+        { t: 'Saludarla con calidez', realidad: 72, energia: 4, resp: { pos: 'Qué amable. Ven mañana temprano: te guardo un pan caliente.', neg: '…hola, mi cielo.' }, et: 'saludo' }
+      ]
+    },
+    ramiro: {
+      saludo: { alegre: ['Buen día. La madera está seca y la sierra, afilada. Día de trabajar.'], sereno: ['El taller está en silencio. Así me gusta: la madera no admite errores y yo tampoco.'], neutral: ['Ramiro, carpintero. Hago puertas, mesas y las vigas de media aldea. Habla poco y directo: ¿qué necesitas?'], triste: ['La humedad me torció una tabla buena… hoy no es día de encargar nada fino.'] },
+      opciones: [
+        { t: 'Preguntar por su oficio', realidad: 64, energia: 4, resp: { pos: 'Una puerta que cierra justo, una mesa que no cojea: eso es carpintería. La madera buena y seca no perdona las prisas, y yo no perdono la madera mala. Si me encargas algo, te lo hago para que dure.', neg: 'Madera buena, medidas exactas, sin prisas. Fin.' }, et: 'pregunta' },
+        { t: 'Pedirle un consejo de trabajo', realidad: 62, energia: 4, resp: { pos: 'El consejo es uno: mide dos veces, corta una. Lo demás es fuerza y paciencia. Y si algo sale mal, no lo escondas: la madera se nota cuando mientes.', neg: 'Mide dos veces. Corta una.' }, et: 'pregunta' },
+        { t: 'Saludarlo con respeto', realidad: 70, energia: 4, resp: { pos: 'Respeto. Eso me gusta.', neg: 'Ajá.' }, et: 'saludo' }
+      ]
+    },
+    carmen: {
+      saludo: { alegre: ['¡Qué día tan bueno para tejer! La lluvia mansa ya pasó y los hilos están contentos.', 'Pasa, pasa. El telar canta y la manta sale sola.'], sereno: ['Cada hilo tiene su humor y yo solo lo acompaño. Siéntate, si quieres ver.'], neutral: ['Soy Carmen, tejedora de Bruma. Tejo mantas, redes y las bufandas de media aldea.'], triste: ['Se me deshizo un nudo que llevaba horas… no pasa nada: todo tejido se puede volver a empezar.'] },
+      opciones: [
+        { t: 'Preguntar por sus tejidos', realidad: 64, energia: 4, resp: { pos: 'Mis mantas pesan lo justo y abrigan lo que deben: lana buena, nudos firmes y paciencia. Una bufanda mía dura inviernos enteros. El truco no es la prisa: es acompañar al hilo, no pelear con él.', neg: 'Lana buena y paciencia. Eso es tejer.' }, et: 'pregunta' },
+        { t: 'Preguntar por la lluvia mansa', realidad: 62, energia: 4, resp: { pos: 'La lluvia mansa es el mejor clima para tejer: todo suena a agua y a hilo, y nadie te apura. Con tormenta guardo el telar; con calor, los hilos se pegan a los dedos. Pero la lluvia mansa… esa es mi aliada.', neg: 'Lluvia mansa: el mejor clima para el telar.' }, et: 'pregunta' },
+        { t: 'Saludarla con calidez', realidad: 72, energia: 4, resp: { pos: 'Qué amable. Siéntate un rato: el telar no muerde.', neg: '…hola, mi cielo.' }, et: 'saludo' }
+      ]
+    },
+    felipe: {
+      saludo: { alegre: ['¡Hoy la huerta está el doble de verde! ¡La lluvia la pedía a gritos!', '¡Buen día! ¿Viste cómo crece lo sembrado? ¡Yo lo sembré!'], sereno: ['La tierra mojada al amanecer… eso no tiene precio. Bueno, sí: trabajo.'], neutral: ['Soy Felipe, granjero de Bruma. Trabajo la huerta del sur con Elena y quiero una parcela propia.'], triste: ['La tormenta me tumba lo sembrado… una noche así y todo se va al suelo.'] },
+      opciones: [
+        { t: 'Preguntar por la huerta', realidad: 64, energia: 4, resp: { pos: 'La huerta es paciencia: riegas temprano, siembras con cuidado y esperas. Ver crecer lo sembrado es lo mejor del oficio. Eso sí: el calor de mediodía tumba a cualquiera, así que a regar antes de que salga el sol fuerte.', neg: 'Se siembra, se riega y se espera. Así crece todo.' }, et: 'pregunta' },
+        { t: 'Preguntar por Elena', realidad: 62, energia: 4, resp: { pos: 'Elena me enseña todo: cuándo regar, cuándo sembrar, cuándo dejar quieta la tierra. Yo tengo más fuerza que experiencia, y lo sé. Pero aprendo rápido, ¿eh? Algún día tendré mi propia parcela.', neg: 'Elena es la que sabe. Yo aprendo.' }, et: 'pregunta' },
+        { t: 'Saludarlo', realidad: 70, energia: 4, resp: { pos: '¡Buen día! ¿Me ayudas a regar? Es broma… o no.', neg: '¡Hola!' }, et: 'saludo' }
+      ]
+    },
+    lucia: {
+      saludo: { alegre: ['¡Lluvia! ¡Las hierbas se despiertan y el cesto se llena solo!', 'Buen día. Huele a romero, ¿verdad? Lo acabo de recoger.'], sereno: ['Cada planta se conoce por su olor y cada olor, por su uso. Pregunta sin miedo.'], neutral: ['Soy Lucía, herbolaria de Bruma. Recojo hierbas en la Ribera y preparo remedios con Sora.'], triste: ['El calor me marchitó lo recogido… habrá que salir más temprano mañana.'] },
+      opciones: [
+        { t: 'Preguntar por sus remedios', realidad: 64, energia: 4, resp: { pos: 'Un remedio bueno no hace ruido: cura sin que lo notes. El romero al amanecer, la manzanilla para el susto, y siempre, siempre, preguntar antes de arrancar una planta. La tierra da, pero hay que pedir permiso.', neg: 'Hierbas, paciencia y no arrancar sin pedir.' }, et: 'pregunta' },
+        { t: 'Preguntar por la Ribera', realidad: 62, energia: 4, resp: { pos: 'La Ribera es mi despensa: junto al río crecen las mejores hierbas, mojadas y contentas. Eso sí: no cruces el puente sin mirar el agua, y no pises lo sembrado. Y si ves a Sora, dile que el romero ya está seco.', neg: 'Junto al río, las mejores hierbas.' }, et: 'pregunta' },
+        { t: 'Saludarla con calidez', realidad: 72, energia: 4, resp: { pos: 'Qué amable. ¿Un té de hierbas? Lo preparo en un momento.', neg: '…hola.' }, et: 'saludo' }
+      ]
+    },
+    tomas: {
+      saludo: { alegre: ['¡TÚ! ¿Viste entrenar a Kaelen? ¡Yo lo vi TODO! ¡Cuando sea guardia peleo como él!', '¡Día de correr hasta la arena y volver! ¿Vienes? ¿Vienes?'], sereno: ['Kaelen dice que la guardia se practica igual con lluvia que con sol. Yo le creo.'], neutral: ['¡Soy Tomás! Aprendiz de guardia de Bruma. Sigo a Kaelen a todas partes y practico con un palo. ¿Quieres ver cómo entreno?'], triste: ['La tormenta me mete en casa… y los truenos son el cielo entrenando, ¿verdad? …¿verdad?'] },
+      opciones: [
+        { t: 'Preguntar por Kaelen', realidad: 64, energia: 4, resp: { pos: '¡Kaelen es el mejor guardia de Bruma! Me enseña a vigilar, a correr y a no tenerle miedo a nada. Bueno… casi a nada. Me dijo «bien hecho» una vez, ¿sabías? ¡UNA VEZ! Yo quiero ser guardia de verdad antes de cumplir años.', neg: '¡Kaelen es el mejor! ¡Y yo voy a ser como él!' }, et: 'pregunta' },
+        { t: 'Verlo entrenar', realidad: 66, energia: 6, resp: { pos: '¡MIRA! ¡Un palo, dos pasos, giro! …¿viste? ¿Viste cómo lo hice? ¡Otra vez! ¡Otra vez!', neg: '¡Mira! …bueno, más o menos. ¡La próxima sí sale!' }, et: 'entrenar' },
+        { t: 'Saludarlo', realidad: 72, energia: 5, resp: { pos: '¡Hola, héroe! ¿Vamos a correr?', neg: '¡Hola!' }, et: 'saludo' }
+      ]
+    },
+    elvira: {
+      saludo: { alegre: ['Día claro: a tender hierbas al sol. Pasa, pero no toques los frascos.'], sereno: ['Mi tienda huele a romero y a menta desde la calle. Eso es buena señal.'], neutral: ['Soy Elvira, herbolaria de la Metrópolis. Preparo remedios para media ciudad. El precio es el precio: no regateo.'], triste: ['Hoy llegó un cliente que quería el remedio a medias. Los remedios a medias no curan: se lo dije y se fue.'] },
+      opciones: [
+        { t: 'Preguntar por sus remedios', realidad: 64, energia: 4, resp: { pos: 'Un remedio bien hecho se nota en el olor: hierbas secas, medida exacta y paciencia. Yo no vendo promesas: vendo lo que funciona. Si sabes lo que buscas, te lo preparo. Si no sabes, te pregunto y lo averiguamos.', neg: 'El precio es el precio. El remedio, el remedio.' }, et: 'pregunta' },
+        { t: 'Preguntar por la ciudad', realidad: 62, energia: 4, resp: { pos: 'La Metrópolis es grande y ruidosa, pero las hierbas son las mismas que en Bruma: solo cambia el precio. Aquí viene gente de todas las aldeas, y todos acaban buscando lo mismo: algo que los cure sin hacerles preguntas.', neg: 'Ciudad grande, hierbas iguales.' }, et: 'pregunta' },
+        { t: 'Saludarla con respeto', realidad: 70, energia: 4, resp: { pos: 'Respeto. Bien. ¿Qué buscas?', neg: 'Ajá.' }, et: 'saludo' }
+      ]
+    },
+    rodrigo: {
+      saludo: { alegre: ['¡Día perfecto! ¿Calor? Mi fragua trabaja sola con este sol. ¡A forjar!', '¡Ese es el espíritu! ¿Vienes por acero o solo a mirar cómo se hace?'], sereno: ['El acero al rojo cereza no espera a nadie. Habla mientras trabajo, si puedes seguirme.'], neutral: ['Rodrigo, herrero de la Metrópolis. Forjo para guardias, torneo y quien pague bien. Mi acero es el mejor del continente, y si lo dudas, pregúntale a mi martillo.'], triste: ['La lluvia me enfría la fragua… en la ciudad eso es casi un insulto.'] },
+      opciones: [
+        { t: 'Preguntar por su acero', realidad: 64, energia: 4, resp: { pos: 'Mi acero se forja con calor constante y sin atajos: al rojo cereza, martillo pesado, temple con paciencia. El acero barato de fuera se dobla con mirarlo; el mío aguanta torneos. Los encargos difíciles son mis favoritos: si es fácil, no vale la pena.', neg: 'Acero bueno, martillo pesado, sin regateos.' }, et: 'pregunta' },
+        { t: 'Pedirle un encargo', realidad: 62, energia: 6, resp: { pos: '¿Un encargo? Dime qué necesitas y cuánto pagas. Lo difícil lo hago hoy; lo imposible, mañana. Pero que no me regateen el oficio: el martillo no perdona y yo tampoco.', neg: 'Encargo sí. Regateo no.' }, et: 'pregunta' },
+        { t: 'Saludarlo con respeto', realidad: 70, energia: 4, resp: { pos: 'Respeto al oficio. Eso me gusta.', neg: 'Ajá.' }, et: 'saludo' }
+      ]
+    },
+    camila: {
+      saludo: { alegre: ['¡Día claro! ¡A tender telas al sol! ¡Mira qué colores!', '¡Qué bueno verte! Traigo telas nuevas y la aguja ya está impaciente.'], sereno: ['Un buen traje se nota antes de hablar. Siéntate: te tomo medidas mientras charlamos.'], neutral: ['Soy Camila, sastre de la Metrópolis. Coso trajes de torneo, capas de viaje y los uniformes de la guardia.'], triste: ['Me pidieron un traje para ayer… ¡para AYER! La aguja no corre tanto, por mucho que yo quiera.'] },
+      opciones: [
+        { t: 'Preguntar por sus trajes', realidad: 64, energia: 4, resp: { pos: 'Un traje de torneo tiene que aguantar golpes y verse bien al mismo tiempo: tela fuerte, costura firme y un color que se vea desde la grada. Las capas de viaje son otra cosa: ligeras, que no estorben al correr. Dime para qué lo quieres y te digo qué tela lleva.', neg: 'Tela buena, medidas exactas y sin prisas.' }, et: 'pregunta' },
+        { t: 'Preguntar por la guardia', realidad: 62, energia: 4, resp: { pos: 'Los uniformes de la guardia los coso yo: mismos colores, mismo corte, para que se reconozcan de lejos. Un guardia mal vestido es un guardia que nadie respeta, y eso no lo permito. Ni el viento me mueve los patrones: los sujeto con alfileres, como todo.', neg: 'Uniformes iguales, bien cosidos. Orden.' }, et: 'pregunta' },
+        { t: 'Saludarla con calidez', realidad: 72, energia: 4, resp: { pos: '¡Qué amable! Pasa: te enseño las telas nuevas.', neg: '…hola, mi cielo.' }, et: 'saludo' }
+      ]
+    },
+    andres: {
+      saludo: { alegre: ['¡Día de mercado grande! ¡Hoy horneo para media ciudad!', '¡Sol y mercado! ¡El pan vuela de las bandejas! ¡Pasa, pasa!'], sereno: ['El pan recién hecho y las mañanas de horno… no hay mejor forma de empezar el día.'], neutral: ['Soy Andrés, panadero de la Metrópolis. Horneo desde antes del amanecer. El pan del día anterior lo regalo a quien no puede pagarlo, sin decirlo.'], triste: ['Hoy me devolvieron un pan… un pan mío, devuelto. Eso duele más que el calor del horno.'] },
+      opciones: [
+        { t: 'Preguntar por su pan', realidad: 64, energia: 4, resp: { pos: 'Mi pan es de horno de leña y madrugada: se vende antes de que salga el sol, cuando la ciudad todavía huele a noche. El calor de la ciudad lo agria si no tienes cuidado, así que horneo el doble de temprano. Y el que sobra, se regala: un panadero no deja a nadie sin comer.', neg: 'Pan de madrugada, horno de leña. Eso es todo.' }, et: 'pregunta' },
+        { t: 'Preguntar por el mercado', realidad: 62, energia: 4, resp: { pos: 'El mercado de la Metrópolis es el corazón de la ciudad: aquí se cruzan peleadores, comerciantes y viajeros de todas las aldeas. Con lluvia la plaza se vacía y mi tienda se llena de olor a pan; con sol, el pan vuela. Nublado o no, se hornea igual.', neg: 'El mercado es la ciudad entera, en una plaza.' }, et: 'pregunta' },
+        { t: 'Saludarlo con calidez', realidad: 72, energia: 4, resp: { pos: '¡Qué amable! Toma, un pan caliente. Es de la casa.', neg: '…hola, mi cielo.' }, et: 'saludo' }
+      ]
+    },
+    valeria: {
+      saludo: { alegre: ['Día claro: clase completa, sin excusas. Siéntate y abre el cuaderno.'], sereno: ['La teoría también se entrena. Pregunta bien y te respondo bien.'], neutral: ['Soy Valeria, maestra de la academia de la Metrópolis. Enseño teoría de los elementos a los aspirantes. Exijo puntualidad, cuadernos limpios y preguntas buenas.'], triste: ['Hoy la clase se durmió con el calor… preguntas cortas y agua cerca, o no aprende nadie.'] },
+      opciones: [
+        { t: 'Preguntar por los elementos', realidad: 64, energia: 4, resp: { pos: 'Los elementos no son trucos: son teoría. Fuego, Agua, Tierra, Viento y Rayo, cada uno con su carácter y su costo. El que no estudia, gasta Esencia a lo loco y luego pregunta por qué se cansa. Tú: estudia primero, pelea después. Esa es la lección de hoy.', neg: 'Estudia la teoría. Luego pelea.' }, et: 'pregunta' },
+        { t: 'Preguntar por sus alumnos', realidad: 62, energia: 4, resp: { pos: 'Mis alumnos llegan tarde con niebla y con excusas. Las anoto todas. Pero los que leen, los que preguntan exacto… esos llegan lejos. La academia no es para el que más pega: es para el que más entiende. ¿Tú lees, o solo peleas?', neg: 'Alumnos que leen: esos llegan lejos.' }, et: 'pregunta' },
+        { t: 'Saludarla con respeto', realidad: 70, energia: 4, resp: { pos: 'Puntualidad y respeto. Así se empieza una clase.', neg: 'Ajá. Siéntate.' }, et: 'saludo' }
+      ]
+    },
+    jorge: {
+      saludo: { alegre: ['Día despejado y en orden. Así prospera la ciudad.'], sereno: ['La puerta oeste no se cierra: se vigila. Yo vigilo.'], neutral: ['Soy Jorge, guardia de la puerta oeste de la Metrópolis. Vigilo quién entra y quién sale. Conozco a los viajeros por la cara y a los problemas por el paso.'], triste: ['Hoy entró gente sin saludar… el desorden a la hora punta no se perdona, pero se registra.'] },
+      opciones: [
+        { t: 'Preguntar por la puerta oeste', realidad: 64, energia: 4, resp: { pos: 'Por esta puerta pasa todo: viajeros de Arcana, comerciantes de Bruma, peleadores de torneo. Mi trabajo es simple: que entre quien debe entrar y que no entre el desorden. Los que entran sin saludar los anoto. Los que saludan, pasan sin problemas.', neg: 'Se vigila quién entra. Orden, siempre.' }, et: 'pregunta' },
+        { t: 'Preguntar por Arcana', realidad: 62, energia: 4, resp: { pos: 'Al oeste: Pueblo Salina y, más lejos, Arcana, la ciudad de los magos. El camino es largo y recto. Si vas, ve con orden: los magos no perdonan el desorden, y yo no perdono que vuelvas sin avisar.', neg: 'Al oeste, Arcana. Camino largo.' }, et: 'pregunta' },
+        { t: 'Saludarlo con respeto', realidad: 70, energia: 4, resp: { pos: 'Orden y respeto. Pasa.', neg: 'Ajá.' }, et: 'saludo' }
+      ]
+    },
+    sofia: {
+      saludo: { alegre: ['¡Día claro! ¡Plaza llena y voz clara! ¡A cantar!', '¡El viento lleva mi voz hasta las calles! ¡Hoy canto para toda la ciudad!'], sereno: ['Las canciones cuentan las historias de las aldeas. Yo solo les pongo voz.'], neutral: ['Soy Sofía, trovadora de la Metrópolis. Canto en la plaza por monedas y por gusto.'], triste: ['La tormenta vació la plaza… ni los trovadores salimos con truenos. La plaza espera, y yo también.'] },
+      opciones: [
+        { t: 'Pedirle una canción', realidad: 66, energia: 6, resp: { pos: '¡Claro! Esta es de un viajero que cruzó el desierto sin agua y volvió contándolo: «caminó la sal, bebió del viento… y al final, el oasis lo encontró a él». ¿Te gustó? La exagero solo un poco.', neg: 'Una corta, entonces: «el viento canta, la plaza escucha».' }, et: 'pregunta' },
+        { t: 'Preguntar por las aldeas', realidad: 62, energia: 4, resp: { pos: 'He cantado en todas: Bruma huele a pan, Vuelo Alto a viento, Chispa Alta a tormenta y el Puerto, a caldo. Cada aldea tiene su canción, y yo me las sé todas… o casi todas. Las que no me sé, las invento. Solo un poco.', neg: 'Cada aldea tiene su canción.' }, et: 'pregunta' },
+        { t: 'Saludarla con calidez', realidad: 72, energia: 4, resp: { pos: '¡Qué amable! Esta canción va por ti.', neg: '…hola.' }, et: 'saludo' }
+      ]
+    },
+    diego: {
+      saludo: { alegre: ['¡Día despejado, día de ventas! ¡Pasa, pasa, mira sin compromiso… y con compromiso también!', '¡Cielo claro y bolsa llena! ¡Hoy se vende bien!'], sereno: ['Las especias son historia que se huele: cada una viene de lejos y cuenta de dónde.'], neutral: ['Soy Diego, comerciante de especias de la Metrópolis. Vendo pimienta, comino y cosas que huelen a otros continentes.'], triste: ['Lloviendo no vende nadie… bueno, casi nadie. El olor a especias mojadas me encanta, eso sí.'] },
+      opciones: [
+        { t: 'Preguntar por sus especias', realidad: 64, energia: 4, resp: { pos: 'Tengo pimienta que pica como un puño, comino que huele a desierto y mezclas que no te digo de dónde vienen: secreto de comerciante. Todo trato se hace con sonrisa, y todo trato bueno se repite. ¿Qué buscas? ¿Algo que pique, algo que perfume, o algo raro?', neg: 'Pimienta, comino y cosas raras. A precio amigo.' }, et: 'pregunta' },
+        { t: 'Preguntar por el mercado', realidad: 62, energia: 4, resp: { pos: 'El mercado es chisme sano y monedas que suenan: aquí se sabe quién llegó, quién se fue y quién busca qué. Con niebla los clientes llegan de sorpresa, y eso me encanta… si compran. Con tormenta, a cerrar el puesto y a contar monedas adentro.', neg: 'El mercado lo sabe todo. Y vende de todo.' }, et: 'pregunta' },
+        { t: 'Saludarlo', realidad: 70, energia: 4, resp: { pos: '¡Buen día! ¡Y buena compra, que es lo mismo!', neg: '…pasa, pasa.' }, et: 'saludo' }
+      ]
+    },
+    paola: {
+      saludo: { alegre: ['Día claro: a destilar al sol. Pasa, pero no toques los frascos.'], sereno: ['Las mezclas exactas no admiten prisas. Pregunta con calma y te respondo con calma.'], neutral: ['Soy Paola, alquimista de la Metrópolis. Mezclo hierbas y minerales en mi taller junto a la plaza. Mis pociones son caras porque funcionan, y lo digo sin sonreír.'], triste: ['Una mezcla se me evaporó con el calor… a trabajar más temprano mañana.'] },
+      opciones: [
+        { t: 'Preguntar por sus mezclas', realidad: 64, energia: 4, resp: { pos: 'La alquimia es medida: un gramo de más y la mezcla se arruina; un gramo de menos y no sirve. El calor evapora, el polvo arruina, la humedad engaña: por eso mido dos veces. Mis pociones cuestan porque funcionan. Las baratas… bueno, las baratas son baratas por algo.', neg: 'Medida exacta. Sin atajos.' }, et: 'pregunta' },
+        { t: 'Preguntar por las hierbas', realidad: 62, energia: 4, resp: { pos: 'Las hierbas las traen de Bruma y de Raíz de Piedra: romero, menta, raíces secas. Las seco yo misma, a la sombra, para que no pierdan el olor. El viento del mercado me trae olores nuevos: algunos sirven, otros no. El olfato no miente.', neg: 'Hierbas de Bruma y de Raíz. Secas a la sombra.' }, et: 'pregunta' },
+        { t: 'Saludarla con respeto', realidad: 70, energia: 4, resp: { pos: 'Respeto y preguntas exactas. Bien.', neg: 'Ajá.' }, et: 'saludo' }
+      ]
+    },
+    ariel: {
+      saludo: { alegre: ['¡Día claro! ¡Se ven las montañas enteras desde aquí! ¡La cometa llega más alto que ayer!', '¡Este viento es mi clima! ¡La cometa lo sabe antes que yo!'], sereno: ['El viento me cuenta las noticias antes que a nadie. Hoy trae… viajeros. Y calma.'], neutral: ['Soy Ariel, vigía de Vuelo Alto. Vuelo cometas desde la meseta y aviso cuando viene tormenta o viajeros.'], triste: ['Hoy no hay viento… los días sin viento son días sin noticias. La cometa duerme.'] },
+      opciones: [
+        { t: 'Preguntar por el viento', realidad: 64, energia: 4, resp: { pos: 'El viento de la meseta no es uno: es muchos. El de la mañana levanta la cometa; el de la tarde la empuja lejos; el de tormenta… ese avisa antes, si sabes escuchar. Yo escucho. Por eso soy vigía: el viento me habla y yo traduzco.', neg: 'El viento avisa antes. Yo escucho.' }, et: 'pregunta' },
+        { t: 'Preguntar por las cometas', realidad: 62, energia: 4, resp: { pos: 'Mi cometa es de tela ligera y varillas firmes: sube con el viento caliente y baja solo si yo quiero. Con niebla vuelo de memoria, como los viejos: desaparece y solo queda el hilo. ¿Quieres verla volar? Hoy el viento está de buen humor.', neg: 'Tela ligera, viento bueno. Así vuela.' }, et: 'pregunta' },
+        { t: 'Saludarlo', realidad: 70, energia: 4, resp: { pos: 'Buen viento te traiga. Y buen camino.', neg: '…hola.' }, et: 'saludo' }
+      ]
+    },
+    nora: {
+      saludo: { alegre: ['¡Día claro! ¡Se ve la Metrópolis desde el telar! ¡Bonito!', '¡El viento de la meseta seca la lana mejor que el sol! ¡Mi mejor ayudante!'], sereno: ['Tejo despacio, como pide la lana. Siéntate si quieres mirar.'], neutral: ['Soy Nora, tejedora de Vuelo Alto. Tejo con lana de la meseta y vendo mantas que pesan poco y abrigan mucho.'], triste: ['El calor me resecó las manos… a tejer bajo techo, con agua cerca.'] },
+      opciones: [
+        { t: 'Preguntar por sus mantas', realidad: 64, energia: 4, resp: { pos: 'Mis mantas son de lana de la meseta: ligeras como el viento y calientes como un abrazo. El viento me enseña los nudos: los que aguantan son los que se hacen despacio, sin prisa. Una manta mía dura inviernos enteros, y pesa menos que un pan.', neg: 'Lana de meseta, nudos lentos. Así salen.' }, et: 'pregunta' },
+        { t: 'Preguntar por Vuelo Alto', realidad: 62, energia: 4, resp: { pos: 'Vuelo Alto es viento, altura y silencio: desde aquí se ve todo el continente en un día claro. Con niebla, la meseta se vuelve lana sin tejer: todo suave y borroso. Aquí arriba el sol pega más fuerte, así que a tejer bajo techo.', neg: 'Viento, altura y silencio. Así es Vuelo Alto.' }, et: 'pregunta' },
+        { t: 'Saludarla con calidez', realidad: 72, energia: 4, resp: { pos: 'Qué amable. Siéntate: el telar canta bajito.', neg: '…hola.' }, et: 'saludo' }
+      ]
+    },
+    ivan: {
+      saludo: { alegre: ['¡TORMENTA! ¡El cielo forja rayos y yo forjo acero! ¡Mi clima!', '¡Buen día! ¡El acero no espera! ¿Vienes por herramientas o a mirar?'], sereno: ['La fragua está caliente y el martillo, listo. Habla claro: ¿qué necesitas?'], neutral: ['Iván, herrero de Chispa Alta. Forjo con el calor de los rayos que caen en la meseta. Mi acero huele a tormenta, y no admito que otro herrero sea mejor.'], triste: ['La lluvia mansa me enfría la fragua… en Chispa Alta eso es casi un insulto.'] },
+      opciones: [
+        { t: 'Preguntar por su acero', realidad: 64, energia: 4, resp: { pos: 'Mi acero se forja con rayo y paciencia: cada trueno es leña gratis para mi fragua, y cada golpe de martillo lleva el calor de la tormenta. Las herramientas que hago duran: no se rompen, no se doblan. El acero barato… ese ni lo toco.', neg: 'Acero de tormenta. Dura. Fin.' }, et: 'pregunta' },
+        { t: 'Preguntar por las tormentas', realidad: 62, energia: 4, resp: { pos: 'Aquí la tormenta no pasa: vive. Los rayos caen sin avisar, y yo los aprovecho: cuando truena, forjo. Cuando no truena, también forjo, pero con menos gracia. Si te asustan los truenos, no te acerques a la fragua con tormenta: las chispas vuelan.', neg: 'Tormenta: mi clima, mi leña.' }, et: 'pregunta' },
+        { t: 'Saludarlo con respeto', realidad: 70, energia: 4, resp: { pos: 'Respeto al oficio. Bien.', neg: 'Ajá.' }, et: 'saludo' }
+      ]
+    },
+    lena: {
+      saludo: { alegre: ['¡TORMENTA! ¡El cielo canta conmigo! ¡Mi momento!', '¡Día claro! ¡Plaza llena y voz clara! ¡A cantar!'], sereno: ['Mi voz se lleva bien con los rayos: cuando truena, canto más fuerte.'], neutral: ['Soy Lena, cantante de Chispa Alta. Canto cuando truena y dicen que soy la voz de la tormenta.'], triste: ['Hoy no hay trueno… los días sin trueno son días sin coro. Canto igual, pero no es lo mismo.'] },
+      opciones: [
+        { t: 'Pedirle una canción', realidad: 66, energia: 6, resp: { pos: '¡Claro! Esta va con trueno de fondo, aunque no haya trueno: «cayó el rayo en la meseta, y la meseta cantó…». ¿Te gustó? ¡Cuando truene de verdad suena el doble!', neg: 'Una corta: «trueno, voz y plaza».' }, et: 'pregunta' },
+        { t: 'Preguntar por Chispa Alta', realidad: 62, energia: 4, resp: { pos: 'Chispa Alta es cielo abierto y tormenta: aquí el Rayo cae fácil y la fragua de Iván nunca se enfría. Con niebla canto bajito, que todo se escucha raro; con sol, la plaza se llena. Y con tormenta… con tormenta soy yo la que manda.', neg: 'Cielo abierto, tormenta y voz.' }, et: 'pregunta' },
+        { t: 'Saludarla con calidez', realidad: 72, energia: 4, resp: { pos: '¡Qué amable! Esta canción va por ti, con truenos.', neg: '…hola.' }, et: 'saludo' }
+      ]
+    },
+    omar: {
+      saludo: { alegre: ['Día claro. Buen lago.'], sereno: ['El lago sube. Bien.'], neutral: ['Omar. Pescador. Pesco en el lago desde antes de que Nami naciera, según yo.'], triste: ['Calor. El lago se enturbia. Mal día.'] },
+      opciones: [
+        { t: 'Preguntar por la pesca', realidad: 64, energia: 4, resp: { pos: 'Pescar es esperar. El amanecer sobre el lago, la caña quieta, y el pez viene solo. Nublado pican; con calor bajan; con tormenta, nadie pesca. Ni yo. La prisa no pesca nada.', neg: 'Esperar. Eso es pescar.' }, et: 'pregunta' },
+        { t: 'Preguntar por el lago', realidad: 62, energia: 4, resp: { pos: 'El lago es grande y callado. El Río del Este lo alimenta y sigue al sur. Con niebla no se ve nada: se oye todo. Pesco de memoria cuando hay niebla. Y de día claro, se ve el fondo. Casi.', neg: 'Lago grande. Callado. Bueno.' }, et: 'pregunta' },
+        { t: 'Saludarlo', realidad: 70, energia: 4, resp: { pos: '…Buen día.', neg: '…Ajá.' }, et: 'saludo' }
+      ]
+    },
+    rosa: {
+      saludo: { alegre: ['¡Día claro! ¡Pescado fresco y plaza llena! ¡Hoy se cocina para todos!', '¡Lluvia! ¡Día de caldo caliente y puerto lleno!'], sereno: ['El caldo está al fuego y el pescado, fresco. Siéntate: comes en un momento.'], neutral: ['Soy Rosa, cocinera de Puerto Brisa Azul. Cocino pescado para todo el puerto y mi caldo es famoso hasta la Metrópolis.'], triste: ['El calor me echa a perder el pescado… a cocinar temprano o no se cocina.'] },
+      opciones: [
+        { t: 'Preguntar por su caldo', realidad: 64, energia: 4, resp: { pos: 'Mi caldo es pescado fresco del lago, leña buena y sazón que no se discute. Se cocina despacio, con el puerto entero oliéndolo. Hasta el mejor caldo se puede quemar, pero el mío no: lo vigilo como a un hijo. ¿Quieres un tazón? Te lo sirvo caliente.', neg: 'Caldo de pescado fresco. Famoso. Fin.' }, et: 'pregunta' },
+        { t: 'Preguntar por el puerto', realidad: 62, energia: 4, resp: { pos: 'El puerto vive del lago: Nami pesca en el muelle, Omar pesca en silencio y yo cocino lo que traen. Con lluvia, mi cocina se llena; con sol, la plaza se llena. Y con tormenta, cierro y guardo el pescado: ni el caldo sale con truenos.', neg: 'Lago, pesca y caldo. Eso es el puerto.' }, et: 'pregunta' },
+        { t: 'Saludarla con calidez', realidad: 72, energia: 4, resp: { pos: '¡Qué amable! Siéntate: un caldo te espera.', neg: '…hola, mi cielo.' }, et: 'saludo' }
+      ]
+    },
+    hugo: {
+      saludo: { alegre: ['Día claro. A hacer carbón.'], sereno: ['El carbón no necesita palabras. Yo tampoco.'], neutral: ['Hugo. Carbonero de Ceniza Viva. Hago carbón con la madera quemada y lo vendo a las forjas.'], triste: ['Lluvia. Mal día. El carbón se apaga.'] },
+      opciones: [
+        { t: 'Preguntar por el carbón', realidad: 64, energia: 4, resp: { pos: 'Carbón bien hecho: madera quemada, horno tapado y paciencia. El calor seco de la ceniza ayuda; la lluvia lo apaga. Lo vendo a las forjas: sin carbón bueno no hay acero bueno. El trabajo terminado es lo único que importa.', neg: 'Carbón bien hecho. Eso es todo.' }, et: 'pregunta' },
+        { t: 'Preguntar por Ceniza Viva', realidad: 62, energia: 4, resp: { pos: 'Ceniza Viva es fuego y silencio: la Tierra Quemada, los braseros que no se apagan y la ceniza que vuela con el viento. El frío de la montaña no llega aquí. Aquí se trabaja callado y se termina lo empezado.', neg: 'Fuego y silencio.' }, et: 'pregunta' },
+        { t: 'Saludarlo', realidad: 70, energia: 4, resp: { pos: '…Buen día.', neg: '…Ajá.' }, et: 'saludo' }
+      ]
+    },
+    emma: {
+      saludo: { alegre: ['¡Día claro! ¡A secar ollas al sol!', '¡Sol y barro! ¡Así salen las ollas buenas!'], sereno: ['El barro guarda el calor de la tierra. Amaso despacio: las prisas agrietan.'], neutral: ['Soy Emma, alfarera de Ceniza Viva. Hago ollas y cántaros con la arcilla de la Tierra Quemada y los cuezo en los braseros.'], triste: ['La lluvia me arruina el barro… hoy no se amasa. Se mira llover.'] },
+      opciones: [
+        { t: 'Preguntar por sus ollas', realidad: 64, energia: 4, resp: { pos: 'Una olla buena no tiene grietas: barro suave al amasar, torno parejo y brasero al rojo vivo. El viento seca el barro antes de tiempo, así que lo tapo; la ceniza se mete, así que lo limpio. Y cuando sale del horno entera… eso no tiene precio.', neg: 'Barro, torno y brasero. Sin prisas.' }, et: 'pregunta' },
+        { t: 'Preguntar por la Tierra Quemada', realidad: 62, energia: 4, resp: { pos: 'La Tierra Quemada es ceniza, brasas y calor seco: el suelo no quema a los suyos, y a los demás sí. Aquí la arcilla sale buena porque la tierra ya pasó por el fuego. Con niebla el barro se ve suave, bonito. Con lluvia… mejor no hablar.', neg: 'Ceniza, brasas y barro bueno.' }, et: 'pregunta' },
+        { t: 'Saludarla con calidez', realidad: 72, energia: 4, resp: { pos: 'Qué amable. Mira las ollas: si te gusta una, es tuya.', neg: '…hola.' }, et: 'saludo' }
+      ]
+    },
+    pablo: {
+      saludo: { alegre: ['Día claro: la piedra se ve entera. A cortar.'], sereno: ['La cantera en silencio… eso es trabajar bien.'], neutral: ['Pablo. Cantero de Raíz de Piedra. Corto piedra para las casas y los caminos.'], triste: ['Lluvia: la cantera se vuelve barro. Se corta igual, más despacio.'] },
+      opciones: [
+        { t: 'Preguntar por la piedra', realidad: 64, energia: 4, resp: { pos: 'La piedra buena y firme no se discute: se corta, se carga y se pone donde hace falta. La blanda se deshace; la buena dura siglos. Mi forma de querer es aparecer con una piedra justo cuando hace falta. Sin palabras.', neg: 'Piedra buena. Punto.' }, et: 'pregunta' },
+        { t: 'Preguntar por Raíz de Piedra', realidad: 62, energia: 4, resp: { pos: 'Raíz de Piedra es roca, silencio y trabajo: entre las rocas, las raíces curan y la piedra sostiene. El viento entre las rocas silba; yo lo conozco. Con niebla cada piedra es una sorpresa, y conozco todas.', neg: 'Roca y silencio.' }, et: 'pregunta' },
+        { t: 'Saludarlo', realidad: 70, energia: 4, resp: { pos: '…Buen día.', neg: '…Ajá.' }, et: 'saludo' }
+      ]
+    },
+    ana: {
+      saludo: { alegre: ['¡Lluvia! ¡Las raíces se ablandan y salen enteras! ¡El mejor día para recoger!', '¡Día claro! ¡A secar raíces al sol!'], sereno: ['La raíz cura porque no tiene prisa. Yo tampoco.'], neutral: ['Soy Ana, herbolaria de Raíz de Piedra. Recojo raíces y hierbas entre las rocas y preparo remedios para la aldea.'], triste: ['El calor marchita las raíces… a salir al amanecer, con cesto y sombrero.'] },
+      opciones: [
+        { t: 'Preguntar por sus remedios', realidad: 64, energia: 4, resp: { pos: 'Todo remedio empieza con un error curado: se recoge la raíz entera, sin arrancarla a lo bruto, se seca a la sombra y se prepara con calma. La raíz bien sacada cura; la mal sacada, ni eso. Y nunca arranques sin pedir: la tierra escucha.', neg: 'Raíces enteras, secas a la sombra.' }, et: 'pregunta' },
+        { t: 'Preguntar por las raíces', realidad: 62, energia: 4, resp: { pos: 'Entre las rocas crecen las mejores raíces: huelen más fuerte con niebla, así las encuentro. Con lluvia se ablandan y salen enteras; con calor, se esconden. Yo recojo de memoria, planta a planta, y el cesto siempre vuelve lleno.', neg: 'Entre las rocas, las mejores.' }, et: 'pregunta' },
+        { t: 'Saludarla con calidez', realidad: 72, energia: 4, resp: { pos: 'Qué amable. ¿Un té de raíces? Lo preparo en un momento.', neg: '…hola, mi cielo.' }, et: 'saludo' }
+      ]
+    },
+    esteban: {
+      saludo: { alegre: ['Día claro: la luz buena entra a la biblioteca. Pasa, pero en silencio.', 'Sol en Arcana: día de leer en serio.'], sereno: ['Los libros viejos no tienen prisa. Yo tampoco. Pregunta exacto y te respondo exacto.'], neutral: ['Soy Esteban, bibliotecario de Arcana. Cuido los libros de la ciudad de los magos y sé dónde está cada uno. Presto libros con una condición: que vuelvan.'], triste: ['Con este calor los libros se resecan… a cerrar ventanas y a cuidar el papel viejo.'] },
+      opciones: [
+        { t: 'Preguntar por los libros', realidad: 64, energia: 4, resp: { pos: 'La biblioteca guarda siglos: libros de teoría, de historia, de técnicas que ya nadie enseña. Cada uno tiene su estante y su lugar; el desorden en los estantes no se perdona. Si doblas una página, te lo anoto. Si lo devuelves a tiempo, te presto otro.', neg: 'Libros viejos, estantes en orden. Que vuelvan.' }, et: 'pregunta' },
+        { t: 'Preguntar por Arcana', realidad: 62, energia: 4, resp: { pos: 'Arcana es la ciudad de los magos: torres de estudio, braseros que no se apagan y hechiceros que cruzan el continente entero para venir a leer. Con niebla, la ciudad entera parece un libro viejo. Con lluvia, se lee y se pregunta: nadie se escapa.', neg: 'Torres, libros y braseros.' }, et: 'pregunta' },
+        { t: 'Saludarlo con respeto', realidad: 70, energia: 4, resp: { pos: 'Respeto y silencio. Así se entra a una biblioteca.', neg: '…asiente sin levantar la vista.' }, et: 'saludo' }
+      ]
+    },
+    miriam: {
+      saludo: { alegre: ['¡Día claro! ¡La noche será clara! ¡Lo sé!', '¡Sol de día, estrellas de noche! ¡Así me gusta!'], sereno: ['Las estrellas no se apagan. Yo las miro y digo lo que veo, sin adornarlo.'], neutral: ['Soy Miriam, astróloga de Arcana. Leo las estrellas desde la torre. La ciudad me consulta antes de las fiestas y después de las tormentas.'], triste: ['Las nubes tapan el cielo… las estrellas esperan. Yo también.'] },
+      opciones: [
+        { t: 'Preguntar por las estrellas', realidad: 64, energia: 4, resp: { pos: 'Las estrellas hablan bajito: hay que mirar sin prisa y sin pedir certezas. Yo digo lo que veo: una noche clara trae buen camino; un cielo nublado, paciencia. Y si me preguntas si vas a ganar el torneo… las estrellas no apuestan, y yo tampoco.', neg: 'Miro, digo lo que veo. Sin certezas.' }, et: 'pregunta' },
+        { t: 'Preguntar por el cielo de Arcana', realidad: 62, energia: 4, resp: { pos: 'El cielo de Arcana es el más limpio del continente: sin humo de fraguas ni luces de ciudad grande. Con viento, las nubes se van y las estrellas quedan. Con niebla, ni las estrellas se ven: día de té. Y con tormenta, el cielo habla fuerte. Yo escucho.', neg: 'El cielo más limpio del continente.' }, et: 'pregunta' },
+        { t: 'Saludarla con calidez', realidad: 72, energia: 4, resp: { pos: 'Qué amable. Las estrellas lo vieron venir. Yo también, casi.', neg: '…hola.' }, et: 'saludo' }
       ]
     }
   },

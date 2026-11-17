@@ -72,15 +72,15 @@ U.Grid = {
     [[16.5, 26.5], [8.5, 2.6], [61.5, 24.5], [47.5, 2.6], [10.5, 31.5]].forEach(p => { const cx = Math.floor(p[0]), cy = Math.floor(p[1]); for (let y = cy - 1; y <= cy + 1; y++) for (let x = cx - 1; x <= cx + 1; x++) if (x >= 0 && y >= 0 && x < W && y < H && tiles[y * W + x] !== T.AGUA) solidos[y * W + x] = 0; for (let i = objetos.length - 1; i >= 0; i--) { const o = objetos[i]; if (o.solido && (o.tipo === 'arbol' || o.tipo === 'roca') && Math.abs(o.x + 0.5 - p[0]) < 1.6 && Math.abs(o.y + 0.5 - p[1]) < 1.6) objetos.splice(i, 1); } });
     // Zonas de ambiente (la primera que coincide gana; la última cubre todo)
     const zonas = [
-      { id: 'aldea', nombre: 'Aldea de Bruma', x: 4, y: 12, w: 38, h: 32, humedad: 0.45, temp: 0.5, viento: 0.4, suelo: 'pavimento', icono: 'aldea', tinte: [255, 210, 140, 0.03] },
-      { id: 'ribera', nombre: 'Ribera Húmeda', x: 26, y: 4, w: 14, h: 40, humedad: 0.92, temp: 0.42, viento: 0.5, suelo: 'tierra', icono: 'agua', tinte: [60, 160, 255, 0.07] },
-      { id: 'cenizar', nombre: 'Campo de Ceniza', x: 42, y: 4, w: 19, h: 18, humedad: 0.08, temp: 0.95, viento: 0.55, suelo: 'ceniza', icono: 'fuego', tinte: [255, 120, 40, 0.09] },
-      { id: 'arena', nombre: 'Arena de Ecos', x: 41, y: 25, w: 19, h: 19, humedad: 0.25, temp: 0.6, viento: 0.75, suelo: 'arena', abierto: true, icono: 'arena', tinte: [255, 220, 120, 0.04] },
-      { id: 'lagoSur', nombre: 'Lago del Sur', x: 60, y: 44, w: 14, h: 14, humedad: 0.95, temp: 0.45, viento: 0.5, suelo: 'tierra', icono: 'agua', tinte: [60, 160, 255, 0.07] },
-      { id: 'quemado', nombre: 'Suelo Quemado', x: 73, y: 44, w: 11, h: 11, humedad: 0.06, temp: 0.97, viento: 0.5, suelo: 'ceniza', icono: 'fuego', tinte: [255, 120, 40, 0.09] },
-      { id: 'rocosa', nombre: 'Zona Rocosa', x: 55, y: 55, w: 13, h: 7, humedad: 0.3, temp: 0.5, viento: 0.45, suelo: 'tierra', icono: 'bosque', tinte: [150, 130, 90, 0.05] },
-      { id: 'acantilado', nombre: 'Acantilado de Viento', x: 51, y: 44, w: 9, h: 7, humedad: 0.4, temp: 0.45, viento: 0.95, suelo: 'tierra', abierto: true, icono: 'arena', tinte: [126, 240, 192, 0.05] },
-      { id: 'bosque', nombre: 'Bosque Susurrante', x: 0, y: 0, w: W, h: H, humedad: 0.55, temp: 0.4, viento: 0.22, suelo: 'tierra', icono: 'bosque', tinte: [40, 90, 60, 0.05] }
+      { id: 'aldea', nombre: 'Aldea de Bruma', x: 4, y: 12, w: 38, h: 32, humedad: 0.45, temp: 0.5, viento: 0.4, suelo: 'pavimento', icono: 'aldea', clima: 'aldea', tinte: [255, 210, 140, 0.03] },
+      { id: 'ribera', nombre: 'Ribera Húmeda', x: 26, y: 4, w: 14, h: 40, humedad: 0.92, temp: 0.42, viento: 0.5, suelo: 'tierra', icono: 'agua', clima: 'rio', tinte: [60, 160, 255, 0.07] },
+      { id: 'cenizar', nombre: 'Campo de Ceniza', x: 42, y: 4, w: 19, h: 18, humedad: 0.08, temp: 0.95, viento: 0.55, suelo: 'ceniza', icono: 'fuego', clima: 'fuego', tinte: [255, 120, 40, 0.09] },
+      { id: 'arena', nombre: 'Arena de Ecos', x: 41, y: 25, w: 19, h: 19, humedad: 0.25, temp: 0.6, viento: 0.75, suelo: 'arena', abierto: true, icono: 'arena', clima: 'aldea', tinte: [255, 220, 120, 0.04] },
+      { id: 'lagoSur', nombre: 'Lago del Sur', x: 60, y: 44, w: 14, h: 14, humedad: 0.95, temp: 0.45, viento: 0.5, suelo: 'tierra', icono: 'agua', clima: 'lago', tinte: [60, 160, 255, 0.07] },
+      { id: 'quemado', nombre: 'Suelo Quemado', x: 73, y: 44, w: 11, h: 11, humedad: 0.06, temp: 0.97, viento: 0.5, suelo: 'ceniza', icono: 'fuego', clima: 'fuego', tinte: [255, 120, 40, 0.09] },
+      { id: 'rocosa', nombre: 'Zona Rocosa', x: 55, y: 55, w: 13, h: 7, humedad: 0.3, temp: 0.5, viento: 0.45, suelo: 'tierra', icono: 'bosque', clima: 'montana', tinte: [150, 130, 90, 0.05] },
+      { id: 'acantilado', nombre: 'Acantilado de Viento', x: 51, y: 44, w: 9, h: 7, humedad: 0.4, temp: 0.45, viento: 0.95, suelo: 'tierra', abierto: true, icono: 'arena', clima: 'viento', tinte: [126, 240, 192, 0.05] },
+      { id: 'bosque', nombre: 'Bosque Susurrante', x: 0, y: 0, w: W, h: H, humedad: 0.55, temp: 0.4, viento: 0.22, suelo: 'tierra', icono: 'bosque', clima: 'bosque', tinte: [40, 90, 60, 0.05] }
     ];
     return { id: 'aldea', nombreMapa: 'Aldea de Bruma', ancho: W, alto: H, tiles, vari, objetos, solidos, zonas, arena: { x: AX, y: AY, r: AR }, ocultarRuna: false, inicio: { x: 16.5, y: 26.5 }, spawns: [[46, 31], [54, 31], [50, 38], [46, 37], [54, 37]], npcs: { kaelen: { x: 21.5, y: 22.5 }, sora: { x: 14.5, y: 26.5 }, torin: { x: 11.5, y: 20.5 }, marisol: { x: 22.5, y: 32.5 }, breno: { x: 18.5, y: 29.5 }, elena: { x: 8.5, y: 24.5 }, marco: { x: 27.5, y: 22.5 }, pipo: { x: 15.5, y: 21.5 } },
       salidas: [{ x: 6.5, y: 0, w: 4, h: 1.4, destino: 'bosque', spawn: { x: 28.5, y: 52.5 }, etiqueta: 'Bosque Susurrante' },
@@ -128,7 +128,7 @@ U.Grid = {
     const spawnsBandidos = [[24.5, 16.5], [32.5, 16.5], [28.5, 21.5], [21.5, 27.5], [36.5, 24.5]];
     spawnsBandidos.concat([[28.5, 41.5], [28.5, 52.5]]).forEach(p => { const cx = Math.floor(p[0]), cy = Math.floor(p[1]); for (let y = cy - 1; y <= cy + 1; y++) for (let x = cx - 1; x <= cx + 1; x++) if (x >= 0 && y >= 0 && x < W && y < H) solidos[y * W + x] = 0; for (let i = objetos.length - 1; i >= 0; i--) { const o = objetos[i]; if (o.solido && Math.abs(o.x + (o.w || 1) / 2 - p[0]) < 1.6 && Math.abs(o.y + (o.h || 1) / 2 - p[1]) < 1.6) objetos.splice(i, 1); } });
     const zonas = [
-      { id: 'bosque', nombre: 'Bosque Susurrante', x: 0, y: 0, w: W, h: H, humedad: 0.62, temp: 0.35, viento: 0.15, suelo: 'tierra', icono: 'bosque', tinte: [20, 70, 40, 0.10] }
+      { id: 'bosque', nombre: 'Bosque Susurrante', x: 0, y: 0, w: W, h: H, humedad: 0.62, temp: 0.35, viento: 0.15, suelo: 'tierra', icono: 'bosque', clima: 'bosque', tinte: [20, 70, 40, 0.10] }
     ];
     return { id: 'bosque', nombreMapa: 'Bosque Susurrante', ancho: W, alto: H, tiles, vari, objetos, solidos, zonas, arena: { x: 28, y: 12, r: 5 }, ocultarRuna: true, inicio: { x: 28.5, y: 52.5 }, spawns: [], spawnsBandidos: [[24.5, 16.5], [32.5, 16.5], [28.5, 21.5], [21.5, 27.5], [36.5, 24.5]], npcs: {},
       salidas: [{ x: 25.5, y: 54.6, w: 6, h: 1.4, destino: 'aldea', spawn: { x: 8.5, y: 2.6 }, etiqueta: 'Aldea de Bruma' }] };
@@ -161,8 +161,8 @@ U.Grid = {
     objetos.forEach(o => { if (o.solido) for (let y = o.y; y < o.y + o.h; y++) for (let x = o.x; x < o.x + o.w; x++) if (x >= 0 && y >= 0 && x < W && y < H) solidos[y * W + x] = 1; });
     [[2.5, 21.5], [20.5, 16.5], [34.5, 24.5], [24.5, 30.5], [45.5, 20.5]].forEach(p => { const cx = Math.floor(p[0]), cy = Math.floor(p[1]); for (let y = cy - 1; y <= cy + 1; y++) for (let x = cx - 1; x <= cx + 1; x++) if (x >= 0 && y >= 0 && x < W && y < H && tiles[y * W + x] !== T.AGUA) solidos[y * W + x] = 0; for (let i = objetos.length - 1; i >= 0; i--) { const o = objetos[i]; if (o.solido && (o.tipo === 'cactus' || o.tipo === 'roca') && Math.abs(o.x + 0.5 - p[0]) < 1.6 && Math.abs(o.y + 0.5 - p[1]) < 1.6) objetos.splice(i, 1); } });
     const zonas = [
-      { id: 'oasis', nombre: 'Oasis del Desierto', x: 36, y: 3, w: 18, h: 16, humedad: 0.85, temp: 0.6, viento: 0.4, suelo: 'tierra', icono: 'agua', tinte: [60, 160, 255, 0.05] },
-      { id: 'desierto', nombre: 'Desierto de Sal', x: 0, y: 0, w: W, h: H, humedad: 0.05, temp: 1, viento: 0.6, suelo: 'arena', abierto: true, icono: 'arena', tinte: [255, 190, 90, 0.08] }
+      { id: 'oasis', nombre: 'Oasis del Desierto', x: 36, y: 3, w: 18, h: 16, humedad: 0.85, temp: 0.6, viento: 0.4, suelo: 'tierra', icono: 'agua', clima: 'lago', tinte: [60, 160, 255, 0.05] },
+      { id: 'desierto', nombre: 'Desierto de Sal', x: 0, y: 0, w: W, h: H, humedad: 0.05, temp: 1, viento: 0.6, suelo: 'arena', abierto: true, icono: 'arena', clima: 'desierto', tinte: [255, 190, 90, 0.08] }
     ];
     return { id: 'desierto', nombreMapa: 'Desierto de Sal', ancho: W, alto: H, tiles, vari, objetos, solidos, zonas, arena: { x: 28, y: 30, r: 4 }, ocultarRuna: true, inicio: { x: 2.5, y: 21.5 }, spawns: [], spawnsAbiertos: [['brasa', 20.5, 16.5], ['ilusionista', 34.5, 24.5], ['bandido', 24.5, 30.5], ['ilusionista', 45.5, 20.5]], npcs: {},
       salidas: [{ x: 0, y: 19, w: 1.3, h: 6, destino: 'aldea', spawn: { x: 61.5, y: 24.5 }, etiqueta: 'Aldea de Bruma' }] };
@@ -193,7 +193,7 @@ U.Grid = {
     objetos.forEach(o => { if (o.solido) for (let y = o.y; y < o.y + o.h; y++) for (let x = o.x; x < o.x + o.w; x++) if (x >= 0 && y >= 0 && x < W && y < H) solidos[y * W + x] = 1; });
     [[20.5, 11.5], [27.5, 39.5]].forEach(p => { const cx = Math.floor(p[0]), cy = Math.floor(p[1]); for (let y = cy - 1; y <= cy + 1; y++) for (let x = cx - 1; x <= cx + 1; x++) if (x >= 0 && y >= 0 && x < W && y < H && !(x === 20 && (y === 10 || y === 11))) solidos[y * W + x] = 0; });
     [[27.5, 39.5], [22.5, 16.5], [17.5, 20.5], [32.5, 26.5], [24.5, 30.5]].forEach(p => { const cx = Math.floor(p[0]), cy = Math.floor(p[1]); for (let y = cy - 1; y <= cy + 1; y++) for (let x = cx - 1; x <= cx + 1; x++) if (x >= 0 && y >= 0 && x < W && y < H) solidos[y * W + x] = 0; for (let i = objetos.length - 1; i >= 0; i--) { const o = objetos[i]; if (o.solido && (o.tipo === 'roca' || o.tipo === 'arbol') && Math.abs(o.x + 0.5 - p[0]) < 1.6 && Math.abs(o.y + 0.5 - p[1]) < 1.6) objetos.splice(i, 1); } });
-    const zonas = [ { id: 'montana', nombre: 'Montaña Brumosa', x: 0, y: 0, w: W, h: H, humedad: 0.3, temp: 0.15, viento: 0.9, suelo: 'tierra', abierto: true, icono: 'bosque', tinte: [160, 190, 230, 0.06] } ];
+    const zonas = [ { id: 'montana', nombre: 'Montaña Brumosa', x: 0, y: 0, w: W, h: H, humedad: 0.3, temp: 0.15, viento: 0.9, suelo: 'tierra', abierto: true, icono: 'bosque', clima: 'montana', tinte: [160, 190, 230, 0.06] } ];
     return { id: 'montana', nombreMapa: 'Montaña Brumosa', ancho: W, alto: H, tiles, vari, objetos, solidos, zonas, arena: { x: 27, y: 20, r: 4 }, ocultarRuna: true, inicio: { x: 27.5, y: 39.5 }, spawns: [], spawnsAbiertos: [['ilusionista', 22.5, 16.5], ['ilusionista', 17.5, 20.5], ['chaman', 32.5, 26.5], ['veterano', 24.5, 30.5]], npcs: {},
       salidas: [{ x: 24.5, y: 40.6, w: 6, h: 1.4, destino: 'aldea', spawn: { x: 47.5, y: 2.6 }, etiqueta: 'Aldea de Bruma' }] };
   },
@@ -536,22 +536,22 @@ U.Grid = {
     for (let x = 0; x < W; x++) { set(x, 0, T.AGUA); set(x, 1, T.AGUA); set(x, H - 2, T.AGUA); set(x, H - 1, T.AGUA); }
     for (let y = 0; y < H; y++) { set(0, y, T.AGUA); set(1, y, T.AGUA); set(W - 2, y, T.AGUA); set(W - 1, y, T.AGUA); }
     // --- Zonas de ambiente de los asentamientos nuevos ---
-    zonas.push({ id: 'metropolis', nombre: 'La Metrópolis', x: 186, y: 168, w: 70, h: 62, humedad: 0.4, temp: 0.55, viento: 0.5, suelo: 'pavimento', icono: 'aldea', tinte: [200, 210, 255, 0.04] });
-    zonas.push({ id: 'vueloAlto', nombre: 'Aldea Vuelo Alto', x: 192, y: 36, w: 50, h: 50, humedad: 0.4, temp: 0.4, viento: 0.95, suelo: 'tierra', abierto: true, icono: 'arena', tinte: [126, 240, 192, 0.05] });
-    zonas.push({ id: 'chispaAlta', nombre: 'Aldea Chispa Alta', x: 332, y: 114, w: 48, h: 44, humedad: 0.35, temp: 0.5, viento: 0.8, suelo: 'tierra', abierto: true, icono: 'arena', tinte: [255, 225, 120, 0.05] });
-    zonas.push({ id: 'arcana', nombre: 'Arcana · Ciudad de los Magos', x: 40, y: 138, w: 50, h: 42, humedad: 0.5, temp: 0.5, viento: 0.45, suelo: 'pavimento', icono: 'aldea', tinte: [150, 120, 255, 0.05] });
-    zonas.push({ id: 'raizPiedra', nombre: 'Aldea Raíz de Piedra', x: 124, y: 308, w: 50, h: 44, humedad: 0.3, temp: 0.5, viento: 0.45, suelo: 'tierra', icono: 'bosque', tinte: [150, 130, 90, 0.05] });
-    zonas.push({ id: 'puebloAgua', nombre: 'Puerto Brisa Azul', x: 344, y: 172, w: 52, h: 46, humedad: 0.9, temp: 0.45, viento: 0.55, suelo: 'pavimento', icono: 'agua', tinte: [60, 160, 255, 0.06] });
-    zonas.push({ id: 'lagoEste', nombre: 'Lago Brisa Azul', x: 344, y: 216, w: 52, h: 34, humedad: 0.95, temp: 0.45, viento: 0.5, suelo: 'tierra', icono: 'agua', tinte: [60, 160, 255, 0.07] });
-    zonas.push({ id: 'rioEste', nombre: 'Río del Este', x: 322, y: 48, w: 20, h: 200, humedad: 0.92, temp: 0.42, viento: 0.5, suelo: 'tierra', icono: 'agua', tinte: [60, 160, 255, 0.07] });
-    zonas.push({ id: 'puebloFuego', nombre: 'Aldea Ceniza Viva', x: 306, y: 290, w: 48, h: 44, humedad: 0.07, temp: 0.96, viento: 0.5, suelo: 'ceniza', icono: 'fuego', tinte: [255, 120, 40, 0.09] });
-    zonas.push({ id: 'lagunaSerena', nombre: 'Laguna Serena', x: 228, y: 304, w: 42, h: 32, humedad: 0.9, temp: 0.45, viento: 0.45, suelo: 'tierra', icono: 'agua', tinte: [60, 160, 255, 0.06] });
-    zonas.push({ id: 'altoPino', nombre: 'Pueblo Alto Pino', x: 128, y: 108, w: 26, h: 24, humedad: 0.55, temp: 0.4, viento: 0.3, suelo: 'tierra', icono: 'bosque', tinte: [40, 90, 60, 0.05] });
-    zonas.push({ id: 'rocafirme', nombre: 'Pueblo Rocafirme', x: 240, y: 104, w: 26, h: 24, humedad: 0.35, temp: 0.45, viento: 0.6, suelo: 'tierra', icono: 'bosque', tinte: [150, 130, 90, 0.04] });
-    zonas.push({ id: 'tresCruces', nombre: 'Pueblo Tres Cruces', x: 288, y: 156, w: 26, h: 24, humedad: 0.5, temp: 0.5, viento: 0.45, suelo: 'tierra', icono: 'aldea', tinte: [255, 210, 140, 0.03] });
-    zonas.push({ id: 'salina', nombre: 'Pueblo Salina', x: 76, y: 194, w: 26, h: 24, humedad: 0.6, temp: 0.55, viento: 0.55, suelo: 'tierra', icono: 'agua', tinte: [230, 230, 210, 0.04] });
-    zonas.push({ id: 'vegaBaja', nombre: 'Pueblo Vega Baja', x: 234, y: 256, w: 26, h: 24, humedad: 0.55, temp: 0.55, viento: 0.4, suelo: 'tierra', icono: 'aldea', tinte: [120, 180, 90, 0.04] });
-    zonas.push({ id: 'brasaChica', nombre: 'Pueblo Brasa Chica', x: 280, y: 250, w: 26, h: 24, humedad: 0.2, temp: 0.8, viento: 0.5, suelo: 'ceniza', icono: 'fuego', tinte: [255, 120, 40, 0.05] });
+    zonas.push({ id: 'metropolis', nombre: 'La Metrópolis', x: 186, y: 168, w: 70, h: 62, humedad: 0.4, temp: 0.55, viento: 0.5, suelo: 'pavimento', icono: 'aldea', clima: 'metropolis', tinte: [200, 210, 255, 0.04] });
+    zonas.push({ id: 'vueloAlto', nombre: 'Aldea Vuelo Alto', x: 192, y: 36, w: 50, h: 50, humedad: 0.4, temp: 0.4, viento: 0.95, suelo: 'tierra', abierto: true, icono: 'arena', clima: 'viento', tinte: [126, 240, 192, 0.05] });
+    zonas.push({ id: 'chispaAlta', nombre: 'Aldea Chispa Alta', x: 332, y: 114, w: 48, h: 44, humedad: 0.35, temp: 0.5, viento: 0.8, suelo: 'tierra', abierto: true, icono: 'arena', clima: 'rayo', tinte: [255, 225, 120, 0.05] });
+    zonas.push({ id: 'arcana', nombre: 'Arcana · Ciudad de los Magos', x: 40, y: 138, w: 50, h: 42, humedad: 0.5, temp: 0.5, viento: 0.45, suelo: 'pavimento', icono: 'aldea', clima: 'aldea', tinte: [150, 120, 255, 0.05] });
+    zonas.push({ id: 'raizPiedra', nombre: 'Aldea Raíz de Piedra', x: 124, y: 308, w: 50, h: 44, humedad: 0.3, temp: 0.5, viento: 0.45, suelo: 'tierra', icono: 'bosque', clima: 'tierra', tinte: [150, 130, 90, 0.05] });
+    zonas.push({ id: 'puebloAgua', nombre: 'Puerto Brisa Azul', x: 344, y: 172, w: 52, h: 46, humedad: 0.9, temp: 0.45, viento: 0.55, suelo: 'pavimento', icono: 'agua', clima: 'agua', tinte: [60, 160, 255, 0.06] });
+    zonas.push({ id: 'lagoEste', nombre: 'Lago Brisa Azul', x: 344, y: 216, w: 52, h: 34, humedad: 0.95, temp: 0.45, viento: 0.5, suelo: 'tierra', icono: 'agua', clima: 'lago', tinte: [60, 160, 255, 0.07] });
+    zonas.push({ id: 'rioEste', nombre: 'Río del Este', x: 322, y: 48, w: 20, h: 200, humedad: 0.92, temp: 0.42, viento: 0.5, suelo: 'tierra', icono: 'agua', clima: 'rio', tinte: [60, 160, 255, 0.07] });
+    zonas.push({ id: 'puebloFuego', nombre: 'Aldea Ceniza Viva', x: 306, y: 290, w: 48, h: 44, humedad: 0.07, temp: 0.96, viento: 0.5, suelo: 'ceniza', icono: 'fuego', clima: 'fuego', tinte: [255, 120, 40, 0.09] });
+    zonas.push({ id: 'lagunaSerena', nombre: 'Laguna Serena', x: 228, y: 304, w: 42, h: 32, humedad: 0.9, temp: 0.45, viento: 0.45, suelo: 'tierra', icono: 'agua', clima: 'lago', tinte: [60, 160, 255, 0.06] });
+    zonas.push({ id: 'altoPino', nombre: 'Pueblo Alto Pino', x: 128, y: 108, w: 26, h: 24, humedad: 0.55, temp: 0.4, viento: 0.3, suelo: 'tierra', icono: 'bosque', clima: 'bosque', tinte: [40, 90, 60, 0.05] });
+    zonas.push({ id: 'rocafirme', nombre: 'Pueblo Rocafirme', x: 240, y: 104, w: 26, h: 24, humedad: 0.35, temp: 0.45, viento: 0.6, suelo: 'tierra', icono: 'bosque', clima: 'montana', tinte: [150, 130, 90, 0.04] });
+    zonas.push({ id: 'tresCruces', nombre: 'Pueblo Tres Cruces', x: 288, y: 156, w: 26, h: 24, humedad: 0.5, temp: 0.5, viento: 0.45, suelo: 'tierra', icono: 'aldea', clima: 'aldea', tinte: [255, 210, 140, 0.03] });
+    zonas.push({ id: 'salina', nombre: 'Pueblo Salina', x: 76, y: 194, w: 26, h: 24, humedad: 0.6, temp: 0.55, viento: 0.55, suelo: 'tierra', icono: 'agua', clima: 'desierto', tinte: [230, 230, 210, 0.04] });
+    zonas.push({ id: 'vegaBaja', nombre: 'Pueblo Vega Baja', x: 234, y: 256, w: 26, h: 24, humedad: 0.55, temp: 0.55, viento: 0.4, suelo: 'tierra', icono: 'aldea', clima: 'pradera', tinte: [120, 180, 90, 0.04] });
+    zonas.push({ id: 'brasaChica', nombre: 'Pueblo Brasa Chica', x: 280, y: 250, w: 26, h: 24, humedad: 0.2, temp: 0.8, viento: 0.5, suelo: 'ceniza', icono: 'fuego', clima: 'fuego', tinte: [255, 120, 40, 0.05] });
     // --- ZONAS NUEVAS (M/N): cada una con su clave `clima` del vocabulario de clima.js ---
     zonas.push({ id: 'glaciar', nombre: 'Glaciar Eterno', x: 190, y: 6, w: 60, h: 26, humedad: 0.5, temp: 0.05, viento: 0.6, suelo: 'tierra', icono: 'bosque', clima: 'glaciar', tinte: [170, 210, 255, 0.08] });
     zonas.push({ id: 'nieveNorte', nombre: 'Nieves del Norte', x: 130, y: 4, w: 180, h: 24, humedad: 0.5, temp: 0.1, viento: 0.55, suelo: 'tierra', icono: 'bosque', clima: 'nieve', tinte: [200, 220, 255, 0.06] });
@@ -573,9 +573,9 @@ U.Grid = {
     zonas.push({ id: 'termales', nombre: 'Aguas Termales', x: 346, y: 332, w: 26, h: 22, humedad: 0.9, temp: 0.8, viento: 0.3, suelo: 'tierra', icono: 'agua', clima: 'termal', tinte: [255, 180, 120, 0.06] });
     zonas.push({ id: 'volcanes', nombre: 'Campo Volcánico', x: 352, y: 328, w: 44, h: 36, humedad: 0.06, temp: 0.98, viento: 0.5, suelo: 'ceniza', icono: 'fuego', clima: 'volcanes', tinte: [255, 100, 30, 0.09] });
     // 'quemadaSur' va DESPUÉS de volcanes/termales para que esas zonas ganen en el solape (la primera que coincide gana).
-    zonas.push({ id: 'quemadaSur', nombre: 'Tierra Quemada', x: 286, y: 274, w: 104, h: 84, humedad: 0.08, temp: 0.95, viento: 0.55, suelo: 'ceniza', icono: 'fuego', tinte: [255, 120, 40, 0.07] });
+    zonas.push({ id: 'quemadaSur', nombre: 'Tierra Quemada', x: 286, y: 274, w: 104, h: 84, humedad: 0.08, temp: 0.95, viento: 0.55, suelo: 'ceniza', icono: 'fuego', clima: 'fuego', tinte: [255, 120, 40, 0.07] });
     zonas.push({ id: 'nieveSur', nombre: 'Nieves del Sur', x: 180, y: 368, w: 100, h: 24, humedad: 0.5, temp: 0.12, viento: 0.55, suelo: 'tierra', icono: 'bosque', clima: 'nieve', tinte: [200, 220, 255, 0.06] });
-    zonas.push({ id: 'camino', nombre: 'Tierras de Bruma', x: 0, y: 0, w: W, h: H, humedad: 0.5, temp: 0.5, viento: 0.4, suelo: 'tierra', icono: 'bosque', tinte: [120, 160, 90, 0.03] });
+    zonas.push({ id: 'camino', nombre: 'Tierras de Bruma', x: 0, y: 0, w: W, h: H, humedad: 0.5, temp: 0.5, viento: 0.4, suelo: 'tierra', icono: 'bosque', clima: 'aldea', tinte: [120, 160, 90, 0.03] });
     return { id: 'aldea', nombreMapa: 'Continente de Bruma · Mapa continuo', ancho: W, alto: H, tiles, vari, objetos, solidos, zonas, arena: { x: mAldea.arena.x + OFF.aldea.x, y: mAldea.arena.y + OFF.aldea.y, r: mAldea.arena.r }, ocultarRuna: false, inicio: { x: mAldea.inicio.x + OFF.aldea.x, y: mAldea.inicio.y + OFF.aldea.y }, spawns: (mAldea.spawns || []).map(p => [p[0] + OFF.aldea.x, p[1] + OFF.aldea.y]), spawnsBandidos: (mBosque.spawnsBandidos || []).map(p => [p[0] + OFF.bosque.x, p[1] + OFF.bosque.y]), spawnsAbiertos: (mDes.spawnsAbiertos || []).map(s => [s[0], s[1] + OFF.desierto.x, s[2] + OFF.desierto.y]).concat((mMon.spawnsAbiertos || []).map(s => [s[0], s[1] + OFF.montana.x, s[2] + OFF.montana.y])).concat([['bandido', 300.5, 210.5], ['bandido', 120.5, 190.5], ['ilusionista', 252.5, 130.5], ['brasa', 296.5, 282.5], ['chaman', 216.5, 100.5], ['veterano', 342.5, 150.5], ['bandido', 186.5, 306.5], ['ilusionista', 140.5, 168.5], ['bandido', 70.5, 120.5], ['brasa', 330.5, 246.5]]), npcs: npcsPos, salidas: [], offsets: OFF, continuo: true,
       // SPAWN POR ELEMENTO: apareces en la aldea de TU elemento (el viaje a la
       // Metrópolis es parte del juego). Si un elemento no tuviera aldea, Bruma.

@@ -46,7 +46,7 @@ U.Ambiente = {
       const mod = this.modificador(j.elementoActivo, z);
       let txt = z.nombre + ' · ' + (mod.razon || 'ambiente neutro');
       U.HUD.toast(txt, mod.m < 1 ? 'exito' : mod.m > 1 ? 'aviso' : '');
-      if (z.id === 'ribera') E.flags.visitoRibera = true; if (z.id === 'cenizar') E.flags.visitoCenizar = true; if (z.id === 'bosque' || z.id === 'campamento') E.flags.visitoBosque = true; if (z.id === 'desierto') E.flags.visitoDesierto = true; if (z.id === 'montana') E.flags.visitoMontana = true; if (z.id === 'casa') E.flags.visitoCasa = true;
+      if (z.id === 'ribera') E.flags.visitoRibera = true; if (z.id === 'cenizar' || z.id === 'quemadaSur' || z.id === 'volcanes' || z.id === 'puebloFuego') E.flags.visitoCenizar = true; if (z.id === 'bosque' || z.id === 'campamento') E.flags.visitoBosque = true; if (z.id === 'desierto') E.flags.visitoDesierto = true; if (z.id === 'montana') E.flags.visitoMontana = true; if (z.id === 'casa') E.flags.visitoCasa = true;
     }
   }
 };

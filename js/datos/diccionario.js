@@ -57,13 +57,14 @@ U.Diccionario = {
 
 /* ===== U.General: saludo y charla conscientes del contexto (momento · clima · fecha) =====
    U.General vive en js/datos/personas.js (que no se toca): aquí solo se AMPLÍA.
-   Momentos REALES del juego (U.Tiempo.faseDe): amanecer 05–08 · mañana 08–12 ·
-   mediodía 12–15 · tarde 15–19 · atardecer 19–21 · noche 21–05. En Atardecer y de
+   Momentos REALES del juego (U.Tiempo.faseDe): madrugada 00–04 · amanecer 04–08 ·
+   mañana 08–12 · tarde 12–16 · atardecer 16–20 · noche 20–00. En Atardecer y de
    Noche NUNCA se dice «buen día»: al atardecer «ya cae el sol», de noche «¿qué haces
    fuera?». La fecha que existe en el juego es día de la semana + nº de día
-   (U.Tiempo.diaTexto); no hay calendario de mercado, torneo ni festival en el código,
-   así que la fecha se nombra, no se inventan eventos. Los tipos de clima reales son
-   los de U.Clima.TIPOS (despejado, nublado, lluvia, tormenta, viento, niebla, calor):
+   (U.Tiempo.diaTexto) y calendario semanal (U.Tiempo.CALENDARIO): mercado en un pueblo
+   cada día, Torneo de Bruma el sábado en la arena y festival nocturno el domingo; el
+   saludo y la charla los nombran de vez en cuando (fraseEvento). Los tipos de clima
+   reales son los de U.Clima.TIPOS (despejado, nublado, lluvia, tormenta, viento, niebla, calor):
    no existe un tipo «frío» — el frío es temperatura numérica —, pero se deja una
    entrada «frio» por si algún día aparece como tipo. */
 if (U.General) {
@@ -95,10 +96,6 @@ if (U.General) {
         neutro: ['Buenos días. La plaza ya está despierta.', 'Buenos días. La mañana es para los encargos.'],
         amable: ['Buenos días. Qué mañana tan bonita para verte por aquí.', 'Buenos días, ¿cómo amaneciste?'],
         brusco: ['Buenos días. Si vienes a charlar, que sea corto.', 'Mañana: habla claro y no me hagas perder el día.'] },
-      mediodia: { palabra: 'Buenas tardes',
-        neutro: ['Buenas tardes. Mediodía: el sol está en lo alto.', 'Buenas tardes. Ya va medio día.'],
-        amable: ['Buenas tardes. Mediodía… ¿ya comiste? No se pelea con hambre.', 'Buenas tardes, qué sol tan fuerte. Busca sombra un rato.'],
-        brusco: ['Buenas tardes. Mediodía: el sol pega y yo sigo. Tú verás.', 'Tardes. Habla, que el sol no perdona.'] },
       tarde: { palabra: 'Buenas tardes',
         neutro: ['Buenas tardes. La tarde avanza tranquila.', 'Buenas tardes. Ya falta menos para recogerse.'],
         amable: ['Buenas tardes. Qué tarde tan bonita para pasear un rato.', 'Buenas tardes, ¿cómo va tu día?'],
@@ -112,7 +109,7 @@ if (U.General) {
         amable: ['Buenas noches… ¿todo bien? A estas horas casi todos estamos en casa.', 'Es de noche ya. ¿Quieres resguardarte un rato?'],
         brusco: ['Buenas noches… ¿o es que no tienes casa a la que volver?', 'De noche no se charla: se duerme o se vigila.'] }
     },
-    // De noche casi todos están en sus casas (los NPCs entran a las 21:00): si hablas
+    // De noche casi todos están en sus casas (los NPCs se meten en casa al caer la noche): si hablas
     // con uno, lo primero que te dice es qué haces fuera. Cada registro a su manera.
     saludoNoche: {
       neutro: ['Es de noche, ¿qué haces fuera? Casi todos estamos en casa a estas horas.', 'Buenas noches. De noche la aldea se recoge: yo debería estar en casa, como todos.', 'Es de noche. Los bandidos salen de noche, ¿lo sabías? Ten cuidado.'],
@@ -121,6 +118,10 @@ if (U.General) {
     },
     // Charla por momento: lo que se comenta a esa hora, según la personalidad.
     charlaMomento: {
+      madrugada: {
+        neutro: ['De madrugada la aldea duerme: silencio, estrellas y algún perro a lo lejos.'],
+        amable: ['De madrugada todo duerme… hasta las estrellas parecen susurrar bajito.'],
+        brusco: ['Madrugada. La aldea duerme y yo también debería. Habla rápido.'] },
       amanecer: {
         neutro: ['El amanecer trae la aldea de vuelta: puertas, humo y pasos.'],
         amable: ['Qué bonito amanecer. Todo empieza otra vez, ¿verdad?'],
@@ -129,10 +130,6 @@ if (U.General) {
         neutro: ['La mañana es para los encargos: la plaza ya anda en lo suyo.'],
         amable: ['La mañana está para disfrutarla despacio.'],
         brusco: ['Mañana: si no trabajas, estorbas.'] },
-      mediodia: {
-        neutro: ['Mediodía: el sol en lo alto y la aldea a medio día.'],
-        amable: ['Mediodía… ¿ya comiste? No se pelea con hambre.'],
-        brusco: ['Mediodía. El sol pega y yo sigo. Tú verás.'] },
       tarde: {
         neutro: ['La tarde avanza tranquila: ya falta menos para recogerse.'],
         amable: ['Qué tarde tan bonita para pasear un rato.'],
@@ -194,6 +191,59 @@ if (U.General) {
         amable: ['Qué frío… abrígate bien, ¿sí?', 'Con este frío, un té caliente es lo primero.'],
         brusco: ['¿Frío? Abrígate y deja de temblar.', 'Frío. El que se queja, se congela.'] }
     },
+    // Frases de CALENDARIO (U.Tiempo.CALENDARIO): se nombran de vez en cuando, con el
+    // registro del NPC (amable/brusco/neutro). {pueblo} es el pueblo del mercado.
+    frasesEvento: {
+      mercadoHoy: {
+        neutro: ['Hoy es día de mercado en {pueblo}: la plaza anda llena.', 'Hoy hay mercado en {pueblo}. Los puestos ya están puestos.'],
+        amable: ['Hoy hay mercado en {pueblo}, ¿ya viste los puestos? Qué bonito se pone.', 'Hoy es día de mercado en {pueblo}. Si vas, prueba de todo, ¿sí?'],
+        brusco: ['Hoy es mercado en {pueblo}. Si vas, que sea rápido: la plaza está hasta arriba.', 'Mercado hoy en {pueblo}. Compra o no estorbes.'] },
+      mercadoManana: {
+        neutro: ['Mañana es día de mercado en {pueblo}.', 'Mañana toca mercado en {pueblo}: la plaza se llena.'],
+        amable: ['Mañana hay mercado en {pueblo}. Te va a gustar, ya verás.', 'Mañana es día de mercado en {pueblo}. Ven temprano, que lo bueno se acaba.'],
+        brusco: ['Mañana hay mercado en {pueblo}. Ve temprano o no vayas.', 'Mañana: mercado en {pueblo}. No me pidas que te acompañe.'] },
+      torneoHoy: {
+        neutro: ['Hoy es el torneo en la arena: empieza al atardecer.', 'Hoy hay torneo en la arena. Al atardecer empieza.'],
+        amable: ['Hoy es el torneo en la arena… ¡qué emoción! Empieza al atardecer, no te lo pierdas.', 'Hoy hay torneo. Si vas a la arena, te veo por ahí.'],
+        brusco: ['Hoy hay torneo en la arena. Al atardecer. O peleas o miras, pero no estorbes.', 'Torneo hoy. En la arena, al atardecer. Lo demás es ruido.'] },
+      torneoManana: {
+        neutro: ['Mañana es el torneo en la arena.', 'Mañana toca torneo en la arena: empieza al atardecer.'],
+        amable: ['Mañana es el torneo en la arena. ¡Ya quiero que llegue!', 'Mañana hay torneo. Descansa hoy, que mañana se pelea.'],
+        brusco: ['Mañana: torneo en la arena. Prepárate o ni vayas.', 'Mañana hay torneo. Afila lo que tengas que afilar.'] },
+      festivalHoy: {
+        neutro: ['Esta noche es el festival: la aldea se queda despierta.', 'Hoy hay festival nocturno. Esta noche nadie duerme temprano.'],
+        amable: ['¡Esta noche es el festival! Quédate, que se pone precioso.', 'Hoy es el festival nocturno. Luces, música y toda la aldea despierta.'],
+        brusco: ['Esta noche hay festival. Ruido hasta tarde, ya te aviso.', 'Festival hoy, de noche. Si no te gusta el ruido, métete en casa.'] },
+      festivalManana: {
+        neutro: ['Mañana es el festival nocturno.', 'Mañana toca festival: de noche la aldea no duerme.'],
+        amable: ['¡Mañana es el festival nocturno! Qué ganas tengo.', 'Mañana hay festival. Guarda fuerzas para la noche.'],
+        brusco: ['Mañana: festival nocturno. Ruido y gente hasta tarde.', 'Mañana hay festival. Duerme hoy, que mañana no se duerme.'] }
+    },
+    // Pueblo del NPC: el de su mapa (vía U.Economia.puebloDeMapa) o, si su mapa no es
+    // un pueblo, el pueblo donde está el jugador. Devuelve el nombre tal como figura
+    // en U.Tiempo.CALENDARIO.MERCADO, o null si no es pueblo de mercado.
+    puebloDeNpc(npc, E) {
+      if (!U.Economia || !U.Economia.PUEBLOS) return null;
+      const nombrar = k => (k && U.Economia.PUEBLOS[k]) || null;
+      if (npc && npc.mapa) { const n = nombrar(U.Economia.puebloDeMapa(npc.mapa)); if (n && U.Tiempo && U.Tiempo.CALENDARIO.MERCADO.indexOf(n) >= 0) return n; }
+      const n2 = nombrar(U.Economia.puebloActual());
+      if (n2 && U.Tiempo && U.Tiempo.CALENDARIO.MERCADO.indexOf(n2) >= 0) return n2;
+      return null;
+    },
+    // Frase del próximo evento del calendario (hoy o mañana) para el pueblo del NPC:
+    // mercado en su pueblo, torneo o festival. Vacía si no hay evento hoy ni mañana.
+    fraseEvento(npc, E) {
+      if (!U.Tiempo || !U.Tiempo.proximoEvento || !E || !E.reloj) return '';
+      const pueblo = this.puebloDeNpc ? this.puebloDeNpc(npc, E) : null;
+      const ev = U.Tiempo.proximoEvento(E, pueblo);
+      if (!ev || ev.dias > 1) return '';
+      const reg = U.Diccionario ? U.Diccionario.registroDe(npc) : 'neutro';
+      const clave = (npc ? npc.id : 'x') + ':evento:' + ev.tipo + ':' + ev.dias + ':' + (E.reloj.dia || 1);
+      const tabla = this.frasesEvento[ev.tipo + (ev.dias === 0 ? 'Hoy' : 'Manana')];
+      if (!tabla) return '';
+      const lin = tabla[reg] || tabla.neutro;
+      return U.Diccionario.elegir(lin, clave).replace(/\{pueblo\}/g, ev.pueblo || '');
+    },
     // Saludo consciente del contexto: dado el NPC (su personalidad), el momento, el
     // clima y la fecha, devuelve { palabra, frase }. Nunca «buen día» en Atardecer/Noche.
     saludoContexto(npc, E) {
@@ -203,14 +253,19 @@ if (U.General) {
       const clave = (npc ? npc.id : 'x') + ':' + mom.id + ':' + (E && E.reloj ? E.reloj.dia : 1);
       if (mom.id === 'noche' || mom.id === 'madrugada') {
         const lin = this.saludoNoche[reg] || this.saludoNoche.neutro;
-        return { palabra: 'Buenas noches', frase: U.Diccionario.elegir(lin, clave) };
+        let frase = U.Diccionario.elegir(lin, clave);
+        // De noche también se nombra el calendario de vez en cuando (sobre todo el
+        // festival, que es nocturno): solo el evento, sin la fecha plana.
+        if (U.Tiempo && E && E.reloj && U.Diccionario.hash(clave + ':fecha') % 3 === 0) { const ev = this.fraseEvento(npc, E); if (ev) frase += ' ' + ev; }
+        return { palabra: 'Buenas noches', frase: frase };
       }
       const tabla = this.saludosMomento[mom.id] || this.saludosMomento.manana;
       const lin = tabla[reg] || tabla.neutro;
       let frase = U.Diccionario.elegir(lin, clave);
       // Fecha (día de la semana + nº de día, lo que el juego sí lleva): se nombra de
-      // vez en cuando, sin inventar eventos de mercado, torneo ni festival.
-      if (U.Tiempo && E && E.reloj && U.Diccionario.hash(clave + ':fecha') % 3 === 0) frase += ' Hoy es ' + U.Tiempo.diaTexto(E.reloj) + '.';
+      // vez en cuando; si hoy o mañana hay un evento del calendario (mercado en el
+      // pueblo del NPC, torneo o festival), se nombra el evento en vez de la fecha.
+      if (U.Tiempo && E && E.reloj && U.Diccionario.hash(clave + ':fecha') % 3 === 0) { const ev = this.fraseEvento(npc, E); frase += ' ' + (ev || ('Hoy es ' + U.Tiempo.diaTexto(E.reloj) + '.')); }
       return { palabra: tabla.palabra, frase: frase };
     },
     // Charla consciente del contexto: momento (con su personalidad) + clima actual.
@@ -223,7 +278,11 @@ if (U.General) {
       const clave = (npc ? npc.id : 'x') + ':charla:' + mom.id + ':' + (E && E.reloj ? E.reloj.dia : 1);
       const tipo = E && E.clima ? E.clima.tipo : 'despejado';
       const cola = this.climaCorto[tipo] || this.climaCorto.despejado;
-      return U.Diccionario.elegir(lin, clave) + ' ' + cola;
+      let frase = U.Diccionario.elegir(lin, clave) + ' ' + cola;
+      // Calendario: si hoy o mañana hay un evento (mercado en el pueblo del NPC,
+      // torneo o festival), se nombra de vez en cuando, igual que la fecha en el saludo.
+      if (U.Tiempo && E && E.reloj && U.Diccionario.hash(clave + ':fecha') % 3 === 0) { const ev = this.fraseEvento(npc, E); if (ev) frase += ' ' + ev; }
+      return frase;
     }
   });
 }

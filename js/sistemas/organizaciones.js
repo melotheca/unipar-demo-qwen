@@ -64,7 +64,7 @@ U.Orgs = {
   ],
   nuevoEstado() {
     const base = () => ({ pistas: 0, descubierta: false, unido: false, detenida: false, mision: 0, spawned: false, emboscadas: 0 });
-    return { mano: base(), jade: base(), cole: base(), secreta: { poderExtra: 0, rumores: 0, frenadasVistas: 0 }, cd: 0, persecucion: { cd: 0, activos: 0, rastrear: null } };
+    return { mano: base(), jade: base(), cole: base(), secreta: { poderExtra: 0, rumores: 0, frenadasVistas: 0 }, cd: 0, persecucion: { cd: 0, activos: 0, rastrear: null, liderSalio: false, defensoresCaidos: 0 } };
   },
   asegurar() {
     const E = U.Juego.estado; if (!E) return null;
@@ -75,7 +75,7 @@ U.Orgs = {
     if (!E.orgs.persecucion) E.orgs.persecucion = { cd: 0, activos: 0, rastrear: null };
     return E.orgs;
   },
-  asegurarPersecucion() { const O = this.asegurar(); if (!O) return null; if (!O.persecucion) O.persecucion = { cd: 0, activos: 0, rastrear: null }; const P = O.persecucion; if (P.cd == null) P.cd = 0; if (P.activos == null) P.activos = 0; return P; },
+  asegurarPersecucion() { const O = this.asegurar(); if (!O) return null; if (!O.persecucion) O.persecucion = { cd: 0, activos: 0, rastrear: null, liderSalio: false, defensoresCaidos: 0 }; const P = O.persecucion; if (P.cd == null) P.cd = 0; if (P.activos == null) P.activos = 0; if (P.liderSalio == null) P.liderSalio = false; if (P.defensoresCaidos == null) P.defensoresCaidos = 0; return P; },
   // FAMA = karma del pueblo actual (U.Economia.karma, −100…100). Decide cómo te trata
   // la patrulla (y los círculos): alta → te cubren; baja → no se desvían por ti.
   fama(E) { const e = E || U.Juego.estado; if (!e || !e.jugador || !U.Economia) return 0; return U.Economia.karma(e.jugador, U.Economia.puebloActual()); },
@@ -319,7 +319,7 @@ U.Orgs = {
       const E2 = U.Juego.estado;
       if (!E2.enemigos.some(x => x.vida > 0 && x.esPerseguidor)) { const P = this.asegurarPersecucion(); if (P) P.activos = 0; this.retirarDefensores(); U.HUD.toast('Los perseguidores cayeron. Por ahora: mientras lleves la máscara, volverán.', 'exito'); }
     }
-    if (e.esDefensor) return; // un patrullero caído no dispara nada más
+    if (e.esDefensor) { const P = this.asegurarPersecucion(); if (P) P.defensoresCaidos = (P.defensoresCaidos || 0) + 1; return; } // un patrullero caído: la patrulla está perdiendo (el líder puede salir)
     if (e.esOrg === 'selloAgente') U.HUD.toast('El agente sin nombre cae susurrando: «La llave… no es tuya…» La organización que no tiene nombre ya sabe que la tienes.', 'aviso');
   },
   // ---------- D. PERSECUCIÓN POR MÁSCARA / ARTEFACTO ----------
@@ -380,9 +380,14 @@ U.Orgs = {
   },
   // PATRULLA EN EL PUEBLO: defienden por DEBER (son de servicio), no por ti.
   // Novato/Patrullero siempre; Oficial si son 3+; Élite si es grave (4+). El LÍDER
-  // NO aparece por una persecución personal de máscara. La FAMA decide cómo te
-  // tratan A TI: alta (≥20) → pelean a tu lado y te cubren; baja → pelean contra los
-  // intrusos pero no se desvían por ti (solo plantan cara si el intruso se acerca).
+  // sale SOLO cuando la cosa es MUY seria: persecución al máximo (3 perseguidores,
+  // que es lo más que puede haber: los nuevos solo aparecen si hay menos de 3) Y la
+  // patrulla está perdiendo (ya cayó un defensor en esta persecución) O el jugador
+  // está en peligro real (Vida por debajo del 25% de su máximo). Una sola vez por
+  // persecución (P.liderSalio): si el líder cae, no reaparece en la misma. La FAMA
+  // decide cómo te tratan A TI: alta (≥20) → pelean a tu lado y te cubren; baja →
+  // pelean contra los intrusos pero no se desvían por ti (solo plantan cara si el
+  // intruso se acerca).
   // Los defensores son E.enemigos con esDefensor: actualizarEnemigos los salta por
   // stun (se lo refresco cada cuadro) y su movimiento/ataque los llevo yo aquí, así
   // que NO hace falta tocar combate.js para ellos.
@@ -390,15 +395,24 @@ U.Orgs = {
     const E = U.Juego.estado, j = E.jugador;
     let defs = E.enemigos.filter(e => e.vida > 0 && e.esDefensor);
     const fama = this.fama(E);
+    const P = this.asegurarPersecucion();
+    // MUY SERIO = persecución al máximo (3 perseguidores) Y (la patrulla pierde
+    // o el jugador está en peligro real). El líder solo sale una vez por persecución.
+    const grave = pers.length >= 3 && (j.vida < j.stats.vida * 0.25 || (P && (P.defensoresCaidos || 0) > 0));
     const quiero = pers.length >= 4 ? ['novato', 'patrullero', 'oficial', 'elite'] : pers.length >= 3 ? ['novato', 'patrullero', 'oficial'] : ['novato', 'patrullero'];
+    if (grave && P && !P.liderSalio) quiero.push('lider');
     quiero.forEach((rango, i) => {
       if (defs.some(d => d.rangoPatrulla === rango)) return;
       const c = U.Reliquias.celdaLibre(E.mapa, Math.floor(j.x) + (i % 2 ? 3 : -3), Math.floor(j.y) + (i < 2 ? 2 : -2));
-      const e = U.Combate.crearEnemigo(rango === 'novato' ? 'bandido' : 'veterano', c.x + 0.5, c.y + 0.5, E.dificultad * (rango === 'elite' ? 1.5 : rango === 'oficial' ? 1.25 : 1.05));
-      e.nombre = 'Patrullero · ' + rango[0].toUpperCase() + rango.slice(1) + ' de servicio'; e.esDefensor = true; e.rangoPatrulla = rango; e.esOrg = 'defensor';
+      const esLider = rango === 'lider';
+      const e = U.Combate.crearEnemigo('veterano', c.x + 0.5, c.y + 0.5, E.dificultad * (esLider ? 2.0 : rango === 'elite' ? 1.5 : rango === 'oficial' ? 1.25 : 1.05));
+      if (esLider) { e.stats.vida = Math.round(e.stats.vida * 1.5); e.vida = e.stats.vida; e.stats.ataque = Math.round(e.stats.ataque * 1.5); e.nombre = 'Líder de la Patrulla'; P.liderSalio = true; }
+      else e.nombre = 'Patrullero · ' + rango[0].toUpperCase() + rango.slice(1) + ' de servicio';
+      e.esDefensor = true; e.rangoPatrulla = rango; e.esOrg = 'defensor';
       E.enemigos.push(e); U.Combate.particulas(e.x, e.y - 0.5, 10, '#7cc4ff', 'humo');
       defs.push(e);
-      U.HUD.toast('🛡 La patrulla de servicio sale a defender el pueblo: un ' + rango + ' se planta contra los intrusos. (Por deber, no por ti.)', 'aviso');
+      if (esLider) { U.HUD.banner('🛡 ¡EL LÍDER DE LA PATRULLA SALE A DEFENDER EL PUEBLO!', 3); U.HUD.toast('La cosa se puso seria y el líder en persona sale a plantar cara: de los más fuertes del pueblo. No es el Guardián, es quien manda la patrulla — y no viene a negociar.', 'peligro'); }
+      else U.HUD.toast('🛡 La patrulla de servicio sale a defender el pueblo: un ' + rango + ' se planta contra los intrusos. (Por deber, no por ti.)', 'aviso');
     });
     defs.forEach(d => {
       d.efectos.stun = 0.5; // actualizarEnemigos lo salta: me encargo yo de moverlo y de que pegue
@@ -415,6 +429,7 @@ U.Orgs = {
   retirarDefensores() {
     const E = U.Juego.estado; if (!E) return;
     const defs = E.enemigos.filter(e => e.esDefensor);
+    const P = this.asegurarPersecucion(); if (P) { P.liderSalio = false; P.defensoresCaidos = 0; } // la persecución terminó: en la próxima, el líder podrá salir de nuevo
     if (!defs.length) return;
     defs.forEach(d => U.Combate.particulas(d.x, d.y - 0.5, 8, '#7cc4ff', 'humo'));
     E.enemigos = E.enemigos.filter(e => !e.esDefensor);
