@@ -478,6 +478,28 @@ U.Render = {
         ctx.fillStyle = col2; ctx.fillRect(-11, -6, 5, 2); ctx.fillRect(-4, -3 + Math.max(0, paso), 2, 3); ctx.fillRect(3, -3 + Math.max(0, -paso), 2, 3);
         ctx.fillStyle = '#e8dcc8'; ctx.fillRect(5, -6 + Math.abs(paso), 4, 2);
         break; }
+      case 'salamandra': {
+        R(-6, -6 + Math.abs(paso), 10, 4, col); R(4, -8 + Math.abs(paso), 5, 4, col); ctx.fillStyle = '#1a1a2e'; ctx.fillRect(7, -7 + Math.abs(paso), 1, 1);
+        ctx.fillStyle = '#ffd23e'; ctx.fillRect(-4, -5, 2, 1); ctx.fillRect(0, -5, 2, 1); ctx.fillRect(-11, -5, 5, 2);
+        ctx.fillStyle = col2; ctx.fillRect(-3, -3 + Math.max(0, paso), 2, 2); ctx.fillRect(2, -3 + Math.max(0, -paso), 2, 2);
+        break; }
+      case 'buho': {
+        const bobB = Math.round(Math.sin(this.tiempo * 2.4 + c.x) * 1.5);
+        ctx.globalAlpha = 0.95; R(-6, -14 + bobB, 12, 10, col); ctx.globalAlpha = 1;
+        ctx.fillStyle = col2; ctx.fillRect(-8, -12 + bobB, 3, 4); ctx.fillRect(5, -12 + bobB, 3, 4);
+        ctx.fillStyle = '#1a1a2e'; ctx.fillRect(-3, -11 + bobB, 2, 2); ctx.fillRect(1, -11 + bobB, 2, 2);
+        ctx.fillStyle = '#ffd23e'; ctx.fillRect(-1, -8 + bobB, 2, 2);
+        break; }
+      case 'halcon': {
+        const bobH = Math.round(Math.sin(this.tiempo * 3 + c.x) * 2);
+        R(-5, -13 + bobH, 10, 6, col); R(5, -15 + bobH, 5, 5, col); ctx.fillStyle = '#1a1a2e'; ctx.fillRect(8, -13 + bobH, 1, 2);
+        ctx.fillStyle = col2; ctx.fillRect(-10, -14 + bobH, 5, 2); ctx.fillRect(5, -14 + bobH, 5, 2); ctx.fillRect(-3, -8 + bobH, 2, 2);
+        break; }
+      case 'grifo': {
+        R(-7, -9 + Math.abs(paso), 13, 6, col); R(5, -13 + Math.abs(paso), 6, 6, col); R(5, -16 + Math.abs(paso), 2, 3, col2); R(9, -16 + Math.abs(paso), 2, 3, col2);
+        ctx.fillStyle = '#1a1a2e'; ctx.fillRect(9, -11 + Math.abs(paso), 1, 2);
+        ctx.fillStyle = col2; ctx.fillRect(-9, -13, 4, 2); ctx.fillRect(4, -13, 4, 2); ctx.fillRect(-5, -3 + Math.max(0, paso), 2, 4); ctx.fillRect(3, -3 + Math.max(0, -paso), 2, 4);
+        break; }
       default: R(-6, -10, 12, 7, col); R(5, -13, 5, 5, col);
     }
     ctx.restore();
@@ -495,21 +517,62 @@ U.Render = {
     mctx.restore();
     ctx.drawImage(mini, 0, 0, 32, 32, 8, 10, 48, 48);
   },
+  // Ventana deslizante del minimapa: 64×48 celdas alrededor del jugador (2 px por
+  // celda en el lienzo de 128×96). Conforme avanza, la ventana le sigue; lo que
+  // quedó muy atrás sale de la ventana y se borra (no queda dibujado).
+  MINIMAPA_W: 64, MINIMAPA_H: 48,
+  ventanaMinimapa(estado) {
+    const m = estado.mapa; const j = estado.jugador;
+    const w = Math.min(this.MINIMAPA_W, m.ancho), h = Math.min(this.MINIMAPA_H, m.alto);
+    const x0 = Math.max(0, Math.min(m.ancho - w, Math.floor(j.x - w / 2)));
+    const y0 = Math.max(0, Math.min(m.alto - h, Math.floor(j.y - h / 2)));
+    return { x0, y0, w, h };
+  },
   minimapa(cv, estado) {
     if (!cv || !estado || !estado.mapa || !estado.mapa.tiles) return;
-    const ctx = cv.getContext('2d'); const m = estado.mapa; const sx = cv.width / m.ancho, sy = cv.height / m.alto; const cols = ['#2e7d4f', '#8a6b46', '#1f5f9e', '#c9a86a', '#4a3a3a', '#6b7280', '#7a5a3a', '#24513a', '#dbbf85', '#e8eef4', '#5d6472'];
+    if (U.HUD && U.HUD.enGuarida && U.HUD.enGuarida(estado)) return; // en guarida no hay minimapa
+    const ctx = cv.getContext('2d'); const m = estado.mapa; const cols = ['#2e7d4f', '#8a6b46', '#1f5f9e', '#c9a86a', '#4a3a3a', '#6b7280', '#7a5a3a', '#24513a', '#dbbf85', '#e8eef4', '#5d6472'];
+    const v = this.ventanaMinimapa(estado); const sx = cv.width / v.w, sy = cv.height / v.h;
     ctx.fillStyle = '#0e1530'; ctx.fillRect(0, 0, cv.width, cv.height);
-    // Muestreo por píxel del lienzo (128×96), NO por celda del mapa: el continente mide
-    // 440×400 = 176 000 celdas y recorrerlas todas cada 0,2 s dejaba el minimapa en negro
-    // (y el teléfono sin aire). Cada píxel pinta el color de la celda que le toca.
-    for (let py = 0; py < cv.height; py++) for (let px = 0; px < cv.width; px++) { const tx = Math.min(m.ancho - 1, Math.floor(px / sx)), ty = Math.min(m.alto - 1, Math.floor(py / sy)); ctx.fillStyle = cols[m.tiles[ty * m.ancho + tx]] || '#2e7d4f'; ctx.fillRect(px, py, 1, 1); }
-    m.objetos.forEach(o => { if (o.tipo === 'casa') { ctx.fillStyle = '#b98a5a'; ctx.fillRect(o.x * sx, o.y * sy, o.w * sx, o.h * sy); } else if (o.tipo === 'arbol') { ctx.fillStyle = '#1f5c3a'; ctx.fillRect(o.x * sx, o.y * sy, sx, sy); } else if (o.tipo === 'escondite' && o.descubierto) { ctx.fillStyle = o.color || '#d9a441'; ctx.fillRect(o.x * sx - 1, o.y * sy - 1, 3, 3); } });
-    const ar = m.arena; if (ar && !m.ocultarRuna) { ctx.strokeStyle = estado.arena.activa ? '#ff5470' : '#ffe14d'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc((ar.x + 0.5) * sx, (ar.y + 0.5) * sy, ar.r * sx, 0, Math.PI * 2); ctx.stroke(); }
-    (m.salidas || []).forEach(s => { ctx.fillStyle = '#ffe14d'; ctx.fillRect((s.x + s.w / 2) * sx - 2, (s.y + s.h / 2) * sy - 2, 4, 4); });
-    estado.npcs.forEach(n => { if (n.enCasa) return; ctx.fillStyle = '#35c6f4'; ctx.fillRect(n.x * sx - 1, n.y * sy - 1, 3, 3); });
-    estado.enemigos.forEach(e => { if (e.vida > 0) { ctx.fillStyle = '#ff4d4d'; ctx.fillRect(e.x * sx - 1, e.y * sy - 1, 3, 3); } });
-    (estado.criaturas || []).forEach(c => { if (c.vida > 0) { ctx.fillStyle = c.invocada ? '#67e08a' : c.temperamento === 'hostil' ? '#ff8a9c' : '#e05bd0'; ctx.fillRect(c.x * sx - 1, c.y * sy - 1, 3, 3); } });
-    const j = estado.jugador; const p = 0.5 + 0.5 * Math.sin(this.tiempo * 5); ctx.fillStyle = '#fff'; ctx.fillRect(j.x * sx - 1.5, j.y * sy - 1.5, 4, 4); ctx.strokeStyle = 'rgba(255,255,255,' + (0.3 + p * 0.5) + ')'; ctx.beginPath(); ctx.arc(j.x * sx, j.y * sy, 3 + p * 2, 0, Math.PI * 2); ctx.stroke();
-    const camM = estado.camara || { x: 0, y: 0 }; ctx.strokeStyle = '#6f86c9'; ctx.strokeRect(camM.x / 16 * sx, camM.y / 16 * sy, this.viewW / 16 * sx, this.viewH / 16 * sy);
+    // Muestreo por píxel del lienzo, NO por celda del mapa: cada píxel pinta el
+    // color de la celda de LA VENTANA que le toca (el continente mide 440×400).
+    for (let py = 0; py < cv.height; py++) for (let px = 0; px < cv.width; px++) { const tx = Math.min(m.ancho - 1, v.x0 + Math.floor(px / sx)), ty = Math.min(m.alto - 1, v.y0 + Math.floor(py / sy)); ctx.fillStyle = cols[m.tiles[ty * m.ancho + tx]] || '#2e7d4f'; ctx.fillRect(px, py, 1, 1); }
+    const X = x => (x - v.x0) * sx, Y = y => (y - v.y0) * sy;
+    const dentro = (x, y) => x >= v.x0 - 1 && x < v.x0 + v.w + 1 && y >= v.y0 - 1 && y < v.y0 + v.h + 1;
+    m.objetos.forEach(o => { if (!dentro(o.x, o.y)) return; if (o.tipo === 'casa') { ctx.fillStyle = '#b98a5a'; ctx.fillRect(X(o.x), Y(o.y), o.w * sx, o.h * sy); } else if (o.tipo === 'arbol') { ctx.fillStyle = '#1f5c3a'; ctx.fillRect(X(o.x), Y(o.y), sx, sy); } else if (o.tipo === 'escondite' && o.descubierto) { ctx.fillStyle = o.color || '#d9a441'; ctx.fillRect(X(o.x) - 1, Y(o.y) - 1, 3, 3); } });
+    const ar = m.arena; if (ar && !m.ocultarRuna && dentro(ar.x, ar.y)) { ctx.strokeStyle = estado.arena.activa ? '#ff5470' : '#ffe14d'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc((ar.x + 0.5 - v.x0) * sx, (ar.y + 0.5 - v.y0) * sy, ar.r * sx, 0, Math.PI * 2); ctx.stroke(); }
+    (m.salidas || []).forEach(s => { if (!dentro(s.x, s.y)) return; ctx.fillStyle = '#ffe14d'; ctx.fillRect((s.x + s.w / 2 - v.x0) * sx - 2, (s.y + s.h / 2 - v.y0) * sy - 2, 4, 4); });
+    estado.npcs.forEach(n => { if (n.enCasa || !dentro(n.x, n.y)) return; ctx.fillStyle = '#35c6f4'; ctx.fillRect(X(n.x) - 1, Y(n.y) - 1, 3, 3); });
+    estado.enemigos.forEach(e => { if (e.vida > 0 && dentro(e.x, e.y)) { ctx.fillStyle = '#ff4d4d'; ctx.fillRect(X(e.x) - 1, Y(e.y) - 1, 3, 3); } });
+    (estado.criaturas || []).forEach(c => { if (c.vida > 0 && dentro(c.x, c.y)) { ctx.fillStyle = c.invocada ? '#67e08a' : c.temperamento === 'hostil' ? '#ff8a9c' : '#e05bd0'; ctx.fillRect(X(c.x) - 1, Y(c.y) - 1, 3, 3); } });
+    const j = estado.jugador; const p = 0.5 + 0.5 * Math.sin(this.tiempo * 5); ctx.fillStyle = '#fff'; ctx.fillRect(X(j.x) - 1.5, Y(j.y) - 1.5, 4, 4); ctx.strokeStyle = 'rgba(255,255,255,' + (0.3 + p * 0.5) + ')'; ctx.beginPath(); ctx.arc(X(j.x), Y(j.y), 3 + p * 2, 0, Math.PI * 2); ctx.stroke();
+  },
+  // Mapa COMPLETO con niebla de guerra (Pausa → Mapa): lo explorado QUEDA revelado
+  // (para poder volver), lo no explorado está oscuro. Las zonas reveladas por rumor
+  // se ven enteras, con marco dorado y nombre. `mapa` es el continente (E.mapas.aldea).
+  mapaCompleto(cv, estado, mapa) {
+    if (!cv || !estado) return;
+    const m = mapa || estado.mapa; if (!m || !m.tiles) return;
+    if (U.HUD && U.HUD.enGuarida && U.HUD.enGuarida(estado)) return;
+    const ctx = cv.getContext('2d'); const cols = ['#2e7d4f', '#8a6b46', '#1f5f9e', '#c9a86a', '#4a3a3a', '#6b7280', '#7a5a3a', '#24513a', '#dbbf85', '#e8eef4', '#5d6472'];
+    const sx = cv.width / m.ancho, sy = cv.height / m.alto;
+    const visto = (x, y) => !U.HUD || !U.HUD.bloqueExplorado || U.HUD.bloqueExplorado(estado, x, y);
+    ctx.fillStyle = '#0a0f24'; ctx.fillRect(0, 0, cv.width, cv.height);
+    for (let py = 0; py < cv.height; py++) for (let px = 0; px < cv.width; px++) { const tx = Math.min(m.ancho - 1, Math.floor(px / sx)), ty = Math.min(m.alto - 1, Math.floor(py / sy)); if (!visto(tx, ty)) continue; ctx.fillStyle = cols[m.tiles[ty * m.ancho + tx]] || '#2e7d4f'; ctx.fillRect(px, py, 1, 1); }
+    const X = x => x * sx, Y = y => y * sy;
+    (m.zonas || []).forEach(z => {
+      const revelada = estado.explorado && estado.explorado.zonas && estado.explorado.zonas.indexOf(z.id) >= 0;
+      const explorada = visto(z.x + z.w / 2, z.y + z.h / 2);
+      if (!revelada && !explorada) return;
+      if (revelada && !explorada) { // por rumor: se ve el rectángulo, marcado en dorado
+        ctx.strokeStyle = '#ffe14d'; ctx.lineWidth = 2; ctx.strokeRect(X(z.x), Y(z.y), z.w * sx, z.h * sy);
+        this.texto(ctx, z.nombre.toUpperCase(), X(z.x + z.w / 2), Y(z.y + z.h / 2) - 4, 1, '#ffe14d', 'center');
+      }
+    });
+    m.objetos.forEach(o => { if (!visto(o.x, o.y)) return; if (o.tipo === 'casa') { ctx.fillStyle = '#b98a5a'; ctx.fillRect(X(o.x), Y(o.y), o.w * sx, o.h * sy); } else if (o.tipo === 'arbol') { ctx.fillStyle = '#1f5c3a'; ctx.fillRect(X(o.x), Y(o.y), sx, sy); } else if (o.tipo === 'escondite' && o.descubierto) { ctx.fillStyle = o.color || '#d9a441'; ctx.fillRect(X(o.x) - 1, Y(o.y) - 1, 3, 3); } });
+    const ar = m.arena; if (ar && !m.ocultarRuna && visto(ar.x, ar.y)) { ctx.strokeStyle = estado.arena.activa ? '#ff5470' : '#ffe14d'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc((ar.x + 0.5) * sx, (ar.y + 0.5) * sy, ar.r * sx, 0, Math.PI * 2); ctx.stroke(); }
+    const j = estado.jugador;
+    const pj = estado.mapaId === 'aldea' ? { x: j.x, y: j.y } : (m.pueblos && m.pueblos.bruma ? m.pueblos.bruma : { x: m.inicio.x, y: m.inicio.y });
+    const p = 0.5 + 0.5 * Math.sin(this.tiempo * 5); ctx.fillStyle = '#fff'; ctx.fillRect(X(pj.x) - 2, Y(pj.y) - 2, 4, 4); ctx.strokeStyle = 'rgba(255,255,255,' + (0.3 + p * 0.5) + ')'; ctx.beginPath(); ctx.arc(X(pj.x), Y(pj.y), 4 + p * 2, 0, Math.PI * 2); ctx.stroke();
   }
 };

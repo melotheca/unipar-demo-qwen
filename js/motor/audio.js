@@ -10,6 +10,12 @@ U.Audio = {
     aldea: { bpm: 96,  bajo: [131, 0, 131, 0, 165, 0, 165, 0, 147, 0, 147, 0, 196, 0, 196, 0], mel: [523, 0, 659, 784, 0, 659, 0, 523, 587, 0, 698, 0, 784, 0, 659, 0], tipo: 'square', g: 0.035 },
     bosque: { bpm: 72, bajo: [98, 0, 0, 98, 0, 0, 87, 0, 0, 0, 110, 0, 0, 0, 0, 0], mel: [392, 0, 0, 440, 0, 0, 494, 0, 440, 0, 0, 392, 0, 330, 0, 0], tipo: 'triangle', g: 0.04 },
     arena: { bpm: 140, bajo: [98, 98, 0, 98, 117, 0, 98, 0, 87, 87, 0, 87, 117, 0, 131, 0], mel: [392, 0, 466, 392, 0, 587, 0, 523, 392, 0, 466, 0, 698, 622, 0, 587], tipo: 'sawtooth', g: 0.03 },
+    // PERSECUCIÓN: tensa y rápida como la arena, pero DISTINTA: 152 bpm (más rápida),
+    // onda 'square' (no sawtooth), bajo en semicorcheas ascendentes y melodía en modo
+    // menor con saltos cortos; suena solo fuera de la arena, cuando un enemigo hostil
+    // está cerca o te persigue. La arena (140 bpm, sawtooth) sigue siendo SOLO para
+    // arena / torneo / reto.
+    persecucion: { bpm: 152, bajo: [110, 110, 131, 110, 98, 98, 117, 98, 110, 110, 131, 110, 147, 131, 117, 98], mel: [523, 0, 494, 0, 523, 0, 622, 0, 587, 0, 523, 0, 466, 0, 494, 0], tipo: 'square', g: 0.035 },
     desierto: { bpm: 84, bajo: [110, 0, 0, 110, 0, 0, 98, 0, 0, 0, 87, 0, 0, 0, 0, 0], mel: [440, 0, 0, 466, 0, 440, 0, 0, 415, 0, 0, 392, 0, 0, 0, 0], tipo: 'triangle', g: 0.04 },
     montana: { bpm: 64, bajo: [87, 0, 0, 0, 110, 0, 0, 0, 98, 0, 0, 0, 131, 0, 0, 0], mel: [523, 0, 0, 0, 587, 0, 659, 0, 0, 587, 0, 523, 0, 0, 440, 0], tipo: 'sine', g: 0.045 }
   },
@@ -67,6 +73,22 @@ U.Audio = {
     }
   },
   musica(escena) { if (this.escena === escena) return; this.escena = escena; this.paso = 0; if (this.ctx) this.nextNota = this.ctx.currentTime + 0.1; },
+  // MÚSICA ADAPTATIVA: elige el patrón según el estado del juego. La arena sigue
+  // siendo SOLO para arena / torneo / reto; fuera de ahí, si hay un enemigo hostil
+  // cerca o persiguiéndote (E.enCombate, que combate.js pone en true con enemigos
+  // a menos de 11 celdas), suena 'persecucion'; a salvo vuelve la música de la zona.
+  // Llamarla cada cuadro es barato: musica() solo cambia cuando cambia la escena.
+  // PARCHE (main.js, bucle, tras `U.Audio.actualizar();`):
+  //   if (U.Audio.actualizarMusica) U.Audio.actualizarMusica(E);
+  actualizarMusica(E) {
+    if (!E) return;
+    if (E.arena && E.arena.activa) { this.musica('arena'); return; }
+    if (E.torneo && E.torneo.activo) { this.musica('arena'); return; }
+    if (E.reto) { this.musica('arena'); return; }
+    if (E.enCombate) { this.musica('persecucion'); return; }
+    const z = E.zonaActual;
+    this.musica(z && z.id === 'bosque' ? 'bosque' : z && z.id === 'desierto' ? 'desierto' : z && z.id === 'montana' ? 'montana' : 'aldea');
+  },
   ambiente(zona) { if (!this.ambGain) return; let g = 0; if (zona) { if (zona.id === 'ribera') g = 0.05; else if (zona.id === 'bosque') g = 0.02; else if (zona.id === 'cenizar') g = 0.025; else if (zona.id === 'arena') g = 0.015; } this.ambGain.gain.setTargetAtTime(g, this.ctx.currentTime, 0.5); },
   actualizar() {
     if (!this.listo || this.silenciado || !this.escena) return; const p = this.patrones[this.escena]; if (!p) return; const c = this.ctx; const dur = 60 / p.bpm / 2;
@@ -75,6 +97,7 @@ U.Audio = {
       if (b) this.notaProg(b, dur * 0.9, 'triangle', p.g * 1.2, this.nextNota);
       if (m) this.notaProg(m, dur * 0.8, p.tipo, p.g, this.nextNota);
       if (this.escena === 'arena' && i % 4 === 0) this.burstProg(0.06, 0.08, 200, this.nextNota);
+      if (this.escena === 'persecucion' && i % 2 === 0) this.burstProg(0.04, 0.06, 320, this.nextNota); // persecución: pulso el doble de rápido que la arena
       this.nextNota += dur; this.paso++;
     }
   },

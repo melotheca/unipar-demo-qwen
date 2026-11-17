@@ -87,7 +87,7 @@ U.Economia = {
     { mapa: 'aldea', x: 330.5, y: 311.5, lugar: 'la plaza de Aldea Ceniza Viva' },
     { mapa: 'aldea', x: 220.5, y: 190.5, lugar: 'la plaza de la Metrópolis' },
     { mapa: 'aldea', x: 64.5, y: 160.5, lugar: 'Arcana, la ciudad de los magos' },
-    { mapa: 'aldea', x: 216.5, y: 66.5, lugar: 'la plaza de Aldea Vuelo Alto' },
+    { mapa: 'aldea', x: 219.5, y: 50.5, lugar: 'la plaza de Aldea Vuelo Alto' },
     { mapa: 'aldea', x: 148.5, y: 332.5, lugar: 'la plaza de Aldea Raíz de Piedra' }
   ],
   generarTablon(rng) {

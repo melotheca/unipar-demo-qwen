@@ -37,7 +37,17 @@ U.Criaturas = {
     serpienteAgua: { nombre: 'Serpiente de agua', temperamento: 'hostil', elemento: 'agua',   vida: 50,  ataque: 12, defensa: 5,  mente: 5,  velocidad: 11, sprite: 'serpiente', color: '#35c6f4', color2: '#1a6b94', vision: 4.2, acuatica: true },
     nutria:        { nombre: 'Nutria del lago', temperamento: 'amistosa', elemento: 'agua',  vida: 36,  ataque: 7,  defensa: 4,  mente: 8,  velocidad: 11, sprite: 'nutria',    color: '#8a6b46', color2: '#5b3d22', acuatica: true },
     tortugaLago:   { nombre: 'Tortuga del lago', temperamento: 'timida',  elemento: 'agua',   vida: 65,  ataque: 6,  defensa: 14, mente: 6,  velocidad: 6,  sprite: 'tortuga',   color: '#4a7a5a', color2: '#2c4a34', huida: 2.2, acuatica: true },
-    ajolote:       { nombre: 'Ajolote de la laguna', temperamento: 'amistosa', elemento: 'agua', vida: 30, ataque: 6, defensa: 3,  mente: 8,  velocidad: 8,  sprite: 'ajolote',   color: '#f2a7c3', color2: '#c46a92', acuatica: true }
+    ajolote:       { nombre: 'Ajolote de la laguna', temperamento: 'amistosa', elemento: 'agua', vida: 30, ataque: 6, defensa: 3,  mente: 8,  velocidad: 8,  sprite: 'ajolote',   color: '#f2a7c3', color2: '#c46a92', acuatica: true },
+    // --- Nuevas (2026-11-17): Fuego, Rayo y Viento, 2 por elemento (total 16→22) ---
+    // Sprites reutilizados de los que ya dibuja render.js (lagarto/bestia/serpiente/espiritu):
+    // el búho y el halcón usan 'espiritu' (flota y se balancea, como un ave en vuelo).
+    // Sprites propios (salamandra/buho/halcon/grifo) quedan como parche pendiente en render.js.
+    salamandraCeniza:{ nombre: 'Salamandra de ceniza', temperamento: 'timida', elemento: 'fuego', vida: 34, ataque: 8,  defensa: 5,  mente: 6,  velocidad: 11, sprite: 'salamandra', color: '#e2703a', color2: '#7a2e12', huida: 3 },
+    bestiaBrasas:  { nombre: 'Bestia de brasas', temperamento: 'hostil',  elemento: 'fuego',  vida: 78, ataque: 14, defensa: 8,  mente: 4,  velocidad: 10, sprite: 'bestia',    color: '#c94f2e', color2: '#5e1f10', vision: 4.6 },
+    serpienteTormenta:{ nombre: 'Serpiente de tormenta', temperamento: 'hostil', elemento: 'rayo', vida: 54, ataque: 13, defensa: 5,  mente: 6,  velocidad: 12, sprite: 'serpiente', color: '#f2d54d', color2: '#8a6d1a', vision: 4.4 },
+    buhoTormenta:  { nombre: 'Búho de tormenta', temperamento: 'timida',  elemento: 'rayo',   vida: 38, ataque: 7,  defensa: 4,  mente: 9,  velocidad: 12, sprite: 'buho',  color: '#8fa8d8', color2: '#3a4a7a', huida: 3.2 },
+    halconViento:  { nombre: 'Halcón de viento', temperamento: 'timida',  elemento: 'viento', vida: 36, ataque: 8,  defensa: 4,  mente: 7,  velocidad: 14, sprite: 'halcon',  color: '#a8c8e0', color2: '#4a6a8a', huida: 3.4 },
+    grifoJoven:    { nombre: 'Grifo joven', temperamento: 'hostil',       elemento: 'viento', vida: 70, ataque: 13, defensa: 7,  mente: 6,  velocidad: 12, sprite: 'grifo',    color: '#c8a878', color2: '#6a4a2a', vision: 4.6, escala: 1.15 }
   },
   // Instancias del mundo: unas POCAS por región (4), en su región correcta del continente continuo.
   INSTANCIAS: [
@@ -56,9 +66,16 @@ U.Criaturas = {
     { uid: 'serpiente_agua_1', especie: 'serpienteAgua', region: 'lago', x: 360.5, y: 232.5 },
     { uid: 'nutria_1', especie: 'nutria', region: 'lago', x: 368.5, y: 219.5, apodo: 'Onda', agua: { x: 368.5, y: 224.5 } },
     { uid: 'tortuga_1', especie: 'tortugaLago', region: 'lago', x: 382.5, y: 240.5 },
-    { uid: 'ajolote_1', especie: 'ajolote', region: 'lago', x: 240.5, y: 313.5, apodo: 'Rosal', agua: { x: 244.5, y: 316.5 } }
+    { uid: 'ajolote_1', especie: 'ajolote', region: 'lago', x: 240.5, y: 313.5, apodo: 'Rosal', agua: { x: 244.5, y: 316.5 } },
+    // --- Nuevas (2026-11-17): Fuego en Campo de Ceniza / Ceniza Viva, Rayo en Chispa Alta, Viento en Vuelo Alto ---
+    { uid: 'salamandra_ceniza_1', especie: 'salamandraCeniza', region: 'puebloFuego', x: 330.5, y: 324.5 },
+    { uid: 'bestia_brasas_1', especie: 'bestiaBrasas', region: 'puebloFuego', x: 322.5, y: 308.5 },
+    { uid: 'serpiente_tormenta_1', especie: 'serpienteTormenta', region: 'chispaAlta', x: 358.5, y: 130.5 },
+    { uid: 'buho_tormenta_1', especie: 'buhoTormenta', region: 'chispaAlta', x: 346.5, y: 136.5 },
+    { uid: 'halcon_viento_1', especie: 'halconViento', region: 'vueloAlto', x: 210.5, y: 50.5 },
+    { uid: 'grifo_joven_1', especie: 'grifoJoven', region: 'vueloAlto', x: 228.5, y: 56.5 }
   ],
-  REGION_NOMBRE: { bosque: 'el Bosque Susurrante', desierto: 'el Desierto de Sal', nieve: 'la Montaña Brumosa (nieve)', lago: 'el Lago Brisa Azul y la Laguna Serena' },
+  REGION_NOMBRE: { bosque: 'el Bosque Susurrante', desierto: 'el Desierto de Sal', nieve: 'la Montaña Brumosa (nieve)', lago: 'el Lago Brisa Azul y la Laguna Serena', puebloFuego: 'Aldea Ceniza Viva', chispaAlta: 'Aldea Chispa Alta', vueloAlto: 'Aldea Vuelo Alto' },
   // ¿En qué región del continente continuo cae un punto? (mismas cajas que usa U.Vida para sus rutas)
   regionEn(x, y) {
     if (x >= 336 && x <= 400 && y >= 210 && y <= 252) return 'lago';
@@ -66,6 +83,10 @@ U.Criaturas = {
     if (x >= 292 && x < 372 && y >= 30 && y < 96) return 'nieve';
     if (x >= 36 && x < 116 && y >= 40 && y < 104) return 'bosque';
     if (x >= 38 && x < 124 && y >= 238 && y < 304) return 'desierto';
+    // Nuevas regiones (2026-11-17): mismas cajas que las zonas de grid.js.
+    if (x >= 306 && x < 354 && y >= 290 && y < 334) return 'puebloFuego';
+    if (x >= 192 && x < 242 && y >= 36 && y < 86) return 'vueloAlto';
+    if (x >= 332 && x < 380 && y >= 114 && y < 158) return 'chispaAlta';
     return 'campos';
   },
   // Deja la posición en una celda caminable cercana (sin sólidos; el agua solo si la especie es acuática).

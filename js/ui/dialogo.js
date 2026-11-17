@@ -154,6 +154,23 @@ U.Dialogo = {
   },
   init() {
     document.getElementById('dlgCerrar').addEventListener('click', () => this.cerrar());
+    // Panel compacto: se arma por JS (index.html no se toca): retrato pequeño + nombre
+    // arriba, charla con historial y máquina de escribir, y barra de secciones.
+    const caja = document.querySelector('#dialogo .dlgCaja');
+    if (caja) caja.classList.add('dlgCompacto');
+    const cuerpo = document.querySelector('#dialogo .dlgCuerpo');
+    const txt = document.getElementById('dlgTexto');
+    if (cuerpo && txt && !document.getElementById('dlgCharla')) {
+      const charla = document.createElement('div'); charla.id = 'dlgCharla';
+      const hist = document.createElement('div'); hist.id = 'dlgHistorial';
+      cuerpo.insertBefore(charla, txt);
+      charla.appendChild(hist); charla.appendChild(txt);
+    }
+    if (cuerpo && !document.getElementById('dlgSecciones')) {
+      const sec = document.createElement('div'); sec.id = 'dlgSecciones';
+      const ops = document.getElementById('dlgOpciones');
+      cuerpo.insertBefore(sec, ops);
+    }
   },
   abrir(npc) {
     const E = U.Juego.estado; this.npc = npc; this.esCartel = false; this.modo = 'npc'; this.fase = 'apertura'; this.abierto = true; E.ui = 'dialogo'; E.jugador.descansando = false; E.jugador.cargando = false; if (!npc.hechos) npc.hechos = []; npc.veces = (npc.veces || 0) + 1;
@@ -163,10 +180,10 @@ U.Dialogo = {
     if (npc.id === 'kaelen' && E.flags.victoria && !E.flags.contadoVictoria) { E.flags.contadoVictoria = true; U.Emociones.evento(npc, { realidad: 90, energia: 20, etiqueta: 'victoria en la arena' }); this.razon = 'Kaelen recuerda tu victoria: Confianza +'; E.objetivos[3].estado = 'hecho'; U.Juego.siguienteObjetivo(); }
     // TU HABLAS PRIMERO: eliges como empezar; el NPC responde DESPUES, recordando lo que ya paso.
     this.decir('Te acercas a ' + npc.nombre + ' (' + npc.rol + '). Tú hablas primero: ¿cómo empiezas la conversación?');
-    this.razon = this.recuerdoTexto(npc); this.pintarRazon(); this.opciones = this.opcionesApertura(npc); this.pintarOpciones(); this.pintarCara(); U.Audio.sfx('dialogo');
+    this.razon = this.recuerdoTexto(npc); this.pintarRazon(); this.seccion = 'hablar'; this.opciones = this.opcionesApertura(npc); this.pintarOpciones(); this.pintarCara(); U.Audio.sfx('dialogo');
   },
   opcionesApertura(npc) {
-    const E = U.Juego.estado; const mom = U.Tiempo.faseDe(U.Tiempo.hora(E)); const cl = U.Clima.de(E); const sal = U.General.saludo(U.Tiempo.hora(E));
+    const E = U.Juego.estado; const mom = U.Tiempo.faseDe(U.Tiempo.hora(E)); const cl = U.Clima.de(E); const sal = U.General.saludoContexto(npc, E);
     return [
       { t: '«' + sal.palabra + ', ' + npc.nombre + '.» (saludo del archivo general: es ' + mom.nombre.toLowerCase() + ')', realidad: 70, energia: 4, et: 'saludo', apertura: 'saludo' },
       { t: '«Vaya tiempo que hace…» (comentar el clima: ' + cl.nombre + ' · ' + cl.detalle + ')', realidad: 64, energia: 4, et: 'clima', apertura: 'clima' },
@@ -187,6 +204,80 @@ U.Dialogo = {
       candidatos.forEach(id => { if (añadidos >= 3 || id === npc.id) return; const t = U.Vida.buscar(id); if (!t) return; if (t.mapa === npc.mapa && !t.enCasa && U.Grid.dist(t, npc) < 8) return; ops.push({ t: '¿Dónde está ' + t.nombre + ' ahora?', realidad: 64, energia: 3, resp: { pos: '', neg: '' }, accion: 'preguntarPor', target: id, et: 'preguntar' }); añadidos++; });
     }
     return ops;
+  },
+  // ===== PANEL COMPACTO: secciones Hablar / Acciones / Misiones =====
+  // El panel ya no muestra todos los botones a la vez: cada sección muestra solo sus
+  // sub-opciones. «Misiones» solo existe si ese NPC tiene alguna (tablón, entrega o
+  // torneo). Toda opción sigue siendo el mismo objeto de siempre: las sub-opciones
+  // llaman a los manejadores de acción que ya existen (nada se reescribe).
+  SECCIONES: [{ id: 'hablar', t: '💬 Hablar' }, { id: 'acciones', t: '⚔ Acciones' }, { id: 'misiones', t: '📜 Misiones' }],
+  _categoria(op) {
+    if (!op) return 'hablar';
+    if (op.et === 'mision' || op.et === 'torneo' || op.accion === 'tablon' || op.accion === 'entregarMision' || op.accion === 'torneo') return 'misiones';
+    if (op.et === 'reto' || op.et === 'entrenar' || op.et === 'comprar' || op.et === 'escudo' || op.et === 'pocion' || op.et === 'jugar' || op.et === 'regalo' || op.et === 'promesa' || op.accion === 'reto' || op.accion === 'entrenoGuia' || op.accion === 'entrenar' || op.accion === 'entrenarYang' || op.accion === 'irTienda' || op.accion === 'aprenderEscudo' || op.accion === 'regaloSorpresa' || op.accion === 'cumplirPromesa' || op.darComida || op.darRegalo || op.darSabor || (op.accion && op.accion.indexOf('orgPetra') === 0)) return 'acciones';
+    return 'hablar';
+  },
+  _tieneMisiones(npc) {
+    if (!npc) return false;
+    return this.opcionesNormales(npc).some(o => this._categoria(o) === 'misiones');
+  },
+  _opcionesSeccion(npc, sec) {
+    const base = this.opcionesNormales(npc);
+    if (sec === 'hablar') {
+      const ops = [];
+      ops.push({ t: '💬 Charlar un rato', realidad: 66, energia: 4, et: 'charlar', charlar: true });
+      ops.push({ t: '🏘 Preguntar por el pueblo', realidad: 62, energia: 4, et: 'pregunta', pueblo: true });
+      base.forEach(o => { if (o.accion === 'preguntarPor') ops.push(o); });
+      ops.push({ t: '👂 Pedir un rumor', realidad: 62, energia: 4, et: 'pregunta', accion: 'orgRumor', resp: { pos: '', neg: '' } });
+      ops.push({ t: '🌦 Preguntar por el clima', realidad: 64, energia: 4, et: 'clima', clima: true });
+      base.forEach(o => { if (this._categoria(o) === 'hablar' && o.accion !== 'preguntarPor' && o.accion !== 'orgRumor') ops.push(o); });
+      return ops;
+    }
+    if (sec === 'acciones') {
+      const ops = [];
+      ops.push({ t: '🪙 Dar dinero', realidad: 70, energia: 5, et: 'regalo', accion: 'regaloSorpresa', resp: { pos: '', neg: '' } });
+      ops.push({ t: '🎁 Darle un objeto (comida de tu mochila)', realidad: 68, energia: 4, et: 'regalo', darComida: true });
+      ops.push({ t: '🎁 Darle su regalo favorito', realidad: 68, energia: 4, et: 'regalo', darRegalo: true });
+      base.forEach(o => { if (this._categoria(o) === 'acciones' && o.accion !== 'regaloSorpresa') ops.push(o); });
+      return ops;
+    }
+    return base.filter(o => this._categoria(o) === 'misiones');
+  },
+  mostrarSecciones(npc) {
+    if (!npc) return;
+    if (!this.seccion || (this.seccion === 'misiones' && !this._tieneMisiones(npc))) this.seccion = 'hablar';
+    this.opciones = this._opcionesSeccion(npc, this.seccion);
+    this.pintarOpciones();
+  },
+  // Dar una comida de la mochila (objeto o regalo favorito): misma regla que cuando
+  // un NPC te la pide (elegirPeticion): +5 confianza (+8 si es su favorito) y +2 karma.
+  elegirDar(n, o) {
+    const E = U.Juego.estado, j = E.jugador; j.bolsaComida = j.bolsaComida || [];
+    if (o.darRegalo) {
+      const fav = U.Economia.favoritoNpc(n.id);
+      if (j.bolsaComida.indexOf(fav) < 0) { this.decir('Su sabor favorito es el ' + fav + ' y no llevas ninguna comida ' + fav + ' en la mochila. Marisol vende las 5 en la tienda, a 10 🪙.'); U.Audio.sfx('fail'); return; }
+      this._darComidaSabor(n, fav); this.mostrarSecciones(n); return;
+    }
+    if (!j.bolsaComida.length) { this.decir('No llevas comida en la mochila para regalar. Marisol vende las 5 en la tienda, a 10 🪙.'); U.Audio.sfx('fail'); return; }
+    this.decir('¿Qué le das a ' + n.nombre + ' de tu mochila?');
+    this.opciones = j.bolsaComida.map(sab => ({ t: '🍽 Darle una Comida ' + sab, darSabor: sab, realidad: 68, energia: 4, et: 'regalo' }));
+    this.pintarOpciones();
+  },
+  _darComidaSabor(n, sabor) {
+    const E = U.Juego.estado, j = E.jugador;
+    const idx = (j.bolsaComida || []).indexOf(sabor);
+    if (idx < 0) { this.decir('Ya no llevas Comida ' + sabor + ' en la mochila.'); U.Audio.sfx('fail'); return; }
+    j.bolsaComida.splice(idx, 1);
+    const ranking = U.Economia.rankingNpc(n.id); const puesto = ranking.indexOf(sabor);
+    const ef = U.Economia.DAR_COMIDA[puesto]; const esFav = puesto === 0;
+    const conf = esFav ? 8 : Math.max(5, ef.conf);
+    U.Economia.confianza(n, conf);
+    if (n.estados) n.estados.animo = Math.max(0, Math.min(100, n.estados.animo + ef.animo));
+    U.Economia.karmaAdd(2, U.Economia.puebloDeMapa(n.mapa));
+    if (!n.hechos) n.hechos = []; n.hechos.push('le regalaste una comida ' + sabor);
+    U.Emociones.evento(n, { realidad: 70, energia: 5, etiqueta: 'regalo' });
+    this.decir(n.nombre + ' recibe tu comida ' + sabor + (esFav ? ': «¡Es mi sabor favorito! ¿Cómo lo supiste?»' : ' con gusto.') + ' (Confianza +' + conf + (esFav ? ' por ser su favorito' : '') + ' · Ánimo ' + (ef.animo >= 0 ? '+' : '') + ef.animo + ' según SU orden de sabores · Karma +2)');
+    this.razon = ''; this.pintarRazon(); this.pintarCara(); U.Audio.sfx('cura');
   },
   abrirSparring(v) {
     const E = U.Juego.estado; const A = U.Vida.buscar(v.a), B = U.Vida.buscar(v.b); if (!A || !B) return;
@@ -226,11 +317,12 @@ U.Dialogo = {
     return rec.length ? npc.nombre + ' recuerda: ' + rec.join(' · ') : npc.nombre + ' aún no tiene recuerdos contigo: esta charla será el primero.';
   },
   respuestaContextual(npc, tipo) {
-    const E = U.Juego.estado; const g = this.guiones[npc.id]; const hechos = npc.hechos || [];
+    const E = U.Juego.estado; const hechos = npc.hechos || [];
     if (npc.id === 'kaelen' && E.flags.contadoVictoria && E.flags.victoria) return '¡Lo escuché desde aquí! Tres oleadas y de pie. Bruma hablará de ti. ¿Qué sigue?';
     if (hechos.indexOf('superaste su reto de combate') >= 0) return 'Todavía me dura el respeto de tu reto superado. Habla, te escucho.';
     if (hechos.indexOf('te vieron caer') >= 0) return npc.id === 'sora' ? 'Te vi despertar junto a la fogata tras caer… Cuídate, ¿sí? ¿Qué necesitas hoy?' : 'La última vez volviste a la fogata en brazos de la derrota. Sigues en pie: eso cuenta. Dime.';
     if (tipo === 'clima') return U.General.respuestaClima(npc, E);
+    if (tipo === 'charlar') return U.General.charlaContexto(npc, E);
     if (tipo === 'novedades') {
       if (U.Tiempo.esNoche(U.Tiempo.hora(E))) return 'De noche la novedad es una: los bandidos del Bosque Susurrante salen al caer la Noche y se retiran al amanecer. No acampan: solo cruzan para asaltar.';
       const aus = (E.roster || []).find(x => x.id !== npc.id && x.mapa !== E.mapaId && !x.enCasa);
@@ -238,8 +330,11 @@ U.Dialogo = {
       if (E.historial && E.historial.retos > 0) return 'La novedad eres tú: ya superaste ' + E.historial.retos + ' reto(s) de combate. Los guías te miran distinto.';
       return 'Novedades: el continente es radial ahora — la Metrópolis brilla en el centro, las aldeas elementales quedan lejos en cada dirección y Arcana, la de los magos, al oeste. El Desierto de Sal arde al oeste de Bruma y la Montaña Brumosa guarda su obelisco al noreste. Y cuando dos de los nuestros hacen sparring en el Bosque (09:00–11:00 y 14:00–17:00) se forma un círculo alrededor de su pelea, donde sea que estén. El mundo creció.';
     }
+    // No todos los NPCs tienen guion propio (p. ej. nami, orin, zara, varek): sin
+    // este respaldo, saludarlos rompía el diálogo (g.saludo de undefined).
+    const g = this.guiones[npc.id] || { saludo: { neutral: [npc.nombre + ' te mira y asiente, sin muchas palabras.'] } };
     const lineas = g.saludo[npc.emocion] || g.saludo.neutral; const fraseSal = lineas[Math.floor(Math.random() * lineas.length)];
-    if (tipo === 'saludo') return U.General.saludo(U.Tiempo.hora(E)).frase + ' ' + fraseSal;
+    if (tipo === 'saludo') return U.General.saludoContexto(npc, E).frase + ' ' + fraseSal;
     return fraseSal;
   },
   abrirTienda(dueno) {
@@ -263,6 +358,7 @@ U.Dialogo = {
     U.Audio.sfx('click');
   },
   pintarTienda() {
+    const secBar = document.getElementById('dlgSecciones'); if (secBar) secBar.innerHTML = '';
     const E = U.Juego.estado, j = E.jugador; j.bolsaPociones = j.bolsaPociones || []; j.bolsaComida = j.bolsaComida || [];
     const pueblo = U.Economia.puebloActual(); const k = U.Economia.karma(j, pueblo);
     const mult = U.Economia.multLugar(E.mapaId);
@@ -425,8 +521,8 @@ U.Dialogo = {
   },
   elegirRegalo(o) {
     const E = U.Juego.estado, j = E.jugador, n = this.npc; this.modo = 'npc';
-    if (!n || !o.cantidad) { this.decir('Otro día será.'); this.opciones = this.opcionesNormales(n); this.pintarOpciones(); return; }
-    if ((j.monedas || 0) < o.cantidad) { this.decir('No traes ' + o.cantidad + ' 🪙.'); this.opciones = this.opcionesNormales(n); this.pintarOpciones(); return; }
+    if (!n || !o.cantidad) { this.decir('Otro día será.'); this.mostrarSecciones(n); return; }
+    if ((j.monedas || 0) < o.cantidad) { this.decir('No traes ' + o.cantidad + ' 🪙.'); this.mostrarSecciones(n); return; }
     j.monedas -= o.cantidad;
     n.regaloDinero = n.regaloDinero || { paso: 0, total: 0 };
     const pasoVal = U.Economia.PASOS_REGALO[Math.min(n.regaloDinero.paso, 3)];
@@ -437,7 +533,7 @@ U.Dialogo = {
     if (!n.hechos) n.hechos = []; n.hechos.push('le regalaste dinero por sorpresa');
     this.decir(n.nombre + ' parpadea, sorprendido: «¿Para mí? …Gracias. De verdad.» (Regalo sorpresa: confianza +' + gan + ' · Bolsa: ' + Math.floor(j.monedas) + ' 🪙)');
     this.razon = 'Regalos de dinero a ' + n.nombre + ': +' + n.regaloDinero.total + '/20 de confianza solo por dinero'; this.pintarRazon();
-    this.opciones = this.opcionesNormales(n); this.pintarOpciones(); this.pintarCara(); U.Audio.sfx('cura');
+    this.mostrarSecciones(n); this.pintarCara(); U.Audio.sfx('cura');
   },
   elegirCama(o) {
     const E = U.Juego.estado;
@@ -600,7 +696,22 @@ U.Dialogo = {
     const cv = document.getElementById('dlgCara'); const ctx = cv.getContext('2d'); ctx.fillStyle = '#0e1530'; ctx.fillRect(0, 0, 64, 64); U.Render.iconoCanvas(cv, 'aldea', '#d9a441');
     this.decir(texto); this.razon = ''; this.pintarRazon(); this.opciones = []; this.pintarOpciones(); U.Audio.sfx('click');
   },
-  decir(t) { const tono = this.npc ? U.Emociones.tonos[this.npc.emocion] : U.Emociones.tonos.neutral; this.textoCompleto = (U.Diccionario && t) ? U.Diccionario.expandir(t, this.npc) : t; this.mostrado = 0; this.vel = tono.vel * (this.npc && U.Personas ? (U.Personas.de(this.npc.id).ritmo || 1) : 1); const p = document.getElementById('dlgTexto'); p.textContent = ''; p.scrollTop = 0; p.style.color = this.npc ? tono.color : '#e8dcc8'; this._textoListo = false; this._pasoScroll = 0; },
+  decir(t) {
+    // La línea anterior pasa al historial (para releer la conversación) antes de
+    // empezar a escribir la nueva con la máquina de escribir.
+    if (this.textoCompleto) this._agregarHistorial(this.npc ? this.npc.nombre : (this.criatura ? U.Criaturas.nombreDe(this.criatura) : '·'), this.textoCompleto);
+    const tono = this.npc ? U.Emociones.tonos[this.npc.emocion] : U.Emociones.tonos.neutral; this.textoCompleto = (U.Diccionario && t) ? U.Diccionario.expandir(t, this.npc) : t; this.mostrado = 0; this.vel = tono.vel * (this.npc && U.Personas ? (U.Personas.de(this.npc.id).ritmo || 1) : 1); const p = document.getElementById('dlgTexto'); p.textContent = ''; p.scrollTop = 0; p.style.color = this.npc ? tono.color : '#e8dcc8'; this._textoListo = false; this._pasoScroll = 0;
+    const ch = document.getElementById('dlgCharla'); if (ch) ch.scrollTop = ch.scrollHeight;
+  },
+  _agregarHistorial(hablante, texto) {
+    const h = document.getElementById('dlgHistorial'); if (!h) return;
+    const d = document.createElement('div'); d.className = 'dlgHistLinea';
+    const b = document.createElement('b'); b.textContent = hablante + ': ';
+    const s = document.createElement('span'); s.textContent = texto;
+    d.appendChild(b); d.appendChild(s); h.appendChild(d);
+    while (h.children.length > 40) h.removeChild(h.firstChild);
+    const ch = document.getElementById('dlgCharla'); if (ch) ch.scrollTop = ch.scrollHeight;
+  },
   pintarCara() {
     const n = this.npc; if (!n) return; const cv = document.getElementById('dlgCara'); const ctx = cv.getContext('2d'); ctx.imageSmoothingEnabled = false; ctx.clearRect(0, 0, 64, 64); U.Render.cara(ctx, n.id, n.emocion, 0, 0, 4);
     document.getElementById('dlgNombre').textContent = n.nombre.toUpperCase() + ' · ' + n.rol; const ch = document.getElementById('dlgEmocion'); ch.textContent = n.emocion; ch.style.color = U.Emociones.tonos[n.emocion].color; ch.style.borderColor = U.Emociones.tonos[n.emocion].color;
@@ -609,13 +720,34 @@ U.Dialogo = {
   pintarRazon() { document.getElementById('dlgRazon').textContent = this.razon; },
   refrescarScroll() {
     const c = document.getElementById('dlgOpciones'); const a = document.getElementById('dlgScrollAviso'); if (!c || !a) return;
-    const t = document.getElementById('dlgTexto'); const at = document.getElementById('dlgTextoAviso');
+    const t = document.getElementById('dlgCharla') || document.getElementById('dlgTexto'); const at = document.getElementById('dlgTextoAviso');
     if (!this._scrollLigado) { this._scrollLigado = true; c.addEventListener('scroll', () => this.refrescarScroll(), { passive: true }); if (t) t.addEventListener('scroll', () => this.refrescarScroll(), { passive: true }); window.addEventListener('resize', () => this.refrescarScroll()); }
     requestAnimationFrame(() => { const sobra = c.scrollHeight > c.clientHeight + 6; const falta = c.scrollHeight - c.scrollTop - c.clientHeight > 6; a.classList.toggle('visible', sobra && falta); if (t && at) { const sobraT = t.scrollHeight > t.clientHeight + 6; const faltaT = t.scrollHeight - t.scrollTop - t.clientHeight > 6; at.classList.toggle('visible', sobraT && faltaT); } });
   },
   pintarOpciones() {
     const c = document.getElementById('dlgOpciones'); c.innerHTML = '';
-    if (this.esCartel) { const b = document.createElement('button'); b.innerHTML = '<span class="k">1</span>Cerrar'; b.addEventListener('click', () => this.cerrar()); c.appendChild(b); c.scrollTop = 0; this.refrescarScroll(); return; }
+    const secBar = document.getElementById('dlgSecciones');
+    if (this.esCartel) { if (secBar) secBar.innerHTML = ''; const b = document.createElement('button'); b.innerHTML = '<span class="k">1</span>Cerrar'; b.addEventListener('click', () => this.cerrar()); c.appendChild(b); c.scrollTop = 0; this.refrescarScroll(); return; }
+    // Panel de NPC: secciones (Hablar / Acciones / Misiones) + sub-opciones de la
+    // sección activa. Los demás modos (tienda, tablón, cama, cofre, criatura, sparring,
+    // petición, regalo) siguen con la lista plana de siempre.
+    if (this.modo === 'npc' && this.npc) {
+      if (secBar) {
+        secBar.innerHTML = '';
+        const disp = this.fase === 'apertura' ? ['hablar'] : this.SECCIONES.filter(s => s.id !== 'misiones' || this._tieneMisiones(this.npc)).map(s => s.id);
+        disp.forEach(id => {
+          const s = this.SECCIONES.find(x => x.id === id);
+          const b = document.createElement('button');
+          b.textContent = s.t; b.className = 'dlgSec' + (this.seccion === id ? ' act' : '');
+          b.addEventListener('click', () => { this.seccion = id; this.opciones = this.fase === 'apertura' ? this.opcionesApertura(this.npc) : this._opcionesSeccion(this.npc, id); this.pintarOpciones(); U.Audio.sfx('click'); });
+          secBar.appendChild(b);
+        });
+      }
+      this.opciones.forEach((o, i) => { const b = document.createElement('button'); b.innerHTML = '<span class="k">' + (i + 1) + '</span>' + o.t; b.addEventListener('click', () => this.elegir(i)); c.appendChild(b); });
+      const s = document.createElement('button'); s.innerHTML = '<span class="k">' + (this.opciones.length + 1) + '</span>Cerrar'; s.addEventListener('click', () => this.cerrar()); c.appendChild(s);
+      c.scrollTop = 0; this.refrescarScroll(); return;
+    }
+    if (secBar) secBar.innerHTML = '';
     this.opciones.forEach((o, i) => { const b = document.createElement('button'); b.innerHTML = '<span class="k">' + (i + 1) + '</span>' + o.t; b.addEventListener('click', () => this.elegir(i)); c.appendChild(b); });
     const s = document.createElement('button'); s.innerHTML = '<span class="k">' + (this.opciones.length + 1) + '</span>Despedirse'; s.addEventListener('click', () => this.cerrar()); c.appendChild(s);
     c.scrollTop = 0; this.refrescarScroll();
@@ -628,7 +760,7 @@ U.Dialogo = {
     if (this.modo === 'cofre') { this.elegirCofre(o); return; }
     if (this.modo === 'pergamino') { if (U.Prohibidas) U.Prohibidas.elegirPergamino(o); return; }
     if (this.modo === 'tienda') { return; } // la tienda nueva se maneja con sus propios botones (pintarTienda)
-    if (this.modo === 'tablon') { const respT = U.Juego.aceptarMision(o.tablonUid); this.modo = 'npc'; this.decir(respT); this.razon = ''; this.pintarRazon(); this.opciones = this.opcionesNormales(this.npc); this.pintarOpciones(); return; }
+    if (this.modo === 'tablon') { const respT = U.Juego.aceptarMision(o.tablonUid); this.modo = 'npc'; this.decir(respT); this.razon = ''; this.pintarRazon(); this.mostrarSecciones(this.npc); return; }
     if (this.modo === 'peticion') { this.elegirPeticion(o); return; }
     if (this.modo === 'regalo') { this.elegirRegalo(o); return; }
     if (this.modo === 'sparring') { if (o.spar === 'solo' || o.spar === 'a' || o.spar === 'b') { const bandoS = o.spar; this.cerrar(); U.Sparring.iniciar(bandoS); } else this.cerrar(); return; }
@@ -638,10 +770,20 @@ U.Dialogo = {
       const r = U.Emociones.evento(n, { realidad: o.realidad, energia: o.energia, etiqueta: o.et });
       if (!n.hechos) n.hechos = []; n.hechos.push('empezaste la charla con: ' + o.et); if (n.hechos.length > 8) n.hechos.shift();
       this.razon = 'Tú hablaste primero (' + o.et + ') · ' + n.nombre + ' ahora está ' + n.emocion + ' · Confianza ' + (r.delta >= 0 ? '+' : '') + r.delta.toFixed(1);
-      this.fase = 'normal'; this.opciones = this.opcionesNormales(n);
-      this.decir(this.respuestaContextual(n, o.apertura)); this.pintarRazon(); this.pintarOpciones(); this.pintarCara(); U.Audio.sfx('dialogo'); return;
+      this.fase = 'normal';
+      this.decir(this.respuestaContextual(n, o.apertura)); this.pintarRazon(); this.mostrarSecciones(n); this.pintarCara(); U.Audio.sfx('dialogo'); return;
     }
     if (this.mostrado < this.textoCompleto.length) { this.mostrado = this.textoCompleto.length; document.getElementById('dlgTexto').textContent = this.textoCompleto; }
+    const E = U.Juego.estado;
+    // Sub-opciones sintéticas de las secciones (no existen como opción de guion):
+    if (o.darComida || o.darRegalo) { this.elegirDar(n, o); return; }
+    if (o.darSabor) { this._darComidaSabor(n, o.darSabor); this.mostrarSecciones(n); return; }
+    if (o.charlar || o.pueblo || o.clima) {
+      const r0 = U.Emociones.evento(n, { realidad: o.realidad, energia: o.energia, etiqueta: o.et });
+      this.razon = n.nombre + ' te escucha · Confianza ' + (r0.delta >= 0 ? '+' : '') + r0.delta.toFixed(1) + ' · ahora está ' + n.emocion;
+      const resp0 = o.charlar ? U.General.charlaContexto(n, E) : o.clima ? U.General.respuestaClima(n, E) : this.respuestaContextual(n, 'novedades');
+      this.decir(resp0); this.pintarRazon(); this.pintarCara(); U.Audio.sfx('dialogo'); return;
+    }
     const r = U.Emociones.evento(n, { realidad: o.realidad, energia: o.energia, etiqueta: o.et });
     const signo = r.delta >= 0 ? '+' : ''; this.razon = n.nombre + ' ' + (r.delta >= 0.3 ? 'confía más en ti' : r.delta <= -0.3 ? 'se ha incomodado' : 'te escucha') + ' · Confianza ' + signo + r.delta.toFixed(1) + ' · ahora está ' + n.emocion;
     const bien = n.estados.animo >= 45; let resp = bien ? o.resp.pos : o.resp.neg;
@@ -668,11 +810,11 @@ U.Dialogo = {
     if (o.accion === 'preguntarPor') { const t2 = U.Vida.buscar(o.target); resp = t2 ? U.Vida.respuestaDonde(n, t2) : 'No lo he visto hoy.'; if (!n.hechos) n.hechos = []; n.hechos.push('preguntaste por ' + (t2 ? t2.nombre : 'un vecino')); }
     this.decir(resp); this.pintarRazon(); this.pintarCara(); U.Audio.sfx('dialogo');
   },
-  cerrar() { if (this.modo === 'sparring' && U.Sparring) U.Sparring.cancelarOferta(); this.abierto = false; this.npc = null; this.criatura = null; this.modo = 'npc'; this.fase = 'normal'; document.getElementById('dialogo').classList.add('oculto'); if (U.Juego.estado.ui === 'dialogo') U.Juego.estado.ui = 'mundo'; U.Audio.sfx('click'); },
+  cerrar() { if (this.modo === 'sparring' && U.Sparring) U.Sparring.cancelarOferta(); this.abierto = false; this.npc = null; this.criatura = null; this.modo = 'npc'; this.fase = 'normal'; this.seccion = 'hablar'; this.textoCompleto = ''; const h = document.getElementById('dlgHistorial'); if (h) h.innerHTML = ''; document.getElementById('dialogo').classList.add('oculto'); if (U.Juego.estado.ui === 'dialogo') U.Juego.estado.ui = 'mundo'; U.Audio.sfx('click'); },
   tecla(num) { if (!this.abierto) return; if (this.esCartel) { this.cerrar(); return; } if (num <= this.opciones.length) this.elegir(num - 1); else this.cerrar(); },
   actualizar(dt) {
     if (!this.abierto) return;
-    if (this.mostrado < this.textoCompleto.length) { this.mostrado = Math.min(this.textoCompleto.length, this.mostrado + this.vel * dt); document.getElementById('dlgTexto').textContent = this.textoCompleto.slice(0, Math.floor(this.mostrado)); if (Math.random() < dt * 8) U.Audio.sfx('dialogo'); const paso = Math.floor(this.mostrado / 30); if (paso !== this._pasoScroll) { this._pasoScroll = paso; this.refrescarScroll(); } }
+    if (this.mostrado < this.textoCompleto.length) { this.mostrado = Math.min(this.textoCompleto.length, this.mostrado + this.vel * dt); document.getElementById('dlgTexto').textContent = this.textoCompleto.slice(0, Math.floor(this.mostrado)); if (Math.random() < dt * 8) U.Audio.sfx('dialogo'); const paso = Math.floor(this.mostrado / 30); if (paso !== this._pasoScroll) { this._pasoScroll = paso; this.refrescarScroll(); } const ch = document.getElementById('dlgCharla'); if (ch) ch.scrollTop = ch.scrollHeight; }
     else if (!this._textoListo) { this._textoListo = true; this.refrescarScroll(); }
     if (this.npc) this.pintarCara();
   }

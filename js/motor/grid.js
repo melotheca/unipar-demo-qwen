@@ -42,19 +42,23 @@ U.Grid = {
     // Aldea
     obj('casa', 9, 17, 3, 3, true, { techo: '#7c3b2e' }); obj('casa', 17, 16, 3, 3, true, { techo: '#5b4a8a' }); obj('casa', 9, 27, 3, 3, true, { techo: '#3b6b7c' });
     obj('casa', 24, 17, 3, 3, true, { techo: '#7c3b2e' }); obj('casa', 5, 36, 3, 3, true, { techo: '#5b4a8a' }); obj('casa', 26, 28, 3, 3, true, { techo: '#3b6b7c' }); obj('casa', 62, 16, 3, 3, true, { techo: '#7c3b2e' }); obj('casa', 68, 36, 3, 3, true, { techo: '#5b4a8a' }); obj('casa', 58, 44, 3, 3, true, { techo: '#3b6b7c' }); obj('casa', 72, 20, 3, 3, true, { techo: '#7c3b2e' });
+    // Bruma crece: seis casas nuevas (panadera, carpintero, tejedora, granjero, herbolaria y aprendiz de guardia).
+    obj('casa', 36, 16, 3, 3, true, { techo: '#5b4a8a' }); obj('casa', 38, 28, 3, 3, true, { techo: '#7c3b2e' }); obj('casa', 6, 33, 3, 3, true, { techo: '#3b6b7c' });
+    obj('casa', 24, 33, 3, 3, true, { techo: '#5b4a8a' }); obj('casa', 34, 38, 3, 3, true, { techo: '#7c3b2e' }); obj('casa', 20, 40, 3, 3, true, { techo: '#3b6b7c' });
     obj('oficina', 13, 34, 5, 4, true, { techo: '#d9a441' }); obj('puertaOficina', 15, 37, 1, 1, false); obj('tienda', 20, 34, 3, 3, true, { techo: '#2a7f5c' }); obj('puertaTienda', 21, 36, 1, 1, false);
-    obj('cartel', 16, 33, 1, 1, true, { texto: 'OFICINA DEL GUARDIÁN DE BRUMA · El Guardián Aldric gobierna la aldea (como un Hokage o un Kamisama, pero de Bruma). Dentro, su secretaria Lía lleva el TABLÓN: 5 misiones nuevas cada día, por RANGO (D a S), pagadas solo por el rango. Entra por la puerta dorada. Al lado está la TIENDA de Marisol: pociones A MEDIDA (tú eliges las unidades), comida, polainas y el permiso de viajero.' });
-    obj('fogata', 16, 24, 1, 1, true); obj('pozo', 19, 21, 1, 1, true); obj('puertaCasa', 10, 29, 1, 1, false); obj('cartel', 57, 24, 1, 1, true, { texto: 'CAMINO GRANDE DEL CONTINENTE · Al este, la METRÓPOLIS, la mega ciudad del centro. Al oeste y al sur de Bruma, el DESIERTO DE SAL: sol brutal, un oasis y espejismos que remapean tus controles al azar. Al noreste, pasando la Metrópolis, la MONTAÑA BRUMOSA y su obelisco; al este, cruzando el puente ancho del Río del Este, PUERTO BRISA AZUL. Todo es un solo mapa continuo: se llega caminando, sin entradas ni avisos, y también a campo traviesa.' }); obj('cartel', 46, 6, 1, 1, true, { texto: 'AL NORESTE, SIGUIENDO EL CAMINO: MONTAÑA BRUMOSA · Se llega caminando por el mapa continuo, sin transiciones. Arriba hay nieve, ilusionistas y un obelisco antiguo que enseña el Hechizo de Inversión.' }); obj('cartel', 9, 4, 1, 1, true, { texto: 'CAMINO AL BOSQUE SUSURRANTE · El sendero del noroeste lleva directo al bosque: todo es un solo mapa continuo, caminas y llegas, sin entradas ni avisos. Dentro ya no hay arena ni reglas: los bandidos salen de noche entre los árboles. Vuelve por el sur cuando quieras.' }); obj('cartel', 23, 24, 1, 1, true, { texto: 'ALDEA DE BRUMA · Al este, el puente lleva a la Ribera Húmeda: el Agua allí cuesta menos. Más al norte, el Campo de Ceniza: el Fuego respira y el Agua se encarece. La Arena está al sureste.' });
-    obj('cartel', 40, 24, 1, 1, true, { texto: 'RIBERA HÚMEDA · La humedad abarata el Agua (−25%) y encarece el Fuego (+50%). Siempre puedes usar tu elemento: solo cambia el costo.' });
-    obj('cartel', 59, 44, 1, 1, true, { texto: 'AL SUR Y AL ESTE, TIERRA NUEVA · El Lago del Sur (Agua cruza gratis; los demás gastan Esencia o rodean por tierra), el Suelo Quemado (el Fuego es inmune; los demás se queman), la Zona Rocosa de Tierra y el Acantilado de Viento (el Viento levita unos segundos). Todo se alcanza por caminos de tierra.' });
-    obj('cartel', 45, 17, 1, 1, true, { texto: 'CAMPO DE CENIZA · Calor extremo: el Fuego cuesta −25%, el Agua +50%. El suelo seco no ayuda a la Tierra. Observa el costo ajustado en tu HUD.' });
+    obj('cartel', 16, 33, 1, 1, true, { texto: 'OFICINA DEL GUARDIÁN DE BRUMA · Aquí manda el Guardián Aldric. Dentro, su secretaria Lía lleva el tablón de misiones: cinco nuevas cada día, por rango, de la D a la S. La puerta dorada es la entrada. Al lado, la tienda de Marisol: pociones, comida y permisos de viajero.' });
+    obj('fogata', 16, 24, 1, 1, true); obj('pozo', 19, 21, 1, 1, true); obj('puertaCasa', 10, 29, 1, 1, false); obj('cartel', 57, 24, 1, 1, true, { texto: 'CAMINO GRANDE DEL CONTINENTE · Al este, la Metrópolis, la ciudad más grande del continente. Al oeste y al sur de Bruma, el Desierto de Sal: sol brutal, un oasis y espejismos que confunden hasta al más listo. Al noreste, pasando la Metrópolis, la Montaña Brumosa y su obelisco; al este, cruzando el puente ancho del Río del Este, Puerto Brisa Azul. Los caminos ayudan, pero se puede ir a campo traviesa por donde se quiera.' }); obj('cartel', 46, 6, 1, 1, true, { texto: 'MONTAÑA BRUMOSA · Siguiendo el camino al noreste. Arriba hay nieve, ilusionistas y un obelisco antiguo que enseña el Hechizo de Inversión.' }); obj('cartel', 9, 4, 1, 1, true, { texto: 'CAMINO AL BOSQUE SUSURRANTE · El sendero del noroeste lleva directo al bosque. De noche salen los bandidos entre los árboles. El sendero del sur es la salida.' }); obj('cartel', 23, 24, 1, 1, true, { texto: 'ALDEA DE BRUMA · Al este, el puente lleva a la Ribera Húmeda: allí el Agua fluye fácil y el Fuego cuesta más. Más al norte, el Campo de Ceniza: el Fuego respira y el Agua se encarece. La Arena está al sureste.' });
+    obj('cartel', 40, 24, 1, 1, true, { texto: 'RIBERA HÚMEDA · La humedad abarata el Agua y encarece el Fuego. Aquí el Agua manda.' });
+    obj('cartel', 59, 44, 1, 1, true, { texto: 'AL SUR Y AL ESTE, TIERRA NUEVA · El Lago del Sur, el Suelo Quemado, la Zona Rocosa y el Acantilado de Viento. El lago se cruza mejor con Agua; la ceniza quema a quien no es de Fuego; el Viento levita unos segundos en el acantilado. Todo se alcanza por caminos de tierra.' });
+    obj('cartel', 45, 17, 1, 1, true, { texto: 'CAMPO DE CENIZA · Calor extremo: el Fuego sale más barato y el Agua más cara. El suelo seco no ayuda a la Tierra.' });
+    obj('cartel', 41, 36, 1, 1, true, { texto: 'ARENA DE BRUMA · Las peleas empiezan al atardecer. Entrada: 10 monedas.' });
     // Arena: reja con puerta al oeste + runa central
     for (let y = AY - AR - 1; y <= AY + AR + 1; y++) for (let x = AX - AR - 1; x <= AX + AR + 1; x++) { const d = Math.hypot(x - AX, y - AY); if (d > AR && d <= AR + 1.2 && !(x <= AX - AR && Math.abs(y - AY) <= 1)) obj('reja', x, y, 1, 1, true); }
     obj('runa', AX, AY, 1, 1, false);
     [[45, 8], [52, 10], [57, 15], [48, 17]].forEach(p => obj('brasero', p[0], p[1], 1, 1, true));
     // Naturaleza
     for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) {
-      const t = get(x, y); const enAldea = x >= 7 && x <= 23 && y >= 15 && y <= 31; const cercaCamino = get(x + 1, y) === T.CAMINO || get(x - 1, y) === T.CAMINO || get(x, y + 1) === T.CAMINO || get(x, y - 1) === T.CAMINO;
+      const t = get(x, y); const enAldea = x >= 4 && x <= 42 && y >= 12 && y <= 44; const cercaCamino = get(x + 1, y) === T.CAMINO || get(x - 1, y) === T.CAMINO || get(x, y + 1) === T.CAMINO || get(x, y - 1) === T.CAMINO;
       if (t === T.PASTO && !enAldea && !cercaCamino) { const r = rng(); if (r < 0.07) obj('arbol', x, y, 1, 1, true, { v: Math.floor(rng() * 2) }); else if (r < 0.095) obj('roca', x, y, 1, 1, true); else if (r < 0.16) obj('flor', x, y, 1, 1, false, { v: Math.floor(rng() * 3) }); }
       if (t === T.CENIZA && rng() < 0.035) obj('roca', x, y, 1, 1, true, { quemada: true });
       if (t === T.PASTO && (get(x + 1, y) === T.AGUA || get(x - 1, y) === T.AGUA) && rng() < 0.35) obj('junco', x, y, 1, 1, false);
@@ -103,8 +107,8 @@ U.Grid = {
     for (let y = 47; y <= 55; y++) for (let x = 24; x <= 32; x++) if (Math.hypot(x - 28, (y - 52) * 1.4) <= 5) set(x, y, T.PASTO);
     const objetos = [];
     const obj = (tipo, x, y, w, h, solido, extra) => { const o = Object.assign({ tipo, x, y, w: w || 1, h: h || 1, solido: !!solido }, extra || {}); if (tipo === 'arbol') { o.vidaMax = 30; o.vida = 30; } else if (tipo === 'roca') { o.vidaMax = 55; o.vida = 55; } else if (tipo === 'cactus') { o.vidaMax = 22; o.vida = 22; } objetos.push(o); };
-    obj('cartel', 30, 50, 1, 1, true, { texto: 'BOSQUE SUSURRANTE · Entrada principal, al sur del bosque. De día el bosque está tranquilo; de NOCHE salen los bandidos entre los árboles, sin campamento ni aviso, y al amanecer se retiran. El sendero va al norte; a mitad de camino, el ramal del este lleva al estanque. El sendero del sur vuelve caminando a la Aldea de Bruma: no hay puertas ni umbrales, todo es un solo mapa continuo.' });
-    obj('cartel', 29, 13, 1, 1, true, { texto: 'CLARO DEL NORTE · Aquí no hay campamento: los bandidos no viven en el bosque, solo lo cruzan de noche para asaltar el sendero. Si oscurece, vuelve a la aldea o prepárate. El bosque cerrado encarece el Viento (×1.5) y la humedad ayuda al Agua.' });
+    obj('cartel', 30, 50, 1, 1, true, { texto: 'BOSQUE SUSURRANTE · Entrada principal, al sur del bosque. De día el bosque está tranquilo; de noche salen los bandidos entre los árboles y al amanecer se retiran. El sendero va al norte; a mitad de camino, el ramal del este lleva al estanque. El sendero del sur vuelve a la Aldea de Bruma.' });
+    obj('cartel', 29, 13, 1, 1, true, { texto: 'CLARO DEL NORTE · Aquí no hay campamento: los bandidos no viven en el bosque, solo lo cruzan de noche para asaltar el sendero. Si oscurece, mejor estar en la aldea o ir preparado. El bosque cerrado frena al Viento y la humedad ayuda al Agua.' });
     obj('fogata', 26, 51, 1, 1, true);
     obj('roca', 24, 10, 1, 1, true); obj('roca', 33, 16, 1, 1, true);
     for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) {
@@ -144,8 +148,8 @@ U.Grid = {
     camino(1, 21, 30, 21); camino(30, 21, 30, 11); camino(30, 11, 41, 11);
     const objetos = [];
     const obj = (tipo, x, y, w, h, solido, extra) => { const o = Object.assign({ tipo, x, y, w: w || 1, h: h || 1, solido: !!solido }, extra || {}); if (tipo === 'arbol') { o.vidaMax = 30; o.vida = 30; } else if (tipo === 'roca') { o.vidaMax = 55; o.vida = 55; } else if (tipo === 'cactus') { o.vidaMax = 22; o.vida = 22; } objetos.push(o); };
-    obj('cartel', 4, 20, 1, 1, true, { texto: 'DESIERTO DE SAL · El calor alimenta al Fuego y seca el Agua. Al noreste hay un oasis. Cuidado con los espejismos: el Ilusionista del desierto lanza el Hechizo de Inversión y tu movimiento se remapea al azar unos segundos. El camino del este vuelve caminando a la Aldea de Bruma pasando el oasis, y la ruta del sur lleva a Aldea Raíz de Piedra y a Aldea Ceniza Viva: todo es un solo mapa continuo, sin transiciones.' });
-    obj('cartel', 42, 14, 1, 1, true, { texto: 'OASIS · Agua en medio de la sal. Aquí la humedad ayuda a tu Agua aunque todo arda alrededor.' });
+    obj('cartel', 4, 20, 1, 1, true, { texto: 'DESIERTO DE SAL · El calor alimenta al Fuego y seca el Agua. Al noreste hay un oasis. Cuidado con los espejismos y con el Ilusionista del desierto: su Hechizo de Inversión confunde el movimiento unos segundos. El camino del este vuelve a la Aldea de Bruma pasando el oasis, y la ruta del sur lleva a Aldea Raíz de Piedra y a Aldea Ceniza Viva.' });
+    obj('cartel', 42, 14, 1, 1, true, { texto: 'OASIS · Agua en medio de la sal. Aquí la humedad ayuda al Agua aunque todo arda alrededor.' });
     obj('fogata', 28, 22, 1, 1, true);
     for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) {
       const t = get(x, y); const cercaCamino = get(x + 1, y) === T.CAMINO || get(x - 1, y) === T.CAMINO || get(x, y + 1) === T.CAMINO || get(x, y - 1) === T.CAMINO;
@@ -177,9 +181,9 @@ U.Grid = {
     camino(27, 41, 27, 24); camino(27, 24, 20, 24); camino(20, 24, 20, 13);
     const objetos = [];
     const obj = (tipo, x, y, w, h, solido, extra) => { const o = Object.assign({ tipo, x, y, w: w || 1, h: h || 1, solido: !!solido }, extra || {}); if (tipo === 'arbol') { o.vidaMax = 30; o.vida = 30; } else if (tipo === 'roca') { o.vidaMax = 55; o.vida = 55; } else if (tipo === 'cactus') { o.vidaMax = 22; o.vida = 22; } objetos.push(o); };
-    obj('cartel', 28, 38, 1, 1, true, { texto: 'MONTAÑA BRUMOSA · El viento abierto abarata el Viento y el Rayo; el frío ahoga el Fuego. Los Ilusionistas de la cima invierten tus controles con su hechizo. En la cima, el OBELISCO enseña ese mismo hechizo a quien lo toca: con V lo lanzas tú y los enemigos se mueven con un mapeo aleatorio.' });
+    obj('cartel', 28, 38, 1, 1, true, { texto: 'MONTAÑA BRUMOSA · El viento abierto abarata el Viento y el Rayo; el frío ahoga el Fuego. Los Ilusionistas de la cima invierten el movimiento con su hechizo. En la cima, el obelisco enseña ese mismo hechizo a quien se acerca.' });
     obj('obelisco', 20, 10, 1, 2, true);
-    obj('cartel', 21, 13, 1, 1, true, { texto: 'OBELISCO DE LA INVERSIÓN · Tócalo para aprender el Hechizo de Inversión (tecla V, 12 de Esencia): los enemigos cercanos se mueven con un mapeo de direcciones ALEATORIO durante 6 segundos. Los Ilusionistas lo usan contra ti: si te alcanza, TU movimiento se remapea al azar unos segundos (ninguna dirección queda igual) y NO se muestra el mapeo: lo descubres probando.' });
+    obj('cartel', 21, 13, 1, 1, true, { texto: 'OBELISCO DE LA INVERSIÓN · Quien se acerca aprende el Hechizo de Inversión: los enemigos cercanos se mueven confundidos unos segundos, sin saber a dónde van. Los Ilusionistas lo usan igual: a quien le alcanza, el movimiento se le confunde al azar y solo lo descubre probando.' });
     obj('fogata', 25, 36, 1, 1, true);
     for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) {
       const t = get(x, y); const cercaCamino = get(x + 1, y) === T.CAMINO || get(x - 1, y) === T.CAMINO || get(x, y + 1) === T.CAMINO || get(x, y - 1) === T.CAMINO;
@@ -221,7 +225,7 @@ U.Grid = {
     const obj = (tipo, x, y, w, h, solido, extra) => { const o = Object.assign({ tipo, x, y, w: w || 1, h: h || 1, solido: !!solido }, extra || {}); if (tipo === 'arbol') { o.vidaMax = 30; o.vida = 30; } else if (tipo === 'roca') { o.vidaMax = 55; o.vida = 55; } else if (tipo === 'cactus') { o.vidaMax = 22; o.vida = 22; } objetos.push(o); };
     obj('cama', 2, 2, 2, 1, true);
     obj('brasero', 19, 2, 1, 1, true);
-    obj('cartel', 6, 2, 1, 1, true, { texto: 'TU CASA · La cama tiene despertador: tócala para dormir hasta la ALARMA que fijes (07:00 por defecto) con Vida y Esencia al 100%. El calendario avanza los días que duermas. El COFRE junto al brasero es tu ALMACENAMIENTO: guarda ahí máscaras, artefactos y pergaminos de técnicas prohibidas — guardados no dan bonus, pero tampoco atraen a Los Coleccionistas. La puerta del sur te devuelve a la aldea.' });
+    obj('cartel', 6, 2, 1, 1, true, { texto: 'TU CASA · La cama tiene despertador: duerme hasta la hora que fijes y despierta entero. El cofre junto al brasero guarda tus máscaras, artefactos y pergaminos: guardados no dan su fuerza, pero tampoco atraen a Los Coleccionistas. La puerta del sur da a la aldea.' });
     obj('pozo', 18, 12, 1, 1, true);
     obj('cofre', 16, 2, 1, 1, true);
     const solidos = new Uint8Array(W * H);
@@ -239,13 +243,14 @@ U.Grid = {
   },
   /* MAPA CONTINUO — EL CONTINENTE DE BRUMA: un solo mapa al aire libre de 440×400,
      rodeado de AGUA por los cuatro bordes (el borde del mundo es mar: no se puede salir
-     del continente). Acomodo RADIAL: la METRÓPOLIS (la mega ciudad central, la más grande
-     y tecnológica) está en el CENTRO (220,200); a su alrededor, LEJOS y en distintas
-     direcciones, las aldeas elementales: Puerto Brisa Azul (Agua) al ESTE, Aldea Ceniza
-     Viva (Fuego) al SURESTE, Aldea Raíz de Piedra (Tierra) al SUROESTE, Aldea Vuelo Alto
-     (Viento) al NORTE y Aldea Chispa Alta (Rayo) al NORESTE; más lejos, al OESTE, ARCANA,
-     la metrópolis pequeña de los magos. La Aldea de Bruma (inicio) queda cerca de la
-     Metrópolis, al suroeste de ella. Entre todo: el Bosque Susurrante (noroeste), la
+     del continente). Acomodo en ANILLO: la METRÓPOLIS (la mega ciudad central, la más grande
+     y tecnológica) está en el CENTRO (220,200); a su alrededor, LEJOS y a DISTANCIA
+     PAREJA (~150 celdas, como un pentágono), las aldeas elementales: Puerto Brisa Azul
+     (Agua) al ESTE, Aldea Ceniza Viva (Fuego) al SURESTE, Aldea Raíz de Piedra (Tierra)
+     al SUROESTE, Aldea Vuelo Alto (Viento) al NORTE y Aldea Chispa Alta (Rayo) al
+     NORESTE; más allá de cada una, su tierra extrema (volcanes, montañas, mar, meseta
+     de tormenta, bosque ancestral). Los huecos los llenan ARCANA, la metrópolis pequeña
+     de los magos, al OESTE, y la Aldea de Bruma (inicio), cerca de la Metrópolis, al sur. Entre todo: el Bosque Susurrante (noroeste), la
      Montaña Brumosa (noreste), el Desierto de Sal (oeste-sur), el Río del Este, el Lago
      Brisa Azul, la Laguna Serena, SEIS pueblos pequeños y lugares con fogatas y carteles,
      para que el viaje nunca sea caminar por nada vacío. Hay caminos que cosen todo
@@ -291,23 +296,60 @@ U.Grid = {
     for (let y = 312; y <= 328; y++) for (let x = 233; x <= 263; x++) if (Math.hypot((x - 248) / 15, (y - 320) / 8) <= 1) set(x, y, T.AGUA); // Laguna Serena
     // --- Tierra Quemada del sureste (suelo de Aldea Ceniza Viva) ---
     for (let y = 280; y <= 354; y++) for (let x = 290; x <= 386; x++) if (get(x, y) !== T.AGUA && rng() > 0.12) set(x, y, T.CENIZA);
+    // --- NUEVAS REGIONES (M/N): nieve, montañas, ríos, lagos y tierras extremas ---
+    // Nieve del extremo norte (más allá de las montañas) y del extremo sur (frío).
+    for (let y = 6; y <= 24; y++) for (let x = 140; x <= 300; x++) if (enContinente(x, y) && rng() > 0.35) set(x, y, T.NIEVE);
+    for (let y = 372; y <= 388; y++) for (let x = 190; x <= 260; x++) if (enContinente(x, y) && rng() > 0.35) set(x, y, T.NIEVE);
+    // Glaciar Eterno: muro de hielo azul al norte, más allá de la nieve.
+    for (let y = 8; y <= 28; y++) for (let x = 195; x <= 245; x++) if (enContinente(x, y)) set(x, y, T.NIEVE);
+    // Montaña de Niebla (Viento, N): cordillera alta que se puede subir a pie; arriba, la nieve.
+    for (let y = 28; y <= 35; y++) for (let x = 150; x <= 290; x++) if (get(x, y) !== T.AGUA) set(x, y, T.MONTANA);
+    // Río Serpiente: nace en la Montaña Brumosa y se retuerce hasta el mar del este.
+    for (let x = 336; x <= 428; x++) { let cy; if (x <= 360) cy = 92 + Math.round((x - 336) * 0.6); else cy = 106 + Math.round(Math.sin(x * 0.08) * 4); for (let y = cy - 1; y <= cy + 1; y++) set(x, y, T.AGUA); }
+    // Lago Espejo: lago interior del centro-sur, agua quieta y juncos.
+    for (let y = 338; y <= 352; y++) for (let x = 188; x <= 212; x++) if (Math.hypot((x - 200) / 12, (y - 345) / 7) <= 1) set(x, y, T.AGUA);
+    // Cascada de la Luna: cae desde lo alto de la Montaña Brumosa a una poza.
+    for (let y = 88; y <= 97; y++) for (let x = 322; x <= 323; x++) set(x, y, T.AGUA);
+    for (let y = 96; y <= 102; y++) for (let x = 318; x <= 326; x++) if (Math.hypot((x - 322) / 4.5, (y - 99) / 3) <= 1) set(x, y, T.AGUA);
+    // Meseta de la Tormenta (Rayo, NE): meseta de piedra batida por tormentas permanentes.
+    for (let y = 80; y <= 106; y++) for (let x = 375; x <= 425; x++) if (get(x, y) !== T.AGUA && rng() > 0.25) set(x, y, T.PIEDRA);
+    // Campo Volcánico (Fuego, SE): conos de roca y ceniza más allá de Ceniza Viva.
+    for (let y = 330; y <= 362; y++) for (let x = 355; x <= 395; x++) if (get(x, y) !== T.AGUA && rng() > 0.2) set(x, y, T.CENIZA);
+    [[372, 344, 5], [386, 352, 4], [362, 356, 4]].forEach(c => { for (let y = c[1] - c[2]; y <= c[1] + c[2]; y++) for (let x = c[0] - c[2]; x <= c[0] + c[2]; x++) if (Math.hypot(x - c[0], y - c[1]) <= c[2] && get(x, y) !== T.AGUA) set(x, y, T.MONTANA); });
+    // Aguas Termales: poza caliente entre la ceniza, junto a los volcanes.
+    for (let y = 338; y <= 348; y++) for (let x = 352; x <= 366; x++) if (Math.hypot((x - 359) / 7, (y - 343) / 5) <= 1) set(x, y, T.AGUA);
+    // Pantano Gris (entre Agua y Tierra): sotobosque encharcado, niebla y juncos.
+    for (let y = 276; y <= 300; y++) for (let x = 264; x <= 282; x++) if (get(x, y) !== T.AGUA) set(x, y, T.SOTOBOSQUE);
+    for (let y = 280; y <= 296; y++) for (let x = 266; x <= 280; x++) if (rng() > 0.8) set(x, y, T.AGUA);
+    // Garganta del Viento: cañón profundo con paredes de roca y suelo de piedra.
+    for (let y = 66; y <= 70; y++) for (let x = 150; x <= 185; x++) set(x, y, T.MONTANA);
+    for (let y = 78; y <= 82; y++) for (let x = 150; x <= 185; x++) set(x, y, T.MONTANA);
+    for (let y = 71; y <= 77; y++) for (let x = 150; x <= 185; x++) set(x, y, T.PIEDRA);
+    // Ruinas de la Aldea Caída: piedras caídas de la Guerra de los Clanes.
+    for (let y = 200; y <= 224; y++) for (let x = 104; x <= 130; x++) if (rng() > 0.55) set(x, y, T.PIEDRA);
+    // Bosque de Bambú (oeste): sotobosque denso de bambú alto.
+    for (let y = 104; y <= 134; y++) for (let x = 56; x <= 114; x++) set(x, y, T.SOTOBOSQUE);
+    // Bosque Ancestral (Tierra, SO): sotobosque de árboles enormes.
+    for (let y = 312; y <= 378; y++) for (let x = 52; x <= 118; x++) if (enContinente(x, y) && get(x, y) !== T.AGUA) set(x, y, T.SOTOBOSQUE);
+    // Cueva de Cristal: anillo de roca con suelo de piedra dentro del Bosque Ancestral.
+    for (let y = 346; y <= 368; y++) for (let x = 70; x <= 94; x++) { const borde = x === 70 || x === 94 || y === 346 || y === 368; if (borde && !(y === 346 && x >= 78 && x <= 84)) set(x, y, T.MONTANA); else if (!borde) set(x, y, T.PIEDRA); }
     // --- Caminos que cosen el continente (sobre el agua dejan PUENTE de madera) ---
     const camino = (x1, y1, x2, y2) => { let x = x1, y = y1; const paso = () => { const tt = get(x, y); if (tt === T.AGUA) set(x, y, T.PUENTE); else set(x, y, T.CAMINO); }; paso(); while (x !== x2) { x += Math.sign(x2 - x); paso(); } while (y !== y2) { y += Math.sign(y2 - y); paso(); } };
     // Espinas radiales desde la Metrópolis
-    camino(220, 170, 220, 82);                                       // N: Metrópolis → Aldea Vuelo Alto
+    camino(220, 170, 220, 62);                                       // N: Metrópolis → Aldea Vuelo Alto
     camino(246, 176, 252, 176); camino(252, 176, 252, 116);         // NE: → Pueblo Rocafirme
     camino(252, 116, 300, 116); camino(300, 116, 300, 84); camino(300, 84, 327, 84); camino(327, 84, 327, 76); // NE: → Montaña Brumosa (obelisco)
-    camino(300, 116, 340, 116); camino(340, 116, 340, 120); camino(340, 120, 364, 120); // NE: → Aldea Chispa Alta (Rayo)
-    camino(368, 96, 384, 96); camino(384, 96, 384, 102);            // Montaña → Chispa Alta (segunda ruta al Rayo)
+    camino(300, 116, 300, 100); camino(300, 100, 352, 100); camino(352, 100, 352, 122); // NE: → Aldea Chispa Alta (Rayo), cruzando el Río Serpiente por dos puentes
+    camino(368, 96, 368, 122);                                      // Montaña → Chispa Alta (segunda ruta al Rayo, cruza el río)
     camino(254, 196, 346, 196);                                     // E: Metrópolis → Puerto Brisa Azul (cruza el río por el puente)
     camino(300, 116, 300, 196);                                     // anillo este interior: Rocafirme → Tres Cruces → camino del este
     camino(238, 224, 292, 224); camino(292, 224, 292, 262);         // SE: → Pueblo Brasa Chica
-    camino(292, 262, 330, 262); camino(330, 262, 330, 296);         // SE: → Aldea Ceniza Viva
-    camino(376, 216, 376, 296); camino(376, 296, 348, 296);         // ruta del este: Puerto → lago → Ceniza Viva (segunda ruta al Fuego)
+    camino(292, 262, 325, 262); camino(325, 262, 325, 291);         // SE: → Aldea Ceniza Viva
+    camino(376, 216, 376, 296); camino(376, 296, 343, 296);         // ruta del este: Puerto → lago → Ceniza Viva (segunda ruta al Fuego)
     camino(220, 228, 220, 268); camino(220, 268, 246, 268);         // S: → Pueblo Vega Baja
     camino(246, 268, 292, 268); camino(292, 268, 292, 262);         // anillo sur: Vega Baja ↔ Brasa Chica
     camino(220, 268, 220, 300); camino(220, 300, 164, 300); camino(164, 300, 164, 312); // S: → Aldea Raíz de Piedra (Tierra)
-    camino(220, 300, 220, 306); camino(220, 306, 312, 306);         // ruta del sur: → Ceniza Viva por el sur (tercera ruta al Fuego)
+    camino(220, 300, 220, 306); camino(220, 306, 320, 306);         // ruta del sur: → Ceniza Viva por el sur (tercera ruta al Fuego)
     camino(196, 224, 196, 246); camino(196, 246, 152, 246);         // SO: Metrópolis → Aldea de Bruma (entra por su camino grande)
     camino(188, 196, 88, 196); camino(88, 196, 88, 206);            // O: → Pueblo Salina
     camino(88, 196, 88, 168); camino(88, 168, 86, 168);             // O: → Arcana, la ciudad de los magos
@@ -320,6 +362,7 @@ U.Grid = {
     camino(150, 222, 150, 140); camino(150, 140, 140, 140); camino(140, 140, 140, 122); // Bruma → Pueblo Alto Pino
     camino(140, 122, 104, 122); camino(104, 122, 104, 98); camino(104, 98, 68, 98);    // Alto Pino → Bosque Susurrante (entrada sur)
     camino(140, 112, 140, 84); camino(140, 84, 196, 84);            // Alto Pino → Vuelo Alto (anillo noroeste)
+    camino(196, 84, 238, 84);                                       // anillo norte: cierra el anillo entre Alto Pino y Rocafirme
     camino(238, 84, 252, 84); camino(252, 84, 252, 116);            // Vuelo Alto → Rocafirme (anillo norte)
     camino(196, 64, 114, 64);                                       // Vuelo Alto → Bosque por el norte (segunda ruta al bosque)
     // El puente del camino del este queda ANCHO (6 baldosas): la escolta y los vecinos
@@ -335,11 +378,14 @@ U.Grid = {
     for (let y = 170; y <= 228; y++) { set(219, y, T.CAMINO); set(220, y, T.CAMINO); }
     [[192, 172], [200, 172], [208, 172], [228, 172], [242, 172], [248, 180], [248, 190], [248, 204], [248, 214], [242, 222], [228, 222], [208, 222], [200, 222], [192, 222], [190, 214], [190, 204], [190, 190], [190, 180]].forEach(p => obj('casa', p[0], p[1], 3, 3, true, { techo: ['#7c3b2e', '#5b4a8a', '#3b6b7c'][Math.floor(rng() * 3)] }));
     obj('tienda', 234, 174, 3, 3, true, { techo: '#2a7f5c' }); obj('puertaTienda', 235, 176, 1, 1, false, { dueno: 'la Boticaria de la Metrópolis' });
+    // La Metrópolis crece: ocho casas más y una segunda tienda (herbolaria).
+    [[196, 178], [212, 176], [236, 178], [212, 186], [232, 190], [204, 196], [232, 206], [212, 210]].forEach(p => obj('casa', p[0], p[1], 3, 3, true, { techo: ['#7c3b2e', '#5b4a8a', '#3b6b7c'][Math.floor(rng() * 3)] }));
+    obj('tienda', 222, 214, 3, 3, true, { techo: '#2a7f5c' }); obj('puertaTienda', 223, 216, 1, 1, false, { dueno: 'la Herbolaria de la Metrópolis' });
     obj('fogata', 219, 207, 1, 1, true); obj('pozo', 210, 190, 1, 1, true);
     obj('brasero', 204, 184, 1, 1, true); obj('brasero', 236, 184, 1, 1, true); obj('brasero', 204, 216, 1, 1, true); obj('brasero', 236, 216, 1, 1, true);
-    obj('cartel', 220, 184, 1, 1, true, { texto: 'LA METRÓPOLIS · La mega ciudad del centro del continente: la más grande, la más avanzada, la de los edificios altos y las calles de piedra. Aquí se cruzan peleadores de TODAS las aldeas, se habla de torneos y se comercia con todo el continente. Tiene su propia TIENDA DE POCIONES (al norte de la plaza). Alrededor, lejos, irradian las aldeas elementales: Vuelo Alto (Viento) al norte, Chispa Alta (Rayo) al noreste, Puerto Brisa Azul (Agua) al este, Ceniza Viva (Fuego) al sureste, Raíz de Piedra (Tierra) al suroeste y Arcana, la ciudad de los magos, al oeste. La Aldea de Bruma queda cerca, al suroeste: es la aldea de inicio.' });
+    obj('cartel', 220, 184, 1, 1, true, { texto: 'LA METRÓPOLIS · La ciudad más grande de todo el continente: edificios altos y calles de piedra. Aquí se cruzan peleadores de todas las aldeas, se habla de torneos y se comercia con todo el continente. Tienda de pociones al norte de la plaza. Alrededor, lejos, están las aldeas elementales: Vuelo Alto al norte, Chispa Alta al noreste, Puerto Brisa Azul al este, Ceniza Viva al sureste, Raíz de Piedra al suroeste y Arcana, la ciudad de los magos, al oeste. La Aldea de Bruma queda cerca, al suroeste.' });
     obj('cartel', 196, 196, 1, 1, true, { texto: 'PUERTA OESTE DE LA METRÓPOLIS · Al oeste: Pueblo Salina y, más lejos, ARCANA, la pequeña metrópolis de los magos, sobre la costa. Al suroeste, la Aldea de Bruma. Todo el borde del continente es mar: el mundo se acaba en el agua.' });
-    obj('cartel', 244, 222, 1, 1, true, { texto: 'PUERTA SURESTE DE LA METRÓPOLIS · Al sureste, Pueblo Brasa Chica y Aldea Ceniza Viva (Fuego). Al sur, Pueblo Vega Baja y Aldea Raíz de Piedra (Tierra). Al este, cruzando el puente del Río del Este, Puerto Brisa Azul (Agua). Los caminos ayudan, pero el continente es libre: puedes ir a campo traviesa por donde quieras.' });
+    obj('cartel', 244, 222, 1, 1, true, { texto: 'PUERTA SURESTE DE LA METRÓPOLIS · Al sureste, Pueblo Brasa Chica y Aldea Ceniza Viva, la del Fuego. Al sur, Pueblo Vega Baja y Aldea Raíz de Piedra, la de la Tierra. Al este, cruzando el puente del Río del Este, Puerto Brisa Azul, la del Agua. Los caminos ayudan, pero se puede ir a campo traviesa por donde se quiera.' });
     // ================================================================
     // PUERTO BRISA AZUL (Agua) — al este, junto al Lago Brisa Azul
     // ================================================================
@@ -348,42 +394,59 @@ U.Grid = {
     obj('casa', 350, 182, 3, 3, true, { techo: '#3b6b7c' }); obj('casa', 358, 180, 3, 3, true, { techo: '#2a7f5c' }); obj('casa', 378, 182, 3, 3, true, { techo: '#3b6b7c' }); obj('casa', 386, 188, 3, 3, true, { techo: '#5b4a8a' }); obj('casa', 352, 204, 3, 3, true, { techo: '#3b6b7c' }); obj('casa', 386, 204, 3, 3, true, { techo: '#2a7f5c' });
     obj('tienda', 366, 180, 3, 3, true, { techo: '#2a7f5c' }); obj('puertaTienda', 367, 182, 1, 1, false, { dueno: 'la Boticaria del Puerto' });
     obj('casa', 380, 206, 3, 3, true, { techo: '#7c3b2e' }); obj('puertaRenta', 381, 208, 1, 1, false, { pueblo: 'Puerto Brisa Azul' });
+    obj('casa', 362, 190, 3, 3, true, { techo: '#5b4a8a' }); obj('casa', 372, 188, 3, 3, true, { techo: '#7c3b2e' });
     obj('fogata', 374, 202, 1, 1, true); obj('pozo', 356, 192, 1, 1, true);
-    obj('cartel', 360, 196, 1, 1, true, { texto: 'PUERTO BRISA AZUL · Aldea de Agua, a la orilla del Lago Brisa Azul. Aquí el Agua respira: cuesta menos y cruza gratis. Nami pesca en el muelle y Orin cuida la orilla. Tiene tienda de pociones. Al oeste, el puente ancho cruza el Río del Este y el camino lleva a la Metrópolis; también puedes rodear el lago o ir a campo traviesa.' });
-    obj('cartel', 368, 220, 1, 1, true, { texto: 'LAGO BRISA AZUL · El lago grande del este. El Río del Este lo alimenta desde el norte y sigue hacia el sur, hasta perderse en la Tierra Quemada. Desde el muelle se pesca y se mira el agua; cruzarlo ya es cosa de tu elemento (o de tu botón de caminar sobre el agua).' });
+    obj('cartel', 360, 196, 1, 1, true, { texto: 'PUERTO BRISA AZUL · Aldea de Agua, a la orilla del Lago Brisa Azul. Aquí el Agua respira: sale más barata y el lago se cruza sin pagar. Nami pesca en el muelle y Orin cuida la orilla. Tienda de pociones en la plaza. Al oeste, el puente ancho cruza el Río del Este y el camino lleva a la Metrópolis; también se puede rodear el lago o ir a campo traviesa.' });
+    obj('cartel', 368, 220, 1, 1, true, { texto: 'LAGO BRISA AZUL · El lago grande del este. El Río del Este lo alimenta desde el norte y sigue hacia el sur, hasta perderse en la Tierra Quemada. Desde el muelle se pesca y se mira el agua; cruzarlo es cosa de tu elemento.' });
     npcsPos.nami = { x: 364.5, y: 198.5 }; npcsPos.orin = { x: 362.5, y: 200.5 };
     // ================================================================
     // ALDEA CENIZA VIVA (Fuego) — al sureste, sobre la Tierra Quemada
     // ================================================================
-    pav(312, 296, 348, 328, T.PIEDRA);
-    obj('casa', 316, 300, 3, 3, true, { techo: '#7c3b2e' }); obj('casa', 338, 300, 3, 3, true, { techo: '#8a4a2a' }); obj('casa', 316, 320, 3, 3, true, { techo: '#7c3b2e' }); obj('casa', 340, 318, 3, 3, true, { techo: '#8a4a2a' });
-    obj('tienda', 326, 298, 3, 3, true, { techo: '#2a7f5c' }); obj('puertaTienda', 327, 300, 1, 1, false, { dueno: 'el Boticario de Ceniza Viva' });
-    obj('casa', 342, 320, 3, 3, true, { techo: '#7c3b2e' }); obj('puertaRenta', 343, 322, 1, 1, false, { pueblo: 'Aldea Ceniza Viva' });
-    obj('brasero', 320, 304, 1, 1, true); obj('brasero', 344, 304, 1, 1, true); obj('brasero', 320, 324, 1, 1, true); obj('brasero', 344, 324, 1, 1, true); obj('fogata', 330, 306, 1, 1, true);
-    obj('cartel', 330, 310, 1, 1, true, { texto: 'ALDEA CENIZA VIVA · Aldea de Fuego, levantada sobre la Tierra Quemada del sureste. Aquí el Fuego cuesta menos y la ceniza no quema a los suyos; a los demás sí (3 de Vida por segundo sobre ceniza). Zara guarda las brasas y Varek trabaja su forja de ceniza. Tiene tienda de pociones. Se llega por el camino del sureste, por la ruta del este bajando del lago, o por la ruta del sur desde el Desierto: hay más de un camino.' });
-    npcsPos.zara = { x: 330.5, y: 312.5 }; npcsPos.varek = { x: 322.5, y: 320.5 };
+    pav(307, 291, 343, 323, T.PIEDRA);
+    obj('casa', 311, 295, 3, 3, true, { techo: '#7c3b2e' }); obj('casa', 333, 295, 3, 3, true, { techo: '#8a4a2a' }); obj('casa', 311, 315, 3, 3, true, { techo: '#7c3b2e' }); obj('casa', 335, 313, 3, 3, true, { techo: '#8a4a2a' });
+    obj('casa', 317, 305, 3, 3, true, { techo: '#5b4a8a' }); obj('casa', 331, 311, 3, 3, true, { techo: '#7c3b2e' });
+    obj('tienda', 321, 293, 3, 3, true, { techo: '#2a7f5c' }); obj('puertaTienda', 322, 295, 1, 1, false, { dueno: 'el Boticario de Ceniza Viva' });
+    obj('casa', 337, 315, 3, 3, true, { techo: '#7c3b2e' }); obj('puertaRenta', 338, 317, 1, 1, false, { pueblo: 'Aldea Ceniza Viva' });
+    obj('brasero', 315, 299, 1, 1, true); obj('brasero', 339, 299, 1, 1, true); obj('brasero', 315, 319, 1, 1, true); obj('brasero', 339, 319, 1, 1, true); obj('fogata', 325, 301, 1, 1, true);
+    obj('cartel', 325, 305, 1, 1, true, { texto: 'ALDEA CENIZA VIVA · Aldea de Fuego, levantada sobre la Tierra Quemada del sureste. Aquí el Fuego sale más barato y la ceniza no quema a los suyos; a los demás sí. Zara guarda las brasas y Varek trabaja su forja de ceniza. Tienda de pociones en la plaza. Se llega por el camino del sureste, por la ruta del este bajando del lago, o por la ruta del sur desde el Desierto: hay más de un camino.' });
+    npcsPos.zara = { x: 325.5, y: 307.5 }; npcsPos.varek = { x: 317.5, y: 315.5 };
     // Gente de las tramas abiertas (investigadora, víctima, cazadora, informante, anticuaria y el del guante negro)
     npcsPos.vera = { x: 224.5, y: 192.5 }; npcsPos.milo = { x: 214.5, y: 206.5 };
-    npcsPos.bram = { x: 150.5, y: 246.5 }; npcsPos.dario = { x: 297.5, y: 171.5 };
+    npcsPos.bram = { x: 149.5, y: 247.5 }; // junto a la fogata, no encima: (150.5,246.5) es la fogata y es sólida; coincide con el punto corregido de su RUTINA en vida.js
+    npcsPos.dario = { x: 297.5, y: 171.5 };
     npcsPos.sana = { x: 374.5, y: 216.5 }; npcsPos.petra = { x: 68.5, y: 162.5 };
+    // Vecinos de las casas nuevas (H): uno por casa, junto a su puerta.
+    npcsPos.ines = { x: 171.5, y: 241.5 }; npcsPos.ramiro = { x: 173.5, y: 253.5 }; npcsPos.carmen = { x: 141.5, y: 258.5 };
+    npcsPos.felipe = { x: 159.5, y: 258.5 }; npcsPos.lucia = { x: 169.5, y: 263.5 }; npcsPos.tomas = { x: 155.5, y: 265.5 };
+    npcsPos.elvira = { x: 223.5, y: 217.5 }; npcsPos.rodrigo = { x: 197.5, y: 181.5 }; npcsPos.camila = { x: 213.5, y: 179.5 };
+    npcsPos.andres = { x: 237.5, y: 181.5 }; npcsPos.valeria = { x: 213.5, y: 189.5 }; npcsPos.jorge = { x: 233.5, y: 193.5 };
+    npcsPos.sofia = { x: 207.5, y: 197.5 }; npcsPos.diego = { x: 233.5, y: 209.5 }; npcsPos.paola = { x: 213.5, y: 213.5 };
+    npcsPos.ariel = { x: 208.5, y: 47.5 }; npcsPos.nora = { x: 226.5, y: 47.5 };
+    npcsPos.ivan = { x: 345.5, y: 133.5 }; npcsPos.lena = { x: 359.5, y: 143.5 };
+    npcsPos.omar = { x: 363.5, y: 193.5 }; npcsPos.rosa = { x: 373.5, y: 191.5 };
+    npcsPos.hugo = { x: 318.5, y: 308.5 }; npcsPos.emma = { x: 332.5, y: 314.5 };
+    npcsPos.pablo = { x: 145.5, y: 333.5 }; npcsPos.ana = { x: 151.5, y: 325.5 };
+    npcsPos.esteban = { x: 61.5, y: 157.5 }; npcsPos.miriam = { x: 81.5, y: 169.5 };
     // ================================================================
     // ALDEA VUELO ALTO (Viento) — al norte, en la meseta ventosa
     // ================================================================
-    pav(204, 56, 230, 74, T.PIEDRA);
-    obj('casa', 200, 54, 3, 3, true, { techo: '#3b6b7c' }); obj('casa', 226, 54, 3, 3, true, { techo: '#5b4a8a' }); obj('casa', 200, 70, 3, 3, true, { techo: '#5b4a8a' }); obj('casa', 228, 70, 3, 3, true, { techo: '#3b6b7c' });
-    obj('tienda', 210, 52, 3, 3, true, { techo: '#2a7f5c' }); obj('puertaTienda', 211, 54, 1, 1, false, { dueno: 'la Boticaria de Vuelo Alto' });
-    obj('casa', 232, 58, 3, 3, true, { techo: '#7c3b2e' }); obj('puertaRenta', 233, 60, 1, 1, false, { pueblo: 'Aldea Vuelo Alto' });
-    obj('fogata', 216, 60, 1, 1, true); obj('pozo', 222, 68, 1, 1, true);
-    obj('cartel', 216, 76, 1, 1, true, { texto: 'ALDEA VUELO ALTO · Aldea de Viento, en la meseta abierta del norte: aquí el Viento fluye y cuesta menos. Tiene tienda de pociones. Al sur, el camino baja directo a la Metrópolis; al oeste, el anillo lleva a Pueblo Alto Pino y al Bosque Susurrante; al este, a Pueblo Rocafirme y a la Montaña Brumosa.' });
+    pav(203, 38, 235, 62, T.PIEDRA);
+    obj('casa', 199, 36, 3, 3, true, { techo: '#3b6b7c' }); obj('casa', 231, 36, 3, 3, true, { techo: '#5b4a8a' }); obj('casa', 199, 56, 3, 3, true, { techo: '#5b4a8a' }); obj('casa', 233, 56, 3, 3, true, { techo: '#3b6b7c' });
+    obj('casa', 207, 44, 3, 3, true, { techo: '#7c3b2e' }); obj('casa', 225, 44, 3, 3, true, { techo: '#3b6b7c' });
+    obj('tienda', 211, 34, 3, 3, true, { techo: '#2a7f5c' }); obj('puertaTienda', 212, 36, 1, 1, false, { dueno: 'la Boticaria de Vuelo Alto' });
+    obj('casa', 235, 40, 3, 3, true, { techo: '#7c3b2e' }); obj('puertaRenta', 236, 42, 1, 1, false, { pueblo: 'Aldea Vuelo Alto' });
+    obj('fogata', 217, 44, 1, 1, true); obj('pozo', 223, 52, 1, 1, true);
+    obj('cartel', 217, 64, 1, 1, true, { texto: 'ALDEA VUELO ALTO · Aldea de Viento, en la meseta abierta del norte: aquí el Viento fluye y sale más barato. Tienda de pociones en la plaza. Al sur, el camino baja directo a la Metrópolis; al oeste, el anillo lleva a Pueblo Alto Pino y al Bosque Susurrante; al este, a Pueblo Rocafirme y a la Montaña Brumosa.' });
     // ================================================================
     // ALDEA CHISPA ALTA (Rayo) — al noreste, tierra de tormentas
     // ================================================================
-    pav(372, 110, 398, 130, T.PIEDRA);
-    obj('casa', 368, 108, 3, 3, true, { techo: '#5b4a8a' }); obj('casa', 392, 108, 3, 3, true, { techo: '#3b6b7c' }); obj('casa', 368, 126, 3, 3, true, { techo: '#3b6b7c' }); obj('casa', 394, 124, 3, 3, true, { techo: '#5b4a8a' });
-    obj('tienda', 378, 106, 3, 3, true, { techo: '#2a7f5c' }); obj('puertaTienda', 379, 108, 1, 1, false, { dueno: 'el Boticario de Chispa Alta' });
-    obj('casa', 396, 116, 3, 3, true, { techo: '#7c3b2e' }); obj('puertaRenta', 397, 118, 1, 1, false, { pueblo: 'Aldea Chispa Alta' });
-    obj('fogata', 384, 116, 1, 1, true); obj('pozo', 374, 124, 1, 1, true);
-    obj('cartel', 384, 132, 1, 1, true, { texto: 'ALDEA CHISPA ALTA · Aldea de Rayo, en la tierra abierta de tormentas del noreste: cielo abierto, el Rayo cae fácil. Tiene tienda de pociones. Al oeste queda la Montaña Brumosa y su obelisco; al suroeste, el camino de Pueblo Rocafirme baja a la Metrópolis.' });
+    pav(340, 122, 370, 148, T.PIEDRA);
+    obj('casa', 338, 122, 3, 3, true, { techo: '#5b4a8a' }); obj('casa', 362, 122, 3, 3, true, { techo: '#3b6b7c' }); obj('casa', 338, 140, 3, 3, true, { techo: '#3b6b7c' }); obj('casa', 364, 138, 3, 3, true, { techo: '#5b4a8a' });
+    obj('casa', 344, 130, 3, 3, true, { techo: '#7c3b2e' }); obj('casa', 358, 140, 3, 3, true, { techo: '#3b6b7c' });
+    obj('tienda', 348, 120, 3, 3, true, { techo: '#2a7f5c' }); obj('puertaTienda', 349, 122, 1, 1, false, { dueno: 'el Boticario de Chispa Alta' });
+    obj('casa', 366, 130, 3, 3, true, { techo: '#7c3b2e' }); obj('puertaRenta', 367, 132, 1, 1, false, { pueblo: 'Aldea Chispa Alta' });
+    obj('fogata', 354, 130, 1, 1, true); obj('pozo', 344, 138, 1, 1, true);
+    obj('cartel', 354, 150, 1, 1, true, { texto: 'ALDEA CHISPA ALTA · Aldea de Rayo, en la tierra abierta de tormentas del noreste: cielo abierto, el Rayo cae fácil. Tienda de pociones en la plaza. Al oeste queda la Montaña Brumosa y su obelisco; al suroeste, el camino de Pueblo Rocafirme baja a la Metrópolis.' });
     // ================================================================
     // ALDEA RAÍZ DE PIEDRA (Tierra) — al suroeste, entre rocas
     // ================================================================
@@ -391,14 +454,16 @@ U.Grid = {
     obj('casa', 134, 318, 3, 3, true, { techo: '#7c3b2e' }); obj('casa', 156, 318, 3, 3, true, { techo: '#5b4a8a' }); obj('casa', 134, 336, 3, 3, true, { techo: '#3b6b7c' }); obj('casa', 158, 334, 3, 3, true, { techo: '#7c3b2e' });
     obj('tienda', 142, 316, 3, 3, true, { techo: '#2a7f5c' }); obj('puertaTienda', 143, 318, 1, 1, false, { dueno: 'la Boticaria de Raíz de Piedra' });
     obj('casa', 160, 324, 3, 3, true, { techo: '#5b4a8a' }); obj('puertaRenta', 161, 326, 1, 1, false, { pueblo: 'Aldea Raíz de Piedra' });
+    obj('casa', 144, 330, 3, 3, true, { techo: '#3b6b7c' }); obj('casa', 150, 322, 3, 3, true, { techo: '#5b4a8a' });
     obj('fogata', 148, 326, 1, 1, true); obj('pozo', 138, 330, 1, 1, true);
-    obj('cartel', 148, 342, 1, 1, true, { texto: 'ALDEA RAÍZ DE PIEDRA · Aldea de Tierra, entre rocas del suroeste: suelo natural, la Tierra responde fuerte. Tiene tienda de pociones. Al norte, el camino sube a la Metrópolis pasando por Pueblo Vega Baja; al este, la ruta del sur lleva al Desierto de Sal y a Ceniza Viva; al noreste queda la Laguna Serena.' });
+    obj('cartel', 148, 342, 1, 1, true, { texto: 'ALDEA RAÍZ DE PIEDRA · Aldea de Tierra, entre rocas del suroeste: suelo natural, la Tierra responde fuerte. Tienda de pociones en la plaza. Al norte, el camino sube a la Metrópolis pasando por Pueblo Vega Baja; al este, la ruta del sur lleva al Desierto de Sal y a Ceniza Viva; al noreste queda la Laguna Serena.' });
     // ================================================================
     // ARCANA — la metrópolis pequeña de los magos, lejos al oeste
     // ================================================================
     pav(46, 144, 84, 174, T.PIEDRA);
     obj('casa', 48, 146, 3, 3, true, { techo: '#5b4a8a' }); obj('casa', 56, 146, 3, 3, true, { techo: '#3b6b7c' }); obj('casa', 66, 146, 3, 3, true, { techo: '#5b4a8a' }); obj('casa', 74, 146, 3, 3, true, { techo: '#3b6b7c' }); obj('casa', 48, 164, 3, 3, true, { techo: '#3b6b7c' }); obj('casa', 58, 166, 3, 3, true, { techo: '#5b4a8a' }); obj('casa', 70, 164, 3, 3, true, { techo: '#5b4a8a' }); obj('casa', 78, 156, 3, 3, true, { techo: '#3b6b7c' });
     obj('casa', 50, 154, 3, 3, true, { techo: '#7c3b2e' }); obj('puertaRenta', 51, 156, 1, 1, false, { pueblo: 'Arcana' });
+    obj('casa', 60, 154, 3, 3, true, { techo: '#3b6b7c' }); obj('casa', 80, 166, 3, 3, true, { techo: '#5b4a8a' });
     obj('fogata', 64, 158, 1, 1, true); obj('pozo', 72, 152, 1, 1, true);
     obj('brasero', 52, 148, 1, 1, true); obj('brasero', 76, 148, 1, 1, true); obj('brasero', 52, 168, 1, 1, true); obj('brasero', 76, 168, 1, 1, true);
     obj('cartel', 64, 150, 1, 1, true, { texto: 'ARCANA · La pequeña metrópolis de los MAGOS: más que una aldea, menos que la Metrópolis. Torres de estudio, braseros que no se apagan y hechiceros que cruzan el continente entero para venir a leer aquí. No hay tienda de pociones: el viajero renta una casa (15 🪙 la noche) y amanece entero. Al este, el camino vuelve a la Metrópolis por Pueblo Salina; al sur, la costa lleva al Desierto de Sal.' });
@@ -410,7 +475,7 @@ U.Grid = {
       obj('casa', cx - 9, cy - 5, 3, 3, true, { techo: '#7c3b2e' }); obj('casa', cx + 6, cy - 6, 3, 3, true, { techo: '#5b4a8a' }); obj('casa', cx - 9, cy + 3, 3, 3, true, { techo: '#3b6b7c' });
       obj('casa', cx + 5, cy + 3, 3, 3, true, { techo: '#7c3b2e' }); obj('puertaRenta', cx + 6, cy + 5, 1, 1, false, { pueblo: nombre });
       obj('fogata', cx, cy, 1, 1, true); obj('pozo', cx - 3, cy + 2, 1, 1, true);
-      obj('cartel', cx + 2, cy - 3, 1, 1, true, { texto: nombre.toUpperCase() + ' · Pueblo pequeño del camino. Aquí NO hay tienda de pociones: si necesitas recuperarte, RENTA LA CASA (la del cartel de llave, 15 🪙 por noche): duermes y despiertas con Vida y Esencia al 100%, como en tu casa o en la fogata. ' + (textoExtra || '') });
+      obj('cartel', cx + 2, cy - 3, 1, 1, true, { texto: nombre.toUpperCase() + ' · Pueblo pequeño del camino. No hay tienda de pociones. Se renta la casa de la llave, 15 🪙 la noche: cama, techo y despertar entero. ' + (textoExtra || '') });
     };
     pueblo('Pueblo Alto Pino', 140, 120, 'Entre el Bosque Susurrante y la meseta de Viento: de aquí salen los leñadores.');
     pueblo('Pueblo Rocafirme', 252, 116, 'Parada del camino del noreste, entre la Metrópolis y la Montaña Brumosa.');
@@ -423,9 +488,39 @@ U.Grid = {
     obj('fogata', 232, 306, 1, 1, true); obj('cartel', 233, 306, 1, 1, true, { texto: 'CAMPAMENTO DE LA LAGUNA · A la orilla noroeste de la Laguna Serena. Agua quieta, juncos y nadie apurado. Al oeste está Aldea Raíz de Piedra; al este, la ruta del sur sigue a Ceniza Viva.' });
     obj('roca', 180, 120, 1, 1, true); obj('roca', 182, 121, 1, 1, true); obj('roca', 179, 122, 1, 1, true); obj('cartel', 181, 123, 1, 1, true, { texto: 'RUINAS DEL MIRADOR · Piedras caídas de algo que fue alto y miró lejos. Desde aquí, en un día claro, se distingue el humo de la Metrópolis al sureste y la meseta de Vuelo Alto al este.' });
     obj('fogata', 120, 168, 1, 1, true); obj('cartel', 121, 168, 1, 1, true, { texto: 'DESCANSO DEL OESTE · Fogata vieja junto al camino de Arcana. Los magos que bajan a la Metrópolis paran aquí a hervir agua y a discutir en voz baja.' });
+    // --- NUEVAS REGIONES (N): letreros, fogata y naturaleza propia ---
+    obj('cartel', 350, 98, 1, 1, true, { texto: 'RÍO SERPIENTE · Nace en la Montaña Brumosa y se retuerce hasta el mar. El puente es el paso seguro; el agua baja fría y rápida.' });
+    obj('cartel', 200, 336, 1, 1, true, { texto: 'LAGO ESPEJO · Agua quieta como un espejo. Los juncos guardan la orilla y el lago devuelve el cielo entero.' });
+    obj('cartel', 327, 99, 1, 1, true, { texto: 'CASCADA DE LA LUNA · El agua cae desde lo alto de la montaña. De noche, dicen, la luna se baña en la poza.' });
+    obj('cartel', 102, 112, 1, 1, true, { texto: 'BOSQUE DE BAMBÚ · El bambú crece alto y junto. Dentro se oye el viento antes de sentirse.' });
+    obj('cartel', 190, 296, 1, 1, true, { texto: 'PRADERA DE LAS FLORES · Hierba mansa y flores hasta donde alcanza la vista. Aquí no hay prisa: ni la tiene el viento.' });
+    obj('cartel', 280, 140, 1, 1, true, { texto: 'LLANURA DORADA · Hierba dorada hasta el horizonte. Aquí el viento peina el campo y el sol no pide permiso.' });
+    obj('cartel', 272, 278, 1, 1, true, { texto: 'PANTANO GRIS · Niebla, juncos y agua quieta. Cuidado: el suelo miente.' });
+    obj('cartel', 168, 74, 1, 1, true, { texto: 'GARGANTA DEL VIENTO · El viento baja por la garganta y sale rugiendo. Aquí hasta los sombreros vuelan.' });
+    obj('cartel', 116, 212, 1, 1, true, { texto: 'RUINAS DE LA ALDEA CAÍDA · Aquí hubo una aldea antes de la Guerra de los Clanes. Nadie la reconstruyó: las piedras guardan el luto.' });
+    obj('cartel', 81, 345, 1, 1, true, { texto: 'CUEVA DE CRISTAL · Bajo la piedra, los cristales brillan con luz propia. La cueva oye antes de ver.' });
+    obj('cartel', 220, 26, 1, 1, true, { texto: 'GLACIAR ETERNO · Un muro de hielo azul que no se derrite ni en verano. Más allá, solo frío.' });
+    obj('fogata', 356, 350, 1, 1, true); obj('cartel', 362, 350, 1, 1, true, { texto: 'AGUAS TERMALES · Agua caliente entre la ceniza. El calor hace su trabajo solo.' });
+    obj('cartel', 375, 340, 1, 1, true, { texto: 'CAMPO VOLCÁNICO · La tierra escupe fuego y la piedra nace caliente. No te acerques a los cráteres.' });
+    obj('cartel', 180, 32, 1, 1, true, { texto: 'MONTAÑA DE NIEBLA · Se sube a pie, sin camino marcado. Arriba, la nieve del norte cubre todo.' });
+    obj('cartel', 400, 92, 1, 1, true, { texto: 'MESETA DE LA TORMENTA · Aquí la tormenta no pasa: vive. Los rayos caen sin avisar.' });
+    obj('cartel', 410, 200, 1, 1, true, { texto: 'COSTA DEL ESTE · El mar empieza aquí y no termina. Al norte, por la costa, hace más frío.' });
+    // Bambú alto: árboles juntos; Bosque Ancestral: árboles enormes y juntos.
+    const hayObj = (x, y) => objetos.some(o => x >= o.x && x < o.x + (o.w || 1) && y >= o.y && y < o.y + (o.h || 1));
+    for (let y = 104; y <= 134; y++) for (let x = 56; x <= 114; x++) { if (get(x, y) === T.SOTOBOSQUE && !hayObj(x, y) && rng() < 0.22) obj('arbol', x, y, 1, 1, true, { v: 1 }); }
+    for (let y = 312; y <= 378; y++) for (let x = 52; x <= 118; x++) { if (get(x, y) === T.SOTOBOSQUE && !hayObj(x, y) && rng() < 0.2) obj('arbol', x, y, 1, 1, true, { v: Math.floor(rng() * 2) }); }
+    // Pradera y Llanura: flores; Pantano y Lago Espejo: juncos; Ruinas y Cueva: rocas.
+    for (let y = 290; y <= 314; y++) for (let x = 176; x <= 212; x++) { if (get(x, y) === T.PASTO && !hayObj(x, y) && rng() < 0.16) obj('flor', x, y, 1, 1, false, { v: Math.floor(rng() * 3) }); }
+    for (let y = 128; y <= 152; y++) for (let x = 268; x <= 332; x++) { if (get(x, y) === T.PASTO && !hayObj(x, y) && rng() < 0.08) obj('flor', x, y, 1, 1, false, { v: Math.floor(rng() * 3) }); }
+    for (let y = 276; y <= 300; y++) for (let x = 264; x <= 282; x++) { if (get(x, y) === T.SOTOBOSQUE && !hayObj(x, y) && rng() < 0.3) obj('junco', x, y, 1, 1, false); }
+    for (let y = 338; y <= 352; y++) for (let x = 188; x <= 212; x++) { if (get(x, y) === T.PASTO && (get(x + 1, y) === T.AGUA || get(x - 1, y) === T.AGUA || get(x, y + 1) === T.AGUA || get(x, y - 1) === T.AGUA) && !hayObj(x, y) && rng() < 0.4) obj('junco', x, y, 1, 1, false); }
+    for (let y = 200; y <= 224; y++) for (let x = 104; x <= 130; x++) { if (get(x, y) === T.PIEDRA && !hayObj(x, y) && rng() < 0.12) obj('roca', x, y, 1, 1, true); }
+    for (let y = 347; y <= 367; y++) for (let x = 71; x <= 93; x++) { if (get(x, y) === T.PIEDRA && !hayObj(x, y) && rng() < 0.15) obj('roca', x, y, 1, 1, true); }
+    // Braseros en los cráteres del Campo Volcánico (la lava, sin inventar tiles).
+    obj('brasero', 372, 344, 1, 1, true); obj('brasero', 386, 352, 1, 1, true); obj('brasero', 362, 356, 1, 1, true);
     // --- Naturaleza de relleno en los campos entre asentamientos ---
     const enRegion = (x, y) => (x >= OFF.aldea.x && x < OFF.aldea.x + 84 && y >= OFF.aldea.y && y < OFF.aldea.y + 62) || (x >= OFF.bosque.x && x < OFF.bosque.x + 72 && y >= OFF.bosque.y && y < OFF.bosque.y + 56) || (x >= OFF.desierto.x && x < OFF.desierto.x + 74 && y >= OFF.desierto.y && y < OFF.desierto.y + 54) || (x >= OFF.montana.x && x < OFF.montana.x + 68 && y >= OFF.montana.y && y < OFF.montana.y + 54);
-    const enAsentamiento = (x, y) => (x >= 184 && x <= 258 && y >= 166 && y <= 232) || (x >= 344 && x <= 396 && y >= 174 && y <= 248) || (x >= 306 && x <= 354 && y >= 290 && y <= 334) || (x >= 192 && x <= 242 && y >= 44 && y <= 86) || (x >= 360 && x <= 408 && y >= 98 && y <= 142) || (x >= 124 && x <= 174 && y >= 308 && y <= 352) || (x >= 40 && x <= 90 && y >= 138 && y <= 180) || (x >= 128 && x <= 154 && y >= 108 && y <= 132) || (x >= 240 && x <= 266 && y >= 104 && y <= 128) || (x >= 288 && x <= 314 && y >= 156 && y <= 180) || (x >= 76 && x <= 102 && y >= 194 && y <= 218) || (x >= 234 && x <= 260 && y >= 256 && y <= 280) || (x >= 280 && x <= 306 && y >= 250 && y <= 274);
+    const enAsentamiento = (x, y) => (x >= 184 && x <= 258 && y >= 166 && y <= 232) || (x >= 344 && x <= 396 && y >= 174 && y <= 248) || (x >= 306 && x <= 354 && y >= 290 && y <= 334) || (x >= 192 && x <= 242 && y >= 36 && y <= 86) || (x >= 332 && x <= 380 && y >= 114 && y <= 158) || (x >= 124 && x <= 174 && y >= 308 && y <= 352) || (x >= 40 && x <= 90 && y >= 138 && y <= 180) || (x >= 128 && x <= 154 && y >= 108 && y <= 132) || (x >= 240 && x <= 266 && y >= 104 && y <= 128) || (x >= 288 && x <= 314 && y >= 156 && y <= 180) || (x >= 76 && x <= 102 && y >= 194 && y <= 218) || (x >= 234 && x <= 260 && y >= 256 && y <= 280) || (x >= 280 && x <= 306 && y >= 250 && y <= 274);
     for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) {
       const tt = get(x, y); if (enAsentamiento(x, y) || enRegion(x, y)) continue;
       const cercaCamino = get(x + 1, y) === T.CAMINO || get(x - 1, y) === T.CAMINO || get(x, y + 1) === T.CAMINO || get(x, y - 1) === T.CAMINO || tt === T.CAMINO;
@@ -436,21 +531,20 @@ U.Grid = {
     // Ningún árbol/roca/cactus puede quedar sobre un camino, un puente o una plaza: el paso queda libre.
     for (let i = objetos.length - 1; i >= 0; i--) { const o = objetos[i]; if ((o.tipo === 'arbol' || o.tipo === 'roca' || o.tipo === 'cactus') && o.solido) { const tt = get(o.x, o.y); if (tt === T.CAMINO || tt === T.PUENTE || tt === T.PIEDRA) { objetos.splice(i, 1); for (let yy = o.y; yy < o.y + (o.h || 1); yy++) for (let xx = o.x; xx < o.x + (o.w || 1); xx++) if (xx >= 0 && yy >= 0 && xx < W && yy < H && tiles[yy * W + xx] !== T.AGUA) solidos[yy * W + xx] = 0; } } }
     // Los puntos clave (plazas, puertas, puestos de NPC, destinos) quedan siempre libres.
-    [[150.5, 248.5], [220.5, 200.5], [364.5, 202.5], [330.5, 314.5], [148.5, 332.5], [216.5, 66.5], [384.5, 122.5], [64.5, 160.5], [368.5, 236.5], [332.5, 196.5], [344.5, 196.5], [362.5, 200.5], [360.5, 196.5], [374.5, 216.5], [368.5, 232.5], [354.5, 300.5], [326.5, 318.5], [330.5, 312.5], [322.5, 320.5], [318.5, 306.5], [68.5, 96.5], [327.5, 75.5], [46.5, 265.5], [89.5, 249.5], [83.5, 69.5], [320.5, 48.5], [174.5, 246.5], [185.5, 234.5], [68.5, 56.5], [356.5, 220.5], [330.5, 311.5], [220.5, 190.5], [140.5, 120.5], [252.5, 116.5], [300.5, 168.5], [88.5, 206.5], [246.5, 268.5], [292.5, 262.5]].forEach(p => { for (let i = objetos.length - 1; i >= 0; i--) { const o = objetos[i]; if (o.solido && (o.tipo === 'arbol' || o.tipo === 'roca' || o.tipo === 'cactus') && Math.abs(o.x + 0.5 - p[0]) < 1.7 && Math.abs(o.y + 0.5 - p[1]) < 1.7) objetos.splice(i, 1); } const cx = Math.floor(p[0]), cy = Math.floor(p[1]); for (let yy = cy - 1; yy <= cy + 1; yy++) for (let xx = cx - 1; xx <= cx + 1; xx++) if (xx >= 0 && yy >= 0 && xx < W && yy < H && tiles[yy * W + xx] !== T.AGUA) solidos[yy * W + xx] = 0; });
+    [[150.5, 248.5], [220.5, 200.5], [364.5, 202.5], [325.5, 309.5], [148.5, 332.5], [219.5, 50.5], [355.5, 135.5], [64.5, 160.5], [368.5, 236.5], [332.5, 196.5], [344.5, 196.5], [362.5, 200.5], [360.5, 196.5], [374.5, 216.5], [368.5, 232.5], [354.5, 300.5], [321.5, 313.5], [325.5, 307.5], [317.5, 315.5], [313.5, 301.5], [68.5, 96.5], [327.5, 75.5], [46.5, 265.5], [89.5, 249.5], [83.5, 69.5], [320.5, 48.5], [174.5, 246.5], [185.5, 234.5], [68.5, 56.5], [356.5, 220.5], [325.5, 306.5], [220.5, 190.5], [140.5, 120.5], [252.5, 116.5], [300.5, 168.5], [88.5, 206.5], [246.5, 268.5], [292.5, 262.5], [171.5, 241.5], [173.5, 253.5], [141.5, 258.5], [159.5, 258.5], [169.5, 263.5], [155.5, 265.5], [223.5, 217.5], [197.5, 181.5], [213.5, 179.5], [237.5, 181.5], [213.5, 189.5], [233.5, 193.5], [207.5, 197.5], [233.5, 209.5], [213.5, 213.5], [208.5, 47.5], [226.5, 47.5], [345.5, 133.5], [359.5, 143.5], [363.5, 193.5], [373.5, 191.5], [318.5, 308.5], [332.5, 314.5], [145.5, 333.5], [151.5, 325.5], [61.5, 157.5], [81.5, 169.5], [350.5, 98.5], [200.5, 336.5], [327.5, 99.5], [102.5, 112.5], [190.5, 296.5], [280.5, 140.5], [272.5, 278.5], [168.5, 74.5], [116.5, 212.5], [81.5, 345.5], [220.5, 26.5], [356.5, 350.5], [362.5, 350.5], [375.5, 340.5], [180.5, 32.5], [400.5, 92.5], [410.5, 200.5]].forEach(p => { for (let i = objetos.length - 1; i >= 0; i--) { const o = objetos[i]; if (o.solido && (o.tipo === 'arbol' || o.tipo === 'roca' || o.tipo === 'cactus') && Math.abs(o.x + 0.5 - p[0]) < 1.7 && Math.abs(o.y + 0.5 - p[1]) < 1.7) objetos.splice(i, 1); } const cx = Math.floor(p[0]), cy = Math.floor(p[1]); for (let yy = cy - 1; yy <= cy + 1; yy++) for (let xx = cx - 1; xx <= cx + 1; xx++) if (xx >= 0 && yy >= 0 && xx < W && yy < H && tiles[yy * W + xx] !== T.AGUA) solidos[yy * W + xx] = 0; });
     // El borde del mundo es MAR: dos baldosas de agua en todo el contorno, sí o sí.
     for (let x = 0; x < W; x++) { set(x, 0, T.AGUA); set(x, 1, T.AGUA); set(x, H - 2, T.AGUA); set(x, H - 1, T.AGUA); }
     for (let y = 0; y < H; y++) { set(0, y, T.AGUA); set(1, y, T.AGUA); set(W - 2, y, T.AGUA); set(W - 1, y, T.AGUA); }
     // --- Zonas de ambiente de los asentamientos nuevos ---
     zonas.push({ id: 'metropolis', nombre: 'La Metrópolis', x: 186, y: 168, w: 70, h: 62, humedad: 0.4, temp: 0.55, viento: 0.5, suelo: 'pavimento', icono: 'aldea', tinte: [200, 210, 255, 0.04] });
-    zonas.push({ id: 'vueloAlto', nombre: 'Aldea Vuelo Alto', x: 192, y: 44, w: 50, h: 42, humedad: 0.4, temp: 0.4, viento: 0.95, suelo: 'tierra', abierto: true, icono: 'arena', tinte: [126, 240, 192, 0.05] });
-    zonas.push({ id: 'chispaAlta', nombre: 'Aldea Chispa Alta', x: 360, y: 98, w: 48, h: 44, humedad: 0.35, temp: 0.5, viento: 0.8, suelo: 'tierra', abierto: true, icono: 'arena', tinte: [255, 225, 120, 0.05] });
+    zonas.push({ id: 'vueloAlto', nombre: 'Aldea Vuelo Alto', x: 192, y: 36, w: 50, h: 50, humedad: 0.4, temp: 0.4, viento: 0.95, suelo: 'tierra', abierto: true, icono: 'arena', tinte: [126, 240, 192, 0.05] });
+    zonas.push({ id: 'chispaAlta', nombre: 'Aldea Chispa Alta', x: 332, y: 114, w: 48, h: 44, humedad: 0.35, temp: 0.5, viento: 0.8, suelo: 'tierra', abierto: true, icono: 'arena', tinte: [255, 225, 120, 0.05] });
     zonas.push({ id: 'arcana', nombre: 'Arcana · Ciudad de los Magos', x: 40, y: 138, w: 50, h: 42, humedad: 0.5, temp: 0.5, viento: 0.45, suelo: 'pavimento', icono: 'aldea', tinte: [150, 120, 255, 0.05] });
     zonas.push({ id: 'raizPiedra', nombre: 'Aldea Raíz de Piedra', x: 124, y: 308, w: 50, h: 44, humedad: 0.3, temp: 0.5, viento: 0.45, suelo: 'tierra', icono: 'bosque', tinte: [150, 130, 90, 0.05] });
     zonas.push({ id: 'puebloAgua', nombre: 'Puerto Brisa Azul', x: 344, y: 172, w: 52, h: 46, humedad: 0.9, temp: 0.45, viento: 0.55, suelo: 'pavimento', icono: 'agua', tinte: [60, 160, 255, 0.06] });
     zonas.push({ id: 'lagoEste', nombre: 'Lago Brisa Azul', x: 344, y: 216, w: 52, h: 34, humedad: 0.95, temp: 0.45, viento: 0.5, suelo: 'tierra', icono: 'agua', tinte: [60, 160, 255, 0.07] });
-    zonas.push({ id: 'rioEste', nombre: 'Río del Este', x: 322, y: 48, w: 34, h: 200, humedad: 0.92, temp: 0.42, viento: 0.5, suelo: 'tierra', icono: 'agua', tinte: [60, 160, 255, 0.07] });
+    zonas.push({ id: 'rioEste', nombre: 'Río del Este', x: 322, y: 48, w: 20, h: 200, humedad: 0.92, temp: 0.42, viento: 0.5, suelo: 'tierra', icono: 'agua', tinte: [60, 160, 255, 0.07] });
     zonas.push({ id: 'puebloFuego', nombre: 'Aldea Ceniza Viva', x: 306, y: 290, w: 48, h: 44, humedad: 0.07, temp: 0.96, viento: 0.5, suelo: 'ceniza', icono: 'fuego', tinte: [255, 120, 40, 0.09] });
-    zonas.push({ id: 'quemadaSur', nombre: 'Tierra Quemada', x: 286, y: 274, w: 104, h: 84, humedad: 0.08, temp: 0.95, viento: 0.55, suelo: 'ceniza', icono: 'fuego', tinte: [255, 120, 40, 0.07] });
     zonas.push({ id: 'lagunaSerena', nombre: 'Laguna Serena', x: 228, y: 304, w: 42, h: 32, humedad: 0.9, temp: 0.45, viento: 0.45, suelo: 'tierra', icono: 'agua', tinte: [60, 160, 255, 0.06] });
     zonas.push({ id: 'altoPino', nombre: 'Pueblo Alto Pino', x: 128, y: 108, w: 26, h: 24, humedad: 0.55, temp: 0.4, viento: 0.3, suelo: 'tierra', icono: 'bosque', tinte: [40, 90, 60, 0.05] });
     zonas.push({ id: 'rocafirme', nombre: 'Pueblo Rocafirme', x: 240, y: 104, w: 26, h: 24, humedad: 0.35, temp: 0.45, viento: 0.6, suelo: 'tierra', icono: 'bosque', tinte: [150, 130, 90, 0.04] });
@@ -458,12 +552,35 @@ U.Grid = {
     zonas.push({ id: 'salina', nombre: 'Pueblo Salina', x: 76, y: 194, w: 26, h: 24, humedad: 0.6, temp: 0.55, viento: 0.55, suelo: 'tierra', icono: 'agua', tinte: [230, 230, 210, 0.04] });
     zonas.push({ id: 'vegaBaja', nombre: 'Pueblo Vega Baja', x: 234, y: 256, w: 26, h: 24, humedad: 0.55, temp: 0.55, viento: 0.4, suelo: 'tierra', icono: 'aldea', tinte: [120, 180, 90, 0.04] });
     zonas.push({ id: 'brasaChica', nombre: 'Pueblo Brasa Chica', x: 280, y: 250, w: 26, h: 24, humedad: 0.2, temp: 0.8, viento: 0.5, suelo: 'ceniza', icono: 'fuego', tinte: [255, 120, 40, 0.05] });
+    // --- ZONAS NUEVAS (M/N): cada una con su clave `clima` del vocabulario de clima.js ---
+    zonas.push({ id: 'glaciar', nombre: 'Glaciar Eterno', x: 190, y: 6, w: 60, h: 26, humedad: 0.5, temp: 0.05, viento: 0.6, suelo: 'tierra', icono: 'bosque', clima: 'glaciar', tinte: [170, 210, 255, 0.08] });
+    zonas.push({ id: 'nieveNorte', nombre: 'Nieves del Norte', x: 130, y: 4, w: 180, h: 24, humedad: 0.5, temp: 0.1, viento: 0.55, suelo: 'tierra', icono: 'bosque', clima: 'nieve', tinte: [200, 220, 255, 0.06] });
+    zonas.push({ id: 'montanaNiebla', nombre: 'Montaña de Niebla', x: 148, y: 26, w: 144, h: 10, humedad: 0.4, temp: 0.15, viento: 0.85, suelo: 'tierra', icono: 'bosque', clima: 'montana', tinte: [160, 190, 230, 0.06] });
+    zonas.push({ id: 'costaFria', nombre: 'Costa Fría del Norte', x: 395, y: 20, w: 40, h: 60, humedad: 0.85, temp: 0.2, viento: 0.7, suelo: 'tierra', icono: 'agua', clima: 'mar', tinte: [120, 180, 255, 0.06] });
+    zonas.push({ id: 'rioSerpiente', nombre: 'Río Serpiente', x: 330, y: 90, w: 102, h: 26, humedad: 0.95, temp: 0.4, viento: 0.5, suelo: 'tierra', icono: 'agua', clima: 'rio', tinte: [60, 160, 255, 0.07] });
+    zonas.push({ id: 'mesetaTormenta', nombre: 'Meseta de la Tormenta', x: 372, y: 78, w: 56, h: 30, humedad: 0.5, temp: 0.45, viento: 0.95, suelo: 'tierra', abierto: true, icono: 'arena', clima: 'tormenta', tinte: [255, 225, 120, 0.07] });
+    zonas.push({ id: 'costaEste', nombre: 'Costa del Este', x: 400, y: 60, w: 38, h: 280, humedad: 0.85, temp: 0.5, viento: 0.65, suelo: 'tierra', icono: 'agua', clima: 'mar', tinte: [120, 180, 255, 0.05] });
+    zonas.push({ id: 'cascadaLuna', nombre: 'Cascada de la Luna', x: 314, y: 86, w: 18, h: 16, humedad: 0.95, temp: 0.35, viento: 0.5, suelo: 'tierra', icono: 'agua', clima: 'cascada', tinte: [120, 200, 255, 0.07] });
+    zonas.push({ id: 'bambu', nombre: 'Bosque de Bambú', x: 54, y: 102, w: 62, h: 34, humedad: 0.7, temp: 0.45, viento: 0.25, suelo: 'tierra', icono: 'bosque', clima: 'bambu', tinte: [60, 160, 90, 0.06] });
+    zonas.push({ id: 'gargantaViento', nombre: 'Garganta del Viento', x: 148, y: 64, w: 40, h: 20, humedad: 0.35, temp: 0.4, viento: 0.95, suelo: 'tierra', icono: 'bosque', clima: 'canon', tinte: [150, 160, 180, 0.06] });
+    zonas.push({ id: 'llanuraDorada', nombre: 'Llanura Dorada', x: 266, y: 126, w: 68, h: 28, humedad: 0.45, temp: 0.55, viento: 0.6, suelo: 'tierra', icono: 'bosque', clima: 'llanura', tinte: [230, 200, 110, 0.04] });
+    zonas.push({ id: 'pantanoGris', nombre: 'Pantano Gris', x: 262, y: 274, w: 22, h: 28, humedad: 0.95, temp: 0.45, viento: 0.3, suelo: 'tierra', icono: 'bosque', clima: 'pantano', tinte: [90, 110, 90, 0.08] });
+    zonas.push({ id: 'ruinasCaida', nombre: 'Ruinas de la Aldea Caída', x: 102, y: 198, w: 30, h: 30, humedad: 0.4, temp: 0.45, viento: 0.45, suelo: 'tierra', icono: 'bosque', clima: 'ruinas', tinte: [140, 140, 140, 0.05] });
+    zonas.push({ id: 'cuevaCristal', nombre: 'Cueva de Cristal', x: 70, y: 346, w: 24, h: 22, humedad: 0.6, temp: 0.4, viento: 0.05, suelo: 'tierra', icono: 'bosque', clima: 'cueva', tinte: [150, 120, 255, 0.07] });
+    zonas.push({ id: 'ancestral', nombre: 'Bosque Ancestral', x: 52, y: 312, w: 66, h: 66, humedad: 0.65, temp: 0.45, viento: 0.2, suelo: 'tierra', icono: 'bosque', clima: 'ancestral', tinte: [30, 80, 50, 0.08] });
+    zonas.push({ id: 'praderaFlores', nombre: 'Pradera de las Flores', x: 174, y: 288, w: 40, h: 28, humedad: 0.55, temp: 0.55, viento: 0.45, suelo: 'tierra', icono: 'bosque', clima: 'pradera', tinte: [140, 200, 140, 0.04] });
+    zonas.push({ id: 'lagoEspejo', nombre: 'Lago Espejo', x: 186, y: 336, w: 28, h: 18, humedad: 0.95, temp: 0.45, viento: 0.4, suelo: 'tierra', icono: 'agua', clima: 'lago', tinte: [120, 200, 255, 0.07] });
+    zonas.push({ id: 'termales', nombre: 'Aguas Termales', x: 346, y: 332, w: 26, h: 22, humedad: 0.9, temp: 0.8, viento: 0.3, suelo: 'tierra', icono: 'agua', clima: 'termal', tinte: [255, 180, 120, 0.06] });
+    zonas.push({ id: 'volcanes', nombre: 'Campo Volcánico', x: 352, y: 328, w: 44, h: 36, humedad: 0.06, temp: 0.98, viento: 0.5, suelo: 'ceniza', icono: 'fuego', clima: 'volcanes', tinte: [255, 100, 30, 0.09] });
+    // 'quemadaSur' va DESPUÉS de volcanes/termales para que esas zonas ganen en el solape (la primera que coincide gana).
+    zonas.push({ id: 'quemadaSur', nombre: 'Tierra Quemada', x: 286, y: 274, w: 104, h: 84, humedad: 0.08, temp: 0.95, viento: 0.55, suelo: 'ceniza', icono: 'fuego', tinte: [255, 120, 40, 0.07] });
+    zonas.push({ id: 'nieveSur', nombre: 'Nieves del Sur', x: 180, y: 368, w: 100, h: 24, humedad: 0.5, temp: 0.12, viento: 0.55, suelo: 'tierra', icono: 'bosque', clima: 'nieve', tinte: [200, 220, 255, 0.06] });
     zonas.push({ id: 'camino', nombre: 'Tierras de Bruma', x: 0, y: 0, w: W, h: H, humedad: 0.5, temp: 0.5, viento: 0.4, suelo: 'tierra', icono: 'bosque', tinte: [120, 160, 90, 0.03] });
     return { id: 'aldea', nombreMapa: 'Continente de Bruma · Mapa continuo', ancho: W, alto: H, tiles, vari, objetos, solidos, zonas, arena: { x: mAldea.arena.x + OFF.aldea.x, y: mAldea.arena.y + OFF.aldea.y, r: mAldea.arena.r }, ocultarRuna: false, inicio: { x: mAldea.inicio.x + OFF.aldea.x, y: mAldea.inicio.y + OFF.aldea.y }, spawns: (mAldea.spawns || []).map(p => [p[0] + OFF.aldea.x, p[1] + OFF.aldea.y]), spawnsBandidos: (mBosque.spawnsBandidos || []).map(p => [p[0] + OFF.bosque.x, p[1] + OFF.bosque.y]), spawnsAbiertos: (mDes.spawnsAbiertos || []).map(s => [s[0], s[1] + OFF.desierto.x, s[2] + OFF.desierto.y]).concat((mMon.spawnsAbiertos || []).map(s => [s[0], s[1] + OFF.montana.x, s[2] + OFF.montana.y])).concat([['bandido', 300.5, 210.5], ['bandido', 120.5, 190.5], ['ilusionista', 252.5, 130.5], ['brasa', 296.5, 282.5], ['chaman', 216.5, 100.5], ['veterano', 342.5, 150.5], ['bandido', 186.5, 306.5], ['ilusionista', 140.5, 168.5], ['bandido', 70.5, 120.5], ['brasa', 330.5, 246.5]]), npcs: npcsPos, salidas: [], offsets: OFF, continuo: true,
       // SPAWN POR ELEMENTO: apareces en la aldea de TU elemento (el viaje a la
       // Metrópolis es parte del juego). Si un elemento no tuviera aldea, Bruma.
-      spawnsElemento: { agua: { x: 364.5, y: 202.5 }, fuego: { x: 330.5, y: 314.5 }, tierra: { x: 148.5, y: 332.5 }, viento: { x: 216.5, y: 66.5 }, rayo: { x: 384.5, y: 122.5 } },
-      pueblos: { metropolis: { x: 220.5, y: 200.5 }, bruma: { x: 150.5, y: 248.5 }, puerto: { x: 368.5, y: 196.5 }, ceniza: { x: 330.5, y: 312.5 }, raiz: { x: 148.5, y: 330.5 }, vuelo: { x: 216.5, y: 64.5 }, chispa: { x: 384.5, y: 120.5 }, arcana: { x: 64.5, y: 158.5 } } };
+      spawnsElemento: { agua: { x: 364.5, y: 202.5 }, fuego: { x: 325.5, y: 307.5 }, tierra: { x: 148.5, y: 332.5 }, viento: { x: 219.5, y: 50.5 }, rayo: { x: 355.5, y: 135.5 } },
+      pueblos: { metropolis: { x: 220.5, y: 200.5 }, bruma: { x: 150.5, y: 248.5 }, puerto: { x: 368.5, y: 196.5 }, ceniza: { x: 325.5, y: 307.5 }, raiz: { x: 148.5, y: 330.5 }, vuelo: { x: 219.5, y: 50.5 }, chispa: { x: 355.5, y: 135.5 }, arcana: { x: 64.5, y: 158.5 } } };
   },
   crearMapaPorId(id, rng) { if (id === 'casa') return this.crearMapaCasa(rng); if (id === 'oficina') return this.crearMapaOficina(rng); return this.crearMapaContinuo(rng); },
 
@@ -479,6 +596,7 @@ U.Grid = {
     const E = window.U && U.Juego ? U.Juego.estado : null;
     if (E && E.jugador) { if (U.Combate) U.Combate.particulas(o.x + 0.5, o.y, 10, o.tipo === 'arbol' ? '#46a06a' : '#8b93a3', 'chispa'); if (U.HUD) U.HUD.toast((o.tipo === 'arbol' ? 'Árbol' : o.tipo === 'roca' ? 'Roca' : 'Cactus') + ' destruido: el paso queda libre. (Los materiales no son monedas: el dinero se gana con misiones, arena y torneo.)', 'exito'); E.flags.rompioObjeto = true; }
     if (window.U && U.Audio) U.Audio.sfx('tierra');
+    if (window.U && U.Reliquias) U.Reliquias.objetoRoto(o); // si la roca/árbol guardaba una máscara, la revela como tesoro recogible
     return true;
   },
   esSolido(m, cx, cy) { if (cx < 0 || cy < 0 || cx >= m.ancho || cy >= m.alto) return true; return m.solidos[cy * m.ancho + cx] === 1; },

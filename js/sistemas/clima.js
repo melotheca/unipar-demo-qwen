@@ -42,6 +42,74 @@ U.Clima = {
     viento: [1.1, 1.2, 1.35, 1.5],
     rayo:   [0.95, 0.9, 0.85, 0.6]
   },
+  // ===== CLIMA POR REGIÓN (2026-11-17) =====
+  // Clave `clima` de la zona (la asigna otro trabajo a cada zona del mapa).
+  // Pesos de cada tipo de clima (suman 100) + intensidad de lluvia [min, max]
+  // (1 ligera · 2 normal · 3 fuerte; la tormenta siempre es intensidad 4).
+  // Reglas del usuario: en Fuego llover es MUY raro y ligero; en Agua la lluvia es
+  // común y puede ser fuerte; en las zonas intermedias el clima es más variado
+  // (pesos repartidos, más entropía). Climas base: Agua = templado, húmedo, brisa,
+  // más lluvia; Fuego = caliente, seco, ceniza en el aire; Tierra = templado,
+  // bosque/roca; Viento = ventoso, frío, despejado; Rayo = tormentoso, eléctrico,
+  // tormentas frecuentes; Metrópolis = templado/neutro; nieve = frío.
+  // Los COSTOS de Esencia no se duplican aquí: los modificadores ya existen
+  // (COSTOS_LLUVIA + factorNumerico + aguaAbundante) y se alimentan del clima
+  // que salga de esta tabla: el Agua sale barata donde hay humedad/agua, el
+  // Fuego paga más con lluvia/frío, el Rayo baja en tormenta, el Viento baja
+  // con viento fuerte y el Fuego baja con calor extremo.
+  CLIMA_REGIONES: {
+    fuego:      { despejado: 45, nublado: 8,  lluvia: 3,  tormenta: 2,  viento: 12, niebla: 2,  calor: 28, lluviaInt: [1, 1] },
+    agua:       { despejado: 22, nublado: 18, lluvia: 32, tormenta: 10, viento: 8,  niebla: 8,  calor: 2,  lluviaInt: [1, 3] },
+    tierra:     { despejado: 34, nublado: 16, lluvia: 18, tormenta: 5,  viento: 10, niebla: 12, calor: 5,  lluviaInt: [1, 2] },
+    viento:     { despejado: 42, nublado: 12, lluvia: 8,  tormenta: 4,  viento: 26, niebla: 6,  calor: 2,  lluviaInt: [1, 2] },
+    rayo:       { despejado: 18, nublado: 14, lluvia: 22, tormenta: 26, viento: 12, niebla: 6,  calor: 2,  lluviaInt: [2, 3] },
+    metropolis: { despejado: 38, nublado: 20, lluvia: 14, tormenta: 5,  viento: 8,  niebla: 10, calor: 5,  lluviaInt: [1, 2] },
+    nieve:      { despejado: 34, nublado: 18, lluvia: 6,  tormenta: 4,  viento: 16, niebla: 22, calor: 0,  lluviaInt: [1, 1] },
+    desierto:   { despejado: 52, nublado: 6,  lluvia: 2,  tormenta: 1,  viento: 14, niebla: 1,  calor: 24, lluviaInt: [1, 1] },
+    bosque:     { despejado: 28, nublado: 16, lluvia: 24, tormenta: 6,  viento: 8,  niebla: 16, calor: 2,  lluviaInt: [1, 3] },
+    montana:    { despejado: 26, nublado: 16, lluvia: 16, tormenta: 10, viento: 14, niebla: 16, calor: 2,  lluviaInt: [1, 3] },
+    rio:        { despejado: 24, nublado: 16, lluvia: 30, tormenta: 8,  viento: 8,  niebla: 12, calor: 2,  lluviaInt: [1, 3] },
+    lago:       { despejado: 26, nublado: 16, lluvia: 28, tormenta: 8,  viento: 8,  niebla: 12, calor: 2,  lluviaInt: [1, 3] },
+    pantano:    { despejado: 18, nublado: 16, lluvia: 30, tormenta: 10, viento: 6,  niebla: 18, calor: 2,  lluviaInt: [1, 3] },
+    pradera:    { despejado: 40, nublado: 16, lluvia: 14, tormenta: 5,  viento: 12, niebla: 8,  calor: 5,  lluviaInt: [1, 2] },
+    llanura:    { despejado: 42, nublado: 14, lluvia: 12, tormenta: 5,  viento: 14, niebla: 8,  calor: 5,  lluviaInt: [1, 2] },
+    canon:      { despejado: 44, nublado: 10, lluvia: 6,  tormenta: 3,  viento: 20, niebla: 5,  calor: 12, lluviaInt: [1, 2] },
+    ruinas:     { despejado: 34, nublado: 16, lluvia: 16, tormenta: 8,  viento: 10, niebla: 14, calor: 2,  lluviaInt: [1, 2] },
+    cueva:      { despejado: 10, nublado: 30, lluvia: 0,  tormenta: 0,  viento: 5,  niebla: 45, calor: 10, lluviaInt: [1, 1] },
+    glaciar:    { despejado: 33, nublado: 16, lluvia: 4,  tormenta: 3,  viento: 18, niebla: 26, calor: 0,  lluviaInt: [1, 1] },
+    termal:     { despejado: 30, nublado: 14, lluvia: 12, tormenta: 4,  viento: 8,  niebla: 22, calor: 10, lluviaInt: [1, 2] },
+    bambu:      { despejado: 28, nublado: 16, lluvia: 26, tormenta: 6,  viento: 8,  niebla: 14, calor: 2,  lluviaInt: [1, 3] },
+    cascada:    { despejado: 22, nublado: 16, lluvia: 32, tormenta: 10, viento: 8,  niebla: 10, calor: 2,  lluviaInt: [2, 3] },
+    volcanes:   { despejado: 40, nublado: 10, lluvia: 2,  tormenta: 3,  viento: 10, niebla: 2,  calor: 33, lluviaInt: [1, 1] },
+    tormenta:   { despejado: 12, nublado: 12, lluvia: 26, tormenta: 32, viento: 10, niebla: 6,  calor: 2,  lluviaInt: [2, 3] },
+    ancestral:  { despejado: 32, nublado: 16, lluvia: 16, tormenta: 6,  viento: 10, niebla: 18, calor: 2,  lluviaInt: [1, 2] },
+    mar:        { despejado: 26, nublado: 16, lluvia: 28, tormenta: 12, viento: 12, niebla: 4,  calor: 2,  lluviaInt: [1, 3] },
+    aldea:      { despejado: 38, nublado: 18, lluvia: 14, tormenta: 5,  viento: 10, niebla: 10, calor: 5,  lluviaInt: [1, 2] },
+    intermedia: { despejado: 30, nublado: 16, lluvia: 18, tormenta: 8,  viento: 12, niebla: 12, calor: 4,  lluviaInt: [1, 3] }
+  },
+  // Entrada de la tabla para la zona actual (o null si la zona no tiene clave `clima`).
+  tablaDe(E) {
+    const z = E && E.zonaActual;
+    if (!z || !z.clima) return null;
+    return this.CLIMA_REGIONES[z.clima] || null;
+  },
+  // Pesos de clima para la zona actual: de la tabla si hay clave `clima`; si no,
+  // DERIVADOS de temp/humedad/viento de la zona (variado, intermedio): más humedad
+  // → más lluvia/tormenta/niebla; más calor → más calor extremo y lluvia ligera;
+  // más viento → más viento fuerte. Así ninguna zona queda sin clima sensato.
+  pesosPara(E) {
+    const t = this.tablaDe(E);
+    if (t) return { despejado: t.despejado, nublado: t.nublado, lluvia: t.lluvia, tormenta: t.tormenta, viento: t.viento, niebla: t.niebla, calor: t.calor, lluviaInt: t.lluviaInt || [1, 3] };
+    const z = E && E.zonaActual;
+    const temp = z && z.temp != null ? z.temp : 0.5, hum = z && z.humedad != null ? z.humedad : 0.45, ven = z && z.viento != null ? z.viento : 0.3;
+    return {
+      despejado: 30, nublado: 18,
+      lluvia: Math.round(4 + hum * 28), tormenta: Math.round(hum * 8 + ven * 4),
+      viento: Math.round(6 + ven * 14), niebla: Math.round(4 + hum * 14),
+      calor: temp >= 0.8 ? 26 : temp >= 0.65 ? 10 : 4,
+      lluviaInt: temp >= 0.85 ? [1, 1] : hum >= 0.7 ? [1, 3] : [1, 2]
+    };
+  },
   // TEMPERATURA ambiente 0..1: la de la zona, ajustada por el clima (el calor extremo sube,
   // la lluvia y la tormenta enfrían) y un poco por el momento del día. Bajo techo, neutra.
   temperatura(E) {
@@ -138,21 +206,19 @@ U.Clima = {
     return Object.assign({}, base, { nombre: 'Lluvia ' + nom, detalle: 'Lluvia ' + nom + ' · ' + fa + ' · Fuego ×' + f + ' · Tierra y Rayo bajan · Viento sube' });
   },
   elegir(E) {
-    const h = U.Tiempo.hora(E); const z = E.zonaActual; const zid = z ? z.id : 'aldea';
-    const pool = [['despejado', 30], ['nublado', 18], ['viento', 12]];
-    if (zid === 'ribera' || zid === 'bosque') { pool.push(['lluvia', 20], ['niebla', 12], ['tormenta', 6]); }
-    else if (zid === 'desierto' || zid === 'cenizar') { pool.push(['calor', 26], ['viento', 10]); }
-    else if (zid === 'montana') { pool.push(['niebla', 18], ['lluvia', 10], ['tormenta', 8]); }
-    else { pool.push(['lluvia', 12], ['niebla', 7], ['tormenta', 5], ['calor', 6]); }
+    const h = U.Tiempo.hora(E); const p = this.pesosPara(E);
+    const pool = [['despejado', p.despejado], ['nublado', p.nublado], ['lluvia', p.lluvia], ['tormenta', p.tormenta], ['viento', p.viento], ['niebla', p.niebla], ['calor', p.calor]];
     if (U.Tiempo.esNoche(h)) pool.push(['niebla', 10]);
-    let tot = 0; pool.forEach(p => tot += p[1]); let r = Math.random() * tot;
+    let tot = 0; pool.forEach(x => tot += x[1]); let r = Math.random() * tot;
     for (let i = 0; i < pool.length; i++) { r -= pool[i][1]; if (r <= 0) return pool[i][0]; }
     return 'despejado';
   },
   fijar(E, tipo, silencioso) {
     if (!E.clima) E.clima = this.crear(null);
     E.clima.tipo = tipo; E.clima.restante = 150 + Math.random() * 150;
-    E.clima.intensidad = tipo === 'tormenta' ? 4 : tipo === 'lluvia' ? 1 + Math.floor(Math.random() * 3) : 0;
+    // Intensidad de lluvia según la región (fuego: siempre ligera; agua: hasta fuerte).
+    if (tipo === 'lluvia') { const li = (this.pesosPara(E).lluviaInt) || [1, 3]; E.clima.intensidad = li[0] + Math.floor(Math.random() * (li[1] - li[0] + 1)); }
+    else E.clima.intensidad = tipo === 'tormenta' ? 4 : 0;
     if (!silencioso && U.HUD) { const c = this.TIPOS[tipo]; if (tipo === 'tormenta') U.HUD.banner('⛈ TORMENTA', 1.6); U.Audio.sfx(tipo === 'tormenta' ? 'rayo' : tipo === 'lluvia' ? 'agua' : 'zona'); }
     // Un vecino cercano comenta el clima EN VOZ ALTA, con su gusto personal (no todos igual).
     if (!silencioso && U.Juego && U.Juego.estado && U.General && !this.esInterior(U.Juego.estado)) { const E2 = U.Juego.estado; const cerca = (E2.npcs || []).filter(n => !n.enCasa && !n.ocultoSparring).sort((a, b) => U.Grid.dist(a, E2.jugador) - U.Grid.dist(b, E2.jugador))[0]; if (cerca && U.Grid.dist(cerca, E2.jugador) < 11) E2.efectos.textos.push({ x: cerca.x, y: cerca.y, txt: cerca.nombre + ': ' + U.General.fraseCortaClima(cerca, E2), color: '#e8dcc8', escala: 1, vida: 2.6, max: 2.6 }); }

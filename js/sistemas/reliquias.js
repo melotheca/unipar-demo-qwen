@@ -2,9 +2,14 @@
 window.U = window.U || {};
 
 /* Unipar — MÁSCARAS LEGENDARIAS, ARTEFACTOS ANTIGUOS y ALMACENAMIENTO EN LA CASA.
-   MÁSCARAS: 6, una por estadística, SÚPER RARAS, escondidas en el mundo (cuevas, ruinas
-   y lugares difíciles). Pasivas: NO gastan Esencia. Solo se lleva UNA puesta a la vez
-   (ponerte otra quita la anterior) y el bonus SOLO funciona con la máscara puesta.
+   MÁSCARAS: 6, una por estadística, SÚPER RARAS. 4 están escondidas DENTRO de rocas
+   o árboles concretos del continente (la roca se elige al azar al crear el mundo con
+   la semilla: la misma roca toda la partida, otra roca en otro mundo; al romperla se
+   revela la máscara) y 2 las guardan LOS COLECCIONISTAS como recompensa de jefe en
+   sus guaridas (ver U.Escondites). Los rumores acotan la ZONA de cada máscara, no el
+   punto exacto. La Llave del Sello es objeto de trama y NO entra en este reparto.
+   Pasivas: NO gastan Esencia. Solo se lleva UNA puesta a la vez (ponerte otra quita
+   la anterior) y el bonus SOLO funciona con la máscara puesta.
    RIESGO: con una máscara puesta, en los PUEBLOS no pasa nada; en ZONAS SALVAJES
    (desierto, bosque, montaña, campos…) Los Coleccionistas salen al paso para quitártela.
    CASA: el COFRE de tu casa guarda máscaras y artefactos. Lo guardado no da bonus,
@@ -31,20 +36,91 @@ U.Reliquias = {
     llave: { nombre: 'Llave del Sello', color: '#ff5470', peligro: true, efecto: 'Una llave del sello que encierra a El Infernal. PELIGRO: el compañero de El Infernal la quiere para liberarlo, así que llevarla contigo atrae a los agentes de su organización sin nombre en las zonas salvajes. Guardada en el cofre de tu casa, nadie te sigue.', origen: 'Forjada cuando Orión se selló a sí mismo junto a El Infernal con la técnica prohibida, Las Puertas del Infierno.' }
   },
   PRECIO_PETRA: 250,
-  // Dónde está escondido cada tesoro en el continente continuo (la celda exacta se
+  // Dónde está escondido cada ARTEFACTO en el continente continuo (la celda exacta se
   // ajusta sola a la celda libre más cercana al generarse: nunca cae en agua ni en un muro).
+  // Las MÁSCARAS ya NO tienen tesoro visible: 4 van dentro de rocas/árboles al azar
+  // (ver ZONAS_MASCARA / asignarMascarasEnRocas) y 2 son recompensa de jefe en las
+  // guaridas de los Coleccionistas (ver U.Escondites: coleRuinas → fuerza, coleCueva → mente).
   TESOROS: [
-    { id: 'vida', x: 80, y: 66, lugar: 'una cueva de raíces del Bosque Susurrante, junto a su estanque' },
-    { id: 'esencia', x: 171, y: 243, lugar: 'las ruinas hundidas de la Ribera Húmeda' },
-    { id: 'fuerza', x: 188, y: 231, lugar: 'las ruinas quemadas del Campo de Ceniza' },
-    { id: 'resistencia', x: 317, y: 45, lugar: 'una gruta alta de la Montaña Brumosa, cerca de la cima' },
-    { id: 'velocidad', x: 93, y: 253, lugar: 'las ruinas del Desierto de Sal, pasado el oasis' },
-    { id: 'mente', x: 60, y: 157, lugar: 'las ruinas viejas al oeste de Arcana, la ciudad de los magos' },
     { id: 'cristal', x: 353, y: 217, lugar: 'la orilla escondida del Lago Brisa Azul' },
     { id: 'espada', x: 330, y: 72, lugar: 'las ruinas de la Montaña Brumosa, bajo el obelisco' },
     { id: 'fragmento', x: 334, y: 308, lugar: 'la Tierra Quemada, junto a Aldea Ceniza Viva' },
     { id: 'llave', x: 213, y: 103, lugar: 'unas ruinas sin nombre al sur de Aldea Vuelo Alto' }
   ],
+  // MÁSCARAS EN ROCAS/ÁRBOLES: cada una vive en UNA zona del continente (rectángulo en
+  // coordenadas del mapa continuo). Los rumores acotan la zona; la roca o el árbol exacto
+  // se elige al azar con la semilla del mundo (misma roca toda la partida, otra en otro
+  // mundo). Al romper esa roca/árbol, la máscara se revela como tesoro recogible.
+  // PARCHE (js/motor/grid.js, en U.Grid.danarObjeto, justo antes de su `return true;`):
+  //   if (window.U && U.Reliquias) U.Reliquias.objetoRoto(o);
+  MASCARAS_ROCA: ['vida', 'esencia', 'resistencia', 'velocidad'],
+  ZONAS_MASCARA: {
+    vida: { rect: { x0: 40, y0: 44, x1: 112, y1: 100 }, lugar: 'dentro de una roca o un árbol del Bosque Susurrante',
+      rumor: 'Dicen que una máscara duerme escondida en el Bosque Susurrante, al fondo del noroeste, DENTRO de una roca o de un árbol: no se ve desde fuera, hay que romper la piedra o talar el árbol para encontrarla. Nadie sabe cuál roca es: en cada mundo es otra.' },
+    esencia: { rect: { x0: 158, y0: 224, x1: 176, y1: 268 }, lugar: 'dentro de una roca o un árbol de la Ribera Húmeda',
+      rumor: 'Junto al río, en la Ribera Húmeda, cuentan que una máscara quedó sellada DENTRO de una roca o un árbol, a la orilla del agua. Rompe piedras por la ribera y quizá suene a hueco.' },
+    resistencia: { rect: { x0: 300, y0: 36, x1: 368, y1: 90 }, lugar: 'dentro de una roca o un árbol de la Montaña Brumosa',
+      rumor: 'En la Montaña Brumosa, en altura, hay una máscara metida DENTRO de una roca o un árbol: los viejos dicen que la montaña la tragó para guardarla. Rompe rocas arriba y busca.' },
+    velocidad: { rect: { x0: 44, y0: 244, x1: 118, y1: 298 }, lugar: 'dentro de una roca del Desierto de Sal',
+      rumor: 'Pasado el oasis del Desierto de Sal, una máscara espera DENTRO de una roca del desierto, tapada por la arena y el sol. Las rocas del desierto son muchas: rompe y escucha.' }
+  },
+  // Rumores de máscaras, como DATOS que el sistema de diálogo puede leer: una línea
+  // por máscara aún no encontrada, con su zona acotada (nunca el punto exacto).
+  // Uso desde diálogo: U.Reliquias.rumorZonaMascara(id) o U.Reliquias.rumoresMascaras().
+  rumorZonaMascara(id) { const z = this.ZONAS_MASCARA[id]; return z ? z.rumor : null; },
+  rumoresMascaras() {
+    const r = this.asegurar(); if (!r) return [];
+    return this.MASCARAS_ROCA.filter(id => r.encontradas.indexOf(id) < 0).map(id => ({ id, nombre: this.MASCARAS[id].nombre, zona: this.ZONAS_MASCARA[id].lugar, rumor: this.ZONAS_MASCARA[id].rumor }));
+  },
+  // Asigna CADA máscara de roca/árbol a UNA roca o árbol concreto, al azar con la
+  // semilla del mundo (rngSemilla con la semilla + '-mascaras-roca'): determinista por
+  // mundo — la misma roca toda la partida, otra roca en otro mundo — y estable aunque
+  // se guarde y se cargue (se guarda en j.reliquias.mascarasRoca; PARCHE guardado.js,
+  // ver final de este archivo). Si el archivo no trae el campo (partida vieja), se
+  // vuelve a derivar igual, porque la derivación solo depende de la semilla.
+  asignarMascarasEnRocas() {
+    const E = U.Juego.estado; if (!E || E.mapaId !== 'aldea' || !E.mapa) return null;
+    const r = this.asegurar(); if (!r) return null;
+    if (!Array.isArray(r.mascarasRoca)) r.mascarasRoca = [];
+    // Limpia asignaciones de máscaras ya encontradas (no vuelven a esconderse).
+    r.mascarasRoca = r.mascarasRoca.filter(a => a && r.encontradas.indexOf(a.mascara) < 0 && !a.revelada);
+    const rng = U.TestUI.rngSemilla(E.semilla + '-mascaras-roca');
+    const cands = E.mapa.objetos.filter(o => (o.tipo === 'arbol' || o.tipo === 'roca') && o.vidaMax != null)
+      .slice().sort((a, b) => (a.y - b.y) || (a.x - b.x));
+    const enRect = (o, rc) => o.x >= rc.x0 && o.x <= rc.x1 && o.y >= rc.y0 && o.y <= rc.y1;
+    this.MASCARAS_ROCA.forEach(id => {
+      if (r.encontradas.indexOf(id) >= 0) return;
+      if (r.mascarasRoca.some(a => a.mascara === id)) return;
+      const z = this.ZONAS_MASCARA[id];
+      let pool = cands.filter(o => enRect(o, z.rect) && !r.mascarasRoca.some(a => a.x === o.x && a.y === o.y));
+      if (!pool.length) pool = cands.filter(o => !r.mascarasRoca.some(a => a.x === o.x && a.y === o.y));
+      if (!pool.length) return;
+      // Fisher-Yates con el rng de la semilla: el azar es del mundo, no del momento.
+      for (let i = pool.length - 1; i > 0; i--) { const k = Math.floor(rng() * (i + 1)); const t = pool[i]; pool[i] = pool[k]; pool[k] = t; }
+      const o = pool[0];
+      r.mascarasRoca.push({ mascara: id, x: o.x, y: o.y, tipo: o.tipo, revelada: false });
+    });
+    return r.mascarasRoca;
+  },
+  // Enganche de destrucción: lo llama U.Grid.danarObjeto (parche en grid.js) cuando
+  // una roca/árbol/cactus cae. Si esa roca/árbol guardaba una máscara, la máscara se
+  // REVELA como tesoro recogible en esa misma celda (la recoge el flujo normal).
+  objetoRoto(o) {
+    const E = U.Juego.estado; if (!E || !E.mapa || !o) return false;
+    const r = this.asegurar(); if (!r || !Array.isArray(r.mascarasRoca)) return false;
+    const a = r.mascarasRoca.find(x => x && !x.revelada && x.x === o.x && x.y === o.y);
+    if (!a) return false;
+    a.revelada = true;
+    const d = this.MASCARAS[a.mascara];
+    if (!E.mapa.objetos.some(x => x.tipo === 'tesoro' && x.reliquiaId === a.mascara)) {
+      E.mapa.objetos.push({ tipo: 'tesoro', reliquiaId: a.mascara, nombreTesoro: d.nombre, color: d.color, x: o.x, y: o.y, w: 1, h: 1, solido: false });
+    }
+    U.Combate.particulas(o.x + 0.5, o.y, 24, d.color, 'chispa');
+    U.HUD.banner('🎭 ¡ALGO BRILLABA DENTRO! · ' + d.nombre.toUpperCase(), 3); U.Audio.sfx('victoria');
+    U.HUD.toast('La ' + (o.tipo === 'arbol' ? 'madera' : 'piedra') + ' se abrió y dentro brillaba una máscara: estaba ESCONDIDA ahí dentro, no a la vista. Tócala para recogerla.', 'exito');
+    if (U.Guardado) U.Guardado.guardarAuto();
+    return true;
+  },
   // Zonas SEGURAS (pueblos y ciudades): con máscara puesta aquí no pasa nada.
   // Todo lo demás del continente (bosque, desierto, montaña, campos, ribera, ceniza…) es SALVAJE.
   ZONAS_SEGURAS: ['aldea', 'metropolis', 'arcana', 'puebloAgua', 'puebloFuego', 'vueloAlto', 'chispaAlta', 'raizPiedra', 'altoPino', 'rocafirme', 'tresCruces', 'salina', 'vegaBaja', 'brasaChica', 'casa', 'oficina'],
@@ -95,7 +171,7 @@ U.Reliquias = {
   recoger(obj) {
     const E = U.Juego.estado, j = E.jugador; const r = this.asegurar(); if (!r || !obj) return;
     const d = this.defDe(obj.reliquiaId); if (!d) return;
-    const t = this.TESOROS.find(x => x.id === obj.reliquiaId);
+    const t = this.TESOROS.find(x => x.id === obj.reliquiaId) || (this.ZONAS_MASCARA[obj.reliquiaId] ? { lugar: this.ZONAS_MASCARA[obj.reliquiaId].lugar } : null);
     this.quitarTesoroDelMapa(obj.reliquiaId);
     if (r.encontradas.indexOf(obj.reliquiaId) < 0) r.encontradas.push(obj.reliquiaId);
     U.Combate.particulas(j.x, j.y - 1, 22, d.color, 'chispa');
@@ -150,13 +226,15 @@ U.Reliquias = {
     if (U.Guardado) U.Guardado.guardarAuto();
     return 'Recoges ' + d.nombre + ' del cofre: vuelve a tu mochila' + (d.tipo === 'artefacto' ? ' y su efecto vuelve a funcionar, porque la llevas contigo' : ' (póntela para que su bonus funcione)') + '.';
   },
-  // Petra (Arcana) vende UNA pieza rara al azar de las que aún no tienes: máscara o artefacto.
+  // Petra (Arcana) vende UN artefacto al azar de los que aún no tienes.
+  // NO vende máscaras (las 6 solo se encuentran: 4 en rocas/árboles, 2 como recompensa de jefe coleccionista)
+  // ni la Llave del Sello (objeto de trama, peligro: true).
   comprarEnPetra() {
     const E = U.Juego.estado, j = E.jugador; const r = this.asegurar(); if (!r) return '…';
     const tiene = id => r.tenidas.indexOf(id) >= 0 || r.artefactos.indexOf(id) >= 0 || r.casa.indexOf(id) >= 0;
-    const pool = Object.keys(this.MASCARAS).concat(Object.keys(this.ARTEFACTOS)).filter(id => !tiene(id));
+    const pool = Object.keys(this.ARTEFACTOS).filter(id => id !== 'llave' && !tiene(id));
     if (!pool.length) return 'Petra abre las manos: «Ya tienes TODAS las piezas que circulan por el continente, viajero. Ni mi comprador podría ofrecerme más. Lo que te falte ya no se compra: se encuentra… o se defiende.»';
-    if ((j.monedas || 0) < this.PRECIO_PETRA) return 'Petra señala una vitrina cerrada con llave: «Piezas raras de verdad — máscaras legendarias y artefactos antiguos — a ' + this.PRECIO_PETRA + ' 🪙 la pieza, sin preguntas. Traes ' + Math.floor(j.monedas || 0) + ': vuelve con la bolsa llena.»';
+    if ((j.monedas || 0) < this.PRECIO_PETRA) return 'Petra señala una vitrina cerrada con llave: «Artefactos antiguos de verdad — a ' + this.PRECIO_PETRA + ' 🪙 la pieza, sin preguntas. Traes ' + Math.floor(j.monedas || 0) + ': vuelve con la bolsa llena.»';
     const id = pool[Math.floor(Math.random() * pool.length)]; const d = this.defDe(id);
     j.monedas -= this.PRECIO_PETRA;
     if (r.encontradas.indexOf(id) < 0) r.encontradas.push(id);
@@ -207,6 +285,7 @@ U.Reliquias = {
     const E = U.Juego.estado; if (!E || !E.jugador) return;
     const j = E.jugador; const r = this.asegurar(); if (!r) return;
     this.colocarTesoros();
+    if (E.mapaId === 'aldea') this.asignarMascarasEnRocas(); // rocas/árboles con máscara: una vez por mundo (semilla), estables toda la partida
     if (E.mapaId !== 'aldea' || E.ui !== 'mundo') return;
     if (!E.reliquiasT) E.reliquiasT = { cdM: 75, cdL: 150, expo: 0, avisoM: 0, coleVivos: 0 };
     const T = E.reliquiasT;
@@ -227,6 +306,7 @@ U.Reliquias = {
     const E = U.Juego.estado;
     if (accion === 'poner') U.HUD.toast(this.poner(id), 'exito');
     else if (accion === 'quitar') U.HUD.toast(this.quitar(), '');
+    else if (accion === 'soltar') U.HUD.toast(U.Orgs ? U.Orgs.soltarMascara() : '…', 'aviso'); // soltar la máscara puesta: los perseguidores la toman y se van
     else if (accion === 'dejar' || accion === 'recoger') {
       if (!E || E.mapaId !== 'casa') { U.HUD.toast('El almacenamiento está en tu CASA: entra en la casa azul de Bruma y usa el COFRE (o abre la Mochila estando dentro de casa).', 'aviso'); U.Audio.sfx('fail'); return; }
       U.HUD.toast(accion === 'dejar' ? this.dejarEnCasa(id) : this.recogerDeCasa(id), 'exito');
@@ -241,11 +321,12 @@ U.Reliquias = {
     else h += '<div style="font-size:12px;margin-top:5px;color:var(--textoFrio)">No llevas ninguna máscara puesta: ningún bonus de máscara activo (y nadie te persigue por una).</div>';
     Object.keys(this.MASCARAS).forEach(id => {
       const d = this.MASCARAS[id]; const tiene = r.tenidas.indexOf(id) >= 0, enCofre = r.casa.indexOf(id) >= 0, puesta = r.puesta === id;
-      h += '<div class="mochilaItem"><span>🎭 <b style="color:' + d.color + '">' + esc(d.nombre) + '</b> <small style="color:var(--textoFrio)">' + (puesta ? 'PUESTA · bonus activo · ' + esc(d.efecto) : tiene ? esc(d.efecto) : enCofre ? 'guardada en el cofre de tu casa (sin bonus)' : 'todavía no la encontraste: está escondida en el mundo') + '</small></span><span class="acts">'
-        + (puesta ? '<button class="mini peligro" data-reliquia="quitar" data-id="' + id + '">QUITAR</button>' : tiene ? '<button class="mini exito" data-reliquia="poner" data-id="' + id + '">PONER</button>' : '')
+      h += '<div class="mochilaItem"><span>🎭 <b style="color:' + d.color + '">' + esc(d.nombre) + '</b> <small style="color:var(--textoFrio)">' + (puesta ? 'PUESTA · bonus activo · ' + esc(d.efecto) : tiene ? esc(d.efecto) : enCofre ? 'guardada en el cofre de tu casa (sin bonus)' : 'todavía no la encontraste: duerme dentro de una roca o un árbol de su zona, o la guarda un jefe Coleccionista en su guarida') + '</small></span><span class="acts">'
+        + (puesta ? '<button class="mini peligro" data-reliquia="quitar" data-id="' + id + '">QUITAR</button><button class="mini peligro" data-reliquia="soltar" data-id="' + id + '">SOLTAR (que se la lleven)</button>' : tiene ? '<button class="mini exito" data-reliquia="poner" data-id="' + id + '">PONER</button>' : '')
         + (tiene && enCasa ? '<button class="mini" data-reliquia="dejar" data-id="' + id + '">DEJAR EN CASA</button>' : '')
         + (enCofre && enCasa ? '<button class="mini exito" data-reliquia="recoger" data-id="' + id + '">RECOGER</button>' : '') + '</span></div>';
     });
+    h += '<div style="font-size:11px;color:var(--textoTenue)">Dónde se esconden: 4 máscaras duermen DENTRO de una roca o un árbol de su zona (rompe rocas y tala árboles: la roca exacta es al azar en cada mundo) y 2 las guardan los Coleccionistas como recompensa de jefe en sus guaridas. Los rumores de la gente acotan la zona.</div>';
     h += '</section><section><h3>✦ Artefactos antiguos · únicos · los que roban Los Coleccionistas</h3><div style="font-size:11px;color:var(--textoFrio)">Objetos antiguos y únicos (de la Guerra de los Clanes, de Orión, del meteorito, de El Ancestro). Su poder funciona mientras los llevas CONTIGO; guardados en el cofre de tu casa, no. Los Coleccionistas los roban para venderlos: encuéntralos en el mundo, cómpraselos a Petra en Arcana o recupéralos de sus cazadores caídos.</div>';
     Object.keys(this.ARTEFACTOS).forEach(id => {
       const d = this.ARTEFACTOS[id]; const tiene = r.artefactos.indexOf(id) >= 0, enCofre = r.casa.indexOf(id) >= 0;

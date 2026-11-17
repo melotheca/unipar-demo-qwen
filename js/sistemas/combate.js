@@ -39,6 +39,39 @@ U.Combate = {
     m.objetos.slice().forEach(o => { if (!U.Grid.esDestructible(o) || (ya && ya.indexOf(o) >= 0)) return; const cx = o.x + (o.w || 1) / 2, cy = o.y + (o.h || 1) / 2; if (U.Grid.enArco(j.x, j.y, j.dir, alcance + 0.45, { x: cx, y: cy })) U.Grid.danarObjeto(m, o, dmg); });
   },
   golpearObjetoEn(x, y, dmg) { const E = U.Juego.estado; const o = U.Grid.objetoEn(E.mapa, x, y); if (o && U.Grid.esDestructible(o)) { U.Grid.danarObjeto(E.mapa, o, dmg); return true; } return false; },
+  // Rompe el obstáculo destructible (roca/árbol/cactus) que el enemigo tiene enfrente, en la dirección en que intenta moverse.
+  // Devuelve true si dañó algo. NO completa el objetivo del jugador (rompioObjeto): se guarda y se restaura el flag.
+  romperObstaculoFrente(e, mx, my) {
+    const E = U.Juego.estado;
+    const dirs = [];
+    if (mx || my) { const l = Math.hypot(mx, my) || 1; dirs.push({ x: mx / l, y: my / l }); }
+    if (e.dir && (e.dir.x || e.dir.y)) dirs.push({ x: e.dir.x, y: e.dir.y });
+    for (const d of dirs) {
+      for (const dist of [0.7, 1.4]) {
+        const px = e.x + d.x * dist, py = e.y + d.y * dist;
+        const o = U.Grid.objetoEn(E.mapa, px, py);
+        if (o && U.Grid.esDestructible(o)) {
+          const yaRompio = E.flags ? E.flags.rompioObjeto : false;
+          this.golpearObjetoEn(px, py, Math.max(10, (e.stats.ataque || 10) * 2));
+          if (E.flags) E.flags.rompioObjeto = yaRompio; // el enemigo no completa el objetivo del jugador
+          this.particulas(e.x + d.x * 0.7, e.y - 0.5 + d.y * 0.7, 4, '#8b93a3', 'chispa');
+          this.texto(e, '¡ROMPE!', '#ffd08a', 1);
+          U.Audio.sfx('tierra');
+          return true;
+        }
+      }
+    }
+    return false;
+  },
+  // Reposiciona a un enemigo a distancia/mago: se mueve de lado (perpendicular al objetivo) para rodear el obstáculo / recuperar línea de visión.
+  // Devuelve la dirección de lado {x, y} y la deja activa 0.8 s (e.reposicion) para que siga de lado en los siguientes frames.
+  reposicionar(e, dx, dy, d) {
+    const l = Math.hypot(dx, dy) || 1;
+    const lado = Math.random() < 0.5 ? 1 : -1;
+    const dir = { x: (-dy / l) * lado, y: (dx / l) * lado };
+    e.reposicion = { t: 0.8, dx: dir.x, dy: dir.y };
+    return dir;
+  },
   // ---------- ESCUDO (técnica aprendida de un Guía) ----------
   // La naturaleza del escudo del jugador: su elemento activo. Si despertó el Yang y su
   // inclinación de vida es Yang, su escudo es de ENERGÍA (bloquea todo). Los hechiceros
@@ -54,6 +87,7 @@ U.Combate = {
     const j = U.Juego.estado.jugador;
     if (j.escudoAprendido) return false;
     j.escudoAprendido = true; j.escudoNv = 1; j.escudoExp = 0; j.escudoVida = this.escudoMax(j);
+    if (U.Habilidades && U.Habilidades.equipar) U.Habilidades.equipar(j, 'escudo'); // al aprenderlo entra al equipo si hay hueco: B funciona desde el primer momento
     U.HUD.banner('🛡 ¡ESCUDO APRENDIDO! · NIVEL 1 · SOLO DE FRENTE', 2.4); U.Audio.sfx('unlock');
     return true;
   },
@@ -127,6 +161,7 @@ U.Combate = {
     const E = U.Juego.estado, j = E.jugador;
     if (j.escudo) { j.escudo = false; U.HUD.toast('Escudo desactivado.', ''); U.Audio.sfx('click'); return; }
     if (!j.escudoAprendido) { U.HUD.toast('Aún no conoces el Escudo: es una TÉCNICA y se aprende de un Guía. Kaelen, el guardia de la aldea, puede enseñártela (habla con él).', 'aviso'); U.Audio.sfx('fail'); return; }
+    if (U.Habilidades && U.Habilidades.podarEquipo(j).indexOf('escudo') < 0) { U.HUD.toast('El Escudo no está en tu EQUIPO: equípalo en Pausa → Ajustes → Equipo (máx. 5 técnicas).', 'aviso'); U.Audio.sfx('fail'); return; }
     if (j.agotado || j.esencia < 10) { U.HUD.toast('Escudo: necesitas al menos 10 de Esencia.', 'aviso'); U.Audio.sfx('fail'); return; }
     j.escudo = true; j.escudoVida = this.escudoMax(j); j.cargando = false; j.descansando = false; U.Audio.sfx('yang');
     const nv = U.Habilidades.escudo.niveles[j.escudoNv || 1];
@@ -138,9 +173,17 @@ U.Combate = {
   puñoSobre(j) { return j.buffs.sobrecarga > 0 && j.esencia <= 0.01; },
   puedeYin() { const j = U.Juego.estado.jugador; return j.cdYin <= 0 && ((!j.agotado && j.esencia >= 2) || this.puñoSobre(j)); },
   iniciarCarga() { const j = U.Juego.estado.jugador; if (j.cdYin > 0) { U.Audio.sfx('fail'); return; } if (!this.puñoSobre(j)) { if (j.agotado) { U.Audio.sfx('fail'); return; } if (j.esencia < 2) { U.HUD.toast('Sin Esencia para Yin.', 'aviso'); U.Audio.sfx('fail'); return; } } j.cargando = true; j.carga = 0; j.descansando = false; U.Audio.sfx('cargando'); },
-  soltarYin() { const j = U.Juego.estado.jugador; if (!j.cargando) return; const cargado = j.carga >= 0.35; j.cargando = false; this.yin(cargado); },
-  yin(cargado) {
-    const E = U.Juego.estado, j = E.jugador; const h = cargado ? U.Habilidades.yin.cargado : U.Habilidades.yin.normal;
+  soltarYin() { const j = U.Juego.estado.jugador; if (!j.cargando) return; const carga = j.carga; j.cargando = false; this.yin(carga); },
+  yin(carga) {
+    // La carga es 0..1.2 (tope del update loop); si llega un booleano viejo, se traduce a 0 o 1.2.
+    if (typeof carga === 'boolean') carga = carga ? 1.2 : 0;
+    if (typeof carga !== 'number' || !isFinite(carga)) carga = 0;
+    const cargado = carga >= 0.35;
+    const hn = U.Habilidades.yin.normal, hc = U.Habilidades.yin.cargado;
+    // Potencia PROPORCIONAL a la carga: en el umbral (0.35) es la normal; con la carga llena (1.2) es la máxima cargada.
+    const t = cargado ? Math.min(1, Math.max(0, (carga - 0.35) / (1.2 - 0.35))) : 0;
+    const h = { costo: Math.round(hn.costo + t * (hc.costo - hn.costo)), power: hn.power + t * (hc.power - hn.power), forma: cargado ? hc.forma : hn.forma, alcance: hn.alcance + t * (hc.alcance - hn.alcance), restaura: Math.round(hn.restaura + t * (hc.restaura - hn.restaura)) };
+    const E = U.Juego.estado, j = E.jugador;
     if (j.cdYin > 0) return; if (!this.puñoSobre(j) && !U.Recuperacion.gastar(h.costo)) return; // con Sobrecarga activa y Esencia en 0, el puño no cobra Esencia: ya estás pagando con Vida
     j.cdYin = (cargado ? 0.6 : Math.max(0.18, 0.42 - (U.Reliquias ? U.Reliquias.statEf(j, 'velocidad') : j.stats.velocidad) * 0.012)) * (j.buffs.sobrecarga > 0 ? 0.5 : 1); j.ataqueAnim = 0.2; j.descansando = false;
     const atk = (U.Reliquias ? U.Reliquias.statEf(j, 'ataque') : j.stats.ataque) * (j.buffs.sobrecarga > 0 ? 2 : 1);
@@ -157,11 +200,44 @@ U.Combate = {
     // Canalizar: sin técnica desbloqueada, el Yin enseña el elemento (llegar a 15% desbloquea la primera)
     if ((j.maestria[j.elementoActivo] || 0) < 15 && E.enCombate) U.Crecimiento.maestria(j.elementoActivo, 0.45, golpes ? this.desafio(this.vivos()[0] || j) : 0.5);
   },
-  yang() {
+  // Dispatcher del EQUIPO: un id de registro ('tec:<elem>:<id>' | 'yang:<forma>' |
+  // 'escudo') lanza esa técnica. Solo funciona si está dominada Y equipada.
+  usarEquipo(id) {
+    const j = U.Juego.estado.jugador; const tec = U.Habilidades.porId(j, id);
+    if (!tec) { U.HUD.toast('Técnica desconocida.', 'aviso'); return; }
+    if (!U.Habilidades.aprendida(j, tec)) { U.HUD.toast(tec.nombre + ': aún no la dominas.', 'aviso'); U.Audio.sfx('fail'); return; }
+    if (U.Habilidades.podarEquipo(j).indexOf(id) < 0) { U.HUD.toast(tec.nombre + ' no está en tu EQUIPO: equípala en Pausa → Ajustes → Equipo.', 'aviso'); U.Audio.sfx('fail'); return; }
+    if (tec.kind === 'elemento') this.tecnica(id);
+    else if (tec.kind === 'yang') this.yang(tec.tecId);
+    else if (tec.kind === 'escudo') this.toggleEscudo();
+  },
+  // Ataque BÁSICO del elemento principal: línea corta, coste 4, sin aprender nada.
+  // Es lo que hay al inicio (puño + básico) y lo que dispara el botón TÉC.
+  ataqueBasico() {
+    const E = U.Juego.estado, j = E.jugador; const b = U.Habilidades.BASICO;
+    if ((j.cdBasico || 0) > 0) return; if (!U.Recuperacion.gastar(b.costo)) return;
+    j.cdBasico = b.cd; j.ataqueAnim = 0.25; j.descansando = false;
+    const el = U.Elementos.datos[j.elementoActivo]; const atk = (U.Reliquias ? U.Reliquias.statEf(j, 'ataque') : j.stats.ataque) * (j.buffs.sobrecarga > 0 ? 2 : 1);
+    const alcEf = Math.max(1, Math.min(b.alcanceMax, this.alcanceElemental(j)));
+    const celdas = U.Grid.forma('linea', j.x, j.y, j.dir, alcEf, 0);
+    E.efectos.haces.push({ celdas, color: el.color, t: 0.2, max: 0.2 });
+    this.golpearObjetos(celdas, atk * b.power * 0.85); this.golpearInocentes(celdas);
+    this.vivos().forEach(e => { if (U.Grid.enCeldas(celdas, e)) this.dañoEnemigo(e, atk * b.power, j.elementoActivo, { desafio: this.desafio(e), alcance: alcEf }); });
+    if (U.Criaturas) U.Criaturas.impactoJugador(celdas, { dmg: atk * b.power, elemento: j.elementoActivo });
+    this.particulas(j.x + j.dir.x, j.y + j.dir.y - 0.5, 5, el.claro, 'chispa');
+    U.Audio.sfx(j.elementoActivo); E.resumen.tecnicas++;
+  },
+  yang(forma) {
     const E = U.Juego.estado, j = E.jugador;
     if (!j.tieneYang) { U.HUD.toast('Tu Yang aún no despierta: sin afinidad empiezas en 0, pero se alcanza entrenando hasta ' + U.Habilidades.yangDespertar + ' (medita al descansar o entrena con Torin). Como dominar otro elemento: lleva su entrenamiento.', 'aviso'); U.Audio.sfx('fail'); return; }
-    const h = U.Habilidades.yang[j.yangForma];
+    // Sin forma pedida: la seleccionada si está equipada, si no la primera forma Yang equipada.
+    if (!forma) { const eq = U.Habilidades.equipoDetalles(j).filter(t => t.kind === 'yang'); const sel = eq.find(t => t.tecId === j.yangForma); forma = sel ? sel.tecId : (eq[0] ? eq[0].tecId : null); }
+    if (!forma) { U.HUD.toast('No llevas ninguna forma Yang EQUIPADA: elige una en Pausa → Ajustes → Equipo.', 'aviso'); U.Audio.sfx('fail'); return; }
+    const h = U.Habilidades.yang[forma];
+    if (!h) return;
     if (j.estilos.yang < h.umbral) { U.HUD.toast(h.nombre + ' requiere Yang ' + h.umbral + '.', 'aviso'); return; }
+    if (U.Habilidades.podarEquipo(j).indexOf('yang:' + forma) < 0) { U.HUD.toast(h.nombre + ' no está en tu EQUIPO: equípala en Pausa → Ajustes → Equipo.', 'aviso'); U.Audio.sfx('fail'); return; }
+    j.yangForma = forma;
     if (j.cdYang > 0) return; if (!U.Recuperacion.gastar(h.costo)) return;
     j.cdYang = h.cd; j.ataqueAnim = 0.25; j.descansando = false; const atk = (U.Reliquias ? U.Reliquias.statEf(j, 'ataque') : j.stats.ataque) * (j.buffs.sobrecarga > 0 ? 2 : 1);
     U.Audio.sfx('yang'); this.sacudir(0.3);
@@ -173,7 +249,10 @@ U.Combate = {
   // cada 5% → 0–5% = 1 celda, 6–10% = 2, 11–15% = 3, … 96–100% = 20 celdas. Es el alcance
   // MÁXIMO de tus ataques elementales: cada técnica llega hasta donde su forma permita,
   // sin pasar de este alcance (a baja maestría todo es de cerca; dominando, llega lejos).
-  alcanceElemental(j) { const m = (j && j.maestria && j.maestria[j.elementoActivo]) || 0; return Math.max(1, Math.min(20, Math.ceil(m / 5))); },
+  alcanceElemental(j) { return this.alcanceDe(j, j.elementoActivo); },
+  // Alcance de UN elemento concreto (el equipo MEZCLA elementos: cada técnica usa
+  // la maestría de SU elemento, no la del principal).
+  alcanceDe(j, elem) { const m = (j && j.maestria && j.maestria[elem]) || 0; return Math.max(1, Math.min(20, Math.ceil(m / 5))); },
   // CAÍDA DE DAÑO POR DISTANCIA (ataques elementales): a 1 celda = 100% del daño; en la
   // ÚLTIMA celda del alcance = 80%; entre ambas baja LINEAL: daño% = 100% − (dist−1) ×
   // (20% / (alcance−1)). Ej.: alcance 5 → −5% por celda; alcance 10 → −2.2% por celda;
@@ -185,34 +264,45 @@ U.Combate = {
   // Como golpean a muchos enemigos a la vez, cuestan MÁS Esencia (×1.5) y hacen
   // un poco menos de daño por enemigo (×0.9).
   COSTO_RADIAL: 1.5, DANO_RADIAL: 0.9,
-  radioRadial(j) { return Math.max(1, Math.floor(this.alcanceElemental(j) / 2)); },
+  radioRadial(j) { return this.radioRadialDe(j, j.elementoActivo); },
+  radioRadialDe(j, elem) { return Math.max(1, Math.floor(this.alcanceDe(j, elem) / 2)); },
   esRadial(h) { return !!h && h.forma === 'circulo' && !h.centro; },
   conCostoRadial(h) { return this.esRadial(h) ? Object.assign({}, h, { costo: Math.round(h.costo * this.COSTO_RADIAL * 100) / 100, radial: true }) : h },
-  tecnica() {
-    const E = U.Juego.estado, j = E.jugador; const lista = U.Habilidades.elementos[j.elementoActivo]; const h = lista[j.tecnicaIdx];
-    if ((j.maestria[j.elementoActivo] || 0) < h.umbral) { U.HUD.toast(h.nombre + ' requiere maestría mínima de ' + h.umbral + '% y aprenderla de un Guía, por tarea. Canaliza con Yin: la maestría sube con curva multiplicativa, cada tramo cuesta más.', 'aviso'); U.Audio.sfx('fail'); return; }
+  // Técnica ELEMENTAL del equipo. id = id de registro ('tec:<elem>:<id>'); sin id,
+  // la primera técnica elemental EQUIPADA; sin ninguna equipada, el ataque básico.
+  // Cada técnica usa SU elemento (color, coste ambiental, maestría, alcance).
+  tecnica(id) {
+    const E = U.Juego.estado, j = E.jugador;
+    let tec = id ? U.Habilidades.porId(j, id) : null;
+    if (id && (!tec || tec.kind !== 'elemento')) { U.HUD.toast('Técnica desconocida.', 'aviso'); return; }
+    if (!tec) { const eq = U.Habilidades.equipoDetalles(j).filter(t => t.kind === 'elemento'); if (!eq.length) { this.ataqueBasico(); return; } tec = eq[0]; }
+    const h = tec;
+    if (!U.Habilidades.aprendida(j, tec)) { U.HUD.toast(h.nombre + ' requiere maestría mínima de ' + h.umbral + '% y aprenderla de un Guía, por tarea. Canaliza con Yin: la maestría sube con curva multiplicativa, cada tramo cuesta más.', 'aviso'); U.Audio.sfx('fail'); return; }
+    if (U.Habilidades.podarEquipo(j).indexOf(tec.id) < 0) { U.HUD.toast(h.nombre + ' no está en tu EQUIPO: equípala en Pausa → Ajustes → Equipo.', 'aviso'); U.Audio.sfx('fail'); return; }
+    // Compatibilidad: tecnicaIdx sigue apuntando a la técnica usada dentro de su elemento.
+    j.tecnicaIdx = Math.max(0, (U.Habilidades.elementos[h.elemento] || []).findIndex(x => x.id === h.tecId));
     if ((j.cdTec[h.id] || 0) > 0) return;
-    const z = U.Ambiente.zonaEn(j.x, j.y); const c = U.Ambiente.costo(this.conCostoRadial(h), j.elementoActivo, z, j.atributo); // radial (círculo a tu alrededor): +50% de Esencia
+    const z = U.Ambiente.zonaEn(j.x, j.y); const c = U.Ambiente.costo(this.conCostoRadial(h), h.elemento, z, j.atributo); // radial (círculo a tu alrededor): +50% de Esencia
     if (!U.Recuperacion.gastar(c.costo, { ajustado: !c.inestable })) return;
-    j.cdTec[h.id] = h.cd; j.ataqueAnim = 0.3; j.descansando = false; const el = U.Elementos.datos[j.elementoActivo]; const atk = (U.Reliquias ? U.Reliquias.statEf(j, 'ataque') : j.stats.ataque) * (j.buffs.sobrecarga > 0 ? 2 : 1); const base = atk * h.power * ((j.reliquias && j.reliquias.artefactos && j.reliquias.artefactos.indexOf('espada') >= 0) ? 1.25 : 1); // ✦ Espada de Orión: +25% de daño elemental
-    const alcEf = Math.max(1, Math.min(h.alcance || h.radio || 99, this.alcanceElemental(j))); // alcance efectivo: lo que la forma de la técnica permita, topado por tu maestría (1 celda a 0–5% … 20 a 100%)
-    U.Audio.sfx(j.elementoActivo); this.sacudir(0.4); E.resumen.tecnicas++;
+    j.cdTec[h.id] = h.cd; j.ataqueAnim = 0.3; j.descansando = false; const el = U.Elementos.datos[h.elemento]; const atk = (U.Reliquias ? U.Reliquias.statEf(j, 'ataque') : j.stats.ataque) * (j.buffs.sobrecarga > 0 ? 2 : 1); const base = atk * h.power * ((j.reliquias && j.reliquias.artefactos && j.reliquias.artefactos.indexOf('espada') >= 0) ? 1.25 : 1); // ✦ Espada de Orión: +25% de daño elemental
+    const alcEf = Math.max(1, Math.min(h.alcance || h.radio || 99, this.alcanceDe(j, h.elemento))); // alcance efectivo: lo que la forma de la técnica permita, topado por tu maestría (1 celda a 0–5% … 20 a 100%)
+    U.Audio.sfx(h.elemento); this.sacudir(0.4); E.resumen.tecnicas++;
     let objetivo = this.vivos()[0]; let desafio = 0.5;
-    const golpear = (celdas, opts, baseUsada) => { const b = baseUsada != null ? baseUsada : base; this.golpearObjetos(celdas, b * 0.85); this.golpearInocentes(celdas); if (U.Criaturas) U.Criaturas.impactoJugador(celdas, { dmg: b, elemento: j.elementoActivo }); this.vivos().forEach(e => { if (U.Grid.enCeldas(celdas, e)) { this.dañoEnemigo(e, b, j.elementoActivo, Object.assign({ desafio: this.desafio(e), alcance: alcEf }, opts || {}, h.efecto || {})); desafio = Math.max(desafio, this.desafio(e)); objetivo = e; } }); };
+    const golpear = (celdas, opts, baseUsada) => { const b = baseUsada != null ? baseUsada : base; this.golpearObjetos(celdas, b * 0.85); this.golpearInocentes(celdas); if (U.Criaturas) U.Criaturas.impactoJugador(celdas, { dmg: b, elemento: h.elemento }); this.vivos().forEach(e => { if (U.Grid.enCeldas(celdas, e)) { this.dañoEnemigo(e, b, h.elemento, Object.assign({ desafio: this.desafio(e), alcance: alcEf }, opts || {}, h.efecto || {})); desafio = Math.max(desafio, this.desafio(e)); objetivo = e; } }); };
     switch (h.forma) {
-      case 'linea': case 'rect': { const celdas = U.Grid.forma(h.forma, j.x, j.y, j.dir, alcEf, h.radio || 0); E.efectos.haces.push({ celdas, color: el.color, t: 0.3, max: 0.3 }); golpear(celdas); this.particulas(j.x + j.dir.x * 2, j.y + j.dir.y * 2 - 0.5, 10, el.claro, j.elementoActivo === 'agua' ? 'agua' : 'chispa'); break; }
+      case 'linea': case 'rect': { const celdas = U.Grid.forma(h.forma, j.x, j.y, j.dir, alcEf, h.radio || 0); E.efectos.haces.push({ celdas, color: el.color, t: 0.3, max: 0.3 }); golpear(celdas); this.particulas(j.x + j.dir.x * 2, j.y + j.dir.y * 2 - 0.5, 10, el.claro, h.elemento === 'agua' ? 'agua' : 'chispa'); break; }
       case 'cono': { const celdas = U.Grid.forma('cono', j.x, j.y, j.dir, alcEf, 0); E.efectos.haces.push({ celdas, color: el.color, t: 0.35, max: 0.35 }); golpear(celdas); this.particulas(j.x + j.dir.x * 1.5, j.y + j.dir.y * 1.5 - 0.5, 16, el.claro, 'brasa'); break; }
       case 'alterna': { const celdas = U.Grid.forma('alterna', j.x, j.y, j.dir, alcEf, 0); E.efectos.haces.push({ celdas, color: el.color, t: 0.35, max: 0.35 }); golpear(celdas, null, base * 1.2); this.particulas(j.x + j.dir.x * 2, j.y + j.dir.y * 2 - 0.5, 14, el.claro, 'brasa'); break; }
-      case 'circulo': { const esRad = !h.centro; const radioEf = esRad ? this.radioRadial(j) : h.radio; const cx = h.centro === 'frente4' ? j.x + j.dir.x * Math.min(4, alcEf) : j.x, cy = h.centro === 'frente4' ? j.y + j.dir.y * Math.min(4, alcEf) : j.y; const celdas = U.Grid.forma('circulo', cx, cy, j.dir, 0, radioEf); E.efectos.haces.push({ celdas, color: el.color, t: 0.35, max: 0.35 }); E.efectos.anillos.push({ x: cx, y: cy, radio: radioEf, color: el.claro, t: 0.4, max: 0.4 }); golpear(celdas, null, esRad ? base * this.DANO_RADIAL : base); this.particulas(cx, cy - 0.5, 20, el.claro, 'chispa'); this.sacudir(0.8); break; }
-      case 'proyectil': this.proyectil(j, Object.assign({}, h, { alcance: alcEf }), base, j.elementoActivo, el.color, 'jugador'); break;
-      case 'cadena': { const vivos = this.vivos().map(e => ({ e, d: U.Grid.dist(e, j) })).filter(o => o.d <= alcEf).sort((a, b) => a.d - b.d).slice(0, h.saltos); const puntos = [{ x: j.x, y: j.y }]; vivos.forEach(o => { puntos.push({ x: o.e.x, y: o.e.y }); this.dañoEnemigo(o.e, base, j.elementoActivo, Object.assign({ desafio: this.desafio(o.e), alcance: alcEf }, h.efecto || {})); desafio = Math.max(desafio, this.desafio(o.e)); }); if (puntos.length > 1) E.efectos.cadenas.push({ puntos, t: 0.25, max: 0.25 }); else { U.HUD.toast('Ningún enemigo al alcance de la cadena.', ''); } break; }
+      case 'circulo': { const esRad = !h.centro; const radioEf = esRad ? this.radioRadialDe(j, h.elemento) : h.radio; const cx = h.centro === 'frente4' ? j.x + j.dir.x * Math.min(4, alcEf) : j.x, cy = h.centro === 'frente4' ? j.y + j.dir.y * Math.min(4, alcEf) : j.y; const celdas = U.Grid.forma('circulo', cx, cy, j.dir, 0, radioEf); E.efectos.haces.push({ celdas, color: el.color, t: 0.35, max: 0.35 }); E.efectos.anillos.push({ x: cx, y: cy, radio: radioEf, color: el.claro, t: 0.4, max: 0.4 }); golpear(celdas, null, esRad ? base * this.DANO_RADIAL : base); this.particulas(cx, cy - 0.5, 20, el.claro, 'chispa'); this.sacudir(0.8); break; }
+      case 'proyectil': this.proyectil(j, Object.assign({}, h, { alcance: alcEf }), base, h.elemento, el.color, 'jugador'); break;
+      case 'cadena': { const vivos = this.vivos().map(e => ({ e, d: U.Grid.dist(e, j) })).filter(o => o.d <= alcEf).sort((a, b) => a.d - b.d).slice(0, h.saltos); const puntos = [{ x: j.x, y: j.y }]; vivos.forEach(o => { puntos.push({ x: o.e.x, y: o.e.y }); this.dañoEnemigo(o.e, base, h.elemento, Object.assign({ desafio: this.desafio(o.e), alcance: alcEf }, h.efecto || {})); desafio = Math.max(desafio, this.desafio(o.e)); }); if (puntos.length > 1) E.efectos.cadenas.push({ puntos, t: 0.25, max: 0.25 }); else { U.HUD.toast('Ningún enemigo al alcance de la cadena.', ''); } break; }
       case 'destello': { // DESTELLO (Rayo): flash blanco SUAVE y gradual + ceguera en área. Sin daño directo grande: su poder es dejarlos ciegos.
         this.flashPantalla = { t: 0, max: 1.6 }; // lo pinta U.HUD: sube suave a su pico y decae poco a poco (nunca un estrobo); el ajuste de destellos puede reducirlo o apagarlo
-        let ceg = 0; this.vivos().forEach(e => { if (U.Grid.dist(e, j) <= (h.radio || 4)) { e.efectos.cegado = Math.max(e.efectos.cegado || 0, (h.efecto && h.efecto.cegar) || 3); this.dañoEnemigo(e, base, j.elementoActivo, { desafio: this.desafio(e), alcance: h.radio || 4 }); this.texto(e, '👁 CEGADO', '#fff7c2', 1); ceg++; desafio = Math.max(desafio, this.desafio(e)); } });
+        let ceg = 0; this.vivos().forEach(e => { if (U.Grid.dist(e, j) <= (h.radio || 4)) { e.efectos.cegado = Math.max(e.efectos.cegado || 0, (h.efecto && h.efecto.cegar) || 3); this.dañoEnemigo(e, base, h.elemento, { desafio: this.desafio(e), alcance: h.radio || 4 }); this.texto(e, '👁 CEGADO', '#fff7c2', 1); ceg++; desafio = Math.max(desafio, this.desafio(e)); } });
         E.efectos.anillos.push({ x: j.x, y: j.y, radio: h.radio || 4, color: '#fff7c2', t: 0.5, max: 0.5 }); this.particulas(j.x, j.y - 0.6, 26, '#fff7c2', 'chispa'); U.Audio.sfx('rayo');
         U.HUD.toast(ceg ? '✦ DESTELLO: ' + ceg + ' enemigo(s) CEGADOS unos segundos: no te ven y sus ataques fallan.' : '✦ DESTELLO: luz lanzada, sin enemigos cerca que cegar.', ceg ? 'exito' : 'aviso'); break; }
     }
-    U.Crecimiento.maestria(j.elementoActivo, 0.5, desafio); U.Crecimiento.stat('mente', 0.06, 1); U.Crecimiento.stat('ataque', 0.03, desafio);
+    U.Crecimiento.maestria(h.elemento, 0.5, desafio); U.Crecimiento.stat('mente', 0.06, 1); U.Crecimiento.stat('ataque', 0.03, desafio);
   },
   proyectil(origen, h, base, elemento, color, dueño) {
     const d = U.Grid.dir8(origen.dir.x, origen.dir.y); const vel = h.vel || 7;
@@ -231,9 +321,13 @@ U.Combate = {
     if (j.estilos.yin < s.umbral) { U.HUD.toast('Sobrecarga requiere Yin ' + s.umbral + '.', 'aviso'); return; }
     j.buffs.sobrecarga = 1; U.Audio.sfx('sobrecarga'); this.sacudir(1); this.particulas(j.x, j.y - 0.6, 30, '#ff5470', 'brasa'); U.HUD.banner('SOBRECARGA', 1.2); U.HUD.toast('Sobrecarga ACTIVA: Ataque y Velocidad ×2. Drena SOLO Esencia (5%/s); si la Esencia llega a 0, drena VIDA a la misma tasa y solo podrás golpear. Pulsa X otra vez para desactivarla cuando quieras.', 'peligro');
   },
-  cambiarElemento(id) { const j = U.Juego.estado.jugador; if (j.elementos.indexOf(id) < 0 || j.elementoActivo === id) return; j.elementoActivo = id; j.tecnicaIdx = 0; U.Audio.sfx('click'); U.HUD.refrescarSimbolos(); U.HUD.refrescarChips(); U.HUD.toast('Elemento activo: ' + U.Elementos.nombre(id), ''); U.Ambiente.actualizar(); },
-  seleccionarTec(i) { const j = U.Juego.estado.jugador; const h = U.Habilidades.elementos[j.elementoActivo][i]; if (!h) return; if ((j.maestria[j.elementoActivo] || 0) < h.umbral) { U.HUD.toast(h.nombre + ': maestría mínima ' + h.umbral + '% (y se aprende de un Guía, por tarea).', 'aviso'); U.Audio.sfx('fail'); return; } j.tecnicaIdx = i; U.Audio.sfx('click'); U.HUD.refrescarChips(); },
-  seleccionarYang(f) { const j = U.Juego.estado.jugador; if (!j.tieneYang) { U.HUD.toast('Yang sin despertar: entrénalo hasta ' + U.Habilidades.yangDespertar + ' (meditar al descansar, sesiones con Torin) y despertará.', 'aviso'); return; } const h = U.Habilidades.yang[f]; if (j.estilos.yang < h.umbral) { U.HUD.toast(h.nombre + ': estilo Yang ' + h.umbral + ' requerido.', 'aviso'); U.Audio.sfx('fail'); return; } j.yangForma = f; U.Audio.sfx('click'); U.HUD.refrescarChips(); },
+  // El elemento ya NO cambia: queda el del test (el principal) toda la vida. Esta
+  // función queda como guarda legacy (la tecla Tab de main.js la sigue llamando):
+  // no toca j.elementoActivo en ningún sitio.
+  cambiarElemento(id) { const j = U.Juego.estado.jugador; U.HUD.toast('Tu elemento es ' + U.Elementos.nombre(j.elementoActivo) + ', el del test: no cambia en esta vida. Lo que cambia es tu EQUIPO (Pausa → Ajustes → Equipo), que puede mezclar técnicas de todos tus elementos.', ''); },
+  // Teclas 1-5: USAN la técnica del equipo en ese hueco (1 = primera equipada…).
+  seleccionarTec(i) { const j = U.Juego.estado.jugador; const eq = U.Habilidades.equipoDetalles(j); const tec = eq[i]; if (!tec) { if (i === 0) this.ataqueBasico(); return; } this.usarEquipo(tec.id); },
+  seleccionarYang(f) { const j = U.Juego.estado.jugador; if (!j.tieneYang) { U.HUD.toast('Yang sin despertar: entrénalo hasta ' + U.Habilidades.yangDespertar + ' (meditar al descansar, sesiones con Torin) y despertará.', 'aviso'); return; } const h = U.Habilidades.yang[f]; if (!h) return; if (j.estilos.yang < h.umbral) { U.HUD.toast(h.nombre + ': estilo Yang ' + h.umbral + ' requerido.', 'aviso'); U.Audio.sfx('fail'); return; } if (U.Habilidades.podarEquipo(j).indexOf('yang:' + f) < 0) { U.HUD.toast(h.nombre + ' no está en tu EQUIPO: equípala en Pausa → Ajustes → Equipo.', 'aviso'); U.Audio.sfx('fail'); return; } j.yangForma = f; U.Audio.sfx('click'); U.HUD.refrescarChips(); },
 
   golpearInocentes(celdas, arco) {
     const E = U.Juego.estado; if (!celdas || !E.npcs) return;
@@ -324,6 +418,29 @@ U.Combate = {
       if (e.clase === 'chaman') { if (d < 3.5) { mx = -dx / d; my = -dy / d; } else if (d > c.rango + 1) { mx = dx / d; my = dy / d; } }
       else if (d > c.rango) { mx = dx / d; my = dy / d; }
       if (e.efectos.invertido > 0 && (mx || my)) { if (!e.efectos.invMapa && U.Inversion) e.efectos.invMapa = U.Inversion.generar(); const mv = U.Inversion ? U.Inversion.aplicar(e.efectos.invMapa, mx, my) : { x: -mx, y: -my }; mx = mv.x; my = mv.y; }
+      // Reposición activa (mago): sigue de lado mientras dure
+      if (e.reposicion && e.reposicion.t > 0) { mx = e.reposicion.dx; my = e.reposicion.dy; e.reposicion.t -= dt; if (e.reposicion.t <= 0) e.reposicion = null; }
+      // ATORADO: intenta moverse pero su posición casi no cambia durante ~1.5 s (una roca/árbol le bloquea el paso)
+      if (mx || my) {
+        if (e._atoradoX == null) { e._atoradoX = e.x; e._atoradoY = e.y; e._atoradoT = 0; }
+        else {
+          const mov = Math.hypot(e.x - e._atoradoX, e.y - e._atoradoY);
+          if (mov > 0.25) { e._atoradoT = 0; e._atoradoX = e.x; e._atoradoY = e.y; }
+          else {
+            e._atoradoT = (e._atoradoT || 0) + dt;
+            if (e._atoradoT >= 1.5) {
+              const esMago = (c.forma === 'linea'); // chamán, ilusionista: a distancia, no rompen
+              if (!esMago) {
+                const roto = this.romperObstaculoFrente(e, mx, my);
+                if (roto) { e._atoradoT = 1.0; } // vuelve a golpear en 0.5 s si sigue ahí
+                else { const lado = this.reposicionar(e, dx, dy, d); mx = lado.x; my = lado.y; e._atoradoT = 0; e._atoradoX = e.x; e._atoradoY = e.y; }
+              } else {
+                const lado = this.reposicionar(e, dx, dy, d); mx = lado.x; my = lado.y; e._atoradoT = 0; e._atoradoX = e.x; e._atoradoY = e.y;
+              }
+            }
+          }
+        }
+      } else { e._atoradoT = 0; e._atoradoX = e.x; e._atoradoY = e.y; }
       if (mx || my) { U.Grid.mover(E.mapa, e, mx * vel * dt, my * vel * dt); e.moviendo = true; e.anim += dt; } else e.moviendo = false;
       // separación
       vivos.forEach(o => { if (o !== e) { const sx = e.x - o.x, sy = e.y - o.y, sd = Math.hypot(sx, sy); if (sd < 0.8 && sd > 0.001) { U.Grid.mover(E.mapa, e, sx / sd * dt * 1.5, sy / sd * dt * 1.5); } } });

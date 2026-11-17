@@ -95,3 +95,34 @@ button{font-family:var(--fuente);color:var(--texto);cursor:pointer}
   .controlesLista{columns:1}
   .pausaCaja{max-height:96vh}
 }
+
+/* === Panel de NPC compacto (js/ui/dialogo.js añade .dlgCompacto por JS) === */
+/* NOTA: css/combate.css carga después y define el panel grande (720px, retrato 96px);
+   estos selectores llevan #dialogo + .dlgCompacto para ganar en especificidad sin
+   tocar ese archivo. El panel compacto es un recuadro de diálogo (460px máx, ~56dvh),
+   no una pantalla completa: retrato pequeño a la izquierda, nombre arriba, charla con
+   historial + máquina de escribir, y secciones Hablar / Acciones / Misiones. */
+#dialogo .dlgCaja.dlgCompacto{width:min(460px,calc(100vw - 16px));margin-bottom:calc(118px + env(safe-area-inset-bottom));max-height:calc(56dvh);gap:8px;padding:10px}
+#dialogo .dlgCompacto #dlgCara{width:56px;height:56px;flex:0 0 56px}
+#dialogo .dlgCompacto .dlgCuerpo{gap:5px}
+#dialogo .dlgCompacto .dlgCab b{font-size:13px}
+#dialogo .dlgCompacto #dlgCharla{flex:0 1 auto;min-height:0;max-height:20dvh;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;touch-action:pan-y;overscroll-behavior:contain;padding-right:4px;scrollbar-width:thin;scrollbar-color:var(--agua) #0a0f24;background:#0e1530;border:2px solid var(--borde);padding:6px 8px}
+#dialogo .dlgCompacto #dlgCharla::-webkit-scrollbar{width:9px}
+#dialogo .dlgCompacto #dlgCharla::-webkit-scrollbar-track{background:#0a0f24;border:1px solid var(--borde)}
+#dialogo .dlgCompacto #dlgCharla::-webkit-scrollbar-thumb{background:var(--agua);border:2px solid #0a0f24;border-radius:5px}
+#dialogo .dlgCompacto #dlgHistorial .dlgHistLinea{font-size:12px;color:var(--textoTenue);margin:0 0 4px}
+#dialogo .dlgCompacto #dlgHistorial .dlgHistLinea b{color:var(--textoFrio)}
+#dialogo .dlgCompacto #dlgTexto{min-height:20px;max-height:none;overflow:visible;font-size:13px}
+#dialogo .dlgCompacto #dlgRazon{font-size:10.5px;min-height:0;max-height:8dvh}
+#dlgSecciones{display:flex;gap:5px;flex-wrap:wrap}
+#dlgSecciones button{flex:1 1 auto;background:#0e1530;border:2px solid var(--borde);padding:6px 8px;font-size:12px;color:var(--textoTenue);box-shadow:0 3px 0 var(--sombra)}
+#dlgSecciones button:hover{border-color:var(--agua);color:var(--texto)}
+#dlgSecciones button.act{border-color:var(--agua);color:var(--texto);background:var(--superficie)}
+#dlgSecciones button:active{transform:translateY(3px);box-shadow:none}
+#dialogo .dlgCompacto #dlgOpciones{max-height:22dvh;gap:4px}
+#dialogo .dlgCompacto #dlgOpciones button{font-size:12px;padding:6px 8px}
+@media (max-width:720px){
+  #dialogo .dlgCaja.dlgCompacto{margin-bottom:calc(128px + env(safe-area-inset-bottom));width:min(460px,calc(100vw - 12px))}
+  #dialogo .dlgCompacto #dlgCara{width:48px;height:48px;flex:0 0 48px}
+  #dialogo .dlgCompacto #dlgCharla{max-height:17dvh}
+}

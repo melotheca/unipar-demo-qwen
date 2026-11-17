@@ -127,6 +127,20 @@
 #chipsTec{bottom:192px}
 #chipsYang{bottom:214px}
 #chipsProh{bottom:236px}
+/* EQUIPO (loadout): hasta 5 botones de técnica en fila sobre los controles, en el
+   orden elegido en Pausa → Ajustes → Equipo. Solo existen si están equipadas. */
+#equipoBtns{position:absolute;right:calc(14px + env(safe-area-inset-right));bottom:196px;display:flex;gap:6px;justify-content:flex-end;max-width:calc(100vw - 160px);pointer-events:auto;z-index:6}
+.boton.equipo{position:relative;width:48px;height:52px;border-radius:13px;flex:0 0 auto}
+.boton.equipo canvas{width:21px;height:21px}
+.boton.equipo .lbl{font-size:8px;white-space:nowrap;overflow:hidden;max-width:44px;text-overflow:ellipsis}
+.boton.equipo.encendido{filter:brightness(1.5);box-shadow:0 3px 0 var(--sombra),0 0 12px rgba(124,196,255,.7)}
+/* Insignia del elemento fijo (Pausa → Elemento activo): no es un botón, no se toca. */
+#simbolos .elemFijo{display:inline-flex;align-items:center;gap:8px;padding:4px 10px 4px 4px;border:2px solid var(--borde);border-radius:9px;background:var(--superficie)}
+#simbolos .elemFijo canvas{width:26px;height:26px}
+#simbolos .elemFijo b{font-size:13px;letter-spacing:1px}
+/* Filas del selector de equipo (Pausa → Ajustes). */
+.equipoFila .eqNum{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--rayo);color:#0b1020;font-size:11px;font-weight:700;margin-right:4px}
+.equipoFila .acts button[disabled]{opacity:.4;cursor:default}
 #chipsTec button,#chipsYang button,#chipsProh button{background:rgba(14,21,48,.88);border:1px solid var(--borde);border-radius:7px;color:var(--textoFrio);font-size:8.5px;padding:2px 5px;letter-spacing:.3px;text-transform:uppercase;position:relative;overflow:hidden}
 #chipsTec button.sel,#chipsYang button.sel{border-color:var(--rayo);color:var(--rayo)}
 #chipsProh button{border-color:#7a2436;color:#ff8a9c}

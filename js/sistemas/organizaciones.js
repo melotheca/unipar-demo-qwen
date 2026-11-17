@@ -64,7 +64,7 @@ U.Orgs = {
   ],
   nuevoEstado() {
     const base = () => ({ pistas: 0, descubierta: false, unido: false, detenida: false, mision: 0, spawned: false, emboscadas: 0 });
-    return { mano: base(), jade: base(), cole: base(), secreta: { poderExtra: 0, rumores: 0, frenadasVistas: 0 }, cd: 0 };
+    return { mano: base(), jade: base(), cole: base(), secreta: { poderExtra: 0, rumores: 0, frenadasVistas: 0 }, cd: 0, persecucion: { cd: 0, activos: 0, rastrear: null } };
   },
   asegurar() {
     const E = U.Juego.estado; if (!E) return null;
@@ -72,7 +72,65 @@ U.Orgs = {
     ['mano', 'jade', 'cole'].forEach(k => { if (!E.orgs[k]) E.orgs[k] = { pistas: 0, descubierta: false, unido: false, detenida: false, mision: 0, spawned: false, emboscadas: 0 }; });
     if (E.orgs.cd == null) E.orgs.cd = 0;
     if (!E.orgs.secreta) E.orgs.secreta = { poderExtra: 0, rumores: 0, frenadasVistas: 0 };
+    if (!E.orgs.persecucion) E.orgs.persecucion = { cd: 0, activos: 0, rastrear: null };
     return E.orgs;
+  },
+  asegurarPersecucion() { const O = this.asegurar(); if (!O) return null; if (!O.persecucion) O.persecucion = { cd: 0, activos: 0, rastrear: null }; const P = O.persecucion; if (P.cd == null) P.cd = 0; if (P.activos == null) P.activos = 0; return P; },
+  // FAMA = karma del pueblo actual (U.Economia.karma, −100…100). Decide cómo te trata
+  // la patrulla (y los círculos): alta → te cubren; baja → no se desvían por ti.
+  fama(E) { const e = E || U.Juego.estado; if (!e || !e.jugador || !U.Economia) return 0; return U.Economia.karma(e.jugador, U.Economia.puebloActual()); },
+  // ¿Llevas algo que los Coleccionistas quieran? Máscara PUESTA o artefacto contigo.
+  // La Llave del Sello NO entra aquí: ya tiene sus propios agentes (ver Reliquias).
+  llevaAlgoValioso(j) {
+    if (!U.Reliquias) return { valioso: false, puesta: null };
+    const r = U.Reliquias.asegurar(); if (!r) return { valioso: false, puesta: null };
+    const puesta = r.puesta || null;
+    const art = (r.artefactos || []).some(id => id !== 'llave');
+    return { valioso: !!(puesta || art), puesta };
+  },
+  // RASTREO de una máscara robada: { mascara, guaridaId, guaridaNombre }. La guarida
+  // de los Coleccionistas indicada la tiene su jefe como recompensa (ver Escondites).
+  persecucionRastrear() { const P = this.asegurarPersecucion(); return P ? P.rastrear : null; },
+  persecucionRastrearLimpiar() { const P = this.asegurarPersecucion(); if (P) P.rastrear = null; },
+  // SOLTAR LA MÁSCARA: la dejas caer, los perseguidores la toman y se van. La máscara
+  // deja de ser tuya: se recupera rastreándolos hasta su guarida (su jefe la guarda).
+  // Botón en la Mochila (Reliquias.accionMochila 'soltar' + htmlMochila).
+  soltarMascara() {
+    const E = U.Juego.estado, j = E.jugador; const r = U.Reliquias ? U.Reliquias.asegurar() : null;
+    if (!r || !r.puesta) return 'No llevas ninguna máscara puesta.';
+    const id = r.puesta; const d = U.Reliquias.MASCARAS[id];
+    r.puesta = null;
+    let ii; while ((ii = r.tenidas.indexOf(id)) >= 0) r.tenidas.splice(ii, 1);
+    const P = this.asegurarPersecucion();
+    const coleDefs = U.Escondites ? U.Escondites.DEFS.filter(x => x.org === 'cole') : [];
+    const g = coleDefs.length ? coleDefs[Math.floor(Math.random() * coleDefs.length)] : null;
+    if (P) P.rastrear = { mascara: id, guaridaId: g ? g.id : 'coleCueva', guaridaNombre: g ? g.nombre : 'Cueva del Tesoro' };
+    E.enemigos.filter(e => e.esPerseguidor).forEach(e => U.Combate.particulas(e.x, e.y - 0.5, 10, '#d9a441', 'humo'));
+    E.enemigos = E.enemigos.filter(e => !e.esPerseguidor);
+    this.retirarDefensores();
+    if (U.Guardado) U.Guardado.guardarAuto();
+    U.HUD.banner('🎭 SOLTASTE LA ' + d.nombre.toUpperCase(), 2.4); U.Audio.sfx('esquiva');
+    return 'Dejas caer la ' + d.nombre + ' al suelo: un Coleccionista la recoge con una reverencia burlona y todos se retiran. Ya no te persiguen… pero la máscara es suya ahora. Si la quieres de vuelta, tendrás que RASTREARLOS hasta su guarida (' + (g ? g.nombre : 'una guarida de los Coleccionistas') + '): su jefe la guarda como recompensa.';
+  },
+  // Al DESPERTAR tras una derrota (parche en main.js, despertar(), PRIMERA línea,
+  // antes de limpiar enemigos): si te derrotaron los perseguidores, despiertas SIN
+  // la máscara: se la llevaron a su guarida y se recupera como recompensa de jefe.
+  // PARCHE (main.js, despertar()):  despertar() { const E = this.estado, j = E.jugador; if (U.Orgs) U.Orgs.alDespertar(); ...
+  alDespertar() {
+    const E = U.Juego.estado; if (!E || !E.jugador) return;
+    const habiaPers = E.enemigos.some(e => e.esPerseguidor && e.vida > 0);
+    if (!habiaPers) return;
+    const r = U.Reliquias ? U.Reliquias.asegurar() : null;
+    if (!r || !r.puesta) return;
+    const id = r.puesta; const d = U.Reliquias.MASCARAS[id];
+    r.puesta = null;
+    let ii; while ((ii = r.tenidas.indexOf(id)) >= 0) r.tenidas.splice(ii, 1);
+    const P = this.asegurarPersecucion();
+    const coleDefs = U.Escondites ? U.Escondites.DEFS.filter(x => x.org === 'cole') : [];
+    const g = coleDefs.length ? coleDefs[Math.floor(Math.random() * coleDefs.length)] : null;
+    if (P) P.rastrear = { mascara: id, guaridaId: g ? g.id : 'coleCueva', guaridaNombre: g ? g.nombre : 'Cueva del Tesoro' };
+    U.HUD.toast('🎭 Te derrotaron y los Coleccionistas se llevaron tu ' + d.nombre + '. Despiertas sin ella: la recuperas rastreándolos hasta su guarida (' + (g ? g.nombre : 'una guarida de los Coleccionistas') + '), donde su jefe la guarda como recompensa.', 'peligro');
+    if (U.Guardado) U.Guardado.guardarAuto();
   },
   de(org) { const O = this.asegurar(); return O ? O[org] : null; },
   objetivoDe(org) { const E = U.Juego.estado; return E && E.objetivos ? E.objetivos.find(o => o.orgId === org) : null; },
@@ -256,7 +314,111 @@ U.Orgs = {
     if (e.esOrg === 'coleMascara' && U.Reliquias) U.Reliquias.coleccionistaCaido(); // emboscada por tu máscara: al caer todos, puede que llevaran un artefacto robado
     if (e.esOrg === 'coleProhibida' && U.Prohibidas) U.Prohibidas.coleccionistaCaido(); // emboscada por tu pergamino prohibido
     if (e.esOrg === 'escondite' && U.Escondites) U.Escondites.guardiaCaido(e);
+    if (e.esOrg === 'guarida' && U.Escondites) U.Escondites.enemigoCaido(e); // interior de guarida: guardia del túnel o jefe
+    if (e.esPerseguidor) { // perseguidor por tu máscara/artefacto: si no queda ninguno, la patrulla se retira
+      const E2 = U.Juego.estado;
+      if (!E2.enemigos.some(x => x.vida > 0 && x.esPerseguidor)) { const P = this.asegurarPersecucion(); if (P) P.activos = 0; this.retirarDefensores(); U.HUD.toast('Los perseguidores cayeron. Por ahora: mientras lleves la máscara, volverán.', 'exito'); }
+    }
+    if (e.esDefensor) return; // un patrullero caído no dispara nada más
     if (e.esOrg === 'selloAgente') U.HUD.toast('El agente sin nombre cae susurrando: «La llave… no es tuya…» La organización que no tiene nombre ya sabe que la tienes.', 'aviso');
+  },
+  // ---------- D. PERSECUCIÓN POR MÁSCARA / ARTEFACTO ----------
+  // Mientras lleves una máscara puesta o un artefacto contigo, en el BOSQUE (zonas
+  // salvajes) siguen apareciendo perseguidores nuevos (Coleccionistas). En un PUEBLO
+  // NO aparecen nuevos, pero los actuales te siguen adentro — y ahí entra la patrulla.
+  // Los perseguidores llevan e.esPerseguidor = true y NUNCA esArena (el hotfix de
+  // arena no los toca: cancelarArena solo borra esArena). Su movimiento lo lleva el
+  // combate normal (persiguen al jugador); solo la PAUSA de arena y los defensores
+  // se gestionan aquí, con stun: actualizarEnemigos salta a los aturdidos.
+  tickPersecucion(dt) {
+    const E = U.Juego.estado; if (!E || !E.jugador || E.mapaId !== 'aldea' || E.ui !== 'mundo' || !U.Reliquias) return;
+    const P = this.asegurarPersecucion(); if (!P) return;
+    const j = E.jugador;
+    P.cd = Math.max(0, (P.cd || 0) - dt);
+    const pers = E.enemigos.filter(e => e.vida > 0 && e.esPerseguidor);
+    // ARENA: los perseguidores NO entran al círculo (E.mapa.arena: x, y, r). Cuando el
+    // jugador está dentro del círculo (o la arena está activa), la persecución se
+    // PAUSA: esperan en el borde del círculo. Al salir, se REANUDA.
+    const A = E.mapa.arena;
+    const dj = A ? Math.hypot(j.x - (A.x + 0.5), j.y - (A.y + 0.5)) : 1e9;
+    const enArena = (E.arena && E.arena.activa) || (A && dj <= A.r + 1);
+    if (enArena && pers.length) {
+      pers.forEach(e => {
+        const ang = Math.atan2(e.y - (A.y + 0.5), e.x - (A.x + 0.5));
+        // Borde del círculo: r+0.8 (justo fuera de las baldosas de arena, sin tener que
+        // cruzar la reja — la reja está en d (r, r+1.2] —: quedan pegados a la valla).
+        const bx = A.x + 0.5 + Math.cos(ang) * (A.r + 0.8), by = A.y + 0.5 + Math.sin(ang) * (A.r + 0.8);
+        const d = Math.hypot(bx - e.x, by - e.y);
+        if (d > 0.6) { U.Grid.mover(E.mapa, e, (bx - e.x) / d * 2.6 * dt, (by - e.y) / d * 2.6 * dt); e.moviendo = true; }
+        else e.moviendo = false;
+        e.efectos.stun = 0.5; e.esperaArena = true; // pausado: actualizarEnemigos lo salta este cuadro
+      });
+      return; // en pausa no aparece nadie nuevo
+    }
+    pers.forEach(e => { if (e.esperaArena) { e.esperaArena = false; e.efectos.stun = 0; } }); // REANUDA al salir de la arena
+    const salvaje = U.Reliquias.esSalvaje(E);
+    const v = this.llevaAlgoValioso(j);
+    // NUEVOS perseguidores: solo en zonas salvajes, solo si llevas algo valioso.
+    if (salvaje && v.valioso && P.cd <= 0 && pers.length < 3 && !E.torneo && !E.reto && (pers.length > 0 || !E.enCombate)) {
+      P.cd = 150 + Math.random() * 90;
+      const n = pers.length === 0 ? 2 : 1;
+      for (let i = 0; i < n; i++) {
+        const c = U.Reliquias.celdaLibre(E.mapa, Math.floor(j.x) + (i === 0 ? 4 : -4), Math.floor(j.y) + (i === 0 ? 1 : -1));
+        const e = U.Combate.crearEnemigo(i === 0 ? 'veterano' : 'bandido', c.x + 0.5, c.y + 0.5, E.dificultad * 1.1);
+        e.nombre = 'Coleccionista · persigue tu ' + (v.puesta ? U.Reliquias.MASCARAS[v.puesta].nombre : 'artefacto');
+        e.esOrg = 'colePerseguidor'; e.esPerseguidor = true; // NUNCA esArena
+        E.enemigos.push(e); U.Combate.particulas(e.x, e.y - 0.5, 12, '#d9a441', 'humo');
+      }
+      P.activos = pers.length + n;
+      U.HUD.banner('🎭 ¡LOS COLECCIONISTAS TE SIGUEN! · QUIEREN LO QUE LLEVAS', 3);
+      U.HUD.toast('Mientras lleves puesta la máscara (o un artefacto) seguirán apareciendo perseguidores nuevos en las zonas salvajes. En los pueblos no aparecen nuevos, pero los que ya te siguen entran contigo. Puedes SOLTAR la máscara desde la Mochila y se irán con ella… o rastrearlos hasta su guarida si te la quitan.', 'peligro');
+      U.Audio.sfx('oleada');
+    }
+    // PUEBLO: no aparecen nuevos, pero los actuales te siguen adentro → patrulla.
+    if (!salvaje && pers.length) this.tickDefensores(dt, pers);
+    else if (!pers.length) this.retirarDefensores();
+  },
+  // PATRULLA EN EL PUEBLO: defienden por DEBER (son de servicio), no por ti.
+  // Novato/Patrullero siempre; Oficial si son 3+; Élite si es grave (4+). El LÍDER
+  // NO aparece por una persecución personal de máscara. La FAMA decide cómo te
+  // tratan A TI: alta (≥20) → pelean a tu lado y te cubren; baja → pelean contra los
+  // intrusos pero no se desvían por ti (solo plantan cara si el intruso se acerca).
+  // Los defensores son E.enemigos con esDefensor: actualizarEnemigos los salta por
+  // stun (se lo refresco cada cuadro) y su movimiento/ataque los llevo yo aquí, así
+  // que NO hace falta tocar combate.js para ellos.
+  tickDefensores(dt, pers) {
+    const E = U.Juego.estado, j = E.jugador;
+    let defs = E.enemigos.filter(e => e.vida > 0 && e.esDefensor);
+    const fama = this.fama(E);
+    const quiero = pers.length >= 4 ? ['novato', 'patrullero', 'oficial', 'elite'] : pers.length >= 3 ? ['novato', 'patrullero', 'oficial'] : ['novato', 'patrullero'];
+    quiero.forEach((rango, i) => {
+      if (defs.some(d => d.rangoPatrulla === rango)) return;
+      const c = U.Reliquias.celdaLibre(E.mapa, Math.floor(j.x) + (i % 2 ? 3 : -3), Math.floor(j.y) + (i < 2 ? 2 : -2));
+      const e = U.Combate.crearEnemigo(rango === 'novato' ? 'bandido' : 'veterano', c.x + 0.5, c.y + 0.5, E.dificultad * (rango === 'elite' ? 1.5 : rango === 'oficial' ? 1.25 : 1.05));
+      e.nombre = 'Patrullero · ' + rango[0].toUpperCase() + rango.slice(1) + ' de servicio'; e.esDefensor = true; e.rangoPatrulla = rango; e.esOrg = 'defensor';
+      E.enemigos.push(e); U.Combate.particulas(e.x, e.y - 0.5, 10, '#7cc4ff', 'humo');
+      defs.push(e);
+      U.HUD.toast('🛡 La patrulla de servicio sale a defender el pueblo: un ' + rango + ' se planta contra los intrusos. (Por deber, no por ti.)', 'aviso');
+    });
+    defs.forEach(d => {
+      d.efectos.stun = 0.5; // actualizarEnemigos lo salta: me encargo yo de moverlo y de que pegue
+      let presa = null;
+      if (fama >= 20) presa = pers.slice().sort((a, b) => U.Grid.dist(a, j) - U.Grid.dist(b, j))[0]; // fama alta: cubren al jugador
+      else presa = pers.slice().sort((a, b) => U.Grid.dist(a, d) - U.Grid.dist(b, d))[0];
+      if (!presa) { d.moviendo = false; return; }
+      if (fama < 20 && U.Grid.dist(presa, j) > 8) { d.moviendo = false; return; } // fama baja: no se desvían por ti
+      const distP = U.Grid.dist(presa, d);
+      if (distP > 1.6) { const dx = presa.x - d.x, dy = presa.y - d.y, dd = distP || 0.001; U.Grid.mover(E.mapa, d, dx / dd * 2.6 * dt, dy / dd * 2.6 * dt); d.moviendo = true; }
+      else { d.moviendo = false; d.cd = Math.max(0, (d.cd || 0) - dt); if (d.cd <= 0) { d.cd = 1.4; U.Combate.dañoEnemigo(presa, Math.max(4, d.stats.ataque), null, { desafio: 0.5 }); U.Combate.particulas(presa.x, presa.y - 0.6, 6, '#7cc4ff', 'chispa'); } }
+    });
+  },
+  retirarDefensores() {
+    const E = U.Juego.estado; if (!E) return;
+    const defs = E.enemigos.filter(e => e.esDefensor);
+    if (!defs.length) return;
+    defs.forEach(d => U.Combate.particulas(d.x, d.y - 0.5, 8, '#7cc4ff', 'humo'));
+    E.enemigos = E.enemigos.filter(e => !e.esDefensor);
+    U.HUD.toast('La patrulla se retira: ya no hay intrusos en el pueblo.', '');
   },
   tick(dt) {
     const E = U.Juego.estado; if (!E || !E.jugador) return;
@@ -305,6 +467,9 @@ U.Orgs = {
         U.HUD.toast('Es pesada, vieja y brilla con luz antigua. Tú decides: VÉNDELA a Petra en Arcana (150 🪙, sin preguntas) o DEVUÉLVELA con Vera en la Metrópolis (recompensa y karma). Nadie te obliga: es tu objetivo, tu elección.', 'aviso');
       }
     }
+    // PERSECUCIÓN POR MÁSCARA / ARTEFACTO: nuevos perseguidores en zonas salvajes,
+    // pausa en la arena, patrulla de servicio en los pueblos (ver tickPersecucion).
+    this.tickPersecucion(dt);
     // Objetivos de organización: se cumplen al detenerla, unirte o resolver su trama.
     ['mano', 'jade', 'cole'].forEach(org => {
       const o = O[org]; const ob = this.objetivoDe(org);

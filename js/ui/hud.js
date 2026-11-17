@@ -22,7 +22,11 @@ U.HUD = {
     const press = (btn, down, up) => { btn.addEventListener('pointerdown', e => { const E = U.Juego.estado; if (E && E.reloj && E.reloj.durmiendo) return; e.preventDefault(); btn.setPointerCapture(e.pointerId); btn.classList.add('presionado'); down(); }); const rel = e => { btn.classList.remove('presionado'); if (up) up(); }; btn.addEventListener('pointerup', rel); btn.addEventListener('pointercancel', rel); btn.addEventListener('contextmenu', e => e.preventDefault()); };
     press(this.el.btnA, () => U.Juego.pressA(), () => U.Juego.releaseA());
     press(this.el.btnYin, () => U.Combate.iniciarCarga(), () => U.Combate.soltarYin());
-    press(this.el.btnYang, () => U.Combate.yang()); press(this.el.btnTec, () => U.Combate.tecnica()); press(this.el.btnDash, () => U.Combate.dash()); press(this.el.btnSobre, () => U.Combate.sobrecarga()); if (this.el.btnEscudo) press(this.el.btnEscudo, () => U.Combate.toggleEscudo()); if (this.el.btnAgua) press(this.el.btnAgua, () => U.Juego.toggleCaminarAgua()); if (this.el.btnProh) { U.Render.iconoSuave(this.el.btnProh.querySelector('canvas'), 'yang', '#ff8a9c'); press(this.el.btnProh, () => { if (U.Prohibidas) U.Prohibidas.usarSeleccionada(); }); }
+    press(this.el.btnYang, () => U.Combate.yang()); press(this.el.btnTec, () => U.Combate.ataqueBasico()); press(this.el.btnDash, () => U.Combate.dash()); press(this.el.btnSobre, () => U.Combate.sobrecarga()); if (this.el.btnEscudo) press(this.el.btnEscudo, () => U.Combate.toggleEscudo()); if (this.el.btnAgua) press(this.el.btnAgua, () => U.Juego.toggleCaminarAgua()); if (this.el.btnProh) { U.Render.iconoSuave(this.el.btnProh.querySelector('canvas'), 'yang', '#ff8a9c'); press(this.el.btnProh, () => { if (U.Prohibidas) U.Prohibidas.usarSeleccionada(); }); }
+    // EQUIPO: los botones fijos de Yang y Escudo ya no se usan — sus técnicas viven
+    // en el equipo y sus botones se crean aquí (refrescarEquipo), solo si equipadas.
+    this.el.btnYang.classList.add('oculto'); if (this.el.btnEscudo) this.el.btnEscudo.classList.add('oculto');
+    { const cont = $('controles'); const eq = document.createElement('div'); eq.id = 'equipoBtns'; eq.setAttribute('aria-label', 'Técnicas equipadas'); cont.appendChild(eq); this.el.equipoBtns = eq; this._firmaEquipo = null; }
     // Joystick analógico
     const jz = $('joystick'), knob = $('joyKnob');
     const move = e => { if (!this.joy.activo || e.pointerId !== this.joy.id) return; let dx = e.clientX - this.joy.cx, dy = e.clientY - this.joy.cy; const d = Math.hypot(dx, dy); const max = this.joy.r; if (d > max) { dx = dx / d * max; dy = dy / d * max; } knob.style.transform = 'translate(' + dx + 'px,' + dy + 'px)'; const mag = Math.min(1, d / max); const I = U.Juego.input; if (mag < 0.15) { I.vx = 0; I.vy = 0; I.mag = 0; } else { const v = U.Grid.dir8(dx, dy); I.vx = v.x; I.vy = v.y; I.mag = mag; } I.joy = true; };
@@ -33,19 +37,81 @@ U.HUD = {
     document.addEventListener('contextmenu', e => { if (e.target.closest('#controles')) e.preventDefault(); });
   },
   mostrar() { this.el.hud.classList.remove('oculto'); },
+  // Tu elemento es FIJO (lo definió el test): ya no hay botones para cambiarlo.
+  // Aquí solo queda la insignia de tu elemento principal, sin acción.
   refrescarSimbolos() {
     const j = U.Juego.estado.jugador; const c = this.el.simbolos; c.innerHTML = '';
-    j.elementos.forEach(id => { const b = document.createElement('button'); b.title = 'Cambiar a ' + U.Elementos.nombre(id); b.className = id === j.elementoActivo ? 'activo' : ''; b.setAttribute('aria-label', U.Elementos.nombre(id)); const cv = document.createElement('canvas'); cv.width = 57; cv.height = 57; U.Render.iconoSuave(cv, id); b.appendChild(cv); b.addEventListener('click', () => U.Combate.cambiarElemento(id)); c.appendChild(b); });
+    const el = j.elemento || j.elementoActivo;
+    const insignia = document.createElement('span'); insignia.className = 'elemFijo'; insignia.title = 'Tu elemento: ' + U.Elementos.nombre(el) + ' (lo definió el test; no cambia en esta vida). Tu aura y tu escudo son de este elemento.';
+    const cv = document.createElement('canvas'); cv.width = 57; cv.height = 57; U.Render.iconoSuave(cv, el); insignia.appendChild(cv);
+    const nom = document.createElement('b'); nom.textContent = U.Elementos.nombre(el); insignia.appendChild(nom); c.appendChild(insignia);
+    const caja = document.querySelector('#ajusteElemento .ajusteElemCaja');
+    if (caja) { const h3 = caja.querySelector('h3'); if (h3) h3.textContent = 'Tu elemento'; const p = caja.querySelector('p'); if (p) p.textContent = 'Lo definió el test y no cambia en esta vida. Lo que sí cambia es tu EQUIPO: en Pausa → Ajustes → Equipo eliges hasta 5 técnicas dominadas, mezclando elementos.'; }
     U.Render.iconoSuave(this.el.btnTec.querySelector('canvas'), j.elementoActivo); this.el.btnTec.style.borderColor = U.Elementos.color(j.elementoActivo);
+    this.refrescarEquipo();
+  },
+  // Botones del EQUIPO (hasta 5, en el orden elegido): un botón aparece SOLO si la
+  // técnica está dominada Y equipada. Puño (Yin) y básico (TÉC) son fijos y no van aquí.
+  refrescarEquipo() {
+    const j = U.Juego.estado && U.Juego.estado.jugador; const cont = this.el.equipoBtns; if (!j || !cont) return;
+    const eq = U.Habilidades.equipoDetalles(j);
+    const firma = eq.map(t => t.id).join('|');
+    if (this._firmaEquipo === firma) return; this._firmaEquipo = firma;
+    cont.innerHTML = '';
+    eq.forEach((t, i) => {
+      const b = document.createElement('button'); b.className = 'boton equipo'; b.dataset.tec = t.id;
+      b.style.borderColor = t.kind === 'yang' ? '#f8fafc' : t.kind === 'escudo' ? U.Combate.escudoColor(j) : U.Elementos.color(t.elemento);
+      b.title = t.nombre + ' (' + (i + 1) + ') · ' + t.desc + (t.costo != null ? ' · Costo ' + t.costo + ' Esencia' : '') + (t.cd ? ' · CD ' + t.cd + 's' : '');
+      const cv = document.createElement('canvas'); cv.width = 72; cv.height = 72;
+      const icono = t.kind === 'yang' ? 'yang' : t.kind === 'escudo' ? (U.Combate.escudoTipo(j) === 'yang' ? 'yang' : U.Combate.escudoTipo(j)) : t.elemento;
+      U.Render.iconoSuave(cv, icono, t.kind === 'yang' ? '#f8fafc' : t.kind === 'escudo' ? U.Combate.escudoColor(j) : U.Elementos.color(t.elemento));
+      b.appendChild(cv);
+      const lbl = document.createElement('span'); lbl.className = 'lbl'; lbl.textContent = (i + 1) + ' · ' + t.nombre.split(' ')[0].toUpperCase(); b.appendChild(lbl);
+      const cd = document.createElement('i'); cd.className = 'cd'; b.appendChild(cd);
+      b.addEventListener('pointerdown', e => { e.preventDefault(); b.classList.add('presionado'); U.Combate.usarEquipo(t.id); });
+      b.addEventListener('pointerup', () => b.classList.remove('presionado'));
+      b.addEventListener('pointercancel', () => b.classList.remove('presionado'));
+      b.addEventListener('contextmenu', e => e.preventDefault());
+      cont.appendChild(b);
+    });
+  },
+  // Selector del equipo (Pausa → Ajustes): todas las técnicas DOMINADAS, de TODOS
+  // tus elementos (el equipo puede mezclarlos), en orden, hasta 5.
+  htmlEquipo() {
+    const j = U.Juego.estado.jugador; const dom = U.Habilidades.dominadas(j); const eq = U.Habilidades.asegurarEquipo(j);
+    let h = '<section><h3>🎒 Equipo · hasta 5 técnicas (en orden)</h3>'
+      + '<div style="font-size:12px;color:var(--texto)">Tu elemento es fijo (el del test), pero tu equipo MEZCLA elementos: aquí van todas las técnicas que ya DOMINASTE, de todos tus elementos, más las formas Yang y el Escudo. El HUD muestra solo las equipadas, en este orden (teclas 1-5). Cambiar el equipo se hace aquí, en pausa, con calma.</div>'
+      + '<div style="font-size:12px;margin-top:4px">Llevas <b>' + eq.length + '/5</b> equipadas.' + (eq.length >= 5 ? ' Equipo lleno: quita una para meter otra.' : '') + '</div>';
+    if (!dom.length) h += '<div style="font-size:12px;color:var(--textoFrio);margin-top:6px">Aún no dominas ninguna técnica. Golpea con Yin en combate para subir la maestría de tu elemento: al 15% podrás aprender la primera de un Guía, por tarea. Mientras, tienes el puño y el ataque básico de tu elemento.</div>';
+    const grupo = (titulo, lista) => {
+      if (!lista.length) return '';
+      let s = '<div style="font-size:11px;letter-spacing:1px;color:var(--rayo);margin:10px 0 4px">' + titulo + '</div>';
+      lista.forEach(t => {
+        const pos = eq.indexOf(t.id);
+        const enEq = pos >= 0;
+        s += '<div class="mochilaItem equipoFila"><span>' + (enEq ? '<b class="eqNum">' + (pos + 1) + '</b> ' : '') + '<b>' + this.escHtml(t.nombre) + '</b> <small style="color:var(--textoFrio)">' + this.escHtml(t.desc) + ' · Costo ' + t.costo + (t.cd ? ' · CD ' + t.cd + 's' : '') + (t.umbral ? ' · requiere ' + t.umbral + '%' : '') + '</small></span><span class="acts">'
+          + (enEq
+            ? '<button class="mini" data-eq-up="' + t.id + '" title="Subir un hueco (antes en el HUD)">▲</button><button class="mini" data-eq-down="' + t.id + '" title="Bajar un hueco (después en el HUD)">▼</button><button class="mini peligro" data-eq-del="' + t.id + '">QUITAR</button>'
+            : '<button class="mini exito" data-eq-add="' + t.id + '"' + (eq.length >= 5 ? ' disabled title="Equipo lleno (máx. 5): quita una primero"' : '') + '>EQUIPAR</button>')
+          + '</span></div>';
+      });
+      return s;
+    };
+    (j.elementos || [j.elementoActivo]).forEach(el => { h += grupo(U.Elementos.nombre(el) + ' · ' + Math.floor(j.maestria[el] || 0) + '%', dom.filter(t => t.kind === 'elemento' && t.elemento === el)); });
+    h += grupo('Yang · estilo ' + Math.floor(j.estilos.yang || 0), dom.filter(t => t.kind === 'yang'));
+    h += grupo('Escudo · Nv.' + (j.escudoNv || 1), dom.filter(t => t.kind === 'escudo'));
+    h += '</section>';
+    return h;
   },
   refrescarChips() {
     const j = U.Juego.estado.jugador;
-    // Yang: el botón y sus chips aparecen al DESPERTAR el estilo (afinidad del test, o entrenando hasta el umbral).
-    this.el.btnYang.classList.toggle('oculto', !j.tieneYang); this.el.chipsYang.classList.toggle('oculto', !j.tieneYang);
-    const ct = this.el.chipsTec; ct.innerHTML = '';
-    U.Habilidades.elementos[j.elementoActivo].forEach((h, i) => { const b = document.createElement('button'); const lock = (j.maestria[j.elementoActivo] || 0) < h.umbral; b.className = (i === j.tecnicaIdx ? 'sel ' : '') + (lock ? 'lock' : ''); b.textContent = lock ? h.nombre.split(' ')[0] + ' ' + h.umbral + '%' : h.nombre; b.title = h.desc + ' · Alcance con tu maestría (' + Math.floor(j.maestria[j.elementoActivo] || 0) + '%): ' + (U.Combate.alcanceElemental ? U.Combate.alcanceElemental(j) : 1) + ' celdas · el daño elemental cae de 100% a 1 celda a 80% en la última celda · Costo base ' + h.costo + ' · CD ' + h.cd + 's'; const cd = document.createElement('i'); b.appendChild(cd); b.addEventListener('click', () => U.Combate.seleccionarTec(i)); ct.appendChild(b); });
-    const cy = this.el.chipsYang; cy.innerHTML = '';
-    U.Habilidades.yangOrden.forEach(k => { const h = U.Habilidades.yang[k]; const b = document.createElement('button'); const lock = j.estilos.yang < h.umbral; b.className = (k === j.yangForma ? 'sel ' : '') + (lock ? 'lock' : ''); b.textContent = lock ? h.nombre + ' Y' + h.umbral : h.nombre; b.title = h.desc + ' · ' + h.costo + ' Esencia'; b.addEventListener('click', () => U.Combate.seleccionarYang(k)); cy.appendChild(b); });
+    // Los botones fijos Yang/Escudo NO se muestran: sus técnicas viven en el equipo.
+    this.el.btnYang.classList.add('oculto'); if (this.el.btnEscudo) this.el.btnEscudo.classList.add('oculto');
+    // Las chips selectoras (técnica del elemento / forma Yang) desaparecen: el HUD
+    // ya no selecciona, USA el equipo. Solo quedan las PROHIBIDAS (otro sistema).
+    this.el.chipsTec.innerHTML = ''; this.el.chipsTec.classList.add('oculto');
+    this.el.chipsYang.innerHTML = ''; this.el.chipsYang.classList.add('oculto');
+    this.refrescarEquipo();
     // Técnicas PROHIBIDAS: chips rojos + botón PROH, solo visibles si ya aprendiste alguna.
     if (this.el.chipsProh && U.Prohibidas) { const cp = this.el.chipsProh; cp.innerHTML = ''; const pp = U.Prohibidas.asegurar(); const aps = pp ? pp.aprendidas : [];
       cp.classList.toggle('oculto', !aps.length); if (this.el.btnProh) this.el.btnProh.classList.toggle('oculto', !aps.length);
@@ -53,6 +119,76 @@ U.HUD = {
       if (this.el.btnProh && j.prohibidaSel && U.Prohibidas.DEFS[j.prohibidaSel]) this.el.btnProh.title = '💀 ' + U.Prohibidas.DEFS[j.prohibidaSel].nombre + ' (G) · ⚠ PROHIBIDA: ' + U.Prohibidas.DEFS[j.prohibidaSel].consecuencia;
     }
     this.el.btnSobre.classList.toggle('oculto', j.estilos.yin < U.Habilidades.yin.sobrecarga.umbral);
+  },
+  // ---- NIEBLA DE GUERRA + GUARIDAS ----
+  // En guarida no hay minimapa ni mapa completo: el jugador no conoce el lugar.
+  // E.enGuarida lo pondrá el sistema de guaridas; mientras no exista, vale la
+  // regla de respaldo: solo 'aldea' (continente), 'casa' y 'oficina' tienen mapa.
+  enGuarida(E) {
+    E = E || (U.Juego.estado || null); if (!E) return false;
+    if (E.enGuarida) return true;
+    if (typeof E.mapaId === 'string' && E.mapaId.indexOf('guarida') === 0) return true;
+    return ['aldea', 'casa', 'oficina'].indexOf(E.mapaId) < 0;
+  },
+  // Registro de lo explorado: bloques gruesos de 8×8 celdas (un continente de
+  // 440×400 son 55×50 = 2750 bloques como mucho; en la práctica, pocos cientos).
+  // E.explorado = { bloques: { "bx,by": 1 }, zonas: [ids revelados] }.
+  // Bruma y alrededores nacen revelados (ahí vive el jugador): al crear el registro
+  // se marca un radio de 18 celdas alrededor del inicio del continente.
+  EXPLORA_BLOQUE: 8, EXPLORA_RADIO: 12,
+  asegurarExplorado(E) {
+    if (!E.explorado) {
+      E.explorado = { bloques: {}, zonas: [] };
+      const ini = (E.mapas && E.mapas.aldea && E.mapas.aldea.inicio) || (E.mapaId === 'aldea' && E.mapa && E.mapa.inicio) || null;
+      if (ini) this._marcarExplorado(E, ini.x, ini.y, 18);
+    }
+    return E.explorado;
+  },
+  _marcarExplorado(E, x, y, radio) {
+    const ex = this.asegurarExplorado(E); const B = this.EXPLORA_BLOQUE;
+    const r = Math.ceil(radio / B);
+    const bx = Math.floor(x / B), by = Math.floor(y / B);
+    for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) {
+      if (dx * dx + dy * dy > r * r + r) continue;
+      ex.bloques[(bx + dx) + ',' + (by + dy)] = 1;
+    }
+  },
+  registrarExplorado(E) {
+    if (!E || !E.jugador || E.mapaId !== 'aldea') return; // solo el continente tiene niebla; casa/oficina son interiores conocidos
+    this._marcarExplorado(E, E.jugador.x, E.jugador.y, this.EXPLORA_RADIO);
+  },
+  bloqueExplorado(E, x, y) {
+    if (!E || !E.explorado) return false;
+    const B = this.EXPLORA_BLOQUE;
+    if (E.explorado.bloques[Math.floor(x / B) + ',' + Math.floor(y / B)]) return true;
+    // Una zona revelada por rumor revela su rectángulo entero (ver mapa.zonas).
+    const m = (E.mapas && E.mapas.aldea) || E.mapa;
+    if (m && m.zonas) {
+      for (let i = 0; i < E.explorado.zonas.length; i++) {
+        const z = m.zonas.find(zz => zz.id === E.explorado.zonas[i]);
+        if (z && x >= z.x && x < z.x + z.w && y >= z.y && y < z.y + z.h) return true;
+      }
+    }
+    return false;
+  },
+  // Revelar una zona/pueblo en el mapa SIN visitarlo (para el sistema de rumores).
+  // id: id de mapa.zonas ('metropolis', 'vueloAlto', 'chispaAlta', 'arcana',
+  // 'raizPiedra', 'puebloAgua', 'puebloFuego', 'altoPino', 'rocafirme',
+  // 'tresCruces', 'salina', 'vegaBaja', 'brasaChica', 'lagoEste', 'rioEste',
+  // 'lagunaSerena', 'quemadaSur') o clave de mapa.pueblos ('bruma', 'metropolis',
+  // 'puerto', 'ceniza', 'raiz', 'vuelo', 'chispa', 'arcana'). Devuelve true si
+  // el id existe en el mapa; si no existe, igual se guarda (por si el mapa aún
+  // no está cargado) y devuelve false. Uso: U.HUD.revelarZona('metropolis').
+  revelarZona(id) {
+    const E = U.Juego.estado; if (!E || !id) return false;
+    const ex = this.asegurarExplorado(E);
+    if (ex.zonas.indexOf(id) < 0) ex.zonas.push(id);
+    const m = (E.mapas && E.mapas.aldea) || E.mapa;
+    let existe = false;
+    if (m && m.zonas && m.zonas.some(z => z.id === id)) existe = true;
+    if (m && m.pueblos && m.pueblos[id]) { existe = true; const p = m.pueblos[id]; this._marcarExplorado(E, p.x, p.y, 16); }
+    if (U.Guardado) U.Guardado.guardarAuto();
+    return existe;
   },
   toggleInfo() { if ((U.Juego.estado && U.Juego.estado.enCombate) || (this.el.hud && this.el.hud.classList.contains('enCombate'))) return; const abierto = this.el.infoDetalle.classList.toggle('oculto') === false; this.el.btnInfo.classList.toggle('abierto', abierto); this.el.btnInfo.setAttribute('aria-expanded', String(abierto)); if (abierto && !this.el.objDetalle.classList.contains('oculto')) { this.el.objDetalle.classList.add('oculto'); this.el.btnObj.classList.remove('abierto'); this.el.btnObj.setAttribute('aria-expanded', 'false'); } },
   toggleObjetivo() { if ((U.Juego.estado && U.Juego.estado.enCombate) || (this.el.hud && this.el.hud.classList.contains('enCombate'))) return; const abierto = this.el.objDetalle.classList.toggle('oculto') === false; this.el.btnObj.classList.toggle('abierto', abierto); this.el.btnObj.setAttribute('aria-expanded', String(abierto)); if (abierto) { this.refrescarObjetivoDetalle(); if (this.el.infoDetalle && !this.el.infoDetalle.classList.contains('oculto')) { this.el.infoDetalle.classList.add('oculto'); this.el.btnInfo.classList.remove('abierto'); this.el.btnInfo.setAttribute('aria-expanded', 'false'); } } },
@@ -70,16 +206,16 @@ U.HUD = {
     el.agotado.classList.toggle('oculto', !j.agotado);
     this.tNum += dt; if (this.tNum > 0.1) { this.tNum = 0;
       el.numVida.textContent = Math.ceil(j.vida) + '/' + Math.round(j.stats.vida); el.numEsencia.textContent = (Math.round(j.esencia * 10) / 10) + '/' + Math.round(U.Reliquias ? U.Reliquias.esenciaMax(j) : j.stats.esencia);
-      j.pociones = (j.bolsaPociones || []).length; el.pocion.textContent = '🧪 ×' + j.pociones; el.pocion.disabled = j.pociones <= 0; const nm = document.getElementById('numMonedas'); if (nm) nm.textContent = Math.floor(j.monedas || 0); const mh = document.getElementById('mascaraHud'); if (mh) { const pid = j.reliquias && j.reliquias.puesta; mh.classList.toggle('oculto', !pid); if (pid && U.Reliquias && U.Reliquias.MASCARAS[pid]) { const mt = document.getElementById('mascaraHudTxt'); if (mt) mt.textContent = U.Reliquias.MASCARAS[pid].nombre; mh.style.borderColor = U.Reliquias.MASCARAS[pid].color; } } if (el.btnEscudo) { el.btnEscudo.classList.toggle('apagado', !j.escudoAprendido || (!j.escudo && (j.agotado || j.esencia < 10))); el.btnEscudo.style.filter = j.escudo ? 'brightness(1.5)' : ''; el.btnEscudo.style.borderColor = j.escudoAprendido ? U.Combate.escudoColor(j) : '#7cc4ff'; el.btnEscudo.title = j.escudoAprendido ? U.Combate.escudoNombre(j) + ' (B) · Nv.' + (j.escudoNv || 1) + ' (' + U.Habilidades.escudo.niveles[j.escudoNv || 1].nombre + ') · integridad ' + Math.max(0, Math.round(j.escudoVida || 0)) + '/' + U.Combate.escudoMax(j) + ' · no te mueves, drena Esencia/s' : 'Escudo (B): aún no lo conoces. Es una técnica: Kaelen, el guardia, puede enseñártela.'; }
-      const h = U.Habilidades.elementos[j.elementoActivo][j.tecnicaIdx]; const z = E.zonaActual; const c = U.Ambiente.costo(U.Combate.conCostoRadial ? U.Combate.conCostoRadial(h) : h, j.elementoActivo, z, j.atributo);
-      const y = U.Habilidades.yang[j.yangForma];
-      el.btnTec.classList.toggle('apagado', m < h.umbral || j.agotado); el.btnYang.classList.toggle('apagado', j.agotado || j.estilos.yang < y.umbral); el.btnYin.classList.toggle('apagado', j.agotado && !U.Combate.puñoSobre(j)); el.btnDash.classList.toggle('apagado', j.agotado);
-      el.btnTec.title = h.nombre + ' (L) · alcance ' + (U.Combate.alcanceElemental ? U.Combate.alcanceElemental(j) : 1) + ' celdas (maestría ' + Math.floor(m) + '% · +1 celda por cada 5%) · daño 100% a 1 celda → 80% en la última celda · costo ' + c.costo + ' Esencia' + (c.plano ? ' (plano por el clima)' : '') + ' · ' + (c.razon || 'ambiente neutro') + ' · Temp. ' + Math.round(U.Clima.temperatura(E) * 100) + '% · Precip. ' + Math.round(U.Clima.precipitacion(E) * 100) + '%';
+      j.pociones = (j.bolsaPociones || []).length; el.pocion.textContent = '🧪 ×' + j.pociones; el.pocion.disabled = j.pociones <= 0; const nm = document.getElementById('numMonedas'); if (nm) nm.textContent = Math.floor(j.monedas || 0); const mh = document.getElementById('mascaraHud'); if (mh) { const pid = j.reliquias && j.reliquias.puesta; mh.classList.toggle('oculto', !pid); if (pid && U.Reliquias && U.Reliquias.MASCARAS[pid]) { const mt = document.getElementById('mascaraHudTxt'); if (mt) mt.textContent = U.Reliquias.MASCARAS[pid].nombre; mh.style.borderColor = U.Reliquias.MASCARAS[pid].color; } } /* Botón fijo del Escudo: ya no existe; su estado vive en su botón del equipo (clase 'encendido' cuando está activo). */
+      const b = U.Habilidades.BASICO; const z = E.zonaActual; const c = U.Ambiente.costo(b, j.elementoActivo, z, j.atributo);
+      el.btnTec.classList.toggle('apagado', j.agotado || j.esencia < b.costo); el.btnYin.classList.toggle('apagado', j.agotado && !U.Combate.puñoSobre(j)); el.btnDash.classList.toggle('apagado', j.agotado);
+      el.btnTec.title = 'Ataque básico de ' + U.Elementos.nombre(j.elementoActivo) + ' (TÉC) · línea de ' + U.Combate.alcanceElemental(j) + ' celdas (maestría ' + Math.floor(m) + '%) · costo ' + c.costo + ' Esencia' + (c.plano ? ' (plano por el clima)' : '') + ' · ' + (c.razon || 'ambiente neutro') + ' · Temp. ' + Math.round(U.Clima.temperatura(E) * 100) + '% · Precip. ' + Math.round(U.Clima.precipitacion(E) * 100) + '% · Tus técnicas equipadas están en los botones de arriba (teclas 1-5).';
       el.btnSobre.classList.toggle('apagado', false); el.btnSobre.style.filter = j.buffs.sobrecarga > 0 ? 'brightness(1.7)' : ''; el.btnSobre.title = j.buffs.sobrecarga > 0 ? 'Sobrecarga ACTIVA (X): toca para DESACTIVARLA. Drena Esencia; sin Esencia drena Vida y solo puedes golpear.' : 'Sobrecarga (X): interruptor. Ataque y Velocidad ×2; drena Esencia y, sin Esencia, Vida. Toca otra vez para apagarla.';
       // Botón CAMINAR SOBRE EL AGUA: solo existe para Fuego y Rayo (Agua, Viento y Tierra cruzan solos) y solo se muestra cerca del agua o ya sobre ella; su estado se lee en el propio botón.
       if (el.btnAgua) { const necesitaAgua = j.elementoActivo === 'fuego' || j.elementoActivo === 'rayo'; const visibleAgua = necesitaAgua && (!!j.cercaAgua || !!j.sobreAgua); el.btnAgua.classList.toggle('oculto', !visibleAgua); el.btnAgua.classList.toggle('encendido', !!j.caminarAgua); if (el.btnAguaEstado) el.btnAguaEstado.textContent = j.caminarAgua ? 'ENCENDIDO' : 'APAGADO'; el.btnAgua.title = j.caminarAgua ? 'Caminar sobre el agua ENCENDIDO (C): toca para APAGARLO. Sobre el agua gastas 10 de Esencia/s y, sin Esencia, 10 de Vida/s; si lo apagas a mitad del agua, NADAS (más lento, gratis) hasta la orilla.' : 'Caminar sobre el agua APAGADO (C): el agua te bloquea el paso. Toca para ENCENDERLO y cruzar gastando 10 de Esencia/s (sin Esencia no puedes entrar desde la orilla).'; }
-      el.btnTec.querySelector('.cd').style.height = (h.cd ? Math.min(1, (j.cdTec[h.id] || 0) / h.cd) * 100 : 0) + '%'; el.btnYang.querySelector('.cd').style.height = Math.min(1, j.cdYang / y.cd) * 100 + '%'; el.btnYin.querySelector('.cd').style.height = Math.min(1, j.cdYin / 0.4) * 100 + '%';
-      Array.from(el.chipsTec.children).forEach((b, i) => { const hh = U.Habilidades.elementos[j.elementoActivo][i]; b.querySelector('i').style.height = Math.min(1, (j.cdTec[hh.id] || 0) / hh.cd) * 100 + '%'; });
+      el.btnTec.querySelector('.cd').style.height = Math.min(1, (j.cdBasico || 0) / b.cd) * 100 + '%'; el.btnYin.querySelector('.cd').style.height = Math.min(1, j.cdYin / 0.4) * 100 + '%';
+      // Enfriamiento de cada botón del equipo (según su técnica).
+      Array.from(this.el.equipoBtns ? this.el.equipoBtns.children : []).forEach(btn => { const tec = U.Habilidades.porId(j, btn.dataset.tec); if (!tec) return; const cdv = tec.kind === 'elemento' ? (j.cdTec[tec.tecId] || 0) / (tec.cd || 1) : tec.kind === 'yang' ? j.cdYang / (tec.cd || 1) : 0; const ic = btn.querySelector('.cd'); if (ic) ic.style.height = Math.min(1, Math.max(0, cdv)) * 100 + '%'; btn.classList.toggle('apagado', j.agotado || (tec.kind === 'elemento' && (j.cdTec[tec.tecId] || 0) > 0) || (tec.kind === 'yang' && j.cdYang > 0)); if (tec.kind === 'escudo') { btn.classList.toggle('encendido', !!j.escudo); btn.style.filter = j.escudo ? 'brightness(1.5)' : ''; btn.title = U.Combate.escudoNombre(j) + ' (B) · Nv.' + (j.escudoNv || 1) + ' (' + U.Habilidades.escudo.niveles[j.escudoNv || 1].nombre + ') · integridad ' + Math.max(0, Math.round(j.escudoVida || 0)) + '/' + U.Combate.escudoMax(j) + ' · no te mueves, drena Esencia/s'; } });
       el.btnA.querySelector('.lbl').textContent = j.trote ? 'TROTE +' : 'TROTE';
       el.descanso.classList.toggle('oculto', !j.descansando);
       if (j.descansando) { const durm = !!(E.reloj && E.reloj.durmiendo); el.rellDescanso.style.transform = 'scaleX(' + (durm ? Math.min(1, j.vida / j.stats.vida) : Math.min(1, j.vida / U.Recuperacion.techoVida())) + ')'; if (el.descansoTxt) el.descansoTxt.textContent = durm ? 'Durmiendo junto a la fogata… al despertar: Vida y Esencia al 100%' : 'Meditando · Esencia ×3 · Yang + · muévete para cancelar'; }
@@ -87,7 +223,7 @@ U.HUD = {
       const ob = E.objetivos[E.objetivoIdx]; el.obj.textContent = ob ? ob.texto : 'Entrena libremente: la arena acepta rondas más difíciles.';
       if (!el.objDetalle.classList.contains('oculto')) this.refrescarObjetivoDetalle();
     }
-    this.tMini += dt; if (this.tMini > 0.2) { this.tMini = 0; if (!this._enCombate) { try { U.Render.minimapa(el.mini, E); } catch (e) { if (window.console) console.error('Unipar: minimapa ignorado', e); } } }
+    this.tMini += dt; if (this.tMini > 0.2) { this.tMini = 0; const guarida = this.enGuarida(E); if (el.mini) el.mini.classList.toggle('oculto', guarida); if (!this._enCombate && !guarida) { this.registrarExplorado(E); try { U.Render.minimapa(el.mini, E); } catch (e) { if (window.console) console.error('Unipar: minimapa ignorado', e); } } }
     /* Panel superior de oleadas (ARENA DE ECOS / torneo / misión / reto) eliminado: no se crea ni se muestra. El progreso sigue visible en Objetivo, banners y diálogos. */
     // DESTELLO (Rayo): velo blanco SUAVE y gradual — sube en ~0.18 s a su pico y decae exponencial (~1.5 s). Nunca parpadea ni es un estrobo. Ajuste E.destelloModo: 'normal' (pico .5) · 'suave' (.22) · 'off' (sin velo; la ceguera sigue).
     { const vd = document.getElementById('veloDestello'); if (vd) { const F = U.Combate ? U.Combate.flashPantalla : null; if (F) { F.t += dt; const pico = E.destelloModo === 'off' ? 0 : E.destelloModo === 'suave' ? 0.22 : 0.5; const subida = Math.min(1, F.t / 0.18); const decaida = Math.exp(-Math.max(0, F.t - 0.18) / 0.6); vd.style.opacity = (pico * subida * decaida).toFixed(3); if (F.t >= F.max) { U.Combate.flashPantalla = null; vd.style.opacity = '0'; } } else if (vd.style.opacity !== '0') vd.style.opacity = '0'; } }
@@ -139,8 +275,8 @@ U.HUD = {
     + '<div class="statFila" style="grid-template-columns:86px 1fr 118px" title="Condición: 100% es estar en perfecta forma. Cada 10 de Esencia gastada baja 1; la recarga de Esencia va por escalones: ×1.0 desde la mitad del máximo para arriba, ×0.5 de la mitad a un cuarto, ×0.1 por debajo de un cuarto (nunca cero). Se recupera muy lento fuera de combate, según tu atributo, por hora de juego; en combate no se recupera. Dormir la deja al 100% del máximo."><span style="color:#a9c795">Condición</span><div class="bar"><i style="transform:scaleX(' + ((j.cansancio != null ? j.cansancio : U.Recuperacion.condicionMax(j)) / U.Recuperacion.condicionMax(j)) + ');background:linear-gradient(90deg,#6f9a5e,#a9c795)"></i></div><span class="val">' + Math.floor(j.cansancio != null ? j.cansancio : U.Recuperacion.condicionMax(j)) + ' / ' + U.Recuperacion.condicionMax(j) + ' · recarga ×' + U.Recuperacion.multCansancio().toFixed(2) + '</span></div>'
     + '<div style="font-size:11px;color:var(--textoTenue)">Condición: cada 10 de Esencia que gastas en total (técnicas, Yang, dash… y también el drenaje del escudo) baja 1 punto. La recarga de Esencia no baja poco a poco: va por escalones medidos del máximo actual — de la mitad para arriba recuperas completo (×1.0, sin castigo); de la mitad a un cuarto, a la mitad de velocidad (×0.5); por debajo de un cuarto, al 10% (×0.1), muy lento pero nunca cero. Al cruzar un límite el ritmo salta de un escalón al otro. Nunca te bloquea lanzar poderes. El Fluido gasta más Esencia por técnica, así que se cansa más rápido. Se recupera MUCHO más lento que la Esencia, según tu atributo (la misma capacidad de tu Esencia —base 5, Sabio 10, Duro 2— pero POR HORA DE JUEGO, no por segundo) y solo fuera de combate: en combate no se recupera, solo baja. Dormir (fogata o cama) la deja al 100% de su máximo. Su máximo empieza en 100 y crece +5 cada vez que tu Condición cruza por debajo de 25 —cuando de verdad te cansas— hasta +100 por estrés (200 sin Yin). Dominar el Yin da más barra: nivel de Yin ' + U.Recuperacion.nivelYin(j) + ' de 5 (cada nivel +20) → máximo actual ' + U.Recuperacion.condicionMax(j) + ' (tope 300 con Yin Nv.5 y todo el estrés).</div></section>';
     html += '<section><h3>Escudo · técnica de Guía</h3>' + (j.escudoAprendido
-      ? '<div style="font-size:12px"><b style="color:' + U.Combate.escudoColor(j) + '">' + U.Combate.escudoNombre(j) + '</b> · Nivel ' + (j.escudoNv || 1) + ' de 3 (' + U.Habilidades.escudo.niveles[j.escudoNv || 1].nombre + ') · Integridad ' + U.Combate.escudoMax(j) + ' · Bloqueos para subir: ' + (j.escudoNv >= 3 ? 'nivel máximo' : (j.escudoExp || 0) + '/' + U.Habilidades.escudo.niveles[j.escudoNv || 1].bloquesParaSubir) + '</div><div style="font-size:11px;color:var(--textoFrio);margin-top:4px">Un solo botón (B). Sin moverte mientras está activo; drena Esencia por segundo según el clima de tu elemento. La tabla de ventajas le aplica como a ti: el Agua apaga el de Fuego (tu Esencia se queda; vuelve a levantarlo), el Rayo atraviesa el de Agua con ventaja sin romperlo, el Agua erosiona el de Tierra hasta volverlo lodo, la Tierra se amortigua contra el de Agua, el Viento desvía proyectiles pero cede cuerpo a cuerpo, el campo de Rayo castiga al que lo toca, y tu mismo elemento lo absorbe. Si cambias de elemento activo, cambia la naturaleza de tu escudo.</div>'
-      : '<div style="font-size:12px;color:var(--aviso)">Aún no conoces el Escudo. Es una TÉCNICA: hay que buscar a alguien que te la enseñe. Kaelen, el guardia de la aldea, es el Guía de guardia: habla con él y elige «Aprender el ESCUDO».</div>') + '</section>';
+      ? '<div style="font-size:12px"><b style="color:' + U.Combate.escudoColor(j) + '">' + U.Combate.escudoNombre(j) + '</b> · Nivel ' + (j.escudoNv || 1) + ' de 3 (' + U.Habilidades.escudo.niveles[j.escudoNv || 1].nombre + ') · Integridad ' + U.Combate.escudoMax(j) + ' · Bloqueos para subir: ' + (j.escudoNv >= 3 ? 'nivel máximo' : (j.escudoExp || 0) + '/' + U.Habilidades.escudo.niveles[j.escudoNv || 1].bloquesParaSubir) + '</div><div style="font-size:11px;color:var(--textoFrio);margin-top:4px">Un solo botón (B). Sin moverte mientras está activo; drena Esencia por segundo según el clima de tu elemento. La tabla de ventajas le aplica como a ti: el Agua apaga el de Fuego (tu Esencia se queda; vuelve a levantarlo), el Rayo atraviesa el de Agua con ventaja sin romperlo, el Agua erosiona el de Tierra hasta volverlo lodo, la Tierra se amortigua contra el de Agua, el Viento desvía proyectiles pero cede cuerpo a cuerpo, el campo de Rayo castiga al que lo toca, y tu mismo elemento lo absorbe. Su naturaleza es la de tu elemento principal (el del test), fijo toda la vida.</div>'
+      : '<div style="font-size:12px;color:var(--aviso)">Aún no conoces el Escudo. Es una TÉCNICA: hay que buscar a alguien que te la enseñe. Kaelen, el guardia de la aldea, es el Guía de guardia: habla con él y elige «Aprender el ESCUDO». Cuando lo aprendas entrará en tu EQUIPO (Pausa → Ajustes → Equipo) si hay hueco.</div>') + '</section>';
     html += '<section><h3>Maestría elemental · curva multiplicativa · técnicas con un Guía</h3>';
     U.Elementos.ids.forEach(id => { const m = j.maestria[id] || 0; const propio = j.elementos.indexOf(id) >= 0; html += '<div class="statFila" style="opacity:' + (propio ? 1 : 0.45) + '"><span style="color:' + U.Elementos.color(id) + '">' + U.Elementos.nombre(id) + '</span><div class="bar"><i style="transform:scaleX(' + m / 100 + ');background:' + U.Elementos.color(id) + '"></i></div><span class="val">' + m.toFixed(1) + '%</span></div>'; });
     html += '<div style="font-size:11px;color:var(--textoTenue)">Etapa actual: ' + U.Elementos.etapa(j.maestria[j.elementoActivo] || 0) + '. Dominar UN elemento es el trabajo de una vida; los 5, como cinco vidas.</div>' + '<div style="font-size:11px;color:var(--textoFrio);margin-top:4px">📈 <b>Curva multiplicativa (no lineal):</b> la maestría sube gradual y cada tramo cuesta MÁS esfuerzo que el anterior — también los primeros son lentos. A tu ' + Math.floor(j.maestria[j.elementoActivo] || 0) + '% actual, cada punto cuesta ×' + (U.Crecimiento.curvaDiv ? U.Crecimiento.curvaDiv(j.maestria[j.elementoActivo] || 0).toFixed(2) : '1.00') + ' el esfuerzo del primer tramo, y seguirá subiendo. Las técnicas son POCAS y se aprenden de un GUÍA por tarea: 15 / 40 / 70% son la maestría MÍNIMA para poder aprender cada una, no un desbloqueo por porcentaje.</div>'
@@ -172,7 +308,7 @@ U.HUD = {
     if (U.Progresion) html += U.Progresion.resumenPerfil();
     html += '<section><h3>Diario · tus objetivos (mundo abierto, sin final ni orden)</h3><ul class="diario">' + E.objetivos.filter(o => { if (!o.oculto) return true; const oo = E.orgs && o.orgId ? E.orgs[o.orgId] : null; return !!(oo && oo.descubierta); }).map(o => '<li class="' + o.estado + '">' + (o.estado === 'hecho' ? '✓ ' : '◆ ') + o.texto + '</li>').join('') + '</ul><div style="font-size:11px;color:var(--textoTenue)">Ninguno es obligatorio ni va antes que otro: son TU lista de cosas posibles. Cumplir uno no termina el juego.</div></section>';
     html += '<section><h3>Vecinos de Bruma · personalidad · dónde están ahora</h3>' + (E.roster || E.npcs).map(n => { const per = U.Personas ? U.Personas.de(n.id) : null; const donde = U.Vida ? U.Vida.dondeEstaTexto(n) : ''; return '<div style="font-size:12px;margin:4px 0"><b>' + n.nombre + '</b> · <span style="color:' + U.Emociones.tonos[n.emocion].color + '">' + n.emocion + '</span> · confianza ' + Math.round(n.estados.confianza) + (per ? '<br><span style="color:var(--textoFrio)">' + per.tipo + ' · le gusta: ' + per.gustos.join(', ') + '</span>' : '') + '<br><span style="color:var(--rayo)">📍 ' + n.nombre + ' ' + donde + '</span></div>'; }).join('') + '<div style="font-size:11px;color:var(--textoTenue)">Cada vecino tiene su rutina: trabaja, come en la plaza, entrena en el Bosque y vuelve a casa de noche (21:00; Pipo a las 20:00). Si alguien no está en su puesto, pregúntale a otro vecino «¿Dónde está…?» y te dirá dónde fue. Sparring: Kaelen–Marco 09:00–11:00 · Torin–Breno 14:00–17:00. El círculo no está en un lugar fijo: se forma alrededor de la pelea, donde sea que esté pasando; acércate a ese círculo y te ofrecerán unirte. El agua no los detiene a todos: cada vecino cruza según su elemento y su propia decisión — los de Agua, Viento y Tierra cruzan (los de Tierra dejan puente al pasar); los de Fuego y Rayo solo cruzan si ellos deciden hacerlo, y a los que no, el agua les bloquea el paso como a ti sin el botón.</div></section>';
-    html += '<section><h3>Controles</h3><div class="controlesLista">WASD / joystick: mover (analógico)<br>E / botón A: trote +25% (mantén; el A ya no interactúa)<br>Interactuar: toca directamente al personaje u objeto cuando salga su globo (hablar, leer, beber, dormir…)<br>J / Yin: toca golpe 2 · mantén cargado 6<br>K / Yang: forma seleccionada<br>L / Técnica: técnica del elemento<br>Shift / Dash: esquiva con invulnerabilidad 4<br>Q: poción +50% · R: meditar (Esencia ×3, entrena Yang; la Vida automática sigue con techo 25%) · Fogata (tócala): dormir, despertar al 100%<br>F: cambiar forma Yang · 1-3: técnica<br>X: Sobrecarga (Yin 15) · V: Hechizo de Inversión (tras aprenderlo en el obelisco) · B: Escudo (tras aprenderlo con Kaelen; Nv.1 frente, Nv.2 frente y lados, Nv.3 cuatro lados; sin moverte) · M: sonido · Esc: pausa<br>Elemento: cámbialo aquí, en Ajustes (engrane)</div></section>';
+    html += '<section><h3>Controles</h3><div class="controlesLista">WASD / joystick: mover (analógico)<br>E / botón A: trote +25% (mantén; el A ya no interactúa)<br>Interactuar: toca directamente al personaje u objeto cuando salga su globo (hablar, leer, beber, dormir…)<br>J / Yin: toca golpe 2 · mantén cargado 6<br>TÉC: ataque básico de tu elemento (siempre) · 1-5: usar la técnica del equipo en ese hueco<br>K / Yang: primera forma Yang equipada<br>L: primera técnica elemental equipada (o básico si no llevas ninguna)<br>Shift / Dash: esquiva con invulnerabilidad 4<br>Q: poción +50% · R: meditar (Esencia ×3, entrena Yang; la Vida automática sigue con techo 25%) · Fogata (tócala): dormir, despertar al 100%<br>F: cambiar forma Yang (solo entre las equipadas)<br>X: Sobrecarga (Yin 15) · V: Hechizo de Inversión (tras aprenderlo en el obelisco) · B: Escudo (tras aprenderlo con Kaelen; Nv.1 frente, Nv.2 frente y lados, Nv.3 cuatro lados; sin moverte) · M: sonido · Esc: pausa<br>Tu elemento es fijo (el del test). Tu EQUIPO se cambia en Pausa → Ajustes → Equipo (hasta 5 técnicas, mezclando elementos).</div></section>';
     html += '<section><h3>Próximamente (no activo en el juego completo)</h3><div class="listaProx">' + ['Portal', 'Pasaporte', 'Entre-Mundos', 'Eco', 'Pilotaje', 'Modo Alma', 'Teletransportación', 'Intangible', 'Arte Místico (hechiceros: camino de una vida)', 'Invisibilidad (solo hechiceros · tú no puedes aprenderla)', 'Técnicas combinadas', 'Transformaciones Yin/Yang', 'Sangre · Plasma · Metal · Sonido · Magnetismo', 'Vuelo (Viento)', 'Disco Cortante (Yang)'].map(s => '<span>' + s + '</span>').join('') + '</div></section>';
     this.el.pausaCuerpo.innerHTML = html; document.getElementById('selDificultad').value = String(E.dificultad);
     const bD = document.getElementById('btnDescargarPausa'); if (bD) bD.addEventListener('click', () => U.Guardado.descargar());
@@ -196,7 +332,7 @@ U.HUD = {
         + '<button data-sec="estadisticas">📊 Estadísticas <small>' + U.Elementos.nombre(j.elementoActivo) + ' · maestría ' + Math.floor(j.maestria[j.elementoActivo] || 0) + '%</small></button>'
         + '<button data-sec="progresion">🎓 Progresión <small>' + (U.Progresion ? U.Progresion.rangoEscuelaNom(U.Progresion.asegurar() || { escuela: 'estudiante' }) : 'Estudiante') + ' · escuela, academia, cuartel, gimnasios y títulos</small></button>'
         + '<button data-sec="reputacion">✦ Reputación (karma) <small>Aldea de Bruma: ' + (j.karma.aldea || 0) + '</small></button>'
-        + '<button data-sec="ajustes">⚙ Ajustes <small>sonido, dificultad y elemento activo (arriba)</small></button>'
+        + '<button data-sec="ajustes">⚙ Ajustes <small>sonido, dificultad y tu equipo de técnicas</small></button>'
         + '<button data-sec="guardar">💾 Guardar <small>automático siempre activo</small></button>'
         + '</div><div style="font-size:11px;color:var(--textoTenue);margin-top:8px">El juego está PAUSADO mientras este menú está abierto. La mochila no pesa: llevar cosas no te hace más lento; el límite es cuántas caben (3 pociones y 5 comidas).</div>';
     } else if (sec === 'mochila') {
@@ -216,8 +352,13 @@ U.HUD = {
       if (U.Reliquias) html += U.Reliquias.htmlMochila();
       if (U.Prohibidas) html += U.Prohibidas.htmlMochila();
     } else if (sec === 'mapa') {
-      html += '<section><h3>🗺 Mapa · ' + (E.mapa ? E.mapa.nombreMapa : '') + '</h3><div style="text-align:center"><canvas id="mapaCompleto" width="512" height="384" style="width:min(512px,100%);image-rendering:pixelated;border:3px solid var(--borde);background:#0e1530"></canvas></div>'
-        + '<div style="font-size:12px;color:var(--textoFrio);margin-top:6px">El CONTINENTE DE BRUMA (440×400, TODO en un solo mapa continuo, rodeado de mar: el borde del mundo es agua): <b>La Metrópolis</b> en el CENTRO — la mega ciudad, la más grande y avanzada, con su tienda de pociones y peleadores de todas las aldeas · <b>Aldea de Bruma</b> cerca de ella, al suroeste (oficina del Guardián, tienda de Marisol, tu casa, la Arena de Ecos) · las aldeas elementales, LEJOS y en radial: <b>Aldea Vuelo Alto</b> (Viento) al norte · <b>Aldea Chispa Alta</b> (Rayo) al noreste · <b>Puerto Brisa Azul</b> (Agua) al este, junto al Lago Brisa Azul y el Río del Este · <b>Aldea Ceniza Viva</b> (Fuego) al sureste, sobre la Tierra Quemada · <b>Aldea Raíz de Piedra</b> (Tierra) al suroeste · y más lejos, al oeste, <b>Arcana</b>, la pequeña metrópolis de los magos. Regiones: <b>Bosque Susurrante</b> al noroeste · <b>Montaña Brumosa</b> al noreste, con nieve y el obelisco · <b>Desierto de Sal</b> al oeste-sur, con su oasis · la <b>Laguna Serena</b> al sur. Y SEIS pueblos pequeños repartidos por los caminos (Alto Pino, Rocafirme, Tres Cruces, Salina, Vega Baja, Brasa Chica): SIN tienda de pociones — ahí se RENTA UNA CASA por 15 🪙 la noche para dormir y despertar al 100%. Naces en la aldea de TU elemento. Caminos cosen todo en radial y en anillo (a cada aldea se llega por más de un camino), pero el continente es libre: puedes ir a campo traviesa en cualquier dirección, como en GTA. Solo tu casa y la Oficina son interiores: ahí sí entras por su puerta. El minimapa sigue visible en el juego, como siempre.</div></section>';
+      if (this.enGuarida(E)) {
+        html += '<section><h3>🗺 Mapa · lugar desconocido</h3><div style="font-size:12px;color:var(--textoFrio)">Estás en una GUARIDA: un lugar que no conoces. Aquí no hay minimapa ni mapa completo — tendrás que orientarte por lo que veas. Al salir, tu mapa vuelve.</div></section>';
+      } else {
+        html += '<section><h3>🗺 Mapa · ' + (E.mapa ? E.mapa.nombreMapa : '') + '</h3><div style="text-align:center"><canvas id="mapaCompleto" width="512" height="384" style="width:min(512px,100%);image-rendering:pixelated;border:3px solid var(--borde);background:#0e1530"></canvas></div>'
+          + '<div style="font-size:12px;color:var(--textoFrio);margin-top:6px">NIEBLA DE GUERRA: lo que ya exploraste QUEDA revelado (puedes volver), lo que no, está oscuro. Bruma y sus alrededores nacen revelados, porque ahí vives. Un rumor puede revelar un pueblo sin visitarlo (aparece marcado en dorado).</div>'
+          + '<div style="font-size:12px;color:var(--textoFrio);margin-top:6px">El CONTINENTE DE BRUMA (440×400, TODO en un solo mapa continuo, rodeado de mar: el borde del mundo es agua): <b>La Metrópolis</b> en el CENTRO — la mega ciudad, la más grande y avanzada, con su tienda de pociones y peleadores de todas las aldeas · <b>Aldea de Bruma</b> cerca de ella, al suroeste (oficina del Guardián, tienda de Marisol, tu casa, la Arena de Ecos) · las aldeas elementales, LEJOS y en radial: <b>Aldea Vuelo Alto</b> (Viento) al norte · <b>Aldea Chispa Alta</b> (Rayo) al noreste · <b>Puerto Brisa Azul</b> (Agua) al este, junto al Lago Brisa Azul y el Río del Este · <b>Aldea Ceniza Viva</b> (Fuego) al sureste, sobre la Tierra Quemada · <b>Aldea Raíz de Piedra</b> (Tierra) al suroeste · y más lejos, al oeste, <b>Arcana</b>, la pequeña metrópolis de los magos. Regiones: <b>Bosque Susurrante</b> al noroeste · <b>Montaña Brumosa</b> al noreste, con nieve y el obelisco · <b>Desierto de Sal</b> al oeste-sur, con su oasis · la <b>Laguna Serena</b> al sur. Y SEIS pueblos pequeños repartidos por los caminos (Alto Pino, Rocafirme, Tres Cruces, Salina, Vega Baja, Brasa Chica): SIN tienda de pociones — ahí se RENTA UNA CASA por 15 🪙 la noche para dormir y despertar al 100%. Naces en la aldea de TU elemento. Caminos cosen todo en radial y en anillo (a cada aldea se llega por más de un camino), pero el continente es libre: puedes ir a campo traviesa en cualquier dirección, como en GTA. Solo tu casa y la Oficina son interiores: ahí sí entras por su puerta. El minimapa sigue visible en el juego, como siempre.</div></section>';
+      }
     } else if (sec === 'reputacion') {
       html += '<section><h3>✦ Reputación · tu KARMA por pueblo</h3><div style="font-size:12px;color:var(--textoFrio)">El karma va de −100 a +100 y es POR PUEBLO: donde no te conocen empiezas en 0, neutral. En precios: 3% por cada 10 de karma (máximo 30% de descuento o de recargo). A −80 o menos, ese pueblo se niega a venderte.</div>';
       Object.keys(U.Economia.PUEBLOS).forEach(pid => { const k = j.karma[pid] || 0; const pct = Math.max(0, Math.min(100, 50 + k / 2)); html += '<div style="margin:8px 0"><div style="display:flex;justify-content:space-between;font-size:13px"><b>' + U.Economia.PUEBLOS[pid] + '</b><span>Karma <b style="color:' + (k > 0 ? 'var(--exito)' : k < 0 ? 'var(--peligro)' : 'var(--texto)') + '">' + k + '</b> · ' + U.Economia.factorTexto(k) + (k <= -80 ? ' · 🚫 NO TE VENDEN' : '') + '</span></div><div class="karmaBar"><i style="left:' + (k >= 0 ? 50 : pct) + '%;width:' + Math.abs(k) / 2 + '%;background:' + (k >= 0 ? 'var(--exito)' : 'var(--peligro)') + '"></i></div></div>'; });
@@ -229,17 +370,24 @@ U.HUD = {
       const cuerpo = this.el.pausaCuerpo; cuerpo.innerHTML = html + cuerpo.innerHTML.replace(/^<div class="pausaNav">[\s\S]*?<\/div>/, '');
       this.cablearPausa(); return;
     } else if (sec === 'ajustes') {
-      html += '<section><h3>⚙ Ajustes</h3><div style="font-size:12px">Sonido y dificultad están en la barra inferior de esta pantalla. Tu elemento activo se cambia con los símbolos de arriba («Elemento activo»). El minimapa queda visible por defecto en el juego, y el Mapa completo vive en este menú.</div></section>';
+      html += '<section><h3>⚙ Ajustes</h3><div style="font-size:12px">Sonido y dificultad están en la barra inferior de esta pantalla. Tu elemento es fijo (lo definió el test). El minimapa queda visible por defecto en el juego, y el Mapa completo vive en este menú.</div></section>';
+      html += this.htmlEquipo();
     } else if (sec === 'guardar') {
       html += '<section><h3>💾 Guardar</h3><div style="font-size:12px"><span style="color:var(--exito)">●</span> <b>Guardado automático: ACTIVADO, siempre.</b> Tu partida (monedas, mochila, karma, polainas, tablón y misiones) se guarda sola en este navegador cada pocos segundos. También puedes descargar un archivo de respaldo desde la barra inferior.</div></section>';
     }
     this.el.pausaCuerpo.innerHTML = html;
     this.cablearPausa();
-    if (sec === 'mapa') { const cv = document.getElementById('mapaCompleto'); if (cv) U.Render.minimapa(cv, E); }
+    if (sec === 'mapa' && !this.enGuarida(E)) { const cv = document.getElementById('mapaCompleto'); if (cv && U.Render.mapaCompleto) U.Render.mapaCompleto(cv, E, (E.mapas && E.mapas.aldea) || E.mapa); }
   },
   cablearPausa() {
     const c = this.el.pausaCuerpo; if (!c) return;
     c.querySelectorAll('[data-sec]').forEach(b => b.addEventListener('click', () => this.seccionPausa(b.dataset.sec)));
+    // Equipo: añadir / quitar / reordenar (re-render de Ajustes + botones del HUD).
+    const reEq = () => { this.refrescarEquipo(); this.refrescarChips(); if (U.Juego.estado && U.Juego.estado.ui === 'pausa') this.seccionPausa('ajustes'); };
+    c.querySelectorAll('[data-eq-add]').forEach(b => b.addEventListener('click', () => { const r = U.Habilidades.equipar(U.Juego.estado.jugador, b.dataset.eqAdd); if (!r.ok) U.HUD.toast('No se pudo equipar: ' + r.motivo + '.', 'aviso'); else { U.Audio.sfx('click'); } reEq(); }));
+    c.querySelectorAll('[data-eq-del]').forEach(b => b.addEventListener('click', () => { U.Habilidades.desequipar(U.Juego.estado.jugador, b.dataset.eqDel); U.Audio.sfx('click'); reEq(); }));
+    c.querySelectorAll('[data-eq-up]').forEach(b => b.addEventListener('click', () => { U.Habilidades.moverEquipo(U.Juego.estado.jugador, b.dataset.eqUp, -1); reEq(); }));
+    c.querySelectorAll('[data-eq-down]').forEach(b => b.addEventListener('click', () => { U.Habilidades.moverEquipo(U.Juego.estado.jugador, b.dataset.eqDown, 1); reEq(); }));
     c.querySelectorAll('[data-prog]').forEach(b => b.addEventListener('click', () => { if (U.Progresion) U.Progresion.accion(b.dataset.prog, b.dataset); if (U.Juego.estado && U.Juego.estado.ui === 'pausa') this.seccionPausa('progresion'); }));
     c.querySelectorAll('[data-usar]').forEach(b => b.addEventListener('click', () => { U.Recuperacion.usarPocion(parseInt(b.dataset.usar)); this.seccionPausa('mochila'); }));
     c.querySelectorAll('[data-vender]').forEach(b => b.addEventListener('click', () => { const E = U.Juego.estado, j = E.jugador; const p2 = (j.bolsaPociones || [])[parseInt(b.dataset.vender)]; if (p2) { const mitad = Math.floor((p2.precio || 0) / 2); j.bolsaPociones.splice(parseInt(b.dataset.vender), 1); j.monedas = (j.monedas || 0) + mitad; U.Recuperacion.sincronizar(j); U.HUD.toast('Poción vendida por ' + mitad + ' 🪙 (la mitad de lo que pagaste).', 'exito'); U.Audio.sfx('cura'); } this.seccionPausa('mochila'); }));

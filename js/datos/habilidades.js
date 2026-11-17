@@ -103,5 +103,84 @@ U.Habilidades = {
     invisibilidad: { nombre: 'Invisibilidad', aprendiblePorJugador: false, razon: 'Es mental (Arte Místico), no elemental: ningún elemento la hace congruente, así que un dominador no la aprende como técnica suya. La tienen los hechiceros del Escuadrón Gamma.' },
     nota: 'Ser hechicero es casi otra vida: súper difícil, toma una vida. Primero se aprenden cosas básicas (Sentido, Rastreo, Barrera mental) y solo tras años llegan las técnicas mayores.' },
   // Reclasificadas: Destello (Rayo), Vuelo (Viento), Disco Cortante (Yang). Presentimiento/Supresión/Dominio: no se programan.
-  reclasificadas: { destello: 'rayo', vuelo: 'viento', discoCortante: 'yang' }
+  reclasificadas: { destello: 'rayo', vuelo: 'viento', discoCortante: 'yang' },
+
+  // ---- EQUIPO (loadout) · HUD PROGRESIVO ----
+  // No hay máximo de técnicas POR ELEMENTO: cada lista de `elementos` es un array
+  // abierto — añadir una 4ª, 5ª o 10ª técnica a un elemento es solo pushear otro
+  // objeto con su umbral. El límite es solo del EQUIPO: 5 huecos en el HUD.
+  MAX_EQUIPO: 5,
+  // Ataque BÁSICO del elemento principal: siempre disponible, sin aprender nada.
+  // Es lo que dispara el botón TÉC cuando no llevas ninguna técnica equipada.
+  BASICO: { costo: 4, power: 0.9, cd: 0.8, alcanceMax: 3, desc: 'Ataque básico de tu elemento: línea corta, poco coste, siempre disponible.' },
+  // Registro canónico de todo lo equipable. id único por técnica:
+  // 'tec:<elemento>:<id>' (elemental), 'yang:<forma>' (Yang), 'escudo'.
+  registro(j) {
+    const lista = [];
+    (j.elementos || [j.elementoActivo]).forEach(el => {
+      (this.elementos[el] || []).forEach(h => lista.push(Object.assign({}, h, { id: 'tec:' + el + ':' + h.id, tecId: h.id, kind: 'elemento', elemento: el })));
+    });
+    this.yangOrden.forEach(k => { const h = this.yang[k]; lista.push(Object.assign({}, h, { id: 'yang:' + k, tecId: k, kind: 'yang', elemento: 'yang' })); });
+    lista.push({ id: 'escudo', tecId: 'escudo', kind: 'escudo', elemento: j.elementoActivo, nombre: 'Escudo', costo: '9/s', cd: 0, umbral: 0, desc: this.escudo.desc });
+    return lista;
+  },
+  porId(j, id) { return this.registro(j).find(t => t.id === id) || null; },
+  // ¿Está DOMINADA (aprendida)? Elemental: maestría ≥ umbral, o concedida por un Guía
+  // (j.tecnicasAprendidas, lista de ids de registro). Yang: despierto + estilo ≥ umbral
+  // de la forma. Escudo: aprendido de Kaelen.
+  aprendida(j, tec) {
+    if (!tec) return false;
+    if (tec.kind === 'elemento') return (j.tecnicasAprendidas || []).indexOf(tec.id) >= 0 || (j.maestria[tec.elemento] || 0) >= tec.umbral;
+    if (tec.kind === 'yang') return !!j.tieneYang && (j.estilos.yang || 0) >= tec.umbral;
+    if (tec.kind === 'escudo') return !!j.escudoAprendido;
+    return false;
+  },
+  dominadas(j) { return this.registro(j).filter(t => this.aprendida(j, t)); },
+  // Un Guía concede una técnica (futuro sistema de enseñanza por tarea): queda
+  // registrada como aprendida aunque la maestría aún no llegue al umbral, y se
+  // auto-equipa si hay hueco libre.
+  aprenderTecnica(id) {
+    const j = U.Juego.estado.jugador; const tec = this.porId(j, id); if (!tec) return false;
+    j.tecnicasAprendidas = j.tecnicasAprendidas || [];
+    if (j.tecnicasAprendidas.indexOf(id) < 0) j.tecnicasAprendidas.push(id);
+    this.equipar(j, id);
+    return true;
+  },
+  // Equipo: j.equipo = [ids de registro, en orden]. podarEquipo solo poda
+  // (técnicas ya no dominadas, p. ej. tras cargar una partida vieja).
+  // asegurarEquipo ADEMÁS auto-equipa lo RECIÉN dominado mientras haya hueco
+  // libre, en orden de registro (primero el elemento principal, luego el
+  // segundo, luego Yang, luego Escudo) — pero solo UNA VEZ por técnica
+  // (j._equipoVisto): si el jugador la quita a mano, no vuelve sola.
+  podarEquipo(j) {
+    j.equipo = Array.isArray(j.equipo) ? j.equipo.slice(0, this.MAX_EQUIPO) : [];
+    j.equipo = j.equipo.filter(id => { const t = this.porId(j, id); return t && this.aprendida(j, t); });
+    return j.equipo;
+  },
+  asegurarEquipo(j) {
+    this.podarEquipo(j);
+    j._equipoVisto = j._equipoVisto || {};
+    this.registro(j).forEach(t => {
+      if (this.aprendida(j, t) && !j._equipoVisto[t.id]) {
+        j._equipoVisto[t.id] = 1;
+        if (j.equipo.length < this.MAX_EQUIPO && j.equipo.indexOf(t.id) < 0) j.equipo.push(t.id);
+      }
+    });
+    return j.equipo;
+  },
+  equipar(j, id) {
+    const tec = this.porId(j, id); if (!tec) return { ok: false, motivo: 'técnica desconocida' };
+    if (!this.aprendida(j, tec)) return { ok: false, motivo: 'aún no dominada' };
+    this.podarEquipo(j);
+    if (j.equipo.indexOf(id) >= 0) return { ok: true, motivo: 'ya equipada' };
+    if (j.equipo.length >= this.MAX_EQUIPO) return { ok: false, motivo: 'equipo lleno (máx. 5)' };
+    j.equipo.push(id); return { ok: true };
+  },
+  desequipar(j, id) { this.podarEquipo(j); const i = j.equipo.indexOf(id); if (i >= 0) j.equipo.splice(i, 1); return j.equipo; },
+  moverEquipo(j, id, dir) {
+    this.podarEquipo(j); const i = j.equipo.indexOf(id); const k = i + dir;
+    if (i < 0 || k < 0 || k >= j.equipo.length) return false;
+    j.equipo[i] = j.equipo[k]; j.equipo[k] = id; return true;
+  },
+  equipoDetalles(j) { this.asegurarEquipo(j); return j.equipo.map(id => this.porId(j, id)).filter(Boolean); }
 };
