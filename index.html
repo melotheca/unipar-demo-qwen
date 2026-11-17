@@ -1091,7 +1091,15 @@ U.Grid = {
     else { const r = tipo === 'rect' ? (radio || 0) : (radio || 0); for (let i = 1; i <= alcance; i++) { const bx = Math.round(ox + d.x * i), by = Math.round(oy + d.y * i); for (let j = -r; j <= r; j++) add(bx + px * j, by + py * j); } }
     return out;
   },
-  enCeldas(celdas, e) { const cx = Math.round(e.x), cy = Math.round(e.y); for (let i = 0; i < celdas.length; i++) if (celdas[i].x === cx && celdas[i].y === cy) return true; return false; }
+  enCeldas(celdas, e) { const cx = Math.round(e.x), cy = Math.round(e.y); for (let i = 0; i < celdas.length; i++) if (celdas[i].x === cx && celdas[i].y === cy) return true; return false; },
+  // Arco cuerpo a cuerpo CONTINUO, sin redondear posiciones a celdas. El golpe Yin usaba SOLO
+  // enCeldas: la celda del puño sale de Math.round(posición del jugador + dirección) y el blanco
+  // entra si Math.round(su posición) cae EXACTO en esa celda. Como ambos se mueven en continuo,
+  // a veces el puño se dibujaba ENCIMA del enemigo (o del cactus) y el redondeo de uno caía en la
+  // celda vecina: golpe al aire sin daño. Por eso «a veces golpeo y no lo daño». Este arco mira la
+  // distancia y el ángulo reales: pega si el blanco está dentro del alcance y de frente (cono
+  // amplio, dot ≥ 0.35 ≈ ±70°); pegado a ti (menos de 0.9) cuenta aunque quede a un costado.
+  enArco(ox, oy, dir, alcance, e) { const dx = e.x - ox, dy = e.y - oy; const d = Math.hypot(dx, dy); if (d > alcance) return false; if (d < 0.9) return true; const dl = Math.hypot(dir.x, dir.y) || 1; return (dx / d) * (dir.x / dl) + (dy / d) * (dir.y / dl) >= 0.35; }
 };
 </script>
 <script>
@@ -1987,17 +1995,92 @@ U.Vida = {
     pts.push({ x: p.x, y: p.y });
     return pts;
   },
+  // LOS NPC TAMBIÉN PUEDEN CAMINAR SOBRE EL AGUA, y lo deciden ELLOS, como el jugador con su
+  // botón: su elemento manda. Agua cruza gratis; Viento levita; Tierra levanta su puente al
+  // pasar (la celda queda como PUENTE para todos, igual que cuando lo hace el jugador de
+  // Tierra). Fuego y Rayo DECIDEN: la decisión es de cada NPC, se toma una sola vez, es
+  // estable (sale de su propio id: no cambia entre partidas) y queda en n.cruzaAgua — unos
+  // cruzan y otros no, y a los que no, el agua les sigue bloqueando el paso como siempre.
+  // Sin elemento conocido, no cruzan.
+  elementoDe(n) { const per = U.Personas.de(n.id); return per ? per.elemento : null; },
+  decideAgua(n) {
+    if (n.cruzaAgua == null) { const el = this.elementoDe(n);
+      if (el === 'agua' || el === 'viento' || el === 'tierra') n.cruzaAgua = true;
+      else if (el === 'fuego' || el === 'rayo') { let h = 0; const s = String(n.id || n.nombre || ''); for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0; n.cruzaAgua = (h % 100) < 55; }
+      else n.cruzaAgua = false; }
+    return n.cruzaAgua;
+  },
+  // Mismo truco que U.Juego.moverJugador: si este NPC puede/decide cruzar, el agua se vuelve
+  // no-sólida SOLO durante su paso (la colisión usa la caja del personaje, radio 0.3, no el
+  // centro) y se restaura al terminar, para que no afecte a nadie más.
+  moverNPC(n, m, dx, dy) {
+    if (!m) return;
+    if (!this.decideAgua(n)) { U.Grid.mover(m, n, dx, dy); return; }
+    const T = U.Grid.T; const enAgua = (x, y) => { const cx = Math.floor(x), cy = Math.floor(y); return cx >= 0 && cy >= 0 && cx < m.ancho && cy < m.alto && m.tiles[cy * m.ancho + cx] === T.AGUA; };
+    const R = 0.3; const cajaAgua = (x, y) => enAgua(x, y) || enAgua(x - R, y - R) || enAgua(x + R, y - R) || enAgua(x - R, y + R) || enAgua(x + R, y + R);
+    if (!cajaAgua(n.x + dx, n.y + dy) && !cajaAgua(n.x, n.y)) { U.Grid.mover(m, n, dx, dy); return; }
+    const tocados = [];
+    for (let i = 0; i < m.tiles.length; i++) if (m.tiles[i] === T.AGUA && m.solidos[i] === 1) { m.solidos[i] = 0; tocados.push(i); }
+    U.Grid.mover(m, n, dx, dy);
+    tocados.forEach(i => { if (m.tiles[i] === T.AGUA) m.solidos[i] = 1; });
+    if (this.elementoDe(n) === 'tierra' && enAgua(n.x, n.y)) { const cx = Math.floor(n.x), cy = Math.floor(n.y); const idx = cy * m.ancho + cx; if (m.tiles[idx] === T.AGUA) { m.tiles[idx] = T.PUENTE; m.solidos[idx] = 0; if (U.Combate) U.Combate.particulas(n.x, n.y, 3, '#d9a441', 'polvo'); } }
+  },
   caminarDirecto(n, dt, p, vel, E) {
     const dx = p.x - n.x, dy = p.y - n.y, d = Math.hypot(dx, dy);
     if (d < 0.45) { n.moviendo = false; return true; }
-    n.dir = U.Grid.dir8(dx, dy); U.Grid.mover(E.mapa && n.mapa === E.mapaId ? E.mapa : U.Juego.mapaPorId(n.mapa), n, dx / d * vel * dt, dy / d * vel * dt);
+    n.dir = U.Grid.dir8(dx, dy); this.moverNPC(n, E.mapa && n.mapa === E.mapaId ? E.mapa : U.Juego.mapaPorId(n.mapa), dx / d * vel * dt, dy / d * vel * dt);
     n.moviendo = true; n.anim += dt * 1.6;
     return Math.hypot(p.x - n.x, p.y - n.y) < 0.45;
   },
+  // El mapa donde se mueve n: el del jugador si n está en él; si no, el suyo por id.
+  mapaDe(n, E) { return E && E.mapa && n.mapa === E.mapaId ? E.mapa : (U.Juego && U.Juego.mapaPorId ? U.Juego.mapaPorId(n.mapa) : null); },
+  // ¿El tramo recto de n hasta p cruza el agua en el mapa de n? Se muestrea el segmento cada
+  // ~0.4 celdas (menos que el ancho de cualquier río/estanque del juego). Cuenta AGUA y
+  // también PUENTE: el puente de madera y los puentes de Tierra solo existen SOBRE el agua,
+  // y a la altura del puente las celdas del río son PUENTE, no AGUA (sin esto, un destino
+  // justo cruzando el puente no se detectaba como cruce de agua).
+  tramoCruzaAgua(n, p, E) {
+    const m = this.mapaDe(n, E);
+    if (!m) return false;
+    const T = U.Grid.T, d = Math.hypot(p.x - n.x, p.y - n.y), pasos = Math.max(1, Math.ceil(d / 0.4));
+    for (let i = 0; i <= pasos; i++) { const x = Math.floor(n.x + (p.x - n.x) * i / pasos), y = Math.floor(n.y + (p.y - n.y) * i / pasos); if (x >= 0 && y >= 0 && x < m.ancho && y < m.alto && (m.tiles[y * m.ancho + x] === T.AGUA || m.tiles[y * m.ancho + x] === T.PUENTE)) return true; }
+    return false;
+  },
   caminarA(n, dt, p, vel, E) {
     const clave = n.mapa + '>' + p.x + ',' + p.y;
-    if (n.rutaKey !== clave) { n.rutaKey = clave; n.ruta = this.rutaPara(n, p); n.rutaT = 0; }
+    if (n.rutaKey !== clave) { n.rutaKey = clave; n.rutaT = 0; n.desvio = null; n.ultPos = null; n.atascoT = 0; n.mejorDist = null; n.desvioN = 0;
+      // CRUCE DE AGUA TAMBIÉN POR RUTA/HORARIO: rutaPara es el camino viejo — rodea el río
+      // por el puente (y ese rodeo atasca: p. ej. Sora, de Agua, se quedaba pegada para
+      // siempre contra el cartel de (23,24) yendo de la plaza a la Ribera en su horario).
+      // Si el tramo recto hasta el destino cruza agua y este NPC DECIDE cruzar (decideAgua:
+      // Agua/Viento/Tierra cruzan — Tierra deja PUENTE al pasar —; Fuego/Rayo solo si ese
+      // NPC lo decidió), la ruta es DIRECTA y cada paso se mueve con moverNPC (vía
+      // caminarDirecto), igual que en el movimiento directo y en la escolta. Si no cruza
+      // agua o el NPC no decidió cruzar, se usa rutaPara como siempre (puente incluido).
+      n.rutaAgua = !!(this.decideAgua(n) && this.tramoCruzaAgua(n, p, E));
+      n.ruta = n.rutaAgua ? [{ x: p.x, y: p.y }] : this.rutaPara(n, p); }
     if (!n.ruta || !n.ruta.length) return true;
+    // Solo en la ruta DIRECTA de agua: si un sólido suelto (un árbol, una roca, un cartel)
+    // queda justo en la línea y el NPC deja de avanzar, se desvía de lado ~1.5 celdas para
+    // deslizarse por la cara del obstáculo y retoma el destino; sin esto, un sólido en la
+    // línea recta al otro lado del agua lo dejaba pegado igual que el camino viejo. Y
+    // mientras siga avanzando, el tiempo de abandono de la ruta (rutaT) se reinicia: un
+    // cruce largo en línea recta tarda más que el límite de un tramo normal, y sin esto la
+    // ruta se daba por terminada a mitad del cruce y el NPC se quedaba ahí para siempre.
+    if (n.rutaAgua) {
+      if (n.desvio) { n.desvioT -= dt; if (this.caminarDirecto(n, dt, n.desvio, vel, E) || n.desvioT <= 0) { n.desvio = null; n.ultPos = { x: n.x, y: n.y }; n.atascoT = 0; } return false; }
+      if (!n.ultPos || Math.hypot(n.x - n.ultPos.x, n.y - n.ultPos.y) > 0.3) { n.ultPos = { x: n.x, y: n.y }; n.atascoT = 0; n.rutaT = 0; }
+      else if (Math.hypot(p.x - n.x, p.y - n.y) > 0.6) { n.atascoT = (n.atascoT || 0) + dt;
+        if (n.atascoT > 0.9) { n.atascoT = 0; const d = Math.hypot(p.x - n.x, p.y - n.y) || 1, px = -(p.y - n.y) / d, py = (p.x - n.x) / d, m = this.mapaDe(n, E);
+          // Cada atasco seguido sin acercarse al destino, el desvío es más largo y cambia
+          // de lado: un grupo ancho de árboles/rocas no se rodea con el mismo pasito corto.
+          if (n.mejorDist == null || d < n.mejorDist - 1) { n.mejorDist = d; n.desvioN = 0; }
+          n.desvioN = (n.desvioN || 0) + 1;
+          const lejos = 1.5 + Math.min(3, n.desvioN - 1) * 1.1;
+          let lado = n.desvioN % 2 === 1 ? 1 : -1; const tx = n.x + px * lejos * lado, ty = n.y + py * lejos * lado;
+          if (m && U.Grid.solidoEn(m, tx, ty)) lado = -lado;
+          n.desvio = { x: Math.max(0.6, Math.min((m ? m.ancho : 999) - 0.6, n.x + px * lejos * lado)), y: Math.max(0.6, Math.min((m ? m.alto : 999) - 0.6, n.y + py * lejos * lado)) }; n.desvioT = 2.5 + lejos * 0.5; return false; } }
+    }
     n.rutaT = (n.rutaT || 0) + dt;
     const wp = n.ruta[0];
     const esFinal = n.ruta.length === 1;
@@ -2726,9 +2809,19 @@ U.Combate = {
   desafio(e) { return U.Crecimiento.desafio(e); },
 
   golpearObjetos(celdas, dmg) {
-    const E = U.Juego.estado, m = E.mapa; if (!m || !celdas) return;
+    const E = U.Juego.estado, m = E.mapa; if (!m || !celdas) return [];
     const set = {}; celdas.forEach(c => set[c.x + ',' + c.y] = 1);
-    m.objetos.slice().forEach(o => { if (!U.Grid.esDestructible(o)) return; for (let y = o.y; y < o.y + (o.h || 1); y++) for (let x = o.x; x < o.x + (o.w || 1); x++) if (set[x + ',' + y]) { U.Grid.danarObjeto(m, o, dmg); return; } });
+    const golpeados = [];
+    m.objetos.slice().forEach(o => { if (!U.Grid.esDestructible(o)) return; for (let y = o.y; y < o.y + (o.h || 1); y++) for (let x = o.x; x < o.x + (o.w || 1); x++) if (set[x + ',' + y]) { U.Grid.danarObjeto(m, o, dmg); golpeados.push(o); return; } });
+    return golpeados;
+  },
+  // Los objetos destructibles (árbol, roca, cactus) ocupan celdas enteras, pero el puño sale de
+  // una posición continua: con la pura celda redondeada, a veces el puño se veía sobre el cactus
+  // y no lo dañaba. Este pase usa el arco continuo contra el CENTRO del objeto y salta los que
+  // golpearObjetos ya dañó en este mismo golpe (nada de daño doble).
+  golpearObjetosArco(j, alcance, dmg, ya) {
+    const E = U.Juego.estado, m = E.mapa; if (!m) return;
+    m.objetos.slice().forEach(o => { if (!U.Grid.esDestructible(o) || (ya && ya.indexOf(o) >= 0)) return; const cx = o.x + (o.w || 1) / 2, cy = o.y + (o.h || 1) / 2; if (U.Grid.enArco(j.x, j.y, j.dir, alcance + 0.45, { x: cx, y: cy })) U.Grid.danarObjeto(m, o, dmg); });
   },
   golpearObjetoEn(x, y, dmg) { const E = U.Juego.estado; const o = U.Grid.objetoEn(E.mapa, x, y); if (o && U.Grid.esDestructible(o)) { U.Grid.danarObjeto(E.mapa, o, dmg); return true; } return false; },
   // ---------- ESCUDO (técnica aprendida de un maestro) ----------
@@ -2839,8 +2932,10 @@ U.Combate = {
     const celdas = U.Grid.forma('cono', j.x, j.y, j.dir, h.alcance, 1); const el = U.Elementos.datos[j.elementoActivo];
     E.efectos.cortes.push({ x: j.x, y: j.y, dir: j.dir, color: cargado ? el.claro : '#f8fafc', t: 0.18, max: 0.18 });
     U.Audio.sfx(cargado ? 'cargado' : 'yin'); this.sacudir(cargado ? 0.6 : 0.2);
-    this.golpearObjetos(celdas, atk * h.power * 0.95); this.golpearInocentes(celdas);
-    let golpes = 0; this.vivos().forEach(e => { if (U.Grid.enCeldas(celdas, e)) { golpes++; this.dañoEnemigo(e, atk * h.power, null, { desafio: this.desafio(e), cargado }); U.Recuperacion.restaurar(h.restaura); this.texto(j, '+' + h.restaura + ' ESE', '#4da3ff', 1); } });
+    // El golpe conecta por celda EXACTA o por el arco continuo (enArco): el arco tapa los casos
+    // en que el redondeo a celdas dejaba fuera a un enemigo que el puño sí estaba tocando.
+    const golpeadosObj = this.golpearObjetos(celdas, atk * h.power * 0.95); this.golpearObjetosArco(j, h.alcance, atk * h.power * 0.95, golpeadosObj); this.golpearInocentes(celdas, { x: j.x, y: j.y, dir: j.dir, alcance: h.alcance + 0.45 });
+    let golpes = 0; this.vivos().forEach(e => { if (U.Grid.enCeldas(celdas, e) || U.Grid.enArco(j.x, j.y, j.dir, h.alcance + 0.45, e)) { golpes++; this.dañoEnemigo(e, atk * h.power, null, { desafio: this.desafio(e), cargado }); U.Recuperacion.restaurar(h.restaura); this.texto(j, '+' + h.restaura + ' ESE', '#4da3ff', 1); } });
     U.Crecimiento.estilo('yin', cargado ? 0.4 : 0.15, E.enCombate ? 1 : 0.2); if (golpes && U.Juego.progresoEntreno) U.Juego.progresoEntreno('golpes', golpes);
     if (golpes) { U.Crecimiento.stat('ataque', 0.05 * golpes, this.desafio(this.vivos()[0] || j)); E.resumen.golpes += golpes; if (cargado) E.hitstop = 0.05; }
     // Canalizar: sin técnica desbloqueada, el Yin enseña el elemento (llegar a 15% desbloquea la primera)
@@ -2898,9 +2993,9 @@ U.Combate = {
   seleccionarTec(i) { const j = U.Juego.estado.jugador; const h = U.Habilidades.elementos[j.elementoActivo][i]; if (!h) return; if ((j.maestria[j.elementoActivo] || 0) < h.umbral) { U.HUD.toast(h.nombre + ': maestría ' + h.umbral + '% requerida.', 'aviso'); U.Audio.sfx('fail'); return; } j.tecnicaIdx = i; U.Audio.sfx('click'); U.HUD.refrescarChips(); },
   seleccionarYang(f) { const j = U.Juego.estado.jugador; if (!j.tieneYang) { U.HUD.toast('Yang sin despertar: entrénalo hasta ' + U.Habilidades.yangDespertar + ' (meditar al descansar, sesiones con Torin) y despertará.', 'aviso'); return; } const h = U.Habilidades.yang[f]; if (j.estilos.yang < h.umbral) { U.HUD.toast(h.nombre + ': estilo Yang ' + h.umbral + ' requerido.', 'aviso'); U.Audio.sfx('fail'); return; } j.yangForma = f; U.Audio.sfx('click'); U.HUD.refrescarChips(); },
 
-  golpearInocentes(celdas) {
+  golpearInocentes(celdas, arco) {
     const E = U.Juego.estado; if (!celdas || !E.npcs) return;
-    E.npcs.forEach(n => { if (n.enCasa || n.ocultoSparring) return; if (U.Grid.enCeldas(celdas, n)) { U.Economia.karmaAdd(-10, U.Economia.puebloDeMapa(n.mapa)); U.Economia.confianza(n, -15); this.texto(n, '¡A UN INOCENTE!', '#ff4d4d', 1); if (!n.hechos) n.hechos = []; n.hechos.push('le pegaste sin razón'); U.HUD.toast('Pegaste a ' + n.nombre + ', un inocente: karma −10 en este pueblo y su confianza cae.', 'peligro'); } });
+    E.npcs.forEach(n => { if (n.enCasa || n.ocultoSparring) return; if (U.Grid.enCeldas(celdas, n) || (arco && U.Grid.enArco(arco.x, arco.y, arco.dir, arco.alcance, n))) { U.Economia.karmaAdd(-10, U.Economia.puebloDeMapa(n.mapa)); U.Economia.confianza(n, -15); this.texto(n, '¡A UN INOCENTE!', '#ff4d4d', 1); if (!n.hechos) n.hechos = []; n.hechos.push('le pegaste sin razón'); U.HUD.toast('Pegaste a ' + n.nombre + ', un inocente: karma −10 en este pueblo y su confianza cae.', 'peligro'); } });
   },
   // ---------- daño ----------
   dañoEnemigo(e, base, elemento, o) {
@@ -3813,7 +3908,7 @@ U.HUD = {
       html += '<section><h3>Calendario · clima · tu casa · memoria</h3><div style="font-size:12px">📅 <b>' + U.Tiempo.diaTexto(E.reloj) + '</b> · Momento: ' + ff2.nombre + ' (' + U.Tiempo.formato(E.reloj.minutos) + ') · 6 momentos por día, semana de Lunes a Domingo.<br>' + cl.icono + ' <b>Clima: ' + cl.nombre + '</b> · ' + cl.detalle + '. Cambia solo cada pocos minutos y ajusta costos. La lluvia tiene intensidades (ligera, normal, fuerte y tormenta): bajo techo (tu casa, la Oficina) no llueve ni cambian los costos; afuera, el Agua es progresiva (ligera ×0.8, normal ×0.5, fuerte y tormenta = 1) y junto a ríos, estanques u oasis paga DECIMALES (×0.15): la Esencia baja poquito a poquito. El Fuego paga más cuanto más llueve, la Tierra y el Rayo bajan un poco y el Viento sube. La TEMPERATURA también pesa: con calor el Fuego paga ×0.85 y el Agua ×1.25; con frío, al revés (Fuego ×1.2, Agua ×0.9). Todos los costos viven en decimales.<br>🏠 Tu casa (puerta de la casa azul): alarma fijada a las <b>' + U.Tiempo.formato(E.alarmaMin) + '</b> · Hechizo de Inversión: ' + (E.flags.hechizoInversion ? '<b style="color:var(--exito)">aprendido (tecla V)</b>' : 'sin aprender (obelisco de la Montaña Brumosa)') + '<br>Monedas: <b style="color:var(--rayo)">' + Math.floor(j.monedas || 0) + ' 🪙</b> (misiones por rango · arena completa 50 · podio del torneo 300/150/80 · tienda de Marisol) · Torneos ganados: ' + (E.historial.torneos || 0) + ' · Misiones entregadas: ' + (E.historial.misiones || 0) + '<br>Historial de esta vida: victorias de arena ' + E.historial.victorias + ' · caídas ' + E.historial.derrotas + ' · retos superados ' + E.historial.retos + ' · entrenamientos completos ' + E.historial.entrenos + '. Los NPC recuerdan todo esto cuando hablas con ellos (tú hablas primero).</div></section>';
     }
     html += '<section><h3>Diario</h3><ul class="diario">' + E.objetivos.map(o => '<li class="' + o.estado + '">' + (o.estado === 'hecho' ? '✓ ' : o.estado === 'actual' ? '▶ ' : '○ ') + o.texto + '</li>').join('') + '</ul></section>';
-    html += '<section><h3>Vecinos de Bruma · personalidad · dónde están ahora</h3>' + (E.roster || E.npcs).map(n => { const per = U.Personas ? U.Personas.de(n.id) : null; const donde = U.Vida ? U.Vida.dondeEstaTexto(n) : ''; return '<div style="font-size:12px;margin:4px 0"><b>' + n.nombre + '</b> · <span style="color:' + U.Emociones.tonos[n.emocion].color + '">' + n.emocion + '</span> · confianza ' + Math.round(n.estados.confianza) + (per ? '<br><span style="color:var(--textoFrio)">' + per.tipo + ' · le gusta: ' + per.gustos.join(', ') + '</span>' : '') + '<br><span style="color:var(--rayo)">📍 ' + n.nombre + ' ' + donde + '</span></div>'; }).join('') + '<div style="font-size:11px;color:var(--textoTenue)">Cada vecino tiene su rutina: trabaja, come en la plaza, entrena en el Bosque y vuelve a casa de noche (21:00; Pipo a las 20:00). Si alguien no está en su puesto, pregúntale a otro vecino «¿Dónde está…?» y te dirá dónde fue. Sparring: Kaelen–Marco 09:00–11:00 · Torin–Breno 14:00–17:00. El círculo no está en un lugar fijo: se forma alrededor de la pelea, donde sea que esté pasando; acércate a ese círculo y te ofrecerán unirte.</div></section>';
+    html += '<section><h3>Vecinos de Bruma · personalidad · dónde están ahora</h3>' + (E.roster || E.npcs).map(n => { const per = U.Personas ? U.Personas.de(n.id) : null; const donde = U.Vida ? U.Vida.dondeEstaTexto(n) : ''; return '<div style="font-size:12px;margin:4px 0"><b>' + n.nombre + '</b> · <span style="color:' + U.Emociones.tonos[n.emocion].color + '">' + n.emocion + '</span> · confianza ' + Math.round(n.estados.confianza) + (per ? '<br><span style="color:var(--textoFrio)">' + per.tipo + ' · le gusta: ' + per.gustos.join(', ') + '</span>' : '') + '<br><span style="color:var(--rayo)">📍 ' + n.nombre + ' ' + donde + '</span></div>'; }).join('') + '<div style="font-size:11px;color:var(--textoTenue)">Cada vecino tiene su rutina: trabaja, come en la plaza, entrena en el Bosque y vuelve a casa de noche (21:00; Pipo a las 20:00). Si alguien no está en su puesto, pregúntale a otro vecino «¿Dónde está…?» y te dirá dónde fue. Sparring: Kaelen–Marco 09:00–11:00 · Torin–Breno 14:00–17:00. El círculo no está en un lugar fijo: se forma alrededor de la pelea, donde sea que esté pasando; acércate a ese círculo y te ofrecerán unirte. El agua no los detiene a todos: cada vecino cruza según su elemento y su propia decisión — los de Agua, Viento y Tierra cruzan (los de Tierra dejan puente al pasar); los de Fuego y Rayo solo cruzan si ellos deciden hacerlo, y a los que no, el agua les bloquea el paso como a ti sin el botón.</div></section>';
     html += '<section><h3>Controles</h3><div class="controlesLista">WASD / joystick: mover (analógico)<br>E / botón A: trote +25% (mantén; el A ya no interactúa)<br>Interactuar: toca directamente al personaje u objeto cuando salga su globo (hablar, leer, beber, dormir…)<br>J / Yin: toca golpe 2 · mantén cargado 6<br>K / Yang: forma seleccionada<br>L / Técnica: técnica del elemento<br>Shift / Dash: esquiva con invulnerabilidad 4<br>Q: poción +50% · R: meditar (Esencia ×3, entrena Yang; la Vida automática sigue con techo 25%) · Fogata (tócala): dormir, despertar al 100%<br>F: cambiar forma Yang · 1-3: técnica<br>X: Sobrecarga (Yin 15) · V: Hechizo de Inversión (tras aprenderlo en el obelisco) · B: Escudo (tras aprenderlo con Kaelen; Nv.1 frente, Nv.2 frente y lados, Nv.3 cuatro lados; sin moverte) · M: sonido · Esc: pausa<br>Elemento: cámbialo aquí, en Ajustes (engrane)</div></section>';
     html += '<section><h3>Próximamente (no activo en el juego completo)</h3><div class="listaProx">' + ['Portal', 'Pasaporte', 'Entre-Mundos', 'Eco', 'Contrato de sangre', 'Contrato de alma', 'Pilotaje', 'Modo Alma', 'Teletransportación', 'Invisibilidad', 'Intangible', 'Arte Místico', 'Técnicas combinadas', 'Transformaciones Yin/Yang', 'Sangre · Plasma · Metal · Sonido · Magnetismo', 'Destello (Rayo)', 'Vuelo (Viento)', 'Disco Cortante (Yang)'].map(s => '<span>' + s + '</span>').join('') + '</div></section>';
     this.el.pausaCuerpo.innerHTML = html; document.getElementById('selDificultad').value = String(E.dificultad);
@@ -4442,7 +4537,7 @@ U.Juego = {
     if (bandidos.length) { destino = { x: j.x - j.dir.x * 1.4, y: j.y - j.dir.y * 1.4 }; vel = 2.6; } // con peligro, se pone DETRÁS de ti
     else if (U.Grid.dist(npc, j) > 7) { npc.moviendo = false; return; } // te espera si te alejas
     const dx = destino.x - npc.x, dy = destino.y - npc.y, d = Math.hypot(dx, dy);
-    if (d > 0.4) { npc.dir = U.Grid.dir8(dx, dy); U.Grid.mover(E.mapa, npc, dx / d * vel * dt, dy / d * vel * dt); npc.moviendo = true; npc.anim += dt * 1.6; } else npc.moviendo = false;
+    if (d > 0.4) { npc.dir = U.Grid.dir8(dx, dy); U.Vida.moverNPC(npc, E.mapa, dx / d * vel * dt, dy / d * vel * dt); npc.moviendo = true; npc.anim += dt * 1.6; } else npc.moviendo = false;
     if (!bandidos.length && U.Grid.dist(npc, esc.destino) < 1.4) { esc.activa = false; npc.enEscolta = false; this.progresoMision('escolta', 1); U.HUD.banner('🏡 ' + npc.nombre.toUpperCase() + ' LLEGÓ A SU PUEBLO · ESCOLTA CUMPLIDA', 2.4); return; }
     esc.oleadaT -= dt;
     if (esc.oleadaT <= 0 && !bandidos.length && esc.bandidosFuera + bandidos.length < esc.bandidosTotal) {
