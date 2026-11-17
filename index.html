@@ -290,6 +290,12 @@ button{font-family:var(--fuente);color:var(--texto);cursor:pointer}
 .boton.small .lbl{font-size:8px}
 #btnDash{right:142px;bottom:6px;border-color:var(--viento)}
 #btnSobrecarga{right:138px;bottom:76px;border-color:var(--peligro);background:linear-gradient(180deg,#7a1f2f,#3a0e18)}
+/* Botón contextual CAMINAR SOBRE EL AGUA (Fuego y Rayo): interruptor como Sobrecarga, con su estado ENCENDIDO/APAGADO siempre legible. Solo se muestra cerca del agua o ya sobre ella. */
+#btnAgua{position:absolute;left:calc(18px + env(safe-area-inset-left));bottom:calc(158px + env(safe-area-inset-bottom));z-index:5;display:flex;align-items:center;gap:8px;max-width:min(320px,64vw);padding:9px 11px;border:2px solid var(--agua);border-radius:12px;background:rgba(14,21,48,.94);box-shadow:0 3px 0 var(--sombra),0 0 12px rgba(53,198,244,.35);font-size:10.5px;letter-spacing:.6px;line-height:1.25;color:var(--texto);text-align:left;touch-action:none;transition:transform .06s,filter .15s}
+#btnAgua:active{transform:translateY(3px);box-shadow:0 0 0 var(--sombra)}
+#btnAgua .aguaEstado{flex:0 0 auto;padding:2px 7px;border:2px solid var(--borde);border-radius:999px;font-size:10px;font-weight:700;letter-spacing:.5px;color:var(--textoTenue);background:#05070f}
+#btnAgua.encendido{border-color:var(--exito);box-shadow:0 3px 0 var(--sombra),0 0 14px rgba(103,224,138,.5)}
+#btnAgua.encendido .aguaEstado{border-color:var(--exito);color:#0b1020;background:var(--exito)}
 #chipsTec,#chipsYang{position:absolute;right:0;display:flex;gap:3px}
 #chipsTec{bottom:138px}
 #chipsYang{bottom:158px}
@@ -347,6 +353,7 @@ button{font-family:var(--fuente);color:var(--texto);cursor:pointer}
 @media (max-height:460px){
   .dlgCaja{margin-bottom:10px;max-height:calc(100dvh - 34px)}
   #controles{height:180px} #botones{transform:scale(.82);transform-origin:bottom right}
+  #btnAgua{bottom:calc(112px + env(safe-area-inset-bottom));font-size:9.5px;padding:7px 9px}
   #joystick{width:92px;height:92px} #objetivo{display:none} #objetivoDetalle{display:none}
 }
 </style>
@@ -384,6 +391,7 @@ button{font-family:var(--fuente);color:var(--texto);cursor:pointer}
     <!-- ================= Controles ================= -->
     <div id="controles">
       <div id="joystick" aria-label="Joystick virtual"><div id="joyBase"></div><div id="joyKnob"></div></div>
+      <button id="btnAgua" class="oculto" title="Caminar sobre el agua (C): interruptor. Por defecto está APAGADO y el agua te bloquea; actívalo para cruzar. Si lo apagas a mitad del agua, te hundes y vuelves a la orilla."><span>🌊 CAMINAR SOBRE EL AGUA</span><span class="aguaEstado" id="btnAguaEstado">APAGADO</span></button>
       <div id="botones">
         <div id="chipsTec" aria-label="Técnicas del elemento"></div>
         <div id="chipsYang" aria-label="Formas de Yang"></div>
@@ -395,7 +403,7 @@ button{font-family:var(--fuente);color:var(--texto);cursor:pointer}
         <button id="btnYin" class="boton yin" title="Yin: toca = golpe, mantén = cargado (J)"><canvas width="96" height="96"></canvas><span class="lbl">YIN</span><i class="cd"></i></button>
         <button id="btnA" class="boton a" title="Trote: mantén para avanzar más rápido (E). No interactúa: para hablar o leer, toca al personaje u objeto en pantalla."><canvas width="96" height="96"></canvas><span class="lbl">TROTE</span></button>
       </div>
-      <div id="hintTeclado">WASD mover · E trote · Toca un personaje u objeto para interactuar · J Yin · K Yang · L técnica · B Escudo (se aprende con Kaelen; no te mueves, drena Esencia) · V Inversión · Shift dash · Q poción · R meditar · F Yang · 1-3 técnica · Esc pausa · Torneo y misiones por rango: Oficina del Guardián · Pausa (Esc): Mochila, Mapa, Estadísticas, Reputación, Ajustes y Guardar</div>
+      <div id="hintTeclado">WASD mover · E trote · Toca un personaje u objeto para interactuar · J Yin · K Yang · L técnica · B Escudo (se aprende con Kaelen; no te mueves, drena Esencia) · C Caminar sobre el agua (botón que solo aparece cerca del agua; Fuego y Rayo) · V Inversión · Shift dash · Q poción · R meditar · F Yang · 1-3 técnica · Esc pausa · Torneo y misiones por rango: Oficina del Guardián · Pausa (Esc): Mochila, Mapa, Estadísticas, Reputación, Ajustes y Guardar</div>
     </div>
   </div>
 
@@ -3659,7 +3667,7 @@ window.U = window.U || {};
 U.HUD = {
   el: {}, tNum: 0, tMini: 0, bannerT: 0, joy: { activo: false, id: null, cx: 0, cy: 0, r: 60 },
   init() {
-    const $ = id => document.getElementById(id); this.el = { hud: $('hud'), rellVida: $('rellVida'), numVida: $('numVida'), rellEsencia: $('rellEsencia'), numEsencia: $('numEsencia'), rellCansancio: $('rellCansancio'), numCansancio: $('numCansancio'), agotado: $('agotado'), simbolos: $('simbolos'), pocion: $('btnPocion'), mini: $('minimapa'), obj: $('objTexto'), btnObj: $('objetivo'), objDetalle: $('objetivoDetalle'), objDetalleTexto: $('objDetalleTexto'), objDetalleLista: $('objDetalleLista'), banner: $('banner'), descanso: $('descansoInd'), rellDescanso: $('rellDescanso'), descansoTxt: $('descansoTxt'), btnInfo: $('btnReloj'), infoDetalle: $('infoDetalle'), calTexto: $('calTexto'), horaTexto: $('horaTexto'), horaMomento: $('horaMomento'), climaIcono: $('climaIcono'), climaTexto: $('climaTexto'), climaDetalle: $('climaDetalle'), tempTexto: $('tempTexto'), sensTexto: $('sensTexto'), sensNota: $('sensNota'), precipTexto: $('precipTexto'), precipNota: $('precipNota'), humTexto: $('humTexto'), vientoTexto: $('vientoTexto'), vientoNota: $('vientoNota'), btnA: $('btnA'), btnYin: $('btnYin'), btnYang: $('btnYang'), btnTec: $('btnTec'), btnDash: $('btnDash'), btnSobre: $('btnSobrecarga'), chipsTec: $('chipsTec'), chipsYang: $('chipsYang'), sonido: $('btnSonido'), pausa: $('pausa'), pausaCuerpo: $('pausaCuerpo'), fin: $('panelFin') };
+    const $ = id => document.getElementById(id); this.el = { hud: $('hud'), rellVida: $('rellVida'), numVida: $('numVida'), rellEsencia: $('rellEsencia'), numEsencia: $('numEsencia'), rellCansancio: $('rellCansancio'), numCansancio: $('numCansancio'), agotado: $('agotado'), simbolos: $('simbolos'), pocion: $('btnPocion'), mini: $('minimapa'), obj: $('objTexto'), btnObj: $('objetivo'), objDetalle: $('objetivoDetalle'), objDetalleTexto: $('objDetalleTexto'), objDetalleLista: $('objDetalleLista'), banner: $('banner'), descanso: $('descansoInd'), rellDescanso: $('rellDescanso'), descansoTxt: $('descansoTxt'), btnInfo: $('btnReloj'), infoDetalle: $('infoDetalle'), calTexto: $('calTexto'), horaTexto: $('horaTexto'), horaMomento: $('horaMomento'), climaIcono: $('climaIcono'), climaTexto: $('climaTexto'), climaDetalle: $('climaDetalle'), tempTexto: $('tempTexto'), sensTexto: $('sensTexto'), sensNota: $('sensNota'), precipTexto: $('precipTexto'), precipNota: $('precipNota'), humTexto: $('humTexto'), vientoTexto: $('vientoTexto'), vientoNota: $('vientoNota'), btnA: $('btnA'), btnYin: $('btnYin'), btnYang: $('btnYang'), btnTec: $('btnTec'), btnDash: $('btnDash'), btnSobre: $('btnSobrecarga'), btnAgua: $('btnAgua'), btnAguaEstado: $('btnAguaEstado'), chipsTec: $('chipsTec'), chipsYang: $('chipsYang'), sonido: $('btnSonido'), pausa: $('pausa'), pausaCuerpo: $('pausaCuerpo'), fin: $('panelFin') };
     // Iconos de acción (vectoriales suaves, sin pixelar)
     this.el.btnEscudo = $('btnEscudo'); if (this.el.btnEscudo) U.Render.iconoSuave(this.el.btnEscudo.querySelector('canvas'), 'yang', '#7cc4ff');
     U.Render.iconoSuave(this.el.btnA.querySelector('canvas'), 'a', '#a7f3c9'); U.Render.iconoSuave(this.el.btnYin.querySelector('canvas'), 'yin', '#e6c9a0'); U.Render.iconoSuave(this.el.btnYang.querySelector('canvas'), 'yang', '#f8fafc'); U.Render.iconoSuave(this.el.btnDash.querySelector('canvas'), 'dash', '#7ef0c0'); U.Render.iconoSuave(this.el.btnSobre.querySelector('canvas'), 'sobre', '#ffb3c0');
@@ -3676,7 +3684,7 @@ U.HUD = {
     const press = (btn, down, up) => { btn.addEventListener('pointerdown', e => { const E = U.Juego.estado; if (E && E.reloj && E.reloj.durmiendo) return; e.preventDefault(); btn.setPointerCapture(e.pointerId); btn.classList.add('presionado'); down(); }); const rel = e => { btn.classList.remove('presionado'); if (up) up(); }; btn.addEventListener('pointerup', rel); btn.addEventListener('pointercancel', rel); btn.addEventListener('contextmenu', e => e.preventDefault()); };
     press(this.el.btnA, () => U.Juego.pressA(), () => U.Juego.releaseA());
     press(this.el.btnYin, () => U.Combate.iniciarCarga(), () => U.Combate.soltarYin());
-    press(this.el.btnYang, () => U.Combate.yang()); press(this.el.btnTec, () => U.Combate.tecnica()); press(this.el.btnDash, () => U.Combate.dash()); press(this.el.btnSobre, () => U.Combate.sobrecarga()); if (this.el.btnEscudo) press(this.el.btnEscudo, () => U.Combate.toggleEscudo());
+    press(this.el.btnYang, () => U.Combate.yang()); press(this.el.btnTec, () => U.Combate.tecnica()); press(this.el.btnDash, () => U.Combate.dash()); press(this.el.btnSobre, () => U.Combate.sobrecarga()); if (this.el.btnEscudo) press(this.el.btnEscudo, () => U.Combate.toggleEscudo()); if (this.el.btnAgua) press(this.el.btnAgua, () => U.Juego.toggleCaminarAgua());
     // Joystick analógico
     const jz = $('joystick'), knob = $('joyKnob');
     const move = e => { if (!this.joy.activo || e.pointerId !== this.joy.id) return; let dx = e.clientX - this.joy.cx, dy = e.clientY - this.joy.cy; const d = Math.hypot(dx, dy); const max = this.joy.r; if (d > max) { dx = dx / d * max; dy = dy / d * max; } knob.style.transform = 'translate(' + dx + 'px,' + dy + 'px)'; const mag = Math.min(1, d / max); const I = U.Juego.input; if (mag < 0.15) { I.vx = 0; I.vy = 0; I.mag = 0; } else { const v = U.Grid.dir8(dx, dy); I.vx = v.x; I.vy = v.y; I.mag = mag; } I.joy = true; };
@@ -3721,6 +3729,8 @@ U.HUD = {
       el.btnTec.classList.toggle('apagado', m < h.umbral || j.agotado); el.btnYang.classList.toggle('apagado', j.agotado || j.estilos.yang < y.umbral); el.btnYin.classList.toggle('apagado', j.agotado && !U.Combate.puñoSobre(j)); el.btnDash.classList.toggle('apagado', j.agotado);
       el.btnTec.title = h.nombre + ' (L) · costo ' + c.costo + ' Esencia' + (c.plano ? ' (plano por el clima)' : '') + ' · ' + (c.razon || 'ambiente neutro') + ' · Temp. ' + Math.round(U.Clima.temperatura(E) * 100) + '% · Precip. ' + Math.round(U.Clima.precipitacion(E) * 100) + '%';
       el.btnSobre.classList.toggle('apagado', false); el.btnSobre.style.filter = j.buffs.sobrecarga > 0 ? 'brightness(1.7)' : ''; el.btnSobre.title = j.buffs.sobrecarga > 0 ? 'Sobrecarga ACTIVA (X): toca para DESACTIVARLA. Drena Esencia; sin Esencia drena Vida y solo puedes golpear.' : 'Sobrecarga (X): interruptor. Ataque y Velocidad ×2; drena Esencia y, sin Esencia, Vida. Toca otra vez para apagarla.';
+      // Botón CAMINAR SOBRE EL AGUA: solo existe para Fuego y Rayo (Agua, Viento y Tierra cruzan solos) y solo se muestra cerca del agua o ya sobre ella; su estado se lee en el propio botón.
+      if (el.btnAgua) { const necesitaAgua = j.elementoActivo === 'fuego' || j.elementoActivo === 'rayo'; const visibleAgua = necesitaAgua && (!!j.cercaAgua || !!j.sobreAgua); el.btnAgua.classList.toggle('oculto', !visibleAgua); el.btnAgua.classList.toggle('encendido', !!j.caminarAgua); if (el.btnAguaEstado) el.btnAguaEstado.textContent = j.caminarAgua ? 'ENCENDIDO' : 'APAGADO'; el.btnAgua.title = j.caminarAgua ? 'Caminar sobre el agua ENCENDIDO (C): toca para APAGARLO. Sobre el agua gastas 10 de Esencia/s y, sin Esencia, 10 de Vida/s; si lo apagas a mitad del agua, te hundes y vuelves a la orilla.' : 'Caminar sobre el agua APAGADO (C): el agua te bloquea el paso. Toca para ENCENDERLO y cruzar gastando 10 de Esencia/s (sin Esencia no puedes entrar desde la orilla).'; }
       el.btnTec.querySelector('.cd').style.height = (h.cd ? Math.min(1, (j.cdTec[h.id] || 0) / h.cd) * 100 : 0) + '%'; el.btnYang.querySelector('.cd').style.height = Math.min(1, j.cdYang / y.cd) * 100 + '%'; el.btnYin.querySelector('.cd').style.height = Math.min(1, j.cdYin / 0.4) * 100 + '%';
       Array.from(el.chipsTec.children).forEach((b, i) => { const hh = U.Habilidades.elementos[j.elementoActivo][i]; b.querySelector('i').style.height = Math.min(1, (j.cdTec[hh.id] || 0) / hh.cd) * 100 + '%'; });
       el.btnA.querySelector('.lbl').textContent = j.trote ? 'TROTE +' : 'TROTE';
@@ -4174,7 +4184,7 @@ U.Juego = {
     const rng = U.TestUI.rngSemilla(semilla); const mapa = U.Grid.crearMapa(rng);
     const j = { tipo: 'jugador', nombre, perfil, elemento: perfil.elemento, elemento2: perfil.elemento2, elementos: perfil.elemento2 ? [perfil.elemento, perfil.elemento2] : [perfil.elemento], elementoActivo: perfil.elemento, atributo: perfil.atributo,
       stats: Object.assign({}, perfil.stats), vida: perfil.stats.vida, esencia: perfil.stats.esencia, maestria: Object.assign({}, perfil.maestria), estilos: Object.assign({}, perfil.estilos), regenBonus: 0,
-      x: mapa.inicio.x, y: mapa.inicio.y, dir: { x: 0, y: 1 }, anim: 0, moviendo: false, trote: false, agotado: false, invuln: 0, flash: 0, carga: 0, cargando: false, ataqueAnim: 0, cdYin: 0, cdYang: 0, cdTec: {}, dash: { t: 0, cd: 0, dx: 0, dy: 0 }, rastro: [], tecnicaIdx: 0, yangForma: 'haz', tieneYang: !!perfil.yangAfin, buffs: { sobrecarga: 0, sobrecargaCd: 0 }, descansando: false, pociones: 0, bolsaPociones: [], bolsaComida: [], karma: {}, sabores: (perfil.sabores || U.Economia.SABORES.slice()), polainas: {}, polainaEquipada: null, polainaMultCrec: 1, pasosPolainas: 0, condPolainas: 0, comidasHoy: 0, permisoHasta: 0, permisoUsos: 0, promesas: [], monedas: 0, ultimaOrilla: null, levitT: 0, enAguaT: 0, escudo: false, escudoAprendido: false, escudoNv: 0, escudoExp: 0, escudoVida: 0, cansancio: 100, condicionExtra: 0, gastoFatiga: 0, dot: null, invertido: 0, flags: {} };
+      x: mapa.inicio.x, y: mapa.inicio.y, dir: { x: 0, y: 1 }, anim: 0, moviendo: false, trote: false, agotado: false, invuln: 0, flash: 0, carga: 0, cargando: false, ataqueAnim: 0, cdYin: 0, cdYang: 0, cdTec: {}, dash: { t: 0, cd: 0, dx: 0, dy: 0 }, rastro: [], tecnicaIdx: 0, yangForma: 'haz', tieneYang: !!perfil.yangAfin, buffs: { sobrecarga: 0, sobrecargaCd: 0 }, descansando: false, pociones: 0, bolsaPociones: [], bolsaComida: [], karma: {}, sabores: (perfil.sabores || U.Economia.SABORES.slice()), polainas: {}, polainaEquipada: null, polainaMultCrec: 1, pasosPolainas: 0, condPolainas: 0, comidasHoy: 0, permisoHasta: 0, permisoUsos: 0, promesas: [], monedas: 0, ultimaOrilla: null, levitT: 0, enAguaT: 0, caminarAgua: false, cercaAgua: false, sobreAgua: false, escudo: false, escudoAprendido: false, escudoNv: 0, escudoExp: 0, escudoVida: 0, cansancio: 100, condicionExtra: 0, gastoFatiga: 0, dot: null, invertido: 0, flags: {} };
     // tieneYang = Yang DESPERTADO: con afinidad naces despierto; sin ella, despierta al entrenar el estilo hasta el umbral (5).
     const npcs = ['kaelen', 'sora', 'torin', 'marisol', 'breno', 'elena', 'marco', 'pipo'].map(id => U.Emociones.crear(id, rng, mapa.npcs[id]));
     this.estado = { ui: 'mundo', mapa, mapaId: 'aldea', mapas: { aldea: mapa }, npcsPorMapa: {}, cambioCd: 0, jugador: j, npcs, enemigos: [], proyectiles: [], orbes: [], efectos: { particulas: [], textos: [], haces: [], anillos: [], cadenas: [], cortes: [], telegrafos: [] }, camara: { x: j.x * 16 - U.Render.viewW / 2, y: j.y * 16 - U.Render.viewH / 2, shake: 0 }, tiempo: 0, reloj: U.Tiempo.crear(), clima: U.Clima.crear(rng), alarmaMin: 7 * 60, historial: { derrotas: 0, victorias: 0, retos: 0, entrenos: 0, torneos: 0, misiones: 0 }, reto: null, entreno: null, bandidoT: 0, hitstop: 0, dificultad: 1, semilla, rng,
@@ -4201,7 +4211,7 @@ U.Juego = {
         else setTimeout(() => U.HUD.toast('No traes las 10 🪙 del cruce: el guardia te deja pasar esta vez. Gana monedas con misiones.', 'aviso'), 60); } }
     if (destino === 'oficina' && !E.npcsPorMapa.oficina) { const rngO = U.TestUI.rngSemilla(E.semilla + '-oficina'); E.npcsPorMapa.oficina = ['aldric', 'lia'].map(id => U.Emociones.crear(id, rngO, nuevo.npcs[id])); }
     this.refrescarNpcs();
-    const j = E.jugador; const sp = spawn || nuevo.inicio; j.x = sp.x; j.y = sp.y; j.descansando = false; j.cargando = false;
+    const j = E.jugador; const sp = spawn || nuevo.inicio; j.x = sp.x; j.y = sp.y; j.descansando = false; j.cargando = false; j.caminarAgua = false; j.sobreAgua = false; j.cercaAgua = false;
     E.enemigos = []; E.proyectiles = []; E.orbes = []; E.efectos.telegrafos = []; E.interactuable = null; E.zonaActual = null; E.cambioCd = 1.6;
     E.camara.x = j.x * 16 - U.Render.viewW / 2; E.camara.y = j.y * 16 - U.Render.viewH / 2;
     U.Combate.cancelarArena();
@@ -4217,13 +4227,17 @@ U.Juego = {
     }
     if (nuevo.spawnsAbiertos) nuevo.spawnsAbiertos.forEach(sp => { E.enemigos.push(U.Combate.crearEnemigo(sp[0], sp[1], sp[2], E.dificultad)); });
   },
-  // DESPLAZAMIENTOS POR ELEMENTO: Agua camina sobre el agua gratis; Tierra levanta un puente
-  // de piedra (la celda se vuelve PUENTE); Viento levita hasta ~5 s sobre el agua; los demás
-  // gastan 10 de Esencia por segundo. Si la Esencia se acaba A MITAD DEL AGUA, NO se hunden ni
-  // vuelven a la orilla: el costo pasa a VIDA a la misma tasa (10/s) y siguen caminando (ver
-  // tickSuelo); si la Vida llega a 0, derrota normal y despiertan en la fogata. Desde la ORILLA,
-  // con Esencia en 0, NO se puede entrar al agua: el permiso de abajo exige Esencia > 0.5 para
-  // pisar agua nueva, y solo deja seguir a quien YA está sobre el agua (centro en celda de agua).
+  // DESPLAZAMIENTOS POR ELEMENTO: Agua camina sobre el agua gratis y automático (sin botón);
+  // Tierra levanta un puente de piedra automático (la celda se vuelve PUENTE, sin botón);
+  // Viento levita automático hasta ~5 s sobre el agua (sin botón). FUEGO y RAYO son distintos:
+  // por DEFECTO el agua les BLOQUEA (colisiona como un muro) y solo cruzan si el jugador
+  // ACTIVA el botón «Caminar sobre el agua» (interruptor, ver toggleCaminarAgua), que aparece
+  // únicamente cerca del agua o ya sobre ella. Cruzando gastan 10 de Esencia por segundo; si
+  // la Esencia se acaba A MITAD DEL AGUA, NO se hunden: el costo pasa a VIDA a la misma tasa
+  // (10/s) y siguen caminando (ver tickSuelo); si la Vida llega a 0, derrota normal y
+  // despiertan en la fogata. Desde la ORILLA, con Esencia en 0, NO se puede entrar al agua
+  // aunque el botón esté activo: el permiso de abajo exige Esencia > 0.5 para pisar agua
+  // nueva, y solo deja seguir a quien YA está sobre el agua (centro en celda de agua).
   moverJugador(m, j, dx, dy) {
     const T = U.Grid.T; const enAgua = (x, y) => { const cx = Math.floor(x), cy = Math.floor(y); return cx >= 0 && cy >= 0 && cx < m.ancho && cy < m.alto && m.tiles[cy * m.ancho + cx] === T.AGUA; };
     // La colisión de Grid.mover usa la CAJA del personaje (radio 0.3), no su centro: el agua hay
@@ -4233,10 +4247,13 @@ U.Juego = {
     // (ni siquiera el de Agua) y el personaje se quedaba pegado a la orilla empujando sin avanzar.
     const R = 0.3; const cajaAgua = (x, y) => enAgua(x, y) || enAgua(x - R, y - R) || enAgua(x + R, y - R) || enAgua(x - R, y + R) || enAgua(x + R, y + R);
     const destinoAgua = cajaAgua(j.x + dx, j.y + dy) || cajaAgua(j.x, j.y);
-    // enAgua(j.x, j.y) = YA estás sobre el agua: puedes seguir caminando aunque la Esencia sea 0
-    // (te cuesta Vida, ver tickSuelo). Sin ese término, al llegar la Esencia a 0 el agua volvería
-    // a ser sólida bajo tus pies y te quedarías pegado a mitad del lago sin poder avanzar ni volver.
-    const puede = j.elementoActivo === 'agua' || j.elementoActivo === 'tierra' || (j.elementoActivo === 'viento' && (j.levitT || 0) < 5) || j.esencia > 0.5 || enAgua(j.x, j.y);
+    // enAgua(j.x, j.y) = YA estás sobre el agua: con el botón activo puedes seguir caminando
+    // aunque la Esencia sea 0 (te cuesta Vida, ver tickSuelo). Sin ese término, al llegar la
+    // Esencia a 0 el agua volvería a ser sólida bajo tus pies y te quedarías pegado a mitad
+    // del lago sin poder avanzar ni volver. Para Fuego y Rayo TODO pasa por el interruptor
+    // j.caminarAgua: apagado = el agua es sólida y bloquea, como antes de cualquier arreglo.
+    const esAuto = j.elementoActivo === 'agua' || j.elementoActivo === 'tierra' || j.elementoActivo === 'viento';
+    const puede = j.elementoActivo === 'agua' || j.elementoActivo === 'tierra' || (j.elementoActivo === 'viento' && (j.levitT || 0) < 5) || (!esAuto && !!j.caminarAgua && (j.esencia > 0.5 || enAgua(j.x, j.y)));
     if (!destinoAgua || !puede) { U.Grid.mover(m, j, dx, dy); return; }
     const tocados = [];
     for (let i = 0; i < m.tiles.length; i++) if (m.tiles[i] === T.AGUA && m.solidos[i] === 1) { m.solidos[i] = 0; tocados.push(i); }
@@ -4245,12 +4262,62 @@ U.Juego = {
     tocados.forEach(i => { if (m.tiles[i] === T.AGUA) m.solidos[i] = 1; });
     if (j.elementoActivo === 'tierra' && enAgua(j.x, j.y)) { const cx = Math.floor(j.x), cy = Math.floor(j.y); const idx = cy * m.ancho + cx; if (m.tiles[idx] === T.AGUA && j.esencia >= 5) { m.tiles[idx] = T.PUENTE; m.solidos[idx] = 0; j.esencia -= 5; U.Recuperacion.registrarGasto(5); U.Combate.particulas(j.x, j.y, 4, '#d9a441', 'polvo'); } }
   },
+  // CAMINAR SOBRE EL AGUA (solo Fuego y Rayo): interruptor como la Sobrecarga, con su estado
+  // visible en el propio botón (ENCENDIDO/APAGADO). Por defecto APAGADO: el agua bloquea.
+  // El botón solo aparece cerca del agua o ya sobre ella (HUD.actualizar mira j.cercaAgua y
+  // j.sobreAgua); al alejarse de la orilla el interruptor se apaga solo (ver tickSuelo), para
+  // que cada cruce sea una decisión del jugador y nunca un paso automático como antes.
+  toggleCaminarAgua() {
+    const E = this.estado, j = E.jugador; if (!E || !j) return;
+    if (j.elementoActivo === 'agua' || j.elementoActivo === 'viento' || j.elementoActivo === 'tierra') return; // esos tres cruzan solos, sin botón
+    if (j.caminarAgua) { j.caminarAgua = false; U.Audio.sfx('click');
+      if (j.sobreAgua) { this.hundirAgua(); U.HUD.toast('Caminar sobre el agua APAGADO a mitad del agua: te hundes y vuelves a la orilla más cercana.', 'aviso'); }
+      else U.HUD.toast('Caminar sobre el agua APAGADO: el agua vuelve a bloquearte el paso.', '');
+      return; }
+    j.caminarAgua = true; U.Audio.sfx('agua');
+    if (j.esencia <= 0.5) U.HUD.toast('Caminar sobre el agua ENCENDIDO, pero sin Esencia NO puedes entrar desde la orilla: recupera Esencia primero. (Ya sobre el agua, sin Esencia, el costo pasaría a tu Vida.)', 'aviso');
+    else U.HUD.toast('Caminar sobre el agua ENCENDIDO: cruzas gastando 10 de Esencia por segundo; si se acaba a mitad del agua, 10 de Vida por segundo. Apágalo cuando quieras con el mismo botón.', 'exito');
+  },
+  // Hundirse: vuelves a la orilla más cercana. ultimaOrilla es la última posición en tierra
+  // firme que pisaste; si no sirve (no existe o su celda ya no es tierra), se busca la celda
+  // de tierra libre más cercana alrededor, anillo a anillo.
+  hundirAgua() {
+    const E = this.estado, j = E.jugador, m = E.mapa; const T = U.Grid.T;
+    const esAgua = (x, y) => { const cx = Math.floor(x), cy = Math.floor(y); return cx >= 0 && cy >= 0 && cx < m.ancho && cy < m.alto && m.tiles[cy * m.ancho + cx] === T.AGUA; };
+    const libre = (x, y) => { const cx = Math.floor(x), cy = Math.floor(y); return cx >= 0 && cy >= 0 && cx < m.ancho && cy < m.alto && !esAgua(x, y) && !m.solidos[cy * m.ancho + cx]; };
+    if (j.ultimaOrilla && libre(j.ultimaOrilla.x, j.ultimaOrilla.y)) { j.x = j.ultimaOrilla.x; j.y = j.ultimaOrilla.y; }
+    else {
+      let mejor = null, bd = 1e9;
+      const jx = Math.floor(j.x), jy = Math.floor(j.y);
+      for (let r = 1; r <= 8 && !mejor; r++) {
+        for (let cy = jy - r; cy <= jy + r; cy++) {
+          for (let cx = jx - r; cx <= jx + r; cx++) {
+            if (Math.max(Math.abs(cx - jx), Math.abs(cy - jy)) !== r) continue;
+            const px = cx + 0.5, py = cy + 0.5;
+            if (libre(px, py)) { const d = Math.hypot(px - j.x, py - j.y); if (d < bd) { bd = d; mejor = { x: px, y: py }; } }
+          }
+        }
+      }
+      if (mejor) { j.x = mejor.x; j.y = mejor.y; }
+    }
+    j.sobreAgua = false; j.levitT = 0; U.Combate.particulas(j.x, j.y - 0.4, 10, '#35c6f4', 'agua'); U.Audio.sfx('agua');
+  },
   // Efectos del suelo al caminar: agua (drenaje de Esencia y, sin Esencia a mitad del agua, de Vida a la misma tasa), ceniza (quema si no eres Fuego), polainas (pasos y Condición).
   tickSuelo(dt, seMovio, distCel) {
     const E = this.estado, j = E.jugador, m = E.mapa; const T = U.Grid.T;
     const cx = Math.max(0, Math.min(m.ancho - 1, Math.floor(j.x))), cy = Math.max(0, Math.min(m.alto - 1, Math.floor(j.y)));
     const tile = m.tiles[cy * m.ancho + cx];
-    if (tile !== T.AGUA) { j.ultimaOrilla = { x: j.x, y: j.y }; j.levitT = 0; }
+    j.sobreAgua = tile === T.AGUA;
+    // ¿Hay agua cerca? (celdas de agua a ~2 celdas o menos) Decide si el botón «Caminar sobre
+    // el agua» se muestra: cerca de la orilla, chocando con el agua o ya sobre ella.
+    { let cerca = j.sobreAgua;
+      if (!cerca) { const px = Math.floor(j.x), py = Math.floor(j.y);
+        for (let yy = py - 2; yy <= py + 2 && !cerca; yy++) for (let xx = px - 2; xx <= px + 2; xx++) { if (xx < 0 || yy < 0 || xx >= m.ancho || yy >= m.alto) continue; if (m.tiles[yy * m.ancho + xx] === T.AGUA && Math.hypot(xx + 0.5 - j.x, yy + 0.5 - j.y) <= 2.1) { cerca = true; break; } } }
+      j.cercaAgua = cerca; }
+    if (tile !== T.AGUA) { j.ultimaOrilla = { x: j.x, y: j.y }; j.levitT = 0; if (!j.cercaAgua) j.caminarAgua = false; }
+    // Fuego/Rayo sobre el agua SIN el interruptor (p. ej. cambiaron de elemento a mitad del
+    // agua): no se sostienen — se hunden y vuelven a la orilla más cercana.
+    if (tile === T.AGUA && j.elementoActivo !== 'agua' && j.elementoActivo !== 'tierra' && j.elementoActivo !== 'viento' && !j.caminarAgua) { this.hundirAgua(); U.HUD.toast('Sin el botón de caminar sobre el agua activado no te sostienes sobre el agua: vuelves a la orilla.', 'aviso'); return; }
     if (tile === T.AGUA) {
       if (j.elementoActivo === 'viento') { j.levitT = (j.levitT || 0) + dt; if (j.levitT >= 5 && j.ultimaOrilla) { j.x = j.ultimaOrilla.x; j.y = j.ultimaOrilla.y; j.levitT = 0; U.HUD.toast('La levitación se acaba: bajas a la orilla. El Viento levita unos 5 segundos, no vuela el mapa entero.', 'aviso'); } }
       else if (j.elementoActivo !== 'agua' && j.elementoActivo !== 'tierra') {
@@ -4412,7 +4479,7 @@ U.Juego = {
     U.HUD.toast(n.nombre + ' viene hacia ti: parece que quiere pedirte algo.', '');
   },
   siguienteObjetivo() { const E = this.estado; while (E.objetivoIdx < E.objetivos.length && E.objetivos[E.objetivoIdx].estado === 'hecho') E.objetivoIdx++; const o = E.objetivos[E.objetivoIdx]; if (o && o.estado === 'pendiente') o.estado = 'actual'; if (o) U.HUD.toast('Nuevo objetivo: ' + o.texto, 'exito'); },
-  despertar() { const E = this.estado, j = E.jugador; if (E.mapaId !== 'aldea') this.cambiarMapa('aldea', null, true); U.Combate.limpiar(); j.x = E.mapa.inicio.x; j.y = E.mapa.inicio.y; j.vida = Math.max(1, j.stats.vida * 0.25); j.esencia = j.stats.esencia * 0.5; j.agotado = false; j.dot = null; j.escudo = false; j.buffs.sobrecarga = 0; j.invuln = 1; U.Audio.musica('aldea'); U.HUD.toast('Despiertas junto a la fogata. Sora te mira de reojo.', ''); E.historial.derrotas++; E.npcs.forEach(n => { if (!n.hechos) n.hechos = []; if (n.hechos.indexOf('te vieron caer') < 0) n.hechos.push('te vieron caer'); U.Emociones.evento(n, { realidad: 40, energia: 10, etiqueta: 'te vieron caer' }); }); },
+  despertar() { const E = this.estado, j = E.jugador; if (E.mapaId !== 'aldea') this.cambiarMapa('aldea', null, true); U.Combate.limpiar(); j.x = E.mapa.inicio.x; j.y = E.mapa.inicio.y; j.vida = Math.max(1, j.stats.vida * 0.25); j.esencia = j.stats.esencia * 0.5; j.agotado = false; j.dot = null; j.escudo = false; j.buffs.sobrecarga = 0; j.caminarAgua = false; j.sobreAgua = false; j.cercaAgua = false; j.invuln = 1; U.Audio.musica('aldea'); U.HUD.toast('Despiertas junto a la fogata. Sora te mira de reojo.', ''); E.historial.derrotas++; E.npcs.forEach(n => { if (!n.hechos) n.hechos = []; if (n.hechos.indexOf('te vieron caer') < 0) n.hechos.push('te vieron caer'); U.Emociones.evento(n, { realidad: 40, energia: 10, etiqueta: 'te vieron caer' }); }); },
   fin(tipo) { const E = this.estado; if (E.ui === 'fin') return;
     if (tipo === 'derrota' && E.torneo && E.torneo.activo) { if (U.Combate.derrotaTorneo()) return; }
     if (tipo === 'derrota' && E.escolta && E.escolta.activa) { const esc = E.escolta; esc.activa = false; if (esc.npc) { esc.npc.enEscolta = false; esc.npc.vidaEscolta = 100; } E.escolta = null; if (E.mision && E.mision.tipo === 'escolta') { E.mision = null; U.HUD.banner('📜 ESCOLTA FALLIDA · CAÍSTE PROTEGIENDO', 2.4); } } if (tipo === 'derrota') { U.Audio.sfx('derrota'); U.Audio.musica('aldea'); } if (tipo === 'victoria' && E.historial) { E.historial.victorias++; E.npcs.forEach(n => { if (!n.hechos) n.hechos = []; if (n.hechos.indexOf('te vieron ganar la arena') < 0) n.hechos.push('te vieron ganar la arena'); }); } U.Combate.cancelarArena(); U.HUD.mostrarFin(tipo); },
@@ -4434,7 +4501,7 @@ U.Juego = {
     switch (k) {
       case 'e': this.pressA(); break; case 'j': U.Combate.iniciarCarga(); break; case 'k': U.Combate.yang(); break; case 'l': U.Combate.tecnica(); break;
       case 'shift': case ' ': U.Combate.dash(); break; case 'q': U.Recuperacion.pocion(); break; case 'r': U.Recuperacion.toggleDescanso(); break; case 'x': U.Combate.sobrecarga(); break; case 'v': U.Combate.hechizoInversion(); break;
-      case 'b': U.Combate.toggleEscudo(); break; case 'f': { const j = E.jugador; if (!j.tieneYang) break; const ord = U.Habilidades.yangOrden.filter(f => j.estilos.yang >= U.Habilidades.yang[f].umbral); const i = ord.indexOf(j.yangForma); U.Combate.seleccionarYang(ord[(i + 1) % ord.length]); break; }
+      case 'b': U.Combate.toggleEscudo(); break; case 'c': this.toggleCaminarAgua(); break; case 'f': { const j = E.jugador; if (!j.tieneYang) break; const ord = U.Habilidades.yangOrden.filter(f => j.estilos.yang >= U.Habilidades.yang[f].umbral); const i = ord.indexOf(j.yangForma); U.Combate.seleccionarYang(ord[(i + 1) % ord.length]); break; }
       case '1': case '2': case '3': U.Combate.seleccionarTec(parseInt(k) - 1); break;
       case 'tab': { e.preventDefault(); const j = E.jugador; if (j.elementos.length > 1) U.Combate.cambiarElemento(j.elementos[(j.elementos.indexOf(j.elementoActivo) + 1) % j.elementos.length]); break; }
     }
