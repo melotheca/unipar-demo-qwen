@@ -85,6 +85,17 @@ button{font-family:var(--fuente);color:var(--texto);cursor:pointer}
 #finResumen b{display:block;color:var(--agua);font-size:16px}
 #finBotones{display:flex;gap:8px;flex-wrap:wrap;padding:0 14px}
 
+.menuLista{display:grid;gap:8px}
+.menuLista button{text-align:left;background:#0e1530;border:2px solid var(--borde);padding:12px 14px;font-size:15px;color:var(--texto);box-shadow:0 3px 0 var(--sombra);display:flex;justify-content:space-between;gap:10px;align-items:center}
+.menuLista button:hover{border-color:var(--agua);background:var(--superficie)}
+.menuLista button small{color:var(--textoFrio);font-size:11px;text-align:right}
+.pausaNav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.pausaNav button{flex:1 1 auto}
+.mochilaItem{display:flex;gap:8px;align-items:center;justify-content:space-between;background:#0e1530;border:2px solid var(--borde);padding:8px 10px;margin:5px 0;font-size:13px;flex-wrap:wrap}
+.mochilaItem .acts{display:flex;gap:6px;flex-wrap:wrap}
+.tiendaSlider{width:100%;accent-color:var(--agua);height:28px}
+.karmaBar{height:10px;background:#05070f;border:2px solid var(--borde);position:relative;overflow:hidden}
+.karmaBar i{position:absolute;top:0;bottom:0}
 @media (max-width:640px){
   html,body{font-size:13px}
   .controlesLista{columns:1}
@@ -343,8 +354,8 @@ button{font-family:var(--fuente);color:var(--texto);cursor:pointer}
           <div class="barra vida" title="Vida"><div class="relleno" id="rellVida"></div><span class="nums" id="numVida">0/0</span></div>
           <div class="barra esencia" title="Esencia"><div class="relleno" id="rellEsencia"></div><span class="nums" id="numEsencia">0/0</span><span id="agotado" class="oculto">AGOTADO</span></div>
           <div class="barra cansancio" title="Condición: 100% es estar en perfecta forma. Cada 10 de Esencia gastada baja 1. La recarga de Esencia va por escalones según tu Condición (del máximo actual): de la mitad para arriba, completa (×1.0); de la mitad a un cuarto, a la mitad (×0.5); por debajo de un cuarto, al 10% (×0.1, nunca cero). Se recupera muy lento fuera de combate, según tu atributo (por hora de juego); en combate no se recupera. Dormir en fogata o cama la deja al 100% de su máximo. Si cae por debajo de 25, tu máximo crece +5 (hasta +100). Cada nivel de Yin suma +20 al máximo (hasta 300)."><div class="relleno" id="rellCansancio"></div><span class="nums" id="numCansancio">CONDICIÓN 100/100</span></div>
-          <button id="btnPocion" title="Poción: +50% de Vida (Q)" aria-label="Usar poción">🧪 <span>×0</span></button>
-          <div id="monedasHud" title="Monedas: gana en torneo, oleadas y misiones; gasta en la tienda"><span class="monIco" aria-hidden="true">🪙</span><span id="numMonedas">30</span><small>monedas</small></div>
+          <button id="btnPocion" title="Poción rápida (Q): toma la poción de Vida MÁS CHICA de tu mochila" aria-label="Usar la poción más chica">🧪 <span>×0</span></button>
+          <div id="monedasHud" title="Monedas: gana con misiones por rango, la arena y el podio del torneo; gasta en la tienda"><span class="monIco" aria-hidden="true">🪙</span><span id="numMonedas">0</span><small>monedas</small></div>
           <button id="btnReloj" title="Reloj: toca para ver la hora actual y el clima" aria-label="Reloj: toca para ver la hora actual y el clima" aria-expanded="false">🕐</button>
         </div>
         <div id="filaTopInfo">
@@ -375,7 +386,7 @@ button{font-family:var(--fuente);color:var(--texto);cursor:pointer}
         <button id="btnYin" class="boton yin" title="Yin: toca = golpe, mantén = cargado (J)"><canvas width="96" height="96"></canvas><span class="lbl">YIN</span><i class="cd"></i></button>
         <button id="btnA" class="boton a" title="Trote: mantén para avanzar más rápido (E). No interactúa: para hablar o leer, toca al personaje u objeto en pantalla."><canvas width="96" height="96"></canvas><span class="lbl">TROTE</span></button>
       </div>
-      <div id="hintTeclado">WASD mover · E trote · Toca un personaje u objeto para interactuar · J Yin · K Yang · L técnica · B Escudo (se aprende con Kaelen; no te mueves, drena Esencia) · V Inversión · Shift dash · Q poción · R meditar · F Yang · 1-3 técnica · Esc pausa · Torneo y misiones: Oficina del Guardián</div>
+      <div id="hintTeclado">WASD mover · E trote · Toca un personaje u objeto para interactuar · J Yin · K Yang · L técnica · B Escudo (se aprende con Kaelen; no te mueves, drena Esencia) · V Inversión · Shift dash · Q poción · R meditar · F Yang · 1-3 técnica · Esc pausa · Torneo y misiones por rango: Oficina del Guardián · Pausa (Esc): Mochila, Mapa, Estadísticas, Reputación, Ajustes y Guardar</div>
     </div>
   </div>
 
@@ -812,6 +823,12 @@ U.Grid = {
     const camino = (x1, y1, x2, y2) => { let x = x1, y = y1; while (x !== x2) { if (get(x, y) !== T.AGUA) set(x, y, T.CAMINO); x += Math.sign(x2 - x); } while (y !== y2) { if (get(x, y) !== T.AGUA) set(x, y, T.CAMINO); y += Math.sign(y2 - y); } if (get(x, y) !== T.AGUA) set(x, y, T.CAMINO); };
     camino(20, 24, 27, 24); camino(35, 24, 43, 24); camino(43, 24, 43, 34); camino(43, 34, 49, 34); camino(46, 24, 46, 15); camino(16, 28, 16, 31);
     camino(20, 24, 80, 24); camino(16, 31, 16, 38); camino(16, 38, 22, 38); camino(24, 24, 24, 20); camino(43, 34, 66, 34); camino(66, 34, 66, 38); camino(58, 24, 58, 44);
+    // EXPANSIÓN ESTE/SUR (+25% de mundo útil): cada zona elemental tiene su lugar real.
+    camino(58, 44, 66, 44); camino(66, 44, 66, 52);
+    for (let y = 47; y <= 55; y++) for (let x = 62; x <= 71; x++) if (Math.hypot((x - 66.5) / 4.6, (y - 51) / 4.1) <= 1) set(x, y, T.AGUA); // Lago del Sur (Agua)
+    for (let y = 45; y <= 53; y++) for (let x = 74; x <= 82; x++) if (rng() > 0.15) set(x, y, T.CENIZA); // Suelo Quemado del Este (Fuego)
+    for (let y = 56; y <= 60; y++) for (let x = 56; x <= 66; x++) if (rng() > 0.2) set(x, y, T.PIEDRA); // Zona Rocosa del Sur (Tierra)
+    for (let y = 45; y <= 49; y++) for (let x = 52; x <= 58; x++) set(x, y, T.PASTO); // Acantilado de Viento (claro alto y abierto)
     for (let y = 33; y <= 39; y++) for (let x = 12; x <= 23; x++) if (get(x, y) !== T.AGUA) set(x, y, T.PIEDRA);
     // Sendero a la ENTRADA DEL BOSQUE (borde norte): al pisar el umbral cambias de mapa.
     camino(12, 22, 8, 22); camino(8, 22, 8, 1);
@@ -822,9 +839,10 @@ U.Grid = {
     obj('casa', 9, 17, 3, 3, true, { techo: '#7c3b2e' }); obj('casa', 17, 16, 3, 3, true, { techo: '#5b4a8a' }); obj('casa', 9, 27, 3, 3, true, { techo: '#3b6b7c' });
     obj('casa', 24, 17, 3, 3, true, { techo: '#7c3b2e' }); obj('casa', 5, 36, 3, 3, true, { techo: '#5b4a8a' }); obj('casa', 26, 28, 3, 3, true, { techo: '#3b6b7c' }); obj('casa', 62, 16, 3, 3, true, { techo: '#7c3b2e' }); obj('casa', 68, 36, 3, 3, true, { techo: '#5b4a8a' }); obj('casa', 58, 44, 3, 3, true, { techo: '#3b6b7c' }); obj('casa', 72, 20, 3, 3, true, { techo: '#7c3b2e' });
     obj('oficina', 13, 34, 5, 4, true, { techo: '#d9a441' }); obj('puertaOficina', 15, 37, 1, 1, false); obj('tienda', 20, 34, 3, 3, true, { techo: '#2a7f5c' }); obj('puertaTienda', 21, 36, 1, 1, false);
-    obj('cartel', 16, 33, 1, 1, true, { texto: 'OFICINA DEL GUARDIÁN DE BRUMA · El Guardián Aldric gobierna la aldea (como un Hokage o un Kamisama, pero de Bruma). Dentro, su secretaria Lía encarga MISIONES pagadas en monedas: entregas a otros pueblos, proteger a un vecino, buscar reliquias en el desierto y más. Entra por la puerta dorada. Al lado está la TIENDA de Marisol: pociones a cambio de monedas.' });
+    obj('cartel', 16, 33, 1, 1, true, { texto: 'OFICINA DEL GUARDIÁN DE BRUMA · El Guardián Aldric gobierna la aldea (como un Hokage o un Kamisama, pero de Bruma). Dentro, su secretaria Lía lleva el TABLÓN: 5 misiones nuevas cada día, por RANGO (D a S), pagadas solo por el rango. Entra por la puerta dorada. Al lado está la TIENDA de Marisol: pociones A MEDIDA (tú eliges las unidades), comida, polainas y el permiso de viajero.' });
     obj('fogata', 16, 24, 1, 1, true); obj('pozo', 19, 21, 1, 1, true); obj('puertaCasa', 10, 29, 1, 1, false); obj('cartel', 57, 24, 1, 1, true, { texto: 'AL ESTE, POR EL BORDE DEL MAPA: DESIERTO DE SAL · Sol brutal, un oasis al noreste y espejismos que invierten tus controles. Al norte del Campo de Ceniza espera la MONTAÑA BRUMOSA y su obelisco.' }); obj('cartel', 46, 6, 1, 1, true, { texto: 'AL NORTE DE LA CENIZA: MONTAÑA BRUMOSA · Cruza el umbral del borde norte. Arriba hay nieve, ilusionistas y un obelisco antiguo que enseña el Hechizo de Inversión.' }); obj('cartel', 9, 4, 1, 1, true, { texto: 'ENTRADA AL BOSQUE SUSURRANTE · Sigue el sendero hasta el borde norte y cruza el umbral dorado: cambiarás de mapa. Dentro ya no hay arena ni reglas: los bandidos acampan al norte y atacan en abierto. Vuelve por el sur cuando quieras.' }); obj('cartel', 23, 24, 1, 1, true, { texto: 'ALDEA DE BRUMA · Al este, el puente lleva a la Ribera Húmeda: el Agua allí cuesta menos. Más al norte, el Campo de Ceniza: el Fuego respira y el Agua se encarece. La Arena está al sureste.' });
     obj('cartel', 40, 24, 1, 1, true, { texto: 'RIBERA HÚMEDA · La humedad abarata el Agua (−25%) y encarece el Fuego (+50%). Siempre puedes usar tu elemento: solo cambia el costo.' });
+    obj('cartel', 59, 44, 1, 1, true, { texto: 'AL SUR Y AL ESTE, TIERRA NUEVA · El Lago del Sur (Agua cruza gratis; los demás gastan Esencia o rodean por tierra), el Suelo Quemado (el Fuego es inmune; los demás se queman), la Zona Rocosa de Tierra y el Acantilado de Viento (el Viento levita unos segundos). Todo se alcanza por caminos de tierra.' });
     obj('cartel', 45, 17, 1, 1, true, { texto: 'CAMPO DE CENIZA · Calor extremo: el Fuego cuesta −25%, el Agua +50%. El suelo seco no ayuda a la Tierra. Observa el costo ajustado en tu HUD.' });
     // Arena: reja con puerta al oeste + runa central
     for (let y = AY - AR - 1; y <= AY + AR + 1; y++) for (let x = AX - AR - 1; x <= AX + AR + 1; x++) { const d = Math.hypot(x - AX, y - AY); if (d > AR && d <= AR + 1.2 && !(x <= AX - AR && Math.abs(y - AY) <= 1)) obj('reja', x, y, 1, 1, true); }
@@ -850,6 +868,10 @@ U.Grid = {
       { id: 'ribera', nombre: 'Ribera Húmeda', x: 26, y: 4, w: 14, h: 40, humedad: 0.92, temp: 0.42, viento: 0.5, suelo: 'tierra', icono: 'agua', tinte: [60, 160, 255, 0.07] },
       { id: 'cenizar', nombre: 'Campo de Ceniza', x: 42, y: 4, w: 19, h: 18, humedad: 0.08, temp: 0.95, viento: 0.55, suelo: 'ceniza', icono: 'fuego', tinte: [255, 120, 40, 0.09] },
       { id: 'arena', nombre: 'Arena de Ecos', x: 41, y: 25, w: 19, h: 19, humedad: 0.25, temp: 0.6, viento: 0.75, suelo: 'arena', abierto: true, icono: 'arena', tinte: [255, 220, 120, 0.04] },
+      { id: 'lagoSur', nombre: 'Lago del Sur', x: 60, y: 44, w: 14, h: 14, humedad: 0.95, temp: 0.45, viento: 0.5, suelo: 'tierra', icono: 'agua', tinte: [60, 160, 255, 0.07] },
+      { id: 'quemado', nombre: 'Suelo Quemado', x: 73, y: 44, w: 11, h: 11, humedad: 0.06, temp: 0.97, viento: 0.5, suelo: 'ceniza', icono: 'fuego', tinte: [255, 120, 40, 0.09] },
+      { id: 'rocosa', nombre: 'Zona Rocosa', x: 55, y: 55, w: 13, h: 7, humedad: 0.3, temp: 0.5, viento: 0.45, suelo: 'tierra', icono: 'bosque', tinte: [150, 130, 90, 0.05] },
+      { id: 'acantilado', nombre: 'Acantilado de Viento', x: 51, y: 44, w: 9, h: 7, humedad: 0.4, temp: 0.45, viento: 0.95, suelo: 'tierra', abierto: true, icono: 'arena', tinte: [126, 240, 192, 0.05] },
       { id: 'bosque', nombre: 'Bosque Susurrante', x: 0, y: 0, w: W, h: H, humedad: 0.55, temp: 0.4, viento: 0.22, suelo: 'tierra', icono: 'bosque', tinte: [40, 90, 60, 0.05] }
     ];
     return { id: 'aldea', nombreMapa: 'Aldea de Bruma', ancho: W, alto: H, tiles, vari, objetos, solidos, zonas, arena: { x: AX, y: AY, r: AR }, ocultarRuna: false, inicio: { x: 16.5, y: 26.5 }, spawns: [[46, 31], [54, 31], [50, 38], [46, 37], [54, 37]], npcs: { kaelen: { x: 21.5, y: 22.5 }, sora: { x: 14.5, y: 26.5 }, torin: { x: 11.5, y: 20.5 }, marisol: { x: 22.5, y: 32.5 }, breno: { x: 18.5, y: 29.5 }, elena: { x: 8.5, y: 24.5 }, marco: { x: 27.5, y: 22.5 }, pipo: { x: 15.5, y: 21.5 } },
@@ -1017,7 +1039,7 @@ U.Grid = {
     const idx = m.objetos.indexOf(o); if (idx >= 0) m.objetos.splice(idx, 1);
     for (let y = o.y; y < o.y + (o.h || 1); y++) for (let x = o.x; x < o.x + (o.w || 1); x++) if (x >= 0 && y >= 0 && x < m.ancho && y < m.alto && m.tiles[y * m.ancho + x] !== this.T.AGUA) m.solidos[y * m.ancho + x] = 0;
     const E = window.U && U.Juego ? U.Juego.estado : null;
-    if (E && E.jugador) { const premio = o.tipo === 'roca' ? 5 : o.tipo === 'arbol' ? 3 : 2; E.jugador.monedas = (E.jugador.monedas || 0) + premio; if (U.Combate) { U.Combate.texto(E.jugador, '+' + premio + ' 🪙', '#ffe14d', 1); U.Combate.particulas(o.x + 0.5, o.y, 16, '#ffe14d', 'chispa'); } if (U.HUD) U.HUD.toast((o.tipo === 'arbol' ? 'Árbol' : o.tipo === 'roca' ? 'Roca' : 'Cactus') + ' destruido: el paso queda libre. +' + premio + ' monedas de materiales.', 'exito'); if (U.Juego && U.Juego.progresoMision) U.Juego.progresoMision('romper', 1); E.flags.rompioObjeto = true; }
+    if (E && E.jugador) { if (U.Combate) U.Combate.particulas(o.x + 0.5, o.y, 10, o.tipo === 'arbol' ? '#46a06a' : '#8b93a3', 'chispa'); if (U.HUD) U.HUD.toast((o.tipo === 'arbol' ? 'Árbol' : o.tipo === 'roca' ? 'Roca' : 'Cactus') + ' destruido: el paso queda libre. (Los materiales no son monedas: el dinero se gana con misiones, arena y torneo.)', 'exito'); E.flags.rompioObjeto = true; }
     if (window.U && U.Audio) U.Audio.sfx('tierra');
     return true;
   },
@@ -1478,6 +1500,9 @@ U.Render = {
       case 'tienda': ctx.fillStyle = '#3d2a18'; ctx.fillRect(x + 2, y - 6, 44, 46); ctx.fillStyle = '#a8c8a0'; ctx.fillRect(x + 4, y - 4, 40, 42); ctx.fillStyle = '#2a7f5c'; ctx.fillRect(x, y - 14, 48, 12); ctx.fillStyle = '#f8fafc'; for (let i = 0; i < 48; i += 12) ctx.fillRect(x + i, y - 14, 6, 12); ctx.fillStyle = '#4a2c1a'; ctx.fillRect(x + 20, y + 16, 8, 22); ctx.fillStyle = '#ffe14d'; ctx.fillRect(x + 7, y + 4, 9, 9); ctx.fillRect(x + 32, y + 4, 9, 9); break;
       case 'mesa': ctx.fillStyle = '#5b3d22'; ctx.fillRect(x, y + 4, 64, 8); ctx.fillRect(x + 4, y + 12, 6, 14); ctx.fillRect(x + 54, y + 12, 6, 14); ctx.fillStyle = '#e8dcc8'; ctx.fillRect(x + 10, y, 18, 5); ctx.fillStyle = '#ffe14d'; ctx.fillRect(x + 40, y + 1, 10, 4); break;
       case 'reliquia': { const b = Math.round(Math.sin(this.tiempo * 4) * 2); ctx.fillStyle = '#ffe14d'; ctx.fillRect(x + 5, y + 2 + b, 6, 8); ctx.fillStyle = '#fff7c2'; ctx.fillRect(x + 7, y + 4 + b, 2, 3); ctx.fillStyle = 'rgba(255,225,77,.35)'; ctx.fillRect(x + 2, y - 1 + b, 12, 14); } break;
+      case 'encargo': case 'perdido': { const b = Math.round(Math.sin(this.tiempo * 4) * 2); ctx.fillStyle = o.tipo === 'encargo' ? '#d9a441' : '#7cc4ff'; ctx.fillRect(x + 3, y + 5 + b, 10, 8); ctx.fillStyle = '#fff7c2'; ctx.fillRect(x + 7, y + 5 + b, 2, 8); ctx.fillRect(x + 3, y + 8 + b, 10, 2); ctx.fillStyle = 'rgba(255,225,77,.3)'; ctx.fillRect(x + 1, y + 2 + b, 14, 13); } break;
+      case 'pista': { const b = Math.round(Math.sin(this.tiempo * 3) * 1); ctx.fillStyle = '#7cc4ff'; ctx.fillRect(x + 4, y + 10 + b, 3, 3); ctx.fillRect(x + 9, y + 7 + b, 3, 3); ctx.fillRect(x + 6, y + 3 + b, 3, 3); } break;
+      case 'cautivo': { ctx.fillStyle = '#e8c39e'; ctx.fillRect(x + 5, y + 1, 6, 6); ctx.fillStyle = '#5b4a8a'; ctx.fillRect(x + 4, y + 7, 8, 7); ctx.fillStyle = '#ffe14d'; ctx.fillRect(x + 2, y + 13, 12, 2); } break;
       case 'puertaOficina': ctx.fillStyle = '#3d2a18'; ctx.fillRect(x + 1, y - 27, 14, 31); ctx.fillStyle = '#d9a441'; ctx.fillRect(x + 3, y - 25, 10, 27); ctx.fillStyle = '#fff7c2'; ctx.fillRect(x + 10, y - 13, 2, 2); break;
       case 'puertaTienda': ctx.fillStyle = '#3d2a18'; ctx.fillRect(x + 3, y - 17, 10, 25); ctx.fillStyle = '#d9a441'; ctx.fillRect(x + 4, y - 16, 8, 23); ctx.fillStyle = '#fff7c2'; ctx.fillRect(x + 9, y - 6, 2, 2); break;
       case 'puertaCasa': ctx.fillStyle = '#3d2a18'; ctx.fillRect(x + 3, y - 3, 10, 19); ctx.fillStyle = '#8f6a42'; ctx.fillRect(x + 4, y - 2, 8, 17); ctx.fillStyle = '#ffd08a'; ctx.fillRect(x + 10, y + 6, 2, 2); ctx.fillStyle = '#ffe14d'; ctx.fillRect(x + 3, y - 6, 10, 2); break;
@@ -1957,6 +1982,8 @@ U.Vida = {
   // Movimiento de los NPC que están en el mapa del jugador.
   mover(n, dt, j) {
     const E = U.Juego.estado; if (!E || !E.mapa) return;
+    if (n.enEscolta) { n.moviendo = false; return; } // la escolta camina con su propia lógica (U.Juego.tickEscolta)
+    if (n.buscaJugador && n.mapa === E.mapaId && !n.enCasa) { this.caminarA(n, dt, { x: j.x, y: j.y }, 2.9, E); return; } // un NPC que te busca para pedirte algo
     const hora = U.Tiempo.hora(E);
     const dest = this.slotDe(n, hora, E); n.destinoActual = dest;
     if (n.enCasa) {
@@ -2204,6 +2231,7 @@ U.Crecimiento = {
   stat(stat, base, desafio) {
     const j = U.Juego.estado.jugador; const d = desafio == null ? 1 : desafio; if (d <= 0 || base <= 0) return 0;
     let m = 1; if (U.Atributos.esFavorita(j.atributo, stat)) m = 2; if (U.Atributos.esPenalizada(j.atributo, stat)) m *= 0.6;
+    if (stat === 'velocidad' && j.polainaEquipada && U.Juego.estado.enCombate) m *= (j.polainaMultCrec || 1); // POLAINAS: en combate la Velocidad crece más rápido
     let c = base * d * m; const tope = U.Estadisticas.topes[stat];
     const antes = j.stats[stat]; j.stats[stat] = tope ? Math.min(tope, antes + c) : antes + c; c = j.stats[stat] - antes;
     if (stat === 'vida') j.vida = Math.min(j.stats.vida, j.vida + c); if (stat === 'esencia') j.esencia = Math.min(j.stats.esencia, j.esencia + c);
@@ -2522,11 +2550,40 @@ U.Recuperacion = {
     return true;
   },
   restaurar(c) { const j = U.Juego.estado.jugador; j.esencia = Math.min(j.stats.esencia, j.esencia + c); },
+  sincronizar(j) { j.bolsaPociones = j.bolsaPociones || []; j.pociones = j.bolsaPociones.length; },
+  // Botón rápido (Q / frasco): toma la poción de VIDA MÁS CHICA, para no desperdiciar una grande.
   pocion() {
-    const j = U.Juego.estado.jugador; if (j.pociones <= 0) { U.HUD.toast('No tienes pociones. Sora puede darte alguna.', 'aviso'); U.Audio.sfx('fail'); return; }
-    if (j.vida >= j.stats.vida) { U.HUD.toast('Tu Vida ya está llena.', ''); return; }
-    j.pociones--; const cura = Math.round(j.stats.vida * 0.5); j.vida = Math.min(j.stats.vida, j.vida + cura);
-    U.Combate.texto(j, '+' + cura + ' VIDA', '#67e08a', 2); U.Combate.particulas(j.x, j.y - 0.6, 14, '#67e08a', 'cura'); U.Audio.sfx('cura'); U.HUD.toast('Poción: +50% de Vida máxima.', 'exito');
+    const j = U.Juego.estado.jugador; this.sincronizar(j);
+    let idx = -1, menor = Infinity;
+    j.bolsaPociones.forEach((p, i) => { if (p.tipo === 'vida' && p.unidades < menor) { menor = p.unidades; idx = i; } });
+    if (idx < 0) { U.HUD.toast('No tienes poción de Vida en la mochila. Marisol te prepara una a medida en la tienda (tú eliges las unidades).', 'aviso'); U.Audio.sfx('fail'); return; }
+    this.usarPocion(idx);
+  },
+  usarPocion(idx) {
+    const E = U.Juego.estado, j = E.jugador; this.sincronizar(j);
+    const p = j.bolsaPociones[idx]; if (!p) return;
+    if (p.tipo === 'vida' && j.vida >= j.stats.vida) { U.HUD.toast('Tu Vida ya está llena: no desperdicies la poción (lo que sobra al tomarla se pierde).', 'aviso'); return; }
+    if (p.tipo === 'esencia' && j.esencia >= j.stats.esencia) { U.HUD.toast('Tu Esencia ya está llena.', 'aviso'); return; }
+    if (p.tipo === 'condicion' && (j.cansancio || 0) >= this.condicionMax(j)) { U.HUD.toast('Tu Condición ya está al máximo.', 'aviso'); return; }
+    j.bolsaPociones.splice(idx, 1); this.sincronizar(j);
+    if (p.tipo === 'vida') { const antes = j.vida; j.vida = Math.min(j.stats.vida, j.vida + p.unidades); U.Combate.texto(j, '+' + Math.round(j.vida - antes) + ' VIDA', '#67e08a', 2); U.HUD.toast('Poción +' + p.unidades + ': curó ' + Math.round(j.vida - antes) + (p.unidades > j.vida - antes ? ' (el exceso se perdió, como debe ser)' : '') + '.', 'exito'); }
+    else if (p.tipo === 'esencia') { const antes = j.esencia; j.esencia = Math.min(j.stats.esencia, j.esencia + p.unidades); j.agotado = false; U.Combate.texto(j, '+' + Math.round(j.esencia - antes) + ' ESE', '#4da3ff', 2); U.HUD.toast('Tónico +' + p.unidades + ' de Esencia.', 'exito'); }
+    else { const maxC = this.condicionMax(j); const antes = j.cansancio != null ? j.cansancio : maxC; j.cansancio = Math.min(maxC, antes + p.unidades); U.Combate.texto(j, '+' + Math.round(j.cansancio - antes) + ' CONDICIÓN', '#a9c795', 2); U.HUD.toast('Poción de Condición +' + p.unidades + '.', 'exito'); }
+    U.Combate.particulas(j.x, j.y - 0.6, 14, '#67e08a', 'cura'); U.Audio.sfx('cura');
+  },
+  // COMER desde la mochila: máx 3 al día, solo fuera de combate, sube PORCENTAJE según TU ranking de sabores. No restaura Condición.
+  comer(idx) {
+    const E = U.Juego.estado, j = E.jugador;
+    if (E.enCombate) { U.HUD.toast('No puedes comer en combate.', 'aviso'); U.Audio.sfx('fail'); return; }
+    if ((j.comidasHoy || 0) >= 3) { U.HUD.toast('Ya comiste 3 veces hoy. Mañana, más.', 'aviso'); return; }
+    const sabor = (j.bolsaComida || [])[idx]; if (!sabor) return;
+    j.bolsaComida.splice(idx, 1); j.comidasHoy = (j.comidasHoy || 0) + 1;
+    const ranking = j.sabores || U.Economia.SABORES; const puesto = Math.max(0, ranking.indexOf(sabor));
+    const ef = U.Economia.COMER[puesto] || U.Economia.COMER[4];
+    const dv = Math.round(j.stats.vida * ef.vida / 100), de = Math.round(j.stats.esencia * ef.esencia / 100);
+    j.vida = Math.min(j.stats.vida, j.vida + dv); j.esencia = Math.min(j.stats.esencia, j.esencia + de); if (j.esencia > 0) j.agotado = j.esencia < j.stats.esencia * 0.25 ? j.agotado : false;
+    U.Combate.particulas(j.x, j.y - 0.6, 10, '#ffb347', 'cura'); U.Audio.sfx('cura');
+    U.HUD.toast('Comida ' + sabor + ' (tu sabor nº ' + (puesto + 1) + '): ' + (dv ? '+' + dv + ' Vida · ' : '') + (de ? '+' + de + ' Esencia' : puesto === 4 ? 'solo te llena: es tu sabor menos querido' : '') + ' · Comidas de hoy: ' + j.comidasHoy + '/3. (La comida no restaura Condición.)', 'exito');
   },
   toggleDescanso() {
     const E = U.Juego.estado, j = E.jugador;
@@ -2752,7 +2809,7 @@ U.Combate = {
     const celdas = U.Grid.forma('cono', j.x, j.y, j.dir, h.alcance, 1); const el = U.Elementos.datos[j.elementoActivo];
     E.efectos.cortes.push({ x: j.x, y: j.y, dir: j.dir, color: cargado ? el.claro : '#f8fafc', t: 0.18, max: 0.18 });
     U.Audio.sfx(cargado ? 'cargado' : 'yin'); this.sacudir(cargado ? 0.6 : 0.2);
-    this.golpearObjetos(celdas, atk * h.power * 0.95);
+    this.golpearObjetos(celdas, atk * h.power * 0.95); this.golpearInocentes(celdas);
     let golpes = 0; this.vivos().forEach(e => { if (U.Grid.enCeldas(celdas, e)) { golpes++; this.dañoEnemigo(e, atk * h.power, null, { desafio: this.desafio(e), cargado }); U.Recuperacion.restaurar(h.restaura); this.texto(j, '+' + h.restaura + ' ESE', '#4da3ff', 1); } });
     U.Crecimiento.estilo('yin', cargado ? 0.4 : 0.15, E.enCombate ? 1 : 0.2); if (golpes && U.Juego.progresoEntreno) U.Juego.progresoEntreno('golpes', golpes);
     if (golpes) { U.Crecimiento.stat('ataque', 0.05 * golpes, this.desafio(this.vivos()[0] || j)); E.resumen.golpes += golpes; if (cargado) E.hitstop = 0.05; }
@@ -2780,7 +2837,7 @@ U.Combate = {
     j.cdTec[h.id] = h.cd; j.ataqueAnim = 0.3; j.descansando = false; const el = U.Elementos.datos[j.elementoActivo]; const atk = j.stats.ataque * (j.buffs.sobrecarga > 0 ? 2 : 1); const base = atk * h.power;
     U.Audio.sfx(j.elementoActivo); this.sacudir(0.4); E.resumen.tecnicas++;
     let objetivo = this.vivos()[0]; let desafio = 0.5;
-    const golpear = (celdas, opts) => { this.golpearObjetos(celdas, base * 0.85); this.vivos().forEach(e => { if (U.Grid.enCeldas(celdas, e)) { this.dañoEnemigo(e, base, j.elementoActivo, Object.assign({ desafio: this.desafio(e) }, opts || {}, h.efecto || {})); desafio = Math.max(desafio, this.desafio(e)); objetivo = e; } }); };
+    const golpear = (celdas, opts) => { this.golpearObjetos(celdas, base * 0.85); this.golpearInocentes(celdas); this.vivos().forEach(e => { if (U.Grid.enCeldas(celdas, e)) { this.dañoEnemigo(e, base, j.elementoActivo, Object.assign({ desafio: this.desafio(e) }, opts || {}, h.efecto || {})); desafio = Math.max(desafio, this.desafio(e)); objetivo = e; } }); };
     switch (h.forma) {
       case 'linea': case 'rect': { const celdas = U.Grid.forma(h.forma, j.x, j.y, j.dir, h.alcance, h.radio || 0); E.efectos.haces.push({ celdas, color: el.color, t: 0.3, max: 0.3 }); golpear(celdas); this.particulas(j.x + j.dir.x * 2, j.y + j.dir.y * 2 - 0.5, 10, el.claro, j.elementoActivo === 'agua' ? 'agua' : 'chispa'); break; }
       case 'cono': { const celdas = U.Grid.forma('cono', j.x, j.y, j.dir, h.alcance, 0); E.efectos.haces.push({ celdas, color: el.color, t: 0.35, max: 0.35 }); golpear(celdas); this.particulas(j.x + j.dir.x * 1.5, j.y + j.dir.y * 1.5 - 0.5, 16, el.claro, 'brasa'); break; }
@@ -2796,7 +2853,7 @@ U.Combate = {
   },
   dash() {
     const E = U.Juego.estado, j = E.jugador; if (j.dash.cd > 0 || j.dash.t > 0) return; if (!U.Recuperacion.gastar(U.Habilidades.yin.dash.costo)) return;
-    const I = U.Juego.input; const d = (I && I.mag > 0.1) ? U.Grid.dir8(I.vx, I.vy) : j.dir; const dist = 2.2 + j.stats.velocidad * 0.06 * (j.buffs.sobrecarga > 0 ? 1.5 : 1);
+    const I = U.Juego.input; const d = (I && I.mag > 0.1) ? U.Grid.dir8(I.vx, I.vy) : j.dir; const dist = (2.2 + j.stats.velocidad * 0.06 * (j.buffs.sobrecarga > 0 ? 1.5 : 1)) * (j.elementoActivo === 'rayo' ? 1.6 : 1); // Rayo: paso relámpago
     j.dash = { t: 0.16, cd: 0.6, dx: d.x * dist / 0.16, dy: d.y * dist / 0.16 }; j.invuln = Math.max(j.invuln, 0.24); j.dir = d; j.descansando = false; j.cargando = false;
     U.Audio.sfx('dash'); this.particulas(j.x, j.y - 0.3, 8, '#7ef0c0', 'polvo'); U.Crecimiento.stat('velocidad', E.enCombate ? 0.1 : 0.01, 1); U.Crecimiento.estilo('yin', 0.05, 1); E.resumen.dashes++; if (U.Juego.progresoEntreno) U.Juego.progresoEntreno('esquiva', 1);
   },
@@ -2810,6 +2867,10 @@ U.Combate = {
   seleccionarTec(i) { const j = U.Juego.estado.jugador; const h = U.Habilidades.elementos[j.elementoActivo][i]; if (!h) return; if ((j.maestria[j.elementoActivo] || 0) < h.umbral) { U.HUD.toast(h.nombre + ': maestría ' + h.umbral + '% requerida.', 'aviso'); U.Audio.sfx('fail'); return; } j.tecnicaIdx = i; U.Audio.sfx('click'); U.HUD.refrescarChips(); },
   seleccionarYang(f) { const j = U.Juego.estado.jugador; if (!j.tieneYang) { U.HUD.toast('Yang sin despertar: entrénalo hasta ' + U.Habilidades.yangDespertar + ' (meditar al descansar, sesiones con Torin) y despertará.', 'aviso'); return; } const h = U.Habilidades.yang[f]; if (j.estilos.yang < h.umbral) { U.HUD.toast(h.nombre + ': estilo Yang ' + h.umbral + ' requerido.', 'aviso'); U.Audio.sfx('fail'); return; } j.yangForma = f; U.Audio.sfx('click'); U.HUD.refrescarChips(); },
 
+  golpearInocentes(celdas) {
+    const E = U.Juego.estado; if (!celdas || !E.npcs) return;
+    E.npcs.forEach(n => { if (n.enCasa || n.ocultoSparring) return; if (U.Grid.enCeldas(celdas, n)) { U.Economia.karmaAdd(-10, U.Economia.puebloDeMapa(n.mapa)); U.Economia.confianza(n, -15); this.texto(n, '¡A UN INOCENTE!', '#ff4d4d', 1); if (!n.hechos) n.hechos = []; n.hechos.push('le pegaste sin razón'); U.HUD.toast('Pegaste a ' + n.nombre + ', un inocente: karma −10 en este pueblo y su confianza cae.', 'peligro'); } });
+  },
   // ---------- daño ----------
   dañoEnemigo(e, base, elemento, o) {
     o = o || {}; const E = U.Juego.estado;
@@ -2847,7 +2908,10 @@ U.Combate = {
     if (e.esSparring) { e.vida = Math.max(1, Math.ceil(e.stats.vida * 0.10)); e.retirarSparring = true; return; }
     const E = U.Juego.estado; e.vida = 0; e.estado = 'muerto'; E.resumen.bajas++; U.Audio.sfx('muerte'); this.particulas(e.x, e.y - 0.6, 24, U.Elementos.color(e.elemento), 'chispa'); this.particulas(e.x, e.y - 0.6, 8, '#9fb3d9', 'humo'); this.sacudir(0.6); E.hitstop = 0.06;
     E.orbes.push({ x: e.x, y: e.y, t: 12 });
-    { const premio = { bandido: 6, brasa: 7, chaman: 10, ilusionista: 12, veterano: 16 }[e.clase] || 5; E.jugador.monedas = (E.jugador.monedas || 0) + premio; this.texto(e, '+' + premio + ' 🪙', '#ffe14d', 1); if (U.Juego.progresoMision) { if (E.mapaId === 'bosque') U.Juego.progresoMision('caza_bosque', 1); if (e.esProteccion) U.Juego.progresoMision('proteccion', 1); } }
+    { const premio = { bandido: 6, brasa: 7, chaman: 10, ilusionista: 12, veterano: 16 }[e.clase] || 5; E.jugador.monedas = (E.jugador.monedas || 0) + premio; this.texto(e, '+' + premio + ' 🪙', '#ffe14d', 1);
+      if (e.esBestia && U.Juego.progresoMision) U.Juego.progresoMision('cazar', 1);
+      if (e.esRescate && U.Juego.progresoMision) U.Juego.progresoMision('rescatar', 1);
+      if (e.esEscolta && E.escolta) E.escolta.bandidosFuera = (E.escolta.bandidosFuera || 0) + 1; }
     const ds = this.desafio(e); U.Crecimiento.stat('ataque', 0.2, ds); U.Crecimiento.stat('mente', 0.12, ds); U.Crecimiento.maestria(e.elemento === E.jugador.elementoActivo ? e.elemento : E.jugador.elementoActivo, 0.6, ds);
     this.texto(e, 'CAÍDO', '#e8dcc8', 1);
   },
@@ -2868,9 +2932,10 @@ U.Combate = {
       if (e.efectos.stun > 0) { e.efectos.stun -= dt; e.moviendo = false; return; }
       if (e.efectos.slow > 0) e.efectos.slow -= dt;
       if (e.efectos.dot) { const d = e.efectos.dot; d.t -= dt; d.tick += dt; if (d.tick >= 0.5) { d.tick = 0; const dd = Math.max(1, Math.round(d.dmg)); e.vida -= dd; E.resumen.daño += dd; this.texto(e, '-' + dd, '#ff7a2f', 1); this.particulas(e.x, e.y - 0.8, 2, '#ff7a2f', 'brasa'); if (e.vida <= 0) { this.morir(e); return; } } if (d.t <= 0) e.efectos.dot = null; }
-      const c = this.CLASES[e.clase]; const dx = j.x - e.x, dy = j.y - e.y, d = Math.hypot(dx, dy) || 0.001; e.dir = U.Grid.dir8(dx, dy);
+      const c = this.CLASES[e.clase]; const tgt = (e.esEscolta && E.escolta && E.escolta.activa) ? E.escolta.npc : j; const dx = tgt.x - e.x, dy = tgt.y - e.y, d = Math.hypot(dx, dy) || 0.001; e.dir = U.Grid.dir8(dx, dy); e.tgtEscolta = tgt !== j;
       const vel = (2.4 + e.stats.velocidad * 0.06) * (e.efectos.slow > 0 ? 0.45 : 1);
       if (e.estado === 'telegrafia') { e.t -= dt; e.moviendo = false; if (e.t <= 0) { this.ataqueEnemigo(e, c); e.estado = 'recupera'; e.t = 0.25; e.cd = c.cd / E.dificultad; E.efectos.telegrafos = E.efectos.telegrafos.filter(t => t.owner !== e); } return; }
+      if (e.tgtEscolta) { /* su movimiento ya va hacia el escoltado por dx/dy */ }
       if (e.estado === 'recupera') { e.t -= dt; if (e.t <= 0) e.estado = 'persigue'; e.moviendo = false; return; }
       if (e.efectos.invertido > 0) e.efectos.invertido -= dt;
       // movimiento
@@ -2893,6 +2958,7 @@ U.Combate = {
     else if (c.forma === 'linea') { E.efectos.haces.push({ celdas: e.tele, color: el.color, t: 0.25, max: 0.25 }); U.Audio.sfx('viento'); }
     else { E.efectos.haces.push({ celdas: e.tele, color: el.color, t: 0.25, max: 0.25 }); U.Audio.sfx(e.elemento); }
     this.particulas(e.x + e.dir.x, e.y + e.dir.y - 0.5, 8, el.claro, 'chispa');
+    if (e.esEscolta && E.escolta && E.escolta.activa && U.Grid.enCeldas(e.tele, E.escolta.npc)) { U.Juego.escoltaDanada(E.escolta.npc, Math.max(1, Math.round(U.Estadisticas.formulaDaño(e.stats.ataque * c.power, 6)))); return; }
     if (U.Grid.enCeldas(e.tele, j)) { const esFisico = c.forma === 'cono' || c.forma === 'circulo'; this.dañoJugador(e.stats.ataque * c.power, e, c.efecto, { elemento: esFisico ? null : e.elemento, proyectil: false, ox: e.x, oy: e.y }); }
     e.ataqueAnim = 0.2;
   },
@@ -2918,6 +2984,9 @@ U.Combate = {
   // ---------- arena por oleadas ----------
   iniciarArena() {
     const E = U.Juego.estado, j = E.jugador; if (E.arena.activa) return;
+    if (U.Economia.permisoVigente()) { j.permisoUsos = (j.permisoUsos || 0) + 1; U.HUD.toast('Entrada a la arena cubierta por tu permiso de viajero.', 'exito'); }
+    else if ((j.monedas || 0) >= 10) { j.monedas -= 10; U.HUD.toast('Entrada a la arena: −10 🪙. Solo cobras si completas TODA la ronda: 50 🪙.', 'aviso'); }
+    else { U.HUD.toast('La arena cuesta 10 🪙 de entrada y tienes ' + Math.floor(j.monedas || 0) + '. Sin monedas no hay ronda: gana con misiones del tablón.', 'peligro'); U.Audio.sfx('fail'); return; }
     E.arena = { activa: true, ronda: E.arena.ronda || 1, oleada: 1, total: 3, entre: 0, spawned: false, cuenta: 0 };
     E.resumen = { daño: 0, recibido: 0, golpes: 0, tecnicas: 0, yang: 0, bajas: 0, esquives: 0, dashes: 0, crecimiento: {}, maestria: {} };
     j.descansando = false; U.Audio.musica('arena'); U.Audio.sfx('oleada'); U.HUD.banner('RONDA ' + E.arena.ronda + ' · OLEADA 1', 1.8); U.HUD.toast('Sobrevive 3 oleadas. Sal del círculo para abandonar.', '');
@@ -2936,7 +3005,7 @@ U.Combate = {
     const vivos = this.vivos().length;
     if (A.entre > 0) { A.entre -= dt; A.cuenta += dt; if (A.cuenta >= 1) { A.cuenta = 0; if (A.entre > 0.5) U.HUD.banner('OLEADA ' + A.oleada + ' EN ' + Math.ceil(A.entre), 0.9); } if (A.entre <= 0) this.spawnOleada(); return; }
     if (A.spawned && vivos === 0) {
-      if (A.oleada >= A.total) { A.activa = false; const premioArena = 40 + A.ronda * 15; E.jugador.monedas = (E.jugador.monedas || 0) + premioArena; E.flags.ultimoPremio = premioArena; E.flags.victoria = true; E.objetivos[2].estado = 'hecho'; U.Audio.musica('aldea'); U.Audio.sfx('victoria'); U.Juego.fin('victoria'); }
+      if (A.oleada >= A.total) { A.activa = false; const premioArena = 50; E.jugador.monedas = (E.jugador.monedas || 0) + premioArena; E.flags.ultimoPremio = premioArena; E.flags.victoria = true; E.objetivos[2].estado = 'hecho'; U.Audio.musica('aldea'); U.Audio.sfx('victoria'); U.HUD.toast('Ronda completa: +50 🪙. (Nada por oleada: solo se cobra al terminar toda la ronda.)', 'exito'); U.Juego.fin('victoria'); }
       else { A.oleada++; A.spawned = false; A.entre = 4; A.cuenta = 0; U.HUD.toast('Oleada ' + (A.oleada - 1) + ' superada. Respira: sin enemigos la Esencia se recarga más rápido… pero sigues en la arena.', 'exito'); U.Recuperacion.restaurar(j.stats.esencia * 0.15); }
     }
   },
@@ -2952,14 +3021,17 @@ U.Combate = {
   ],
   iniciarTorneo() {
     const E = U.Juego.estado, j = E.jugador; if (E.torneo || E.arena.activa || E.reto) { U.HUD.toast('Ya hay un combate organizado en curso.', 'aviso'); return; }
+    if ((j.monedas || 0) < 50) { U.HUD.toast('El torneo cuesta 50 🪙 de entrada (el permiso NO lo cubre) y tienes ' + Math.floor(j.monedas || 0) + '. Solo cobra el podio: 1º 300 · 2º 150 · 3º 80.', 'peligro'); U.Audio.sfx('fail'); return; }
+    j.monedas -= 50; U.HUD.toast('Entrada al torneo: −50 🪙. Nada por ronda: solo cobra el podio (300 / 150 / 80).', 'aviso');
     if (U.Grid.dist(j, { x: E.mapa.arena.x + 0.5, y: E.mapa.arena.y + 0.5 }) > E.mapa.arena.r + 3 && E.mapaId !== 'aldea') { /* se puede inscribir desde Kaelen/Aldric y pelear en la arena */ }
-    E.torneo = { idx: 0, entre: 2.5, spawned: false, activo: true };
+    E.torneo = { idx: 0, entre: 2.5, spawned: false, activo: true, fase: 'bracket' };
     j.vida = j.stats.vida; j.esencia = j.stats.esencia; j.agotado = false; j.escudo = false; j.cansancio = U.Recuperacion.condicionMax(j); j.gastoFatiga = 0;
     U.HUD.banner('🏆 TORNEO DE BRUMA · OCTAVOS DE FINAL', 2.4); U.Audio.sfx('oleada'); U.Audio.musica('arena');
-    U.HUD.toast('Torneo: 4 rondas de 1 contra 1 (octavos, cuartos, semifinal y final). Entre rondas te recuperas AL COMPLETO. Premio del campeón: 150 monedas y 2 pociones. Ve a la Arena de Ecos (sureste) para pelear.', 'exito');
+    U.HUD.toast('Torneo: octavos, cuartos, semifinal y final, 1 contra 1. Entre rondas te recuperas AL COMPLETO. Solo cobra el podio: 1º 300 🪙 · 2º 150 · 3º 80 (los que pierden la semifinal juegan por el 3º lugar). Ve a la Arena de Ecos (sureste) para pelear.', 'exito');
   },
+  TORNEO_TERCERO: { fase: 'PARTIDO POR EL 3º LUGAR', nombre: 'El Otro Semifinalista', clase: 'chaman', mult: 1.15 },
   spawnTorneo() {
-    const E = U.Juego.estado, T = E.torneo; if (!T) return; const def = this.TORNEO[T.idx]; if (!def) return;
+    const E = U.Juego.estado, T = E.torneo; if (!T) return; const def = T.fase === 'tercero' ? this.TORNEO_TERCERO : this.TORNEO[T.idx]; if (!def) return;
     const j = E.jugador; const cx = E.mapaId === 'aldea' ? E.mapa.arena.x + 0.5 : j.x + 3, cy = E.mapaId === 'aldea' ? E.mapa.arena.y + 0.5 : j.y;
     const e = this.crearEnemigo(def.clase, cx + 2.5, cy, def.mult * E.dificultad); e.nombre = def.nombre; e.esTorneo = true; E.enemigos.push(e); T.spawned = true;
     this.particulas(e.x, e.y - 0.5, 18, '#ffe14d', 'humo'); U.HUD.banner('🏆 ' + def.fase + ' · ' + def.nombre.toUpperCase(), 2); U.Audio.sfx('oleada');
@@ -2968,11 +3040,29 @@ U.Combate = {
     const E = U.Juego.estado, T = E.torneo; if (!T || !T.activo) return; const j = E.jugador;
     if (T.entre > 0) { T.entre -= dt; if (T.entre <= 0) this.spawnTorneo(); return; }
     if (T.spawned && this.vivos().filter(e => e.esTorneo).length === 0) {
-      T.idx++; T.spawned = false;
+      T.spawned = false;
       j.vida = j.stats.vida; j.esencia = j.stats.esencia; j.agotado = false; j.cansancio = U.Recuperacion.condicionMax(j); j.gastoFatiga = 0; // recuperación total entre rondas (también la Condición, al 100% de su máximo)
-      if (T.idx >= this.TORNEO.length) { E.torneo = null; E.historial.torneos = (E.historial.torneos || 0) + 1; j.monedas = (j.monedas || 0) + 150; j.pociones = Math.min(9, j.pociones + 2); U.HUD.banner('🏆 ¡CAMPEÓN DEL TORNEO DE BRUMA! · +150 🪙 · +2 POCIONES', 3); U.Audio.sfx('victoria'); U.Audio.musica('aldea'); U.HUD.toast('Campeón: te recuperaste tras cada ronda y el premio ya está en tu bolsa.', 'exito'); }
+      if (T.fase === 'tercero') { E.torneo = null; j.monedas = (j.monedas || 0) + 80; U.HUD.banner('🥉 ¡TERCER LUGAR DEL TORNEO! · +80 🪙', 3); U.Audio.sfx('victoria'); U.Audio.musica('aldea'); U.HUD.toast('Tercer lugar: cobras 80 🪙 (neto +30 tras la entrada de 50).', 'exito'); return; }
+      T.idx++;
+      if (T.idx >= this.TORNEO.length) { E.torneo = null; E.historial.torneos = (E.historial.torneos || 0) + 1; j.monedas = (j.monedas || 0) + 300; U.HUD.banner('🏆 ¡CAMPEÓN DEL TORNEO DE BRUMA! · +300 🪙', 3); U.Audio.sfx('victoria'); U.Audio.musica('aldea'); U.HUD.toast('Campeón: 300 🪙 (neto +250 tras la entrada). Nada por ronda: solo cobró el podio.', 'exito'); }
       else { T.entre = 3; U.HUD.banner('✅ RONDA SUPERADA · TE RECUPERAS AL 100% · SIGUE: ' + this.TORNEO[T.idx].fase, 2.2); U.Audio.sfx('cura'); this.particulas(j.x, j.y - 1, 16, '#67e08a', 'cura'); }
     }
+  },
+  // Derrota en el torneo: la colocación manda. Semifinal → partido por el 3º lugar; final → 2º (150); antes → 0.
+  derrotaTorneo() {
+    const E = U.Juego.estado, T = E.torneo, j = E.jugador; if (!T) return false;
+    E.enemigos = E.enemigos.filter(e => !e.esTorneo); E.proyectiles = []; U.Audio.musica('aldea');
+    if (T.fase !== 'tercero' && T.idx === 2) { T.fase = 'tercero'; T.spawned = false; T.entre = 3; j.vida = j.stats.vida; j.esencia = j.stats.esencia; j.agotado = false; j.escudo = false; j.cansancio = U.Recuperacion.condicionMax(j); U.HUD.banner('🏆 PERDISTE LA SEMIFINAL · JUEGAS POR EL 3º LUGAR (80 🪙)', 2.6); U.Audio.sfx('cura'); return true; }
+    let premio = 0, txt = '';
+    if (T.fase === 'tercero') { txt = 'Cuarto lugar: no cobras nada (la entrada de 50 se perdió).'; }
+    else if (T.idx >= 3) { premio = 150; txt = 'Segundo lugar: cobras 150 🪙 (neto +100 tras la entrada).'; }
+    else { txt = 'Eliminado antes del podio: no cobras nada (la entrada de 50 se perdió).'; }
+    E.torneo = null;
+    if (premio) j.monedas = (j.monedas || 0) + premio;
+    U.HUD.banner(premio ? '🥈 ¡SEGUNDO LUGAR! · +150 🪙' : '🏆 TORNEO TERMINADO SIN PODIO', 2.6); U.Audio.sfx(premio ? 'victoria' : 'derrota');
+    setTimeout(() => U.HUD.toast(txt, premio ? 'exito' : 'aviso'), 300);
+    U.Juego.despertar();
+    return true;
   },
   cancelarTorneo() { const E = U.Juego.estado; if (E.torneo) { E.enemigos = E.enemigos.filter(e => !e.esTorneo); E.torneo = null; } },
   // HECHIZO DE INVERSIÓN del jugador (se aprende en el obelisco de la Montaña, tecla V):
@@ -2999,7 +3089,7 @@ U.Combate = {
     const E = U.Juego.estado; if (!E.reto) return;
     E.reto.t -= dt;
     const quedan = this.vivos().filter(e => e.esReto).length;
-    if (quedan === 0) { const guia = E.reto.guia; E.reto = null; E.historial.retos++; const j = E.jugador; if (j.pociones < 3) j.pociones++; U.Crecimiento.stat('ataque', 0.4, 1); U.Crecimiento.stat('defensa', 0.3, 1); U.HUD.banner('🏆 ¡RETO SUPERADO! · +1 POCIÓN', 2.2); U.Audio.sfx('victoria'); if (!E.arena.activa) U.Audio.musica(E.mapaId === 'bosque' ? 'bosque' : 'aldea'); const n = E.npcs.find(x => x.id === guia); if (n) { U.Emociones.evento(n, { realidad: 88, energia: 18, etiqueta: 'reto superado' }); n.hechos.push('superaste su reto de combate'); } return; }
+    if (quedan === 0) { const guia = E.reto.guia; E.reto = null; E.historial.retos++; const j = E.jugador; if ((j.bolsaPociones || []).length < 3) { j.bolsaPociones.push({ tipo: 'vida', unidades: 50, precio: 0 }); U.Recuperacion.sincronizar(j); } U.Crecimiento.stat('ataque', 0.4, 1); U.Crecimiento.stat('defensa', 0.3, 1); U.HUD.banner('🏆 ¡RETO SUPERADO! · +1 POCIÓN', 2.2); U.Audio.sfx('victoria'); if (!E.arena.activa) U.Audio.musica(E.mapaId === 'bosque' ? 'bosque' : 'aldea'); const n = E.npcs.find(x => x.id === guia); if (n) { U.Emociones.evento(n, { realidad: 88, energia: 18, etiqueta: 'reto superado' }); n.hechos.push('superaste su reto de combate'); } return; }
     if (E.reto.t <= 0) { E.enemigos.forEach(e => { if (e.esReto) e.vida = 0; }); E.reto = null; U.HUD.banner('RETO ACABADO · SE TE ACABÓ EL TIEMPO', 1.8); U.Audio.sfx('derrota'); if (!E.arena.activa) U.Audio.musica('aldea'); }
   },
   actualizar(dt) {
@@ -3087,7 +3177,7 @@ U.Dialogo = {
         { t: 'Saludarlo con calidez', realidad: 72, energia: 5, resp: { pos: 'Así se habla. Bruma necesita gente así.', neg: '…gracias. Supongo.' }, et: 'saludo' },
         { t: 'Preguntar por la arena', realidad: 60, energia: 5, resp: { pos: 'Tres oleadas. La runa del centro las activa. Los enemigos marcan el suelo antes de golpear: muévete o esquiva con el dash.', neg: 'Runa del centro. Tres oleadas. Eso es todo.' }, accion: 'arena', et: 'pregunta' },
         { t: 'Reto de combate de Kaelen (duelo con tiempo)', realidad: 66, energia: 15, resp: { pos: 'Acepto el reto.', neg: 'Sin reto.' }, accion: 'reto', et: 'reto' },
-        { t: '🏆 Inscribirme al TORNEO DE BRUMA (octavos → final, en la Arena)', realidad: 70, energia: 15, resp: { pos: 'Inscrito. Ve a la Arena de Ecos: allí saldrá tu rival de octavos.', neg: 'Inscrito.' }, accion: 'torneo', et: 'torneo' },
+        { t: '🏆 Inscribirme al TORNEO DE BRUMA (entrada 50 🪙 · solo cobra el podio)', realidad: 70, energia: 15, resp: { pos: 'Inscrito con la entrada cobrada al pelear. Ve a la Arena de Ecos: allí saldrá tu rival de octavos. Solo cobra el podio: 300, 150 y 80.', neg: 'Inscrito.' }, accion: 'torneo', et: 'torneo' },
         { t: 'Entrenar con Kaelen: guardia y esquiva (guía)', realidad: 66, energia: 12, resp: { pos: 'Dash, dash, dash. Tres esquivas con dash y tu cuerpo aprende. Ya empezó: mira el contador en pantalla.', neg: 'Muévete.' }, accion: 'entrenoGuia', et: 'entrenar' },
         { t: '🛡 Aprender el ESCUDO (técnica de maestro)', realidad: 68, energia: 10, resp: { pos: 'El escudo no se regala: se aprende.', neg: 'El escudo se aprende, no se pide.' }, accion: 'aprenderEscudo', et: 'escudo' },
         { t: 'Presumir de tu poder', realidad: 66, energia: 15, resp: { pos: '¡Eso quiero ver! Que la arena lo confirme.', neg: 'Sí, sí. Todos son fuertes hasta que reciben.' }, et: 'presumir' },
@@ -3098,7 +3188,7 @@ U.Dialogo = {
       saludo: { alegre: ['¡Qué alegría verte! El pozo canta cuando alguien con calma se acerca.', 'Ven, ven. Te ves entero, eso me gusta.'], sereno: ['Respira. Aquí el agua va despacio y nosotros también.'], neutral: ['Soy Sora. Cuido el pozo y a los que vuelven golpeados de la arena. ¿Necesitas algo?'], triste: ['Ay… perdón, no estoy de ánimo. Pero dime, ¿estás herido?'], enojado: ['No voy a curarte si vienes a pelear también conmigo.'], asustado: ['¡Ay! Me asustaste… los nervios, ya sabes.'] },
       opciones: [
         { t: 'Saludarla con calidez', realidad: 74, energia: 4, resp: { pos: 'Quédate un momento. La calma también cura.', neg: '…hola.' }, et: 'saludo' },
-        { t: 'Pedir una poción', realidad: 62, energia: 5, resp: { pos: 'Toma. Una poción cura la mitad de tu Vida máxima. La recuperación automática solo llega al 25%: úsala cuando de verdad importe.', neg: 'Te la doy, pero no las desperdicies.' }, accion: 'pocion', et: 'pocion' },
+        { t: 'Pedir una poción', realidad: 62, energia: 5, resp: { pos: 'Toma. Es una poción de +50 unidades, preparada a medida: cura 50 de Vida, y lo que sobre al tomarla se pierde. La recuperación automática solo llega al 25%: úsala cuando de verdad importe.', neg: 'Te la doy, pero no las desperdicies.' }, accion: 'pocion', et: 'pocion' },
         { t: 'Entrenar con Sora: meditación guiada (guía)', realidad: 66, energia: 8, resp: { pos: 'Siéntate conmigo en la calma: medita (tecla R) un total de 8 segundos y tu Mente y tu Yang respiran. Ya empezó: mira el contador.', neg: 'Respira.' }, accion: 'entrenoGuia', et: 'entrenar' },
         { t: 'Preguntar por el descanso', realidad: 60, energia: 3, resp: { pos: 'Tu Vida se recupera sola siempre que estés bajo una cuarta parte de tu máximo, y se detiene justo ahí: el 25% es el tope de la recuperación automática en campo abierto. Pero si duermes en la fogata —interactúa con ella— el tiempo avanza hasta el siguiente momento del día (Amanecer, Mañana, Mediodía, Tarde, Atardecer o Noche) y despiertas con Vida y Esencia al cien por ciento, en la fase que toque. Un día completo dura veinte minutos y tiene 6 momentos: Amanecer 5–8, Mañana 8–12, Mediodía 12–15, Tarde 15–19, Atardecer 19–21 y Noche 21–5. La semana corre en el calendario: Lunes a Domingo, y cada medianoche suma un día a tu vida. La Esencia vuelve sola siempre, a ritmo constante: rápida fuera de combate, más lenta en combate, y golpeando con Yin recuperas aún más. Y quieto, meditando, también entrenas el Yang poco a poco: así se alcanza aunque el test no te haya dado afinidad. Y mira la barrita verde bajo tu Esencia: es tu CONDICIÓN — cien por ciento es estar en perfecta forma. Cada 10 de Esencia que gastas en total, baja 1; y entre más baja esté, más lento se recarga tu Esencia (nunca deja de recargarse, pero se nota). Se recupera muy despacio fuera de combate, según tu atributo, por hora de juego; en combate no se recupera. Dormir te la deja al cien por ciento de su máximo. Y si de verdad te cansas —si cae por debajo de 25— tu máximo crece 5, y dominar el Yin te da todavía más barra. Así que {descansar_bien}: pelear en mala condición es pelear a media máquina.', neg: 'Vida sola hasta el veinticinco por ciento. Para el cien: duerme en la fogata. Y ojo con la barrita verde: es tu condición, y frena tu recarga.' }, et: 'pregunta' },
         { t: 'Provocarla', realidad: 15, energia: 25, resp: { pos: '…¿Por qué harías eso?', neg: 'Fuera. Ahora.' }, et: 'provocar' }
@@ -3117,11 +3207,10 @@ U.Dialogo = {
       ]
     },
     marisol: {
-      saludo: { alegre: ['¡Bienvenido a la tienda! Monedas en la bolsa, pociones en la mano.'], sereno: ['Tienda de Bruma: pociones, siempre. ¿Qué te llevas?'], neutral: ['Soy Marisol. Vendo pociones: 15 monedas la normal. El torneo y las misiones pagan bien, ¿eh?'], triste: ['Hoy se vende poco… pero una poción a tiempo vale oro.'], enojado: ['Sin monedas no hay poción. Ve a ganarlas al torneo.'], asustado: ['¡Ay! Entra despacio, que me tiras los frascos.'] },
+      saludo: { alegre: ['¡Bienvenido a la tienda! Monedas en la bolsa, pociones en la mano.'], sereno: ['Tienda de Bruma: pociones a medida, comida, polainas y el permiso de viajero. ¿Qué te llevas?'], neutral: ['Soy Marisol. Preparo pociones A MEDIDA: tú me dices las unidades y pagas 2 monedas por unidad (y tu karma aquí decide el descuento o el recargo). Pasa a la tienda por la puerta de al lado.'], triste: ['Hoy se vende poco… pero una poción a tiempo vale oro.'], enojado: ['Sin monedas no hay poción. Ve a ganarlas con misiones.'], asustado: ['¡Ay! Entra despacio, que me tiras los frascos.'] },
       opciones: [
-        { t: 'Comprar poción (15 🪙)', realidad: 66, energia: 5, resp: { pos: 'Aquí tienes.', neg: 'Aquí tienes.' }, accion: 'comprarPocion', et: 'comprar' },
-        { t: 'Comprar poción grande · cura 100% (35 🪙)', realidad: 66, energia: 5, resp: { pos: 'La grande: te deja como nuevo al usarla desde la bolsa… hoy equivale a 2 pociones.', neg: 'La grande.' }, accion: 'comprarGrande', et: 'comprar' },
-        { t: 'Preguntar cómo ganar monedas', realidad: 62, energia: 4, resp: { pos: 'Monedas: el TORNEO paga 150 al campeón, cada oleada de la arena paga, los enemigos sueltan algo al caer, romper rocas y árboles da materiales que valen monedas, y Lía en la Oficina paga las MISIONES. Gastar es fácil: aquí.', neg: 'Torneo, arena, misiones y enemigos. Todo paga.' }, et: 'pregunta' },
+        { t: 'Ir a su tienda (pociones A MEDIDA, comida, polainas y permiso)', realidad: 66, energia: 5, resp: { pos: 'Pasa a la tienda: ahí te preparo la poción con las unidades exactas que me pidas.', neg: 'A la tienda.' }, accion: 'irTienda', et: 'comprar' },
+        { t: 'Preguntar cómo ganar monedas', realidad: 62, energia: 4, resp: { pos: 'Monedas de verdad: las MISIONES del tablón de Lía, por rango (D paga 15–25, S paga 135–165); la arena paga 50 solo si completas toda la ronda (entrar cuesta 10); y el torneo solo paga el podio (300, 150 y 80; entrar cuesta 50). Romper árboles y rocas ya no da monedas: eso era ilógico. Gastar es fácil: aquí, en mi tienda.', neg: 'Misiones por rango, arena completa y podio del torneo. Todo lo demás es gasto.' }, et: 'pregunta' },
         { t: 'Saludarla con calidez', realidad: 72, energia: 4, resp: { pos: 'Qué amable. Vuelve cuando quieras.', neg: '…hola.' }, et: 'saludo' }
       ]
     },
@@ -3149,7 +3238,7 @@ U.Dialogo = {
     pipo: {
       saludo: { alegre: ['¡Cuando sea grande gano el TORNEO! ¡Octavos, cuartos, semi y la FINAL!'], sereno: ['Estoy contando las casas: ¡ya hay muchas más que antes!'], neutral: ['Soy Pipo. De noche me meto en casa porque mi mamá dice que salen bandidos. ¿Tú no tienes miedo?'], triste: ['Me regañaron por jugar en la arena…'], enojado: ['¡No soy un niño chico! …bueno, sí.'], asustado: ['¡De noche no salgo NI LOCO!'] },
       opciones: [
-        { t: 'Preguntar por el torneo', realidad: 62, energia: 6, resp: { pos: '¡Se pelea en la Arena! Primero octavos, luego cuartos, la semi y la FINAL. Después de cada pelea te curan TODO. ¡Y el campeón gana 150 monedas!', neg: 'Arena. Cuatro peleas. Premio grande.' }, et: 'pregunta' },
+        { t: 'Preguntar por el torneo', realidad: 62, energia: 6, resp: { pos: '¡Se pelea en la Arena! Entrar cuesta 50 monedas. Primero octavos, luego cuartos, la semi y la FINAL. Después de cada pelea te curan TODO. ¡Y solo cobra el podio: el campeón 300, el segundo 150 y el tercero 80!', neg: 'Arena. Entrada 50. Solo podio.' }, et: 'pregunta' },
         { t: 'Jugar a saltar con Pipo', realidad: 74, energia: 8, resp: { pos: '¡Regla del juego: tienes que {brincar_alto}, más que yo! ¡Y sin caerte! ¡Otra vez, otra vez: {brincar} conmigo hasta que nos cansemos!', neg: 'Tienes que {brincar_alto}. Es la regla. ¡Yo ya voy ganando!' }, et: 'jugar' },
         { t: 'Saludarlo', realidad: 72, energia: 5, resp: { pos: '¡Hola, héroe!', neg: '…hola.' }, et: 'saludo' }
       ]
@@ -3158,16 +3247,16 @@ U.Dialogo = {
       saludo: { alegre: ['Bruma prospera cuando su gente se mueve. Bienvenido a mi oficina.'], sereno: ['Soy Aldric, Guardián de Bruma. Otros pueblos tienen a su Hokage o a su dios en la torre; Bruma me tiene a mí, con papeles y todo.'], neutral: ['Guardián Aldric. Gobierno esta aldea, firmo los encargos y pago las misiones que cumple mi gente. Lía, mi secretaria, lleva el tablón: habla con ella.'], triste: ['Hay encargos sin cumplir y caminos cortados por rocas…'], enojado: ['La oficina se respeta.'], asustado: ['¿Bandidos DENTRO de la aldea? Lía, cierra la puerta.'] },
       opciones: [
         { t: 'Preguntar por la aldea y su gobierno', realidad: 64, energia: 5, resp: { pos: 'Bruma creció: más casas, tienda, esta oficina y caminos más largos a bosque, desierto y montaña. De noche la gente se recoge en sus casas; de día, la plaza vive. Mi trabajo: que nadie pase hambre ni miedo. El tuyo, si quieres: las misiones de Lía.', neg: 'Yo gobierno. Lía encarga. Tú decides.' }, et: 'pregunta' },
-        { t: '🏆 Pedir el TORNEO DE BRUMA', realidad: 70, energia: 12, resp: { pos: 'Autorizado. Ve a la Arena de Ecos: octavos, cuartos, semifinal y final, con recuperación total entre rondas. El campeón se lleva 150 monedas.', neg: 'Autorizado.' }, accion: 'torneo', et: 'torneo' },
+        { t: '🏆 Pedir el TORNEO DE BRUMA', realidad: 70, energia: 12, resp: { pos: 'Autorizado. Entrada: 50 monedas (el permiso no lo cubre). Ve a la Arena de Ecos: octavos, cuartos, semifinal y final, con recuperación total entre rondas. Solo cobra el podio: el campeón 300, el segundo 150 y el tercero 80.', neg: 'Autorizado.' }, accion: 'torneo', et: 'torneo' },
         { t: 'Saludarlo con respeto', realidad: 72, energia: 4, resp: { pos: 'El respeto abre puertas. Esta ya está abierta para ti.', neg: '…asiente en silencio.' }, et: 'saludo' }
       ]
     },
     lia: {
       saludo: { alegre: ['¡El tablón está lleno y tú tienes pinta de cumplir!'], sereno: ['Secretaría del Guardián. Yo registro, encargo y pago. Sin papel no hay misión.'], neutral: ['Soy Lía, secretaria de Aldric. Aquí se encargan las MISIONES de Bruma: entregas a otros lugares, proteger a un vecino, buscar una reliquia en el desierto, despejar caminos… Cada una paga monedas al entregarla conmigo.'], triste: ['Se acumulan los encargos y nadie viene…'], enojado: ['Sin entregar la anterior no hay misión nueva. Orden es orden.'], asustado: ['¡Ese encargo era URGENTE, no aterrador!'] },
       opciones: [
-        { t: '📜 Pedir una MISIÓN de la Oficina', realidad: 66, energia: 6, resp: { pos: 'Misión registrada en el tablón.', neg: 'Misión registrada.' }, accion: 'mision', et: 'mision' },
+        { t: '📜 Ver el TABLÓN: las 5 misiones de hoy (por rango)', realidad: 66, energia: 6, resp: { pos: 'El tablón de hoy…', neg: 'El tablón.' }, accion: 'tablon', et: 'mision' },
         { t: '✅ Entregar misión completada (cobrar)', realidad: 66, energia: 6, resp: { pos: 'Revisando el tablón…', neg: 'Revisando…' }, accion: 'entregarMision', et: 'mision' },
-        { t: 'Preguntar cómo funcionan las misiones', realidad: 62, energia: 4, resp: { pos: 'Simple: pides una, la cumples fuera (el panel superior te muestra el progreso), vuelves y la entregas AQUÍ para cobrar en monedas. Solo una activa a la vez. Hay entregas al desierto, búsquedas de reliquias, escoltas contra bandidos, despejar rocas y árboles, y caza en el bosque.', neg: 'Pedir, cumplir, volver, cobrar.' }, et: 'pregunta' },
+        { t: 'Preguntar cómo funcionan las misiones', realidad: 62, energia: 4, resp: { pos: 'El tablón trae 5 misiones CADA DÍA, totalmente al azar: entregas, recoger encargos, escoltas (un vecino camina a su pueblo y tú lo proteges de los bandidos), objetos perdidos, caza, investigaciones, rescates y mensajes urgentes. Cada una trae su RANGO (D, C, B, A, S) y su elemento sugerido con la razón de la región. El pago es SOLO por el rango, nunca por el elemento: D 15–25, C 30–50, B 55–85, A 90–130, S 135–165. Y el rango se desbloquea con la maestría de TU elemento principal: C al 10%, B al 25%, A al 45%, S al 65%. Cualquiera puede intentar cualquier misión, pero si no es tu elemento te costará más Esencia. Las de hoy caducan esta noche.', neg: 'Tablón, rango, cumplir, volver, cobrar.' }, et: 'pregunta' },
         { t: 'Saludarla con calidez', realidad: 72, energia: 4, resp: { pos: 'Qué gusto. El tablón te espera.', neg: '…hola.' }, et: 'saludo' }
       ]
     }
@@ -3197,6 +3286,9 @@ U.Dialogo = {
   opcionesNormales(npc) {
     const ops = this.guiones[npc.id] ? this.guiones[npc.id].opciones.slice() : [];
     ops.push({ t: 'Conocerle mejor: gustos, disgustos y forma de ser', realidad: 68, energia: 4, resp: { pos: '', neg: '' }, accion: 'gustos', et: 'conocer' });
+    ops.push({ t: 'Preguntar su sabor favorito (para regalarle comida)', realidad: 66, energia: 3, resp: { pos: '', neg: '' }, accion: 'saborFavorito', et: 'conocer' });
+    ops.push({ t: '🎁 Regalarle dinero (sorpresa, sin que lo pida)', realidad: 70, energia: 5, resp: { pos: '', neg: '' }, accion: 'regaloSorpresa', et: 'regalo' });
+    { const E2 = U.Juego.estado; const pr2 = E2 && E2.jugador.promesas ? E2.jugador.promesas.find(x => x.npcId === npc.id) : null; if (pr2) ops.push({ t: 'Cumplir tu promesa: darle las ' + pr2.cantidad + ' 🪙 prometidas', realidad: 74, energia: 5, resp: { pos: '', neg: '' }, accion: 'cumplirPromesa', et: 'promesa' }); }
     if (U.Vida) {
       const candidatos = ['torin', 'breno', 'marco', 'kaelen', 'marisol', 'sora', 'elena'];
       let añadidos = 0;
@@ -3259,21 +3351,163 @@ U.Dialogo = {
     return fraseSal;
   },
   abrirTienda() {
-    const E = U.Juego.estado; this.npc = null; this.esCartel = false; this.modo = 'tienda'; this.fase = 'normal'; this.abierto = true; E.ui = 'dialogo'; E.jugador.descansando = false; E.jugador.cargando = false;
+    const E = U.Juego.estado, j = E.jugador; this.npc = null; this.esCartel = false; this.modo = 'tienda'; this.fase = 'normal'; this.abierto = true; E.ui = 'dialogo'; E.jugador.descansando = false; E.jugador.cargando = false;
     document.getElementById('dialogo').classList.remove('oculto');
-    document.getElementById('dlgNombre').textContent = 'TIENDA DE BRUMA · MARISOL'; document.getElementById('dlgEmocion').textContent = 'tienda'; document.getElementById('dlgConfTxt').textContent = '🪙 ' + (E.jugador.monedas || 0) + ' monedas · 🧪 ×' + E.jugador.pociones;
-    document.getElementById('dlgConfianza').firstElementChild.style.width = '100%';
+    const pueblo = U.Economia.puebloActual(); const k = U.Economia.karma(j, pueblo);
+    document.getElementById('dlgNombre').textContent = 'TIENDA · MARISOL, LA BOTICARIA'; document.getElementById('dlgEmocion').textContent = 'tienda';
     const cv = document.getElementById('dlgCara'); const ctx = cv.getContext('2d'); ctx.fillStyle = '#0e1530'; ctx.fillRect(0, 0, 64, 64); U.Render.iconoCanvas(cv, 'aldea', '#67e08a');
-    this.decir('Tienda de Marisol. Tienes ' + (E.jugador.monedas || 0) + ' monedas. Las monedas se ganan en el TORNEO (150 al campeón), en las oleadas de la arena, al vencer enemigos, al romper rocas y árboles, y entregando MISIONES de Lía en la Oficina.');
-    this.razon = 'Poción 15 🪙 · Poción grande (×2) 35 🪙';
-    this.opciones = [ { t: 'Comprar poción · 15 🪙', tienda: 'pocion' }, { t: 'Comprar poción grande (vale ×2) · 35 🪙', tienda: 'grande' } ];
+    if (!U.Economia.puedeVender(j, pueblo)) {
+      document.getElementById('dlgConfTxt').textContent = 'Karma aquí: ' + k;
+      document.getElementById('dlgConfianza').firstElementChild.style.width = '0%';
+      this.decir('Marisol cruza los brazos: «Con tu karma aquí (' + k + ') no te vendo nada. La aldea no olvida: ayuda con misiones, da lo que te pidan y gánate de vuelta el trato.»');
+      this.razon = 'Karma −80 o menos en este pueblo: se niegan a venderte.'; this.opciones = []; this.pintarRazon(); this.pintarOpciones(); U.Audio.sfx('fail'); return;
+    }
+    this.tiendaUnidades = this.tiendaUnidades || 50;
+    this.pintarTienda();
+    U.Audio.sfx('click');
+  },
+  pintarTienda() {
+    const E = U.Juego.estado, j = E.jugador; j.bolsaPociones = j.bolsaPociones || []; j.bolsaComida = j.bolsaComida || [];
+    const pueblo = U.Economia.puebloActual(); const k = U.Economia.karma(j, pueblo);
+    const mult = U.Economia.multLugar(E.mapaId);
+    document.getElementById('dlgConfTxt').textContent = '🪙 ' + Math.floor(j.monedas || 0) + ' · Karma aquí ' + k + ' (' + U.Economia.factorTexto(k) + ')';
+    document.getElementById('dlgConfianza').firstElementChild.style.width = Math.max(0, Math.min(100, 50 + k / 2)) + '%';
+    const u = Math.max(10, Math.min(1000, this.tiendaUnidades || 50));
+    const pv = U.Economia.precioPocion(u, E.mapaId, j), pe = U.Economia.precioPocion(u, E.mapaId, j);
+    const uc = Math.max(10, Math.min(120, u)); const pc = U.Economia.precioPocion(uc, E.mapaId, j);
+    this.decir('Marisol te prepara la poción AL MOMENTO, como boticaria: tú eliges las unidades y pagas 2 🪙 por unidad' + (mult > 1 ? ' — aquí, lejos y con peligro, cuesta ×1.5 (3 por unidad)' : '') + '. Tu karma en ' + U.Economia.PUEBLOS[pueblo] + ' es ' + k + ': ' + U.Economia.factorTexto(k) + ' ya aplicado. Bolsa: ' + j.bolsaPociones.length + '/3 pociones · ' + j.bolsaComida.length + '/5 comidas · ' + Math.floor(j.monedas || 0) + ' 🪙. Ojo: al tomarla, lo que sobra se pierde.');
+    this.razon = 'Vida/Esencia: 10–1000 unidades · Condición: 10–120 · Vender una poción devuelve la mitad de lo que pagaste (en la Mochila)';
+    this.pintarRazon();
+    const c = document.getElementById('dlgOpciones'); c.innerHTML = '';
+    const fila = document.createElement('div'); fila.style.cssText = 'display:flex;gap:6px;align-items:center;flex-wrap:wrap;background:#0e1530;border:2px solid var(--borde);padding:8px 10px';
+    fila.innerHTML = '<b style="color:var(--rayo)">Unidades: <span id="tiendaUniNum">' + u + '</span></b>';
+    const sl = document.createElement('input'); sl.type = 'range'; sl.min = '10'; sl.max = '1000'; sl.step = '1'; sl.value = String(u); sl.className = 'tiendaSlider'; sl.style.flex = '1 1 160px';
+    sl.addEventListener('input', () => { this.tiendaUnidades = parseInt(sl.value); document.getElementById('tiendaUniNum').textContent = sl.value; this.pintarTiendaPrecios(); });
+    fila.appendChild(sl);
+    [50, 100, 250, 500, 1000].forEach(n => { const b = document.createElement('button'); b.className = 'mini'; b.textContent = String(n); b.addEventListener('click', () => { this.tiendaUnidades = n; this.pintarTienda(); }); fila.appendChild(b); });
+    c.appendChild(fila);
+    const mk = (txt, fn) => { const b = document.createElement('button'); b.innerHTML = txt; b.addEventListener('click', fn); c.appendChild(b); return b; };
+    this._btnPV = mk('', () => this.comprarPocionMedida('vida'));
+    this._btnPE = mk('', () => this.comprarPocionMedida('esencia'));
+    this._btnPC = mk('', () => this.comprarPocionMedida('condicion'));
+    this.pintarTiendaPrecios();
+    U.Economia.SABORES.forEach(sab => { mk('Comprar Comida ' + sab + ' · 10 🪙 (mochila ' + j.bolsaComida.length + '/5)', () => this.comprarComida(sab)); });
+    Object.keys(U.Economia.POLAINAS).forEach(clave => { const pd = U.Economia.POLAINAS[clave]; const tiene = j.polainas && j.polainas[clave]; mk((tiene ? '✓ Ya tienes: ' : 'Comprar ') + pd.nombre + ' · ' + pd.precio + ' 🪙 (vas ' + Math.round((1 - pd.velMult) * 100) + '% más lento; Velocidad crece ×' + pd.crecMult + ' en combate)', () => this.comprarPolainas(clave)); });
+    mk(U.Economia.permisoVigente() ? '✓ Permiso de viajero vigente hasta el día ' + j.permisoHasta + ' (cubre viajes y arena; NO el torneo)' : 'Comprar PERMISO de viajero · 200 🪙 · 28 días (cubre viajes entre pueblos y la entrada a la arena; NO el torneo; se paga solo con 20 usos o más)', () => this.comprarPermiso());
+    const s2 = document.createElement('button'); s2.innerHTML = '<span class="k">✕</span>Salir de la tienda'; s2.addEventListener('click', () => this.cerrar()); c.appendChild(s2);
+  },
+  pintarTiendaPrecios() {
+    const E = U.Juego.estado, j = E.jugador; const u = Math.max(10, Math.min(1000, this.tiendaUnidades || 50));
+    const p = U.Economia.precioPocion(u, E.mapaId, j); const uc = Math.max(10, Math.min(120, u)); const pc = U.Economia.precioPocion(uc, E.mapaId, j);
+    if (this._btnPV) this._btnPV.innerHTML = '🧪 Comprar Poción de Vida +' + u + ' · <b>' + p + ' 🪙</b>';
+    if (this._btnPE) this._btnPE.innerHTML = '🔵 Comprar Tónico de Esencia +' + u + ' · <b>' + p + ' 🪙</b>';
+    if (this._btnPC) this._btnPC.innerHTML = '💚 Comprar Poción de Condición +' + uc + ' · <b>' + pc + ' 🪙</b>';
+    const num = document.getElementById('tiendaUniNum'); if (num) num.textContent = u;
+  },
+  comprarPocionMedida(tipo) {
+    const E = U.Juego.estado, j = E.jugador; j.bolsaPociones = j.bolsaPociones || [];
+    if (j.bolsaPociones.length >= 3) { this.decir('Tu mochila ya lleva 3 pociones (el máximo). Toma o vende una antes de pedir otra.'); U.Audio.sfx('fail'); return; }
+    let u = Math.max(10, Math.min(1000, this.tiendaUnidades || 50)); if (tipo === 'condicion') u = Math.max(10, Math.min(120, u));
+    const precio = U.Economia.precioPocion(u, E.mapaId, j);
+    if ((j.monedas || 0) < precio) { this.decir('Esa dosis cuesta ' + precio + ' 🪙 y tienes ' + Math.floor(j.monedas || 0) + '. Pide menos unidades o gana monedas con misiones del tablón.'); U.Audio.sfx('fail'); return; }
+    j.monedas -= precio; j.bolsaPociones.push({ tipo, unidades: u, precio }); U.Recuperacion.sincronizar(j);
+    this.decir('Marisol la prepara al momento y te la entrega humeante: ' + (tipo === 'vida' ? 'Poción' : tipo === 'esencia' ? 'Tónico' : 'Poción de Condición') + ' +' + u + ' por ' + precio + ' 🪙. Bolsa: ' + Math.floor(j.monedas) + ' 🪙 · Pociones ' + j.bolsaPociones.length + '/3.'); U.Audio.sfx('cura'); this.pintarTienda();
+  },
+  comprarComida(sabor) {
+    const E = U.Juego.estado, j = E.jugador; j.bolsaComida = j.bolsaComida || [];
+    const pueblo = U.Economia.puebloActual(); const precio = Math.max(1, Math.round(U.Economia.COMIDA_PRECIO * U.Economia.factorKarma(U.Economia.karma(j, pueblo))));
+    if (j.bolsaComida.length >= 5) { this.decir('Tu mochila ya lleva 5 comidas (el máximo). Cómete una antes de comprar más.'); U.Audio.sfx('fail'); return; }
+    if ((j.monedas || 0) < precio) { this.decir('La comida cuesta ' + precio + ' 🪙 y tienes ' + Math.floor(j.monedas || 0) + '.'); U.Audio.sfx('fail'); return; }
+    j.monedas -= precio; j.bolsaComida.push(sabor);
+    this.decir('Comida ' + sabor + ' a la mochila (' + precio + ' 🪙). Se come desde la Mochila (pausa), máximo 3 al día y fuera de combate: sube porcentaje según TU orden de sabores del test.'); U.Audio.sfx('cura'); this.pintarTienda();
+  },
+  comprarPolainas(clave) {
+    const E = U.Juego.estado, j = E.jugador; const pd = U.Economia.POLAINAS[clave]; j.polainas = j.polainas || {};
+    if (j.polainas[clave]) { this.decir('Ya tienes las ' + pd.nombre.toLowerCase() + '. Se equipan y se quitan desde la Mochila.'); return; }
+    const pueblo = U.Economia.puebloActual(); const precio = Math.max(1, Math.round(pd.precio * U.Economia.factorKarma(U.Economia.karma(j, pueblo))));
+    if ((j.monedas || 0) < precio) { this.decir('Las ' + pd.nombre.toLowerCase() + ' cuestan ' + precio + ' 🪙 y tienes ' + Math.floor(j.monedas || 0) + '.'); U.Audio.sfx('fail'); return; }
+    j.monedas -= precio; j.polainas[clave] = true;
+    this.decir(pd.nombre + ' compradas (' + precio + ' 🪙). Equípalas desde la Mochila: con ellas puestas vas más lento, pero tu Velocidad crece ×' + pd.crecMult + ' en combate y un poco por pasos. Solo cabe UNA puesta a la vez.'); U.Audio.sfx('unlock'); this.pintarTienda();
+  },
+  comprarPermiso() {
+    const E = U.Juego.estado, j = E.jugador;
+    if (U.Economia.permisoVigente()) { this.decir('Ya tienes permiso vigente hasta el día ' + j.permisoHasta + '. Cubre los cruces entre pueblos (10 🪙) y la entrada a la arena (10 🪙); el torneo NO entra.'); return; }
+    if ((j.monedas || 0) < 200) { this.decir('El permiso cuesta 200 🪙 por 28 días de juego y tienes ' + Math.floor(j.monedas || 0) + '. Se paga solo si lo usas 20 veces o más.'); U.Audio.sfx('fail'); return; }
+    j.monedas -= 200; j.permisoHasta = (E.reloj ? E.reloj.dia : 1) + 28; j.permisoUsos = 0;
+    this.decir('Permiso de viajero firmado: 28 días de juego (hasta el día ' + j.permisoHasta + '). Cubre viajes entre pueblos y entradas a la arena. El torneo se paga aparte, siempre.'); U.Audio.sfx('unlock'); this.pintarTienda();
+  },
+  // ===== TABLÓN DE MISIONES (Lía): 5 del día, con rango, elemento, razón y pago =====
+  abrirTablon() {
+    const E = U.Juego.estado, j = E.jugador; this.modo = 'tablon'; this.fase = 'normal'; this.abierto = true;
+    const lista = U.Economia.asegurarTablon();
+    document.getElementById('dlgConfTxt').textContent = '🪙 ' + Math.floor(j.monedas || 0) + ' · Maestría de ' + U.Elementos.nombre(j.elemento) + ': ' + Math.floor(j.maestria[j.elemento] || 0) + '%';
+    let txt = 'El tablón de hoy (' + U.Tiempo.diaTexto(E.reloj) + '): 5 misiones, las que salieron, sin escoger a mano. Caducan al final del día. Toca una para aceptarla.';
+    if (E.mision && E.mision.activa) txt = E.mision.completada ? 'Ya cumpliste tu misión: entrégala con la opción de entregar para cobrar ' + E.mision.pago + ' 🪙.' : 'Tienes una misión activa: «' + E.mision.desc + '» (' + Math.floor(E.mision.prog) + '/' + E.mision.meta + '). Solo una a la vez.';
+    this.decir(txt);
+    this.razon = 'Desbloqueo por maestría de tu elemento principal: D 0% · C 10% · B 25% · A 45% · S 65% · El pago es SOLO por rango';
+    this.opciones = lista.map(m => { const bloq = !U.Economia.desbloqueada(m.rango, j); return { t: '[' + m.rango + '] ' + m.desc + ' · Especialista en: ' + U.Elementos.nombre(m.elemento) + ' (' + m.razon + ') · ' + m.pago + ' 🪙' + (bloq ? ' · 🔒 pide ' + U.Economia.DESBLOQUEO[m.rango] + '% de maestría' : ''), tablonUid: m.uid }; });
     this.pintarRazon(); this.pintarOpciones(); U.Audio.sfx('click');
   },
-  elegirTienda(o) {
-    const E = U.Juego.estado, j = E.jugador;
-    if (o.tienda === 'pocion') { if ((j.monedas || 0) >= 15) { j.monedas -= 15; j.pociones = Math.min(9, j.pociones + 1); this.decir('Poción vendida. Bolsa: ' + j.monedas + ' 🪙 · Pociones ×' + j.pociones + '.'); U.Audio.sfx('cura'); } else { this.decir('Te faltan monedas (tienes ' + (j.monedas || 0) + ', cuesta 15). Torneo, arena, misiones y enemigos pagan.'); U.Audio.sfx('fail'); } }
-    if (o.tienda === 'grande') { if ((j.monedas || 0) >= 35) { j.monedas -= 35; j.pociones = Math.min(9, j.pociones + 2); this.decir('Poción grande vendida (vale por 2). Bolsa: ' + j.monedas + ' 🪙 · Pociones ×' + j.pociones + '.'); U.Audio.sfx('cura'); } else { this.decir('La grande cuesta 35 🪙 y tienes ' + (j.monedas || 0) + '.'); U.Audio.sfx('fail'); } }
-    document.getElementById('dlgConfTxt').textContent = '🪙 ' + (j.monedas || 0) + ' monedas · 🧪 ×' + j.pociones;
+  // ===== PETICIÓN DE UN NPC que te buscó caminando: dinero o un sabor de comida =====
+  abrirPeticion(npc, pet) {
+    const E = U.Juego.estado; this.npc = npc; this.esCartel = false; this.modo = 'peticion'; this.fase = 'normal'; this.abierto = true; E.ui = 'dialogo'; E.jugador.descansando = false; E.jugador.cargando = false;
+    document.getElementById('dialogo').classList.remove('oculto');
+    this.peticionActual = pet;
+    if (pet.tipo === 'dinero') {
+      this.decir(npc.nombre + ' te buscó hasta encontrarte: «Perdona que te aborde así… ¿me prestas ' + pet.cantidad + ' monedas? Es para algo importante en casa. Si me ayudas, no lo olvido.»');
+      this.razon = 'Dar lo pedido: +3 confianza y +3 karma aquí · Negarte: −3 confianza y −2 karma · Prometer y no dar: −5 karma';
+      this.opciones = [
+        { t: 'Darle las ' + pet.cantidad + ' 🪙 que pide', pet: 'dar' },
+        { t: 'Dar otra cantidad (yo elijo cuánto)', pet: 'libre' },
+        { t: 'Prometo traértelas mañana', pet: 'prometer' },
+        { t: 'No puedo ayudarte', pet: 'negar' }
+      ];
+    } else {
+      const fav = U.Economia.favoritoNpc(npc.id) === pet.sabor;
+      this.decir(npc.nombre + ' te buscó con hambre: «¿No tendrás por ahí una comida ' + pet.sabor + '? Llevo el día entero sin probar bocado' + (fav ? '… y es justo mi sabor favorito, aunque eso no lo sabe casi nadie' : '') + '.»');
+      this.razon = 'Dar el sabor pedido: +5 confianza (+8 si es su favorito) y +2 karma · El ánimo del NPC cambia según SU orden de sabores';
+      this.opciones = [
+        { t: 'Darle una Comida ' + pet.sabor + ' de tu mochila', pet: 'darComida' },
+        { t: 'No tengo de eso ahora', pet: 'negarComida' }
+      ];
+    }
+    this.pintarRazon(); this.pintarOpciones(); this.pintarCara(); U.Audio.sfx('dialogo');
+  },
+  elegirPeticion(o) {
+    const E = U.Juego.estado, j = E.jugador, n = this.npc, pet = this.peticionActual; if (!n || !pet) { this.cerrar(); return; }
+    const pueblo = U.Economia.puebloDeMapa(n.mapa);
+    if (o.pet === 'libre') {
+      this.decir('¿Cuánto le das? (Pidió ' + pet.cantidad + ' 🪙. La confianza escala con lo dado frente a lo pedido, con tope; dar de más no da más.)');
+      this.opciones = [5, 10, 20, 40].filter(v => v <= Math.max(5, Math.floor(j.monedas || 0))).map(v => ({ t: 'Dar ' + v + ' 🪙', pet: 'darLibre', cantidad: v }));
+      if (!this.opciones.length) this.opciones = [{ t: 'No traigo monedas', pet: 'negar' }];
+      this.pintarOpciones(); return;
+    }
+    if (o.pet === 'dar' || o.pet === 'darLibre') {
+      const cant = o.pet === 'dar' ? pet.cantidad : o.cantidad;
+      if ((j.monedas || 0) < cant) { this.decir('No traes ' + cant + ' 🪙 (tienes ' + Math.floor(j.monedas || 0) + ').'); U.Audio.sfx('fail'); return; }
+      j.monedas -= cant;
+      const paso = 3; const gan = o.pet === 'dar' ? paso : Math.max(1, Math.min(paso, Math.round(paso * cant / pet.cantidad)));
+      U.Economia.confianza(n, gan); U.Economia.karmaAdd(3, pueblo);
+      if (!n.hechos) n.hechos = []; n.hechos.push('le diste el dinero que te pidió');
+      this.decir(n.nombre + ': «¡Gracias! De verdad, gracias.» (Confianza +' + gan + ' · Karma +3 en ' + U.Economia.PUEBLOS[pueblo] + ' · Bolsa: ' + Math.floor(j.monedas) + ' 🪙)'); this.razon = ''; this.pintarRazon(); this.opciones = []; this.pintarOpciones(); this.pintarCara(); U.Audio.sfx('cura'); return;
+    }
+    if (o.pet === 'prometer') {
+      j.promesas = j.promesas || []; j.promesas.push({ npcId: n.id, cantidad: pet.cantidad, diaLimite: (E.reloj ? E.reloj.dia : 1) + 1 });
+      this.decir(n.nombre + ': «Mañana, entonces. Te creo.» (Si mañana pasa y no das el dinero: karma −5. Puedes cumplir desde su diálogo: «Cumplir tu promesa».)'); this.opciones = []; this.pintarOpciones(); U.Audio.sfx('click'); return;
+    }
+    if (o.pet === 'negar') { U.Economia.confianza(n, -3); U.Economia.karmaAdd(-2, pueblo); this.decir(n.nombre + ' baja la mirada: «Entiendo… otro día será.» (Confianza −3 · Karma −2)'); this.opciones = []; this.pintarOpciones(); this.pintarCara(); U.Audio.sfx('fail'); return; }
+    if (o.pet === 'darComida') {
+      const idx = (j.bolsaComida || []).indexOf(pet.sabor);
+      if (idx < 0) { this.decir('Revisas tu mochila: no llevas Comida ' + pet.sabor + '. Marisol vende las 5 en la tienda, a 10 🪙.'); U.Audio.sfx('fail'); return; }
+      j.bolsaComida.splice(idx, 1);
+      const ranking = U.Economia.rankingNpc(n.id); const puesto = ranking.indexOf(pet.sabor);
+      const ef = U.Economia.DAR_COMIDA[puesto]; const esFav = puesto === 0;
+      const conf = esFav ? 8 : Math.max(5, ef.conf);
+      U.Economia.confianza(n, conf); n.estados.animo = Math.max(0, Math.min(100, n.estados.animo + ef.animo)); U.Economia.karmaAdd(2, pueblo);
+      if (!n.hechos) n.hechos = []; n.hechos.push('le diste la comida ' + pet.sabor + ' que te pidió');
+      this.decir(n.nombre + ' come con gusto' + (esFav ? ': «¡Es mi sabor favorito! ¿Cómo lo supiste?»' : '.') + ' (Confianza +' + conf + (esFav ? ' por ser su favorito' : '') + ' · Ánimo ' + (ef.animo >= 0 ? '+' : '') + ef.animo + ' según SU orden de sabores · Karma +2)'); this.razon = ''; this.pintarRazon(); this.opciones = []; this.pintarOpciones(); this.pintarCara(); U.Audio.sfx('cura'); return;
+    }
+    if (o.pet === 'negarComida') { this.decir(n.nombre + ': «Ni modo, gracias de todos modos.»'); this.opciones = []; this.pintarOpciones(); U.Audio.sfx('click'); return; }
   },
   abrirCama() {
     const E = U.Juego.estado; this.npc = null; this.esCartel = false; this.modo = 'cama'; this.fase = 'normal'; this.abierto = true; E.ui = 'dialogo'; E.jugador.descansando = false; E.jugador.cargando = false;
@@ -3291,6 +3525,22 @@ U.Dialogo = {
       { t: 'Fijar la alarma a las 08:00', cama: 'fijar', min: 480 }
     ];
     this.pintarRazon(); this.pintarOpciones(); U.Audio.sfx('click');
+  },
+  elegirRegalo(o) {
+    const E = U.Juego.estado, j = E.jugador, n = this.npc; this.modo = 'npc';
+    if (!n || !o.cantidad) { this.decir('Otro día será.'); this.opciones = this.opcionesNormales(n); this.pintarOpciones(); return; }
+    if ((j.monedas || 0) < o.cantidad) { this.decir('No traes ' + o.cantidad + ' 🪙.'); this.opciones = this.opcionesNormales(n); this.pintarOpciones(); return; }
+    j.monedas -= o.cantidad;
+    n.regaloDinero = n.regaloDinero || { paso: 0, total: 0 };
+    const pasoVal = U.Economia.PASOS_REGALO[Math.min(n.regaloDinero.paso, 3)];
+    let gan = Math.max(1, Math.min(pasoVal, Math.round(pasoVal * o.cantidad / 10)));
+    gan = Math.min(gan, 20 - n.regaloDinero.total); if (gan < 0) gan = 0;
+    n.regaloDinero.paso++; n.regaloDinero.total += gan;
+    U.Economia.confianza(n, gan);
+    if (!n.hechos) n.hechos = []; n.hechos.push('le regalaste dinero por sorpresa');
+    this.decir(n.nombre + ' parpadea, sorprendido: «¿Para mí? …Gracias. De verdad.» (Regalo sorpresa: confianza +' + gan + ' · Bolsa: ' + Math.floor(j.monedas) + ' 🪙)');
+    this.razon = 'Regalos de dinero a ' + n.nombre + ': +' + n.regaloDinero.total + '/20 de confianza solo por dinero'; this.pintarRazon();
+    this.opciones = this.opcionesNormales(n); this.pintarOpciones(); this.pintarCara(); U.Audio.sfx('cura');
   },
   elegirCama(o) {
     const E = U.Juego.estado;
@@ -3320,7 +3570,10 @@ U.Dialogo = {
   elegir(i) {
     const o = this.opciones[i]; if (!o) { this.cerrar(); return; }
     if (this.modo === 'cama') { this.elegirCama(o); return; }
-    if (this.modo === 'tienda') { this.elegirTienda(o); return; }
+    if (this.modo === 'tienda') { return; } // la tienda nueva se maneja con sus propios botones (pintarTienda)
+    if (this.modo === 'tablon') { const respT = U.Juego.aceptarMision(o.tablonUid); this.modo = 'npc'; this.decir(respT); this.razon = ''; this.pintarRazon(); this.opciones = this.opcionesNormales(this.npc); this.pintarOpciones(); return; }
+    if (this.modo === 'peticion') { this.elegirPeticion(o); return; }
+    if (this.modo === 'regalo') { this.elegirRegalo(o); return; }
     if (this.modo === 'sparring') { if (o.spar === 'solo' || o.spar === 'a' || o.spar === 'b') { const bandoS = o.spar; this.cerrar(); U.Sparring.iniciar(bandoS); } else this.cerrar(); return; }
     if (this.modo === 'sparringFin') { this.cerrar(); return; }
     const n = this.npc; if (!n) { this.cerrar(); return; }
@@ -3335,15 +3588,16 @@ U.Dialogo = {
     const r = U.Emociones.evento(n, { realidad: o.realidad, energia: o.energia, etiqueta: o.et });
     const signo = r.delta >= 0 ? '+' : ''; this.razon = n.nombre + ' ' + (r.delta >= 0.3 ? 'confía más en ti' : r.delta <= -0.3 ? 'se ha incomodado' : 'te escucha') + ' · Confianza ' + signo + r.delta.toFixed(1) + ' · ahora está ' + n.emocion;
     const bien = n.estados.animo >= 45; let resp = bien ? o.resp.pos : o.resp.neg;
-    if (o.accion === 'pocion') { if (n.stockPociones > 0 && U.Juego.estado.jugador.pociones < 3) { n.stockPociones--; U.Juego.estado.jugador.pociones++; resp += ' (Poción recibida: ×' + U.Juego.estado.jugador.pociones + ')'; U.Audio.sfx('cura'); } else resp = n.stockPociones <= 0 ? 'Se me acabaron por hoy. Recuerda: tu Vida se recupera sola solo hasta el 25%; para despertar al 100%, duerme en la fogata.' : 'Ya cargas demasiadas. Úsalas primero.'; }
+    if (o.accion === 'pocion') { const jj = U.Juego.estado.jugador; jj.bolsaPociones = jj.bolsaPociones || []; if (n.stockPociones > 0 && jj.bolsaPociones.length < 3) { n.stockPociones--; jj.bolsaPociones.push({ tipo: 'vida', unidades: 50, precio: 0 }); U.Recuperacion.sincronizar(jj); resp += ' (Poción +50 recibida: la llevas en la mochila, ×' + jj.pociones + ')'; U.Audio.sfx('cura'); } else resp = n.stockPociones <= 0 ? 'Se me acabaron por hoy. Recuerda: tu Vida se recupera sola solo hasta el 25%; para despertar al 100%, duerme en la fogata.' : 'Tu mochila ya lleva 3 pociones. Úsalas primero.'; }
     if (o.accion === 'entrenar') { if (!n.entreno) { n.entreno = true; U.Crecimiento.estilo('yin', 1.5, 1); resp += ' (Estilo Yin +1.5)'; U.Audio.sfx('unlock'); } else resp = 'Ya entrenamos hoy. Sigue en la arena: el Yin crece golpeando, no hablando.'; }
     if (o.accion === 'entrenarYang') { const j = U.Juego.estado.jugador; if (j.estilos.yang >= 100) resp = 'Tu Yang ya está al máximo (100). De aquí en adelante, úsalo: crece lanzándolo.'; else if (U.Recuperacion.gastar(25)) { U.Crecimiento.estilo('yang', 1.2, 1); resp += ' (Yang ' + j.estilos.yang.toFixed(1) + (j.tieneYang ? '' : ' / ' + U.Habilidades.yangDespertar + ' para despertar') + ' · −25 Esencia)'; U.Audio.sfx('yang'); } else resp = 'Te falta Esencia (la sesión cuesta 25) o estás Agotado. Descansa junto a la fogata y vuelve: meditar descansando también entrena el Yang.'; }
     if (o.accion === 'reto') { const guiaR = n.id; if (!n.hechos) n.hechos = []; n.hechos.push('aceptaste su reto de combate'); this.cerrar(); U.Combate.iniciarReto(guiaR); return; }
     if (o.accion === 'entrenoGuia') { U.Juego.iniciarEntreno(n.id); resp += ' (Entrenamiento con guía iniciado: sigue el contador en pantalla)'; }
-    if (o.accion === 'comprarPocion') { const j = U.Juego.estado.jugador; if ((j.monedas || 0) >= 15) { j.monedas -= 15; j.pociones = Math.min(9, j.pociones + 1); resp = 'Poción comprada por 15 🪙. Te quedan ' + j.monedas + ' monedas y ' + j.pociones + ' pociones.'; U.Audio.sfx('cura'); } else resp = 'Te faltan monedas: la poción cuesta 15 y tienes ' + (j.monedas || 0) + '. Gana monedas en el torneo, la arena o con las misiones de Lía.'; }
-    if (o.accion === 'comprarGrande') { const j = U.Juego.estado.jugador; if ((j.monedas || 0) >= 35) { j.monedas -= 35; j.pociones = Math.min(9, j.pociones + 2); resp = 'Poción grande comprada por 35 🪙 (vale por 2 pociones). Te quedan ' + j.monedas + ' monedas.'; U.Audio.sfx('cura'); } else resp = 'La grande cuesta 35 🪙 y tienes ' + (j.monedas || 0) + '. El torneo paga 150 al campeón…'; }
+    if (o.accion === 'irTienda') { this.cerrar(); setTimeout(() => U.Dialogo.abrirTienda(), 60); return; }
     if (o.accion === 'torneo') { this.cerrar(); U.Combate.iniciarTorneo(); return; }
-    if (o.accion === 'mision') { resp = U.Juego.aceptarMision(); }
+    if (o.accion === 'tablon') { this.abrirTablon(); return; }
+    if (o.accion === 'regaloSorpresa') { this.modo = 'regalo'; this.decir('¿Cuánto le regalas a ' + n.nombre + '? (Regalo sorpresa, sin que te lo pidiera: la confianza sube por pasos — +8 la primera vez, +5, +3, +1 — con tope de +20 por persona solo por dinero. Dar de más no da más.)'); this.razon = 'Bolsa: ' + Math.floor(U.Juego.estado.jugador.monedas || 0) + ' 🪙'; this.pintarRazon(); this.opciones = [5, 10, 20, 50].filter(v => v <= Math.max(0, Math.floor(U.Juego.estado.jugador.monedas || 0))).map(v => ({ t: 'Regalar ' + v + ' 🪙', cantidad: v })); if (!this.opciones.length) this.opciones = [{ t: 'No traigo monedas encima', cantidad: 0 }]; this.pintarOpciones(); return; }
+    if (o.accion === 'cumplirPromesa') { const jj2 = U.Juego.estado.jugador; const pr = (jj2.promesas || []).find(x => x.npcId === n.id); if (pr) { if ((jj2.monedas || 0) >= pr.cantidad) { jj2.monedas -= pr.cantidad; jj2.promesas = jj2.promesas.filter(x => x !== pr); U.Economia.confianza(n, 3); U.Economia.karmaAdd(3, U.Economia.puebloDeMapa(n.mapa)); resp = 'Promesa cumplida: le das las ' + pr.cantidad + ' 🪙. (Confianza +3 · Karma +3)'; if (!n.hechos) n.hechos = []; n.hechos.push('cumpliste tu promesa de dinero'); } else resp = 'Le prometiste ' + pr.cantidad + ' 🪙 y traes ' + Math.floor(jj2.monedas || 0) + '. Si pasa mañana sin cumplir, tu karma cae −5.'; } }
     if (o.accion === 'entregarMision') { resp = U.Juego.entregarMision(); }
     if (o.accion === 'arena') { const E = U.Juego.estado; if (E.objetivos[1].estado === 'actual') { E.objetivos[1].estado = 'hecho'; U.Juego.siguienteObjetivo(); } resp += ' (Objetivo actualizado)'; }
     if (n.id === 'torin' && o.et === 'pregunta' && !U.Juego.estado.jugador.tieneYang) resp += ' Y escucha: tu test no reveló afinidad Yang, pero no está cerrado: se alcanza entrenando, como dominar otro elemento. Medita al descansar o entrena conmigo hasta Yang ' + U.Habilidades.yangDespertar + ' y despertará.';
@@ -3352,6 +3606,7 @@ U.Dialogo = {
       else if (U.Combate.aprenderEscudo()) resp = 'Escucha, porque esto se aprende una vez y se domina en años. El escudo es una TÉCNICA: un solo botón (B) y toma la naturaleza de TU elemento, ' + U.Elementos.nombre(j.elementoActivo) + ' en tu caso. La tabla de ventajas le aplica como si el escudo fueras tú: tu contra te lo rompe o te lo atraviesa, y tu mismo elemento lo absorbe. Al principio solo te cubre DE FRENTE y no te deja moverte: si te pegan por la espalda, es como si no trajeras nada. Bloquea golpes reales y subirá: nivel 2 cubre frente y lados; nivel 3, los cuatro lados. Drena Esencia por segundo, menos si el clima favorece a tu elemento. Ahora practica: {escudo_listo}, y {tener_cuidado} con lo que venga por detrás.';
     }
     if (o.accion === 'gustos') resp = U.Personas.presentarse(n);
+    if (o.accion === 'saborFavorito') { const fav = U.Economia.favoritoNpc(n.id); resp = n.nombre + ' lo piensa y sonríe: «Mi sabor favorito es el ' + fav + '. Si algún día me traes una comida ' + fav + ', me haces el día.» (Darle el sabor que te PIDE da +5 de confianza; si además es su favorito, +8. Y su ánimo cambia según SU orden de sabores.)'; if (!n.hechos) n.hechos = []; n.hechos.push('te contó su sabor favorito: ' + fav); }
     if (o.accion === 'preguntarPor') { const t2 = U.Vida.buscar(o.target); resp = t2 ? U.Vida.respuestaDonde(n, t2) : 'No lo he visto hoy.'; if (!n.hechos) n.hechos = []; n.hechos.push('preguntaste por ' + (t2 ? t2.nombre : 'un vecino')); }
     this.decir(resp); this.pintarRazon(); this.pintarCara(); U.Audio.sfx('dialogo');
   },
@@ -3428,7 +3683,7 @@ U.HUD = {
     el.agotado.classList.toggle('oculto', !j.agotado);
     this.tNum += dt; if (this.tNum > 0.1) { this.tNum = 0;
       el.numVida.textContent = Math.ceil(j.vida) + '/' + Math.round(j.stats.vida); el.numEsencia.textContent = (Math.round(j.esencia * 10) / 10) + '/' + Math.round(j.stats.esencia);
-      el.pocion.textContent = '🧪 ×' + j.pociones; el.pocion.disabled = j.pociones <= 0; const nm = document.getElementById('numMonedas'); if (nm) nm.textContent = Math.floor(j.monedas || 0); if (el.btnEscudo) { el.btnEscudo.classList.toggle('apagado', !j.escudoAprendido || (!j.escudo && (j.agotado || j.esencia < 10))); el.btnEscudo.style.filter = j.escudo ? 'brightness(1.5)' : ''; el.btnEscudo.style.borderColor = j.escudoAprendido ? U.Combate.escudoColor(j) : '#7cc4ff'; el.btnEscudo.title = j.escudoAprendido ? U.Combate.escudoNombre(j) + ' (B) · Nv.' + (j.escudoNv || 1) + ' (' + U.Habilidades.escudo.niveles[j.escudoNv || 1].nombre + ') · integridad ' + Math.max(0, Math.round(j.escudoVida || 0)) + '/' + U.Combate.escudoMax(j) + ' · no te mueves, drena Esencia/s' : 'Escudo (B): aún no lo conoces. Es una técnica: Kaelen, el guardia, puede enseñártela.'; }
+      j.pociones = (j.bolsaPociones || []).length; el.pocion.textContent = '🧪 ×' + j.pociones; el.pocion.disabled = j.pociones <= 0; const nm = document.getElementById('numMonedas'); if (nm) nm.textContent = Math.floor(j.monedas || 0); if (el.btnEscudo) { el.btnEscudo.classList.toggle('apagado', !j.escudoAprendido || (!j.escudo && (j.agotado || j.esencia < 10))); el.btnEscudo.style.filter = j.escudo ? 'brightness(1.5)' : ''; el.btnEscudo.style.borderColor = j.escudoAprendido ? U.Combate.escudoColor(j) : '#7cc4ff'; el.btnEscudo.title = j.escudoAprendido ? U.Combate.escudoNombre(j) + ' (B) · Nv.' + (j.escudoNv || 1) + ' (' + U.Habilidades.escudo.niveles[j.escudoNv || 1].nombre + ') · integridad ' + Math.max(0, Math.round(j.escudoVida || 0)) + '/' + U.Combate.escudoMax(j) + ' · no te mueves, drena Esencia/s' : 'Escudo (B): aún no lo conoces. Es una técnica: Kaelen, el guardia, puede enseñártela.'; }
       const h = U.Habilidades.elementos[j.elementoActivo][j.tecnicaIdx]; const z = E.zonaActual; const c = U.Ambiente.costo(h, j.elementoActivo, z, j.atributo);
       const y = U.Habilidades.yang[j.yangForma];
       el.btnTec.classList.toggle('apagado', m < h.umbral || j.agotado); el.btnYang.classList.toggle('apagado', j.agotado || j.estilos.yang < y.umbral); el.btnYin.classList.toggle('apagado', j.agotado); el.btnDash.classList.toggle('apagado', j.agotado);
@@ -3474,7 +3729,7 @@ U.HUD = {
     s += '</svg><div class="radarNota">Tus estadísticas actuales, en vivo: el polígono crece contigo y se actualiza solo, sin ir a ningún lado. Anillos al 25 · 50 · 75 · 100% de la escala de las barras (Vida y Esencia hasta 200; Ataque, Defensa, Mente y Velocidad hasta 20). El tope real de cada estadística es 3000.</div></div>';
     return s;
   },
-  construirPausa() {
+  construirPausaBase() {
     const E = U.Juego.estado, j = E.jugador, a = U.Atributos.de(j.atributo); let html = '';
     { const G = U.Guardado; const ult = G ? G.ultimoAutoTexto() : '—';
       html += '<section><h3>Partida · guardado automático</h3>'
@@ -3504,7 +3759,7 @@ U.HUD = {
       + '<div style="font-size:11px;color:var(--textoTenue)">Yin: cuerpo, cerca, casi sin Esencia (2/6/4). Yang (al despertar): energía blanca, lejos, cara (Haz 15, Onda 14, Esférico 18) y mejora tu recuperación. Inclinación de esta vida: ' + j.perfil.estilo.toUpperCase() + '.</div></section>';
     html += '<section><h3>Atributo · ' + a.nombre + ' (fijo por vida)</h3><div style="font-size:12px"><span style="color:var(--exito)">' + a.ventaja + '</span> · <span style="color:var(--aviso)">' + a.desventaja + '</span></div><div style="font-size:11px;color:var(--textoFrio);margin-top:4px">' + a.desc + ' La ventaja real es el ×2 en un camino largo.</div></section>';
     { const cl = E.clima ? U.Clima.de(E) : U.Clima.TIPOS.despejado; const ff2 = U.Tiempo.faseDe(U.Tiempo.hora(E));
-      html += '<section><h3>Calendario · clima · tu casa · memoria</h3><div style="font-size:12px">📅 <b>' + U.Tiempo.diaTexto(E.reloj) + '</b> · Momento: ' + ff2.nombre + ' (' + U.Tiempo.formato(E.reloj.minutos) + ') · 6 momentos por día, semana de Lunes a Domingo.<br>' + cl.icono + ' <b>Clima: ' + cl.nombre + '</b> · ' + cl.detalle + '. Cambia solo cada pocos minutos y ajusta costos. La lluvia tiene intensidades (ligera, normal, fuerte y tormenta): bajo techo (tu casa, la Oficina) no llueve ni cambian los costos; afuera, el Agua es progresiva (ligera ×0.8, normal ×0.5, fuerte y tormenta = 1) y junto a ríos, estanques u oasis paga DECIMALES (×0.15): la Esencia baja poquito a poquito. El Fuego paga más cuanto más llueve, la Tierra y el Rayo bajan un poco y el Viento sube. La TEMPERATURA también pesa: con calor el Fuego paga ×0.85 y el Agua ×1.25; con frío, al revés (Fuego ×1.2, Agua ×0.9). Todos los costos viven en decimales.<br>🏠 Tu casa (puerta de la casa azul): alarma fijada a las <b>' + U.Tiempo.formato(E.alarmaMin) + '</b> · Hechizo de Inversión: ' + (E.flags.hechizoInversion ? '<b style="color:var(--exito)">aprendido (tecla V)</b>' : 'sin aprender (obelisco de la Montaña Brumosa)') + '<br>Monedas: <b style="color:var(--rayo)">' + Math.floor(j.monedas || 0) + ' 🪙</b> (torneo 150 al campeón · oleadas · misiones de Lía · tienda de Marisol) · Torneos ganados: ' + (E.historial.torneos || 0) + ' · Misiones entregadas: ' + (E.historial.misiones || 0) + '<br>Historial de esta vida: victorias de arena ' + E.historial.victorias + ' · caídas ' + E.historial.derrotas + ' · retos superados ' + E.historial.retos + ' · entrenamientos completos ' + E.historial.entrenos + '. Los NPC recuerdan todo esto cuando hablas con ellos (tú hablas primero).</div></section>';
+      html += '<section><h3>Calendario · clima · tu casa · memoria</h3><div style="font-size:12px">📅 <b>' + U.Tiempo.diaTexto(E.reloj) + '</b> · Momento: ' + ff2.nombre + ' (' + U.Tiempo.formato(E.reloj.minutos) + ') · 6 momentos por día, semana de Lunes a Domingo.<br>' + cl.icono + ' <b>Clima: ' + cl.nombre + '</b> · ' + cl.detalle + '. Cambia solo cada pocos minutos y ajusta costos. La lluvia tiene intensidades (ligera, normal, fuerte y tormenta): bajo techo (tu casa, la Oficina) no llueve ni cambian los costos; afuera, el Agua es progresiva (ligera ×0.8, normal ×0.5, fuerte y tormenta = 1) y junto a ríos, estanques u oasis paga DECIMALES (×0.15): la Esencia baja poquito a poquito. El Fuego paga más cuanto más llueve, la Tierra y el Rayo bajan un poco y el Viento sube. La TEMPERATURA también pesa: con calor el Fuego paga ×0.85 y el Agua ×1.25; con frío, al revés (Fuego ×1.2, Agua ×0.9). Todos los costos viven en decimales.<br>🏠 Tu casa (puerta de la casa azul): alarma fijada a las <b>' + U.Tiempo.formato(E.alarmaMin) + '</b> · Hechizo de Inversión: ' + (E.flags.hechizoInversion ? '<b style="color:var(--exito)">aprendido (tecla V)</b>' : 'sin aprender (obelisco de la Montaña Brumosa)') + '<br>Monedas: <b style="color:var(--rayo)">' + Math.floor(j.monedas || 0) + ' 🪙</b> (misiones por rango · arena completa 50 · podio del torneo 300/150/80 · tienda de Marisol) · Torneos ganados: ' + (E.historial.torneos || 0) + ' · Misiones entregadas: ' + (E.historial.misiones || 0) + '<br>Historial de esta vida: victorias de arena ' + E.historial.victorias + ' · caídas ' + E.historial.derrotas + ' · retos superados ' + E.historial.retos + ' · entrenamientos completos ' + E.historial.entrenos + '. Los NPC recuerdan todo esto cuando hablas con ellos (tú hablas primero).</div></section>';
     }
     html += '<section><h3>Diario</h3><ul class="diario">' + E.objetivos.map(o => '<li class="' + o.estado + '">' + (o.estado === 'hecho' ? '✓ ' : o.estado === 'actual' ? '▶ ' : '○ ') + o.texto + '</li>').join('') + '</ul></section>';
     html += '<section><h3>Vecinos de Bruma · personalidad · dónde están ahora</h3>' + (E.roster || E.npcs).map(n => { const per = U.Personas ? U.Personas.de(n.id) : null; const donde = U.Vida ? U.Vida.dondeEstaTexto(n) : ''; return '<div style="font-size:12px;margin:4px 0"><b>' + n.nombre + '</b> · <span style="color:' + U.Emociones.tonos[n.emocion].color + '">' + n.emocion + '</span> · confianza ' + Math.round(n.estados.confianza) + (per ? '<br><span style="color:var(--textoFrio)">' + per.tipo + ' · le gusta: ' + per.gustos.join(', ') + '</span>' : '') + '<br><span style="color:var(--rayo)">📍 ' + n.nombre + ' ' + donde + '</span></div>'; }).join('') + '<div style="font-size:11px;color:var(--textoTenue)">Cada vecino tiene su rutina: trabaja, come en la plaza, entrena en el Bosque y vuelve a casa de noche (21:00; Pipo a las 20:00). Si alguien no está en su puesto, pregúntale a otro vecino «¿Dónde está…?» y te dirá dónde fue. Sparring: Kaelen–Marco 09:00–11:00 · Torin–Breno 14:00–17:00. El círculo no está en un lugar fijo: se forma alrededor de la pelea, donde sea que esté pasando; acércate a ese círculo y te ofrecerán unirte.</div></section>';
@@ -3514,6 +3769,70 @@ U.HUD = {
     const bD = document.getElementById('btnDescargarPausa'); if (bD) bD.addEventListener('click', () => U.Guardado.descargar());
     const bCP = document.getElementById('btnCargarPausa'); if (bCP) bCP.addEventListener('click', () => U.Guardado.elegirArchivo());
     const bB = document.getElementById('btnBorrarAuto'); if (bB) bB.addEventListener('click', () => { if (bB.dataset.armado) { U.Guardado.borrarAuto(); bB.textContent = 'BORRADO ✓ (AL SEGUIR JUGANDO SE GUARDA ESTA VIDA)'; return; } bB.dataset.armado = '1'; bB.textContent = '¿SEGURO? TOCA OTRA VEZ'; setTimeout(() => { delete bB.dataset.armado; bB.textContent = 'BORRAR GUARDADO'; }, 3000); });
+  },
+  // ===== MENÚ DE PAUSA estilo Pokémon: Mochila · Mapa · Estadísticas · Reputación · Ajustes · Guardar =====
+  construirPausa() { this.seccionPausa('menu'); },
+  navPausa(activa) {
+    const secs = [['menu', '☰ Menú'], ['mochila', '🎒 Mochila'], ['mapa', '🗺 Mapa'], ['estadisticas', '📊 Estadísticas'], ['reputacion', '✦ Reputación'], ['ajustes', '⚙ Ajustes'], ['guardar', '💾 Guardar']];
+    return '<div class="pausaNav">' + secs.map(x => '<button class="mini' + (x[0] === activa ? ' exito' : '') + '" data-sec="' + x[0] + '">' + x[1] + '</button>').join('') + '</div>';
+  },
+  seccionPausa(sec) {
+    const E = U.Juego.estado, j = E.jugador; if (!E || !j) return;
+    j.bolsaPociones = j.bolsaPociones || []; j.bolsaComida = j.bolsaComida || []; j.polainas = j.polainas || {}; j.karma = j.karma || {};
+    let html = this.navPausa(sec);
+    if (sec === 'menu') {
+      html += '<div class="menuLista">'
+        + '<button data-sec="mochila">🎒 Mochila <small>' + j.bolsaPociones.length + '/3 pociones · ' + j.bolsaComida.length + '/5 comidas' + (j.polainaEquipada ? ' · ' + U.Economia.POLAINAS[j.polainaEquipada].nombre + ' puestas' : '') + '</small></button>'
+        + '<button data-sec="mapa">🗺 Mapa <small>' + (E.mapa ? E.mapa.nombreMapa : '') + ' · el minimapa sigue visible en el juego</small></button>'
+        + '<button data-sec="estadisticas">📊 Estadísticas <small>' + U.Elementos.nombre(j.elementoActivo) + ' · maestría ' + Math.floor(j.maestria[j.elementoActivo] || 0) + '%</small></button>'
+        + '<button data-sec="reputacion">✦ Reputación (karma) <small>Aldea de Bruma: ' + (j.karma.aldea || 0) + '</small></button>'
+        + '<button data-sec="ajustes">⚙ Ajustes <small>sonido, dificultad y elemento activo (arriba)</small></button>'
+        + '<button data-sec="guardar">💾 Guardar <small>automático siempre activo</small></button>'
+        + '</div><div style="font-size:11px;color:var(--textoTenue);margin-top:8px">El juego está PAUSADO mientras este menú está abierto. La mochila no pesa: llevar cosas no te hace más lento; el límite es cuántas caben (3 pociones y 5 comidas).</div>';
+    } else if (sec === 'mochila') {
+      html += '<section><h3>🎒 Mochila · pociones a medida (' + j.bolsaPociones.length + '/3)</h3>';
+      if (!j.bolsaPociones.length) html += '<div style="font-size:12px;color:var(--textoFrio)">Sin pociones. Marisol te prepara una a medida en la tienda: tú eliges las unidades.</div>';
+      j.bolsaPociones.forEach((p2, i) => { const nom = p2.tipo === 'vida' ? 'Poción de Vida' : p2.tipo === 'esencia' ? 'Tónico de Esencia' : 'Poción de Condición'; html += '<div class="mochilaItem"><span>' + (p2.tipo === 'vida' ? '🧪' : p2.tipo === 'esencia' ? '🔵' : '💚') + ' <b>' + nom + ' +' + p2.unidades + '</b>' + (p2.precio ? ' <small style="color:var(--textoFrio)">(costó ' + p2.precio + ' 🪙 · venderla devuelve ' + Math.floor(p2.precio / 2) + ')</small>' : '') + '</span><span class="acts"><button class="mini exito" data-usar="' + i + '">TOMAR</button>' + (p2.precio ? '<button class="mini" data-vender="' + i + '">VENDER · ' + Math.floor(p2.precio / 2) + ' 🪙</button>' : '') + '</span></div>'; });
+      html += '<div style="font-size:11px;color:var(--textoTenue)">El botón rápido del HUD (Q) toma la poción de Vida MÁS CHICA. Aquí eliges la exacta: al tomarla, lo que sobra se pierde.</div></section>';
+      html += '<section><h3>🍽 Comida (' + j.bolsaComida.length + '/5) · hoy ' + (j.comidasHoy || 0) + '/3</h3>';
+      if (!j.bolsaComida.length) html += '<div style="font-size:12px;color:var(--textoFrio)">Sin comida. La tienda vende las 5: dulce, salada, picante, ácida y amarga, a 10 🪙.</div>';
+      const conteo = {}; j.bolsaComida.forEach((sab, i) => { conteo[sab] = conteo[sab] || []; conteo[sab].push(i); });
+      Object.keys(conteo).forEach(sab => { const ranking = j.sabores || U.Economia.SABORES; const puesto = ranking.indexOf(sab); const ef = U.Economia.COMER[puesto]; html += '<div class="mochilaItem"><span>🍽 <b>Comida ' + sab + '</b> ×' + conteo[sab].length + ' <small style="color:var(--textoFrio)">(tu sabor nº ' + (puesto + 1) + ': ' + (ef.vida ? '+' + ef.vida + '% Vida · ' : '') + (ef.esencia ? '+' + ef.esencia + '% Esencia' : 'solo te llena') + ')</small></span><span class="acts"><button class="mini exito" data-comer="' + conteo[sab][0] + '">COMER</button></span></div>'; });
+      html += '<div style="font-size:11px;color:var(--textoTenue)">Comer: máximo 3 al día, solo fuera de combate, sube PORCENTAJE según TU orden de sabores del test. La comida NO restaura Condición.</div></section>';
+      html += '<section><h3>🦵 Polainas (pesas de tobillo) · una puesta a la vez</h3>';
+      Object.keys(U.Economia.POLAINAS).forEach(clave => { const pd = U.Economia.POLAINAS[clave]; const tiene = !!j.polainas[clave]; const puesta = j.polainaEquipada === clave;
+        html += '<div class="mochilaItem"><span><b>' + pd.nombre + '</b> <small style="color:var(--textoFrio)">' + (tiene ? 'vas ' + Math.round((1 - pd.velMult) * 100) + '% más lento · Velocidad ×' + pd.crecMult + ' en combate · +1 Vel cada ' + pd.pasosPunto + ' pasos · −1 Condición cada ' + pd.condCada + ' pasos' : 'no las tienes: ' + pd.precio + ' 🪙 en la tienda') + '</small></span><span class="acts">' + (tiene ? (puesta ? '<button class="mini peligro" data-polaina="">QUITAR</button>' : '<button class="mini exito" data-polaina="' + clave + '">EQUIPAR</button>') : '') + '</span></div>'; });
+      html += '<div style="font-size:11px;color:var(--textoTenue)">Con las polainas NO eres más rápido: vas más lento. Lo que crece es tu nivel de Velocidad (en combates y un poco por pasos; el dash nunca cuenta). Al quitártelas, eres más rápido porque el nivel ya subió, y es permanente.</div></section>';
+    } else if (sec === 'mapa') {
+      html += '<section><h3>🗺 Mapa · ' + (E.mapa ? E.mapa.nombreMapa : '') + '</h3><div style="text-align:center"><canvas id="mapaCompleto" width="512" height="384" style="width:min(512px,100%);image-rendering:pixelated;border:3px solid var(--borde);background:#0e1530"></canvas></div>'
+        + '<div style="font-size:12px;color:var(--textoFrio);margin-top:6px">Pueblos y lugares: <b>Aldea de Bruma</b> (oficina, tienda, tu casa, la Arena) · <b>Bosque Susurrante</b> (norte) · <b>Desierto de Sal</b> (este, con su oasis) · <b>Montaña Brumosa</b> (norte del Campo de Ceniza, con el obelisco). Cada lugar tiene su zona elemental: la Ribera y el lago para Agua, el Campo de Ceniza para Fuego, el acantilado ventoso para Viento, la zona rocosa para Tierra. Siempre hay un camino de tierra a cualquier lugar: el atajo elemental es opcional. Viajar a otro pueblo cuesta 10 🪙 por cruce (el permiso lo cubre). El minimapa sigue visible en el juego, como siempre.</div></section>';
+    } else if (sec === 'reputacion') {
+      html += '<section><h3>✦ Reputación · tu KARMA por pueblo</h3><div style="font-size:12px;color:var(--textoFrio)">El karma va de −100 a +100 y es POR PUEBLO: donde no te conocen empiezas en 0, neutral. En precios: 3% por cada 10 de karma (máximo 30% de descuento o de recargo). A −80 o menos, ese pueblo se niega a venderte.</div>';
+      Object.keys(U.Economia.PUEBLOS).forEach(pid => { const k = j.karma[pid] || 0; const pct = Math.max(0, Math.min(100, 50 + k / 2)); html += '<div style="margin:8px 0"><div style="display:flex;justify-content:space-between;font-size:13px"><b>' + U.Economia.PUEBLOS[pid] + '</b><span>Karma <b style="color:' + (k > 0 ? 'var(--exito)' : k < 0 ? 'var(--peligro)' : 'var(--texto)') + '">' + k + '</b> · ' + U.Economia.factorTexto(k) + (k <= -80 ? ' · 🚫 NO TE VENDEN' : '') + '</span></div><div class="karmaBar"><i style="left:' + (k >= 0 ? 50 : pct) + '%;width:' + Math.abs(k) / 2 + '%;background:' + (k >= 0 ? 'var(--exito)' : 'var(--peligro)') + '"></i></div></div>'; });
+      html += '<div style="font-size:11px;color:var(--textoTenue)">Sube: dar dinero cuando te lo piden +3 · dar la comida pedida +2 · cumplir una misión que ayuda +2. Baja: negarte −2 · prometer y no dar −5 · atacar a un inocente −10 · robar −10. Ejemplo: una poción de 50 unidades en Bruma con karma 0 cuesta 100 🪙; en el desierto con karma +60 cuesta 123; en Bruma con karma −60 cuesta 118.</div></section>';
+    } else if (sec === 'estadisticas') {
+      this.el.pausaCuerpo.innerHTML = html; this.construirPausaBase();
+      const cuerpo = this.el.pausaCuerpo; cuerpo.innerHTML = html + cuerpo.innerHTML.replace(/^<div class="pausaNav">[\s\S]*?<\/div>/, '');
+      this.cablearPausa(); return;
+    } else if (sec === 'ajustes') {
+      html += '<section><h3>⚙ Ajustes</h3><div style="font-size:12px">Sonido y dificultad están en la barra inferior de esta pantalla. Tu elemento activo se cambia con los símbolos de arriba («Elemento activo»). El minimapa queda visible por defecto en el juego, y el Mapa completo vive en este menú.</div></section>';
+    } else if (sec === 'guardar') {
+      html += '<section><h3>💾 Guardar</h3><div style="font-size:12px"><span style="color:var(--exito)">●</span> <b>Guardado automático: ACTIVADO, siempre.</b> Tu partida (monedas, mochila, karma, polainas, tablón y misiones) se guarda sola en este navegador cada pocos segundos. También puedes descargar un archivo de respaldo desde la barra inferior.</div></section>';
+    }
+    this.el.pausaCuerpo.innerHTML = html;
+    this.cablearPausa();
+    if (sec === 'mapa') { const cv = document.getElementById('mapaCompleto'); if (cv) U.Render.minimapa(cv, E); }
+  },
+  cablearPausa() {
+    const c = this.el.pausaCuerpo; if (!c) return;
+    c.querySelectorAll('[data-sec]').forEach(b => b.addEventListener('click', () => this.seccionPausa(b.dataset.sec)));
+    c.querySelectorAll('[data-usar]').forEach(b => b.addEventListener('click', () => { U.Recuperacion.usarPocion(parseInt(b.dataset.usar)); this.seccionPausa('mochila'); }));
+    c.querySelectorAll('[data-vender]').forEach(b => b.addEventListener('click', () => { const E = U.Juego.estado, j = E.jugador; const p2 = (j.bolsaPociones || [])[parseInt(b.dataset.vender)]; if (p2) { const mitad = Math.floor((p2.precio || 0) / 2); j.bolsaPociones.splice(parseInt(b.dataset.vender), 1); j.monedas = (j.monedas || 0) + mitad; U.Recuperacion.sincronizar(j); U.HUD.toast('Poción vendida por ' + mitad + ' 🪙 (la mitad de lo que pagaste).', 'exito'); U.Audio.sfx('cura'); } this.seccionPausa('mochila'); }));
+    c.querySelectorAll('[data-comer]').forEach(b => b.addEventListener('click', () => { U.Recuperacion.comer(parseInt(b.dataset.comer)); this.seccionPausa('mochila'); }));
+    c.querySelectorAll('[data-polaina]').forEach(b => b.addEventListener('click', () => { const j = U.Juego.estado.jugador; const clave = b.dataset.polaina; if (!clave) { j.polainaEquipada = null; j.polainaMultCrec = 1; U.HUD.toast('Polainas fuera. Tu nivel de Velocidad se queda: lo ganado entrenando es permanente.', 'exito'); } else { j.polainaEquipada = clave; j.polainaMultCrec = U.Economia.POLAINAS[clave].crecMult; j.pasosPolainas = 0; j.condPolainas = 0; U.HUD.toast(U.Economia.POLAINAS[clave].nombre + ' puestas: vas más lento, pero tu Velocidad entrena ×' + U.Economia.POLAINAS[clave].crecMult + ' en combate.', 'aviso'); } U.Audio.sfx('click'); this.seccionPausa('mochila'); }));
+    const bD = document.getElementById('btnDescargarPausa'); if (bD && !bD.dataset.cable) { bD.dataset.cable = '1'; bD.addEventListener('click', () => U.Guardado.descargar()); }
+    const bCP = document.getElementById('btnCargarPausa'); if (bCP && !bCP.dataset.cable) { bCP.dataset.cable = '1'; bCP.addEventListener('click', () => U.Guardado.elegirArchivo()); }
+    const bB = document.getElementById('btnBorrarAuto'); if (bB && !bB.dataset.cable) { bB.dataset.cable = '1'; bB.addEventListener('click', () => { if (bB.dataset.armado) { U.Guardado.borrarAuto(); bB.textContent = 'BORRADO ✓'; return; } bB.dataset.armado = '1'; bB.textContent = '¿SEGURO? TOCA OTRA VEZ'; setTimeout(() => { delete bB.dataset.armado; bB.textContent = 'BORRAR GUARDADO'; }, 3000); }); }
   },
   mostrarFin(tipo, datos) {
     const E = U.Juego.estado, j = E.jugador; const caja = this.el.fin.querySelector('.finCaja'); caja.classList.toggle('derrota', tipo === 'derrota');
@@ -3544,7 +3863,7 @@ U.TestUI = {
   nuevaSemilla() { const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let s = ''; for (let i = 0; i < 6; i++) s += chars[Math.floor(Math.random() * chars.length)]; return s; },
   rngSemilla(str) { let h = 2166136261; for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); } return U.Render.mulberry(h >>> 0); },
   comenzar() {
-    U.Audio.init(); U.Audio.reanudar(); U.Audio.musica('test'); U.Audio.sfx('click');
+    U.Audio.init(); U.Audio.reanudar(); U.Audio.musica('test'); U.Audio.sfx('click'); this.saboresListo = false; this.ordenSabores = [];
     this.scores = { p: { fuego: 0, agua: 0, tierra: 0, viento: 0, rayo: 0 }, s: {}, a: {}, e: { yin: 0, yang: 0 } }; this.usadas = [];
     const banco = U.TestBanco.preguntas.map((q, i) => i).sort(() => Math.random() - 0.5); const elegidas = banco.slice(0, 8); this.usadas = elegidas.slice(); this.resto = banco.slice(8);
     this.pasos = []; elegidas.forEach((q, i) => { this.pasos.push({ tipo: 'pregunta', q }); if (i === 2) this.pasos.push({ tipo: 'mercado' }); if (i === 5) this.pasos.push({ tipo: 'carga' }); });
@@ -3566,7 +3885,7 @@ U.TestUI = {
     this.escena = { tipo: 'logo' };
   },
   paso() {
-    this.escenaLista = false; const p = this.pasos[this.idx]; if (!p) { this.reveal(); return; }
+    this.escenaLista = false; const p = this.pasos[this.idx]; if (!p) { if (!this.saboresListo) { this.sabores(); return; } this.reveal(); return; }
     if (p.tipo === 'pregunta') this.pregunta(typeof p.q === 'number' ? U.TestBanco.preguntas[p.q] : p.q, p.extra); else if (p.tipo === 'mercado') this.mercado(); else this.carga();
   },
   siguiente() { this.idx++; setTimeout(() => this.paso(), 350); },
@@ -3576,6 +3895,21 @@ U.TestUI = {
     q.ops.forEach((o, i) => { html += '<button class="op" data-i="' + i + '"><span class="num">' + (i + 1) + '</span><span>' + o.t + '</span></button>'; }); html += '</div></div>'; c.innerHTML = html;
     c.querySelectorAll('.op').forEach(b => b.addEventListener('click', () => { if (this.escenaLista) return; this.escenaLista = true; b.classList.add('elegida'); U.Audio.sfx('click'); this.sumar(q.ops[parseInt(b.dataset.i)]); this.siguiente(); }));
     this.preguntaActual = q;
+  },
+  // SABORES: no eliges uno: los ORDENAS del que más te gusta al que menos. El ranking queda fijo y manda en la comida.
+  sabores() {
+    this.progreso('Sabores: ordénalos por gusto'); this.escena = null;
+    const orden = this.ordenSabores = [];
+    const c = document.getElementById('testContenido');
+    const pintar = () => {
+      let html = '<div class="pregunta"><span class="indice">ANTES DE NACER · TUS SABORES</span><h2>Ordena los sabores del que MÁS te gusta al que MENOS. Tócalos en ese orden: este ranking queda fijo en tu vida y decide cuánto te sube cada comida.</h2>';
+      html += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">' + orden.map((sb, i) => '<span class="chip" style="border-color:var(--exito);color:var(--exito)">' + (i + 1) + 'º ' + sb + '</span>').join('') + '</div><div class="ops">';
+      U.Economia.SABORES.forEach(sb => { if (orden.indexOf(sb) < 0) html += '<button class="op" data-sabor="' + sb + '"><span class="num">' + (orden.length + 1) + '</span><span>Comida ' + sb + '</span></button>'; });
+      html += '</div>' + (orden.length === 5 ? '<p class="registrado" style="color:var(--exito);margin-top:8px">Ranking completo: ' + orden.join(' · ') + '. Registrado.</p>' : '<p class="nota" style="margin-top:8px">Llevas ' + orden.length + '/5. Tu favorito te subirá +10% de Vida y +15% de Esencia al comerlo; el último no te subirá nada, solo te llena.</p>') + '</div>';
+      c.innerHTML = html;
+      c.querySelectorAll('[data-sabor]').forEach(b => b.addEventListener('click', () => { orden.push(b.dataset.sabor); U.Audio.sfx('click'); if (orden.length >= 5) { this.saboresListo = true; if (this.perfil) this.perfil.sabores = orden.slice(); setTimeout(() => this.reveal(), 700); } pintar(); }));
+    };
+    pintar();
   },
   tecla(num) { if (!this.activo) return; const c = document.getElementById('testContenido'); const ops = c.querySelectorAll('.op'); if (ops.length && num >= 1 && num <= ops.length) ops[num - 1].click(); },
   mercado() {
@@ -3611,7 +3945,7 @@ U.TestUI = {
     // Yin lo tiene todo el mundo (es el cuerpo); tenerlo no es dominarlo.
     const yangAfin = estilo === 'yang';
     const estilosFin = { yin: distr.yin || 0, yang: yangAfin ? Math.max(5, distr.yang || 0) : 0 };
-    return { elemento: top, elemento2: elem2, atributo, estilo, yangAfin, stats, maestria, estilos: estilosFin, distr, scores: S };
+    return { elemento: top, elemento2: elem2, atributo, estilo, yangAfin, stats, maestria, estilos: estilosFin, distr, scores: S, sabores: (U.TestUI.ordenSabores && U.TestUI.ordenSabores.length === 5) ? U.TestUI.ordenSabores.slice() : U.Economia.SABORES.slice() };
   },
   reveal() {
     let perfil = this.calcular();
@@ -3624,6 +3958,7 @@ U.TestUI = {
     const m = perfil.maestria[perfil.elemento]; const h1 = U.Habilidades.elementos[perfil.elemento][0];
     html += '<div class="tarjeta"><h3>Maestría de ' + E.nombre + ' · ' + m + '% · ' + U.Elementos.etapa(m) + '</h3><div class="maestriaReveal"><i style="transform:scaleX(' + m / 100 + ');background:linear-gradient(90deg,' + E.color + ',' + E.claro + ')"></i><b style="left:15%"></b><b style="left:40%"></b><b style="left:70%"></b></div><p style="margin:6px 0 0;font-size:11px;color:var(--textoFrio)">Técnicas al 15 / 40 / 70%: ' + U.Habilidades.elementos[perfil.elemento].map(h => h.nombre).join(' · ') + '. ' + (m >= 15 ? h1.nombre + ' ya está disponible.' : 'Aún sin técnica: canaliza con golpes Yin hasta el 15%.') + (perfil.elemento2 ? ' Segundo elemento ' + U.Elementos.nombre(perfil.elemento2) + ' al 5%: sin técnica todavía.' : '') + '</p></div>';
     html += '<div class="tarjeta"><h3>Yang · ' + (perfil.yangAfin ? 'Afinidad revelada' : 'Sin afinidad revelada') + '</h3><p style="margin:0;color:var(--textoFrio)">' + (perfil.yangAfin ? 'El test reveló afinidad con el Yang: naces con el estilo despierto (Yang ' + U.Habilidades.yangDespertar + ') y verás su botón en los controles. Desarrollarlo a fondo lleva su propia vida de entrenamiento. Yin también es tuyo, como el de todos: tenerlo no es dominarlo.' : 'El test no reveló afinidad Yang: no naces con él despierto, pero NO está cerrado. Como dominar otro elemento, puedes alcanzarlo entrenando: medita mientras descansas y entrena con Torin hasta llevar el estilo Yang a ' + U.Habilidades.yangDespertar + '; ahí despertará y aparecerá su botón. La afinidad cambia el punto de partida, no el destino: sin ella el camino es más largo, eso es todo. Yin lo tiene todo el mundo porque todos tienen cuerpo; tenerlo no es dominarlo.') + '</p></div>';
+    html += '<div class="tarjeta"><h3>Tus sabores · en tu orden</h3><p style="margin:0;color:var(--textoFrio)">' + perfil.sabores.map((sb, i) => (i + 1) + 'º ' + sb).join(' · ') + '. Al comer, tu favorito sube +10% de Vida y +15% de Esencia; el 2º, +5% y +10%; el 3º, +5% de Esencia; el 4º, +3%; el 5º no sube nada. Máximo 3 comidas al día, fuera de combate, y la comida no restaura Condición.</p></div>';
     html += '<div class="enfoque">Tu elemento es ' + E.nombre + '. Dominarlo es el trabajo de una vida. Concéntrate en él.</div>';
     html += '<div class="nombreFila"><input id="inpNombre" maxlength="12" value="' + nombre + '" placeholder="Nombre de esta vida"><button class="mini" id="btnDadoNombre">DADO</button><button class="grande" id="btnNacer" style="font-size:13px;padding:10px 16px">Comenzar esta vida</button></div></div>';
     document.getElementById('testContenido').innerHTML = html; U.Render.iconoCanvas(document.getElementById('cvSimbolo'), perfil.elemento);
@@ -3668,6 +4003,124 @@ U.TestUI = {
 };
 </script>
 <script>
+/* === js/sistemas/economia.js === */
+/* Unipar — ECONOMÍA COMPLETA: dinero por RANGOS, KARMA por pueblo, comida por sabores,
+   pociones A MEDIDA, polainas y el TABLÓN de misiones diarias.
+   Números cerrados (decisión del jugador):
+   · Rangos D C B A S (sin Z). Desbloqueo por maestría del elemento principal: D 0% · C 10% · B 25% · A 45% · S 65%.
+   · Pago SOLO por rango, nunca por elemento, con ±25%: D 15–25 · C 30–50 · B 55–85 · A 90–130 · S 135–165.
+   · Arena: entrada 10; solo cobras 50 si completas TODA la ronda. Torneo: entrada 50; solo podio 300/150/80.
+   · Viaje a otro pueblo: 10 por cruce. Permiso: 200 por 28 días (viajes + arena; NO torneo).
+   · Poción a medida: 2 monedas por unidad (×1.5 en desierto/montaña), karma encima: 3% por cada 10 de karma.
+   · Karma −100..+100 POR PUEBLO; a −80 o menos no te venden. Comida: 5 sabores, 10 monedas, máx 3 al día.
+   · Polainas: Ligeras 100 (×0.9 vel, ×1.5 crec) · Medianas 250 (×0.8, ×2) · Pesadas 500 (×0.7, ×2.5). */
+window.U = window.U || {};
+
+U.Economia = {
+  RANGOS: ['D', 'C', 'B', 'A', 'S'],
+  DESBLOQUEO: { D: 0, C: 10, B: 25, A: 45, S: 65 },
+  PAGO: { D: [15, 25], C: [30, 50], B: [55, 85], A: [90, 130], S: [135, 165] },
+  SABORES: ['dulce', 'salado', 'picante', 'ácido', 'amargo'],
+  SABOR_NOM: { dulce: 'Dulce', salado: 'Salado', picante: 'Picante', 'ácido': 'Ácido', amargo: 'Amargo' },
+  COMIDA_PRECIO: 10,
+  // Efecto de comer según TU ranking (índice 0 = tu favorito): % del máximo. La comida NO restaura Condición.
+  COMER: [ { vida: 10, esencia: 15 }, { vida: 5, esencia: 10 }, { vida: 0, esencia: 5 }, { vida: 0, esencia: 3 }, { vida: 0, esencia: 0 } ],
+  // Efecto de DAR comida a un NPC según el ranking DEL NPC: confianza y ánimo.
+  DAR_COMIDA: [ { conf: 8, animo: 15 }, { conf: 5, animo: 8 }, { conf: 3, animo: 3 }, { conf: 1, animo: 0 }, { conf: 0, animo: -5 } ],
+  PASOS_REGALO: [8, 5, 3, 1],
+  POLAINAS: {
+    ligera:  { nombre: 'Polainas ligeras',  precio: 100, velMult: 0.9, crecMult: 1.5, pasosPunto: 100, condCada: 50 },
+    mediana: { nombre: 'Polainas medianas', precio: 250, velMult: 0.8, crecMult: 2.0, pasosPunto: 75,  condCada: 40 },
+    pesada:  { nombre: 'Polainas pesadas',  precio: 500, velMult: 0.7, crecMult: 2.5, pasosPunto: 50,  condCada: 30 }
+  },
+  PUEBLOS: { aldea: 'Aldea de Bruma', bosque: 'Bosque Susurrante', desierto: 'Desierto de Sal', montana: 'Montaña Brumosa' },
+  puebloDeMapa(mapaId) { if (mapaId === 'oficina' || mapaId === 'casa') return 'aldea'; return this.PUEBLOS[mapaId] ? mapaId : 'aldea'; },
+  puebloActual() { const E = U.Juego.estado; return E ? this.puebloDeMapa(E.mapaId) : 'aldea'; },
+  karma(j, pueblo) { j.karma = j.karma || {}; return j.karma[pueblo] || 0; },
+  karmaAdd(delta, pueblo) {
+    const E = U.Juego.estado, j = E.jugador; pueblo = pueblo || this.puebloActual();
+    j.karma = j.karma || {}; const antes = j.karma[pueblo] || 0;
+    j.karma[pueblo] = Math.max(-100, Math.min(100, antes + delta));
+    if (delta !== 0 && U.Combate) U.Combate.texto(j, 'KARMA ' + (delta > 0 ? '+' : '') + delta + ' · ' + this.PUEBLOS[pueblo], delta > 0 ? '#67e08a' : '#ff5470', 1);
+    return j.karma[pueblo];
+  },
+  // Factor de precio por karma: 3% por cada 10 → +100 = −30% · −100 = +30%.
+  factorKarma(k) { return 1 - Math.max(-100, Math.min(100, k)) * 0.003; },
+  factorTexto(k) { const f = this.factorKarma(k); if (k >= 0) return '−' + Math.round((1 - f) * 100) + '% de descuento'; return '+' + Math.round((f - 1) * 100) + '% de recargo'; },
+  puedeVender(j, pueblo) { return this.karma(j, pueblo) > -80; },
+  // Precio por lugar: Bruma ×1.0 (2/unidad); desierto y montaña ×1.5 (3/unidad). El karma va encima.
+  multLugar(mapaId) { return (mapaId === 'desierto' || mapaId === 'montana') ? 1.5 : 1.0; },
+  precioUnidad(mapaId, j) { const pueblo = this.puebloDeMapa(mapaId); return 2 * this.multLugar(mapaId) * this.factorKarma(this.karma(j, pueblo)); },
+  precioPocion(unidades, mapaId, j) { return Math.max(1, Math.round(unidades * this.precioUnidad(mapaId, j))); },
+  permisoVigente() { const E = U.Juego.estado, j = E.jugador; return !!(j.permisoHasta && E.reloj && E.reloj.dia <= j.permisoHasta); },
+  // Ranking de sabores de un NPC: fijo por su id (determinista). El favorito se descubre hablando con él.
+  rankingNpc(npcId) {
+    let h = 2166136261; const s = 'sabor:' + npcId; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+    const arr = this.SABORES.slice(); let seed = h >>> 0;
+    for (let i = arr.length - 1; i > 0; i--) { seed = (Math.imul(seed, 1103515245) + 12345) >>> 0; const k = seed % (i + 1); const t = arr[i]; arr[i] = arr[k]; arr[k] = t; }
+    return arr;
+  },
+  favoritoNpc(npcId) { return this.rankingNpc(npcId)[0]; },
+  confianza(npc, delta) {
+    if (!npc || !npc.estados) return;
+    npc.estados.confianza = Math.max(0, Math.min(100, npc.estados.confianza + delta));
+    npc.estados.animo = Math.max(0, Math.min(100, npc.estados.animo + (delta > 0 ? delta * 0.6 : delta)));
+    if (U.Emociones) npc.emocion = U.Emociones.emocion(npc);
+  },
+  pagoRango(rango, rng) { const r = this.PAGO[rango]; return r[0] + Math.floor((rng ? rng() : Math.random()) * (r[1] - r[0] + 1)); },
+  desbloqueada(rango, j) { return (j.maestria[j.elemento] || 0) >= this.DESBLOQUEO[rango]; },
+  // ---------- TABLÓN: 5 misiones diarias, TOTALMENTE aleatorias ----------
+  TIPOS: {
+    entrega:   { nombre: 'Entrega', rangos: ['D', 'C'] },
+    recoger:   { nombre: 'Recoger', rangos: ['D', 'C'] },
+    escolta:   { nombre: 'Escolta', rangos: ['D', 'C', 'B', 'A'] },
+    perdido:   { nombre: 'Objeto perdido', rangos: ['D', 'C'] },
+    cazar:     { nombre: 'Cazar', rangos: ['C', 'B'] },
+    investigar:{ nombre: 'Investigar', rangos: ['C', 'B'] },
+    rescatar:  { nombre: 'Rescatar', rangos: ['B', 'A'] },
+    mensaje:   { nombre: 'Mensaje urgente', rangos: ['D', 'C'] }
+  },
+  RAZONES: { agua: 'porque vas a la región del lago', fuego: 'porque vas a la zona quemada', tierra: 'porque vas a la zona rocosa', viento: 'porque vas a el acantilado de viento', rayo: 'porque vas a la montaña de las tormentas' },
+  DESTINOS: [
+    { mapa: 'desierto', x: 45.5, y: 10.5, lugar: 'el Oasis del Desierto de Sal' },
+    { mapa: 'bosque', x: 43.5, y: 30.5, lugar: 'el estanque del Bosque Susurrante' },
+    { mapa: 'montana', x: 20.5, y: 12.5, lugar: 'la cima de la Montaña Brumosa' },
+    { mapa: 'aldea', x: 40.5, y: 24.5, lugar: 'la Ribera Húmeda' },
+    { mapa: 'aldea', x: 51.5, y: 12.5, lugar: 'el Campo de Ceniza' },
+    { mapa: 'bosque', x: 28.5, y: 12.5, lugar: 'el claro norte del Bosque Susurrante' }
+  ],
+  generarTablon(rng) {
+    const tipos = Object.keys(this.TIPOS); const out = [];
+    const objetosPerdidos = ['un anillo de plata', 'una herramienta de la forja', 'un juguete de madera', 'una llave vieja', 'un colgante de la familia'];
+    for (let i = 0; i < 5; i++) {
+      const tipo = tipos[Math.floor(rng() * tipos.length)];
+      let rango = this.TIPOS[tipo].rangos[Math.floor(rng() * this.TIPOS[tipo].rangos.length)];
+      if (rng() < 0.07 && ['escolta', 'cazar', 'rescatar', 'investigar', 'entrega'].indexOf(tipo) >= 0) rango = 'S';
+      const elemento = U.Elementos.ids[Math.floor(rng() * 5)];
+      const dest = this.DESTINOS[Math.floor(rng() * this.DESTINOS.length)];
+      const pago = this.pagoRango(rango, rng);
+      let desc = '';
+      if (tipo === 'entrega') desc = 'Lleva un paquete sellado a ' + dest.lugar + '.';
+      else if (tipo === 'recoger') desc = 'Recoge un encargo que espera en ' + dest.lugar + ' y tráelo de vuelta.';
+      else if (tipo === 'escolta') desc = 'Escolta a un vecino caminando hasta la entrada de su pueblo. Protégelo de los bandidos del camino.';
+      else if (tipo === 'perdido') desc = 'Se perdió ' + objetosPerdidos[Math.floor(rng() * objetosPerdidos.length)] + ' por ' + dest.lugar + '. Búscalo y devuélvelo.';
+      else if (tipo === 'cazar') desc = 'Una bestia molesta al pueblo cerca de ' + dest.lugar + ': come cultivos y acecha el camino. Encuéntrala y derróbala.';
+      else if (tipo === 'investigar') desc = 'Se oyen ruidos extraños y faltan cosas por ' + dest.lugar + '. Ve, busca pistas y descubre qué pasa.';
+      else if (tipo === 'rescatar') desc = 'Alguien está atrapado cerca de ' + dest.lugar + ', guardado por bandidos. Rescátalo.';
+      else if (tipo === 'mensaje') desc = 'Lleva un mensaje urgente a ' + dest.lugar + '. Es rápido: si tardas más de 3 horas de juego, cobras la mitad.';
+      out.push({ uid: 'm' + Math.floor(rng() * 1e9), tipo, rango, elemento, razon: this.RAZONES[elemento], pago, desc, destino: { mapa: dest.mapa, x: dest.x, y: dest.y, lugar: dest.lugar } });
+    }
+    return out;
+  },
+  asegurarTablon() {
+    const E = U.Juego.estado; if (!E) return [];
+    const dia = E.reloj ? E.reloj.dia : 1;
+    if (!E.tablon || E.tablon.dia !== dia) E.tablon = { dia, lista: this.generarTablon(E.rng || Math.random) };
+    return E.tablon.lista;
+  }
+};
+</script>
+<script>
 /* === js/main.js === */
 /* Unipar — main: arranque, estado de la vida, bucle único (rAF), entrada teclado/touch, interacciones, objetivos, cámara, pausa y fin. */
 window.U = window.U || {};
@@ -3689,12 +4142,12 @@ U.Juego = {
     const rng = U.TestUI.rngSemilla(semilla); const mapa = U.Grid.crearMapa(rng);
     const j = { tipo: 'jugador', nombre, perfil, elemento: perfil.elemento, elemento2: perfil.elemento2, elementos: perfil.elemento2 ? [perfil.elemento, perfil.elemento2] : [perfil.elemento], elementoActivo: perfil.elemento, atributo: perfil.atributo,
       stats: Object.assign({}, perfil.stats), vida: perfil.stats.vida, esencia: perfil.stats.esencia, maestria: Object.assign({}, perfil.maestria), estilos: Object.assign({}, perfil.estilos), regenBonus: 0,
-      x: mapa.inicio.x, y: mapa.inicio.y, dir: { x: 0, y: 1 }, anim: 0, moviendo: false, trote: false, agotado: false, invuln: 0, flash: 0, carga: 0, cargando: false, ataqueAnim: 0, cdYin: 0, cdYang: 0, cdTec: {}, dash: { t: 0, cd: 0, dx: 0, dy: 0 }, rastro: [], tecnicaIdx: 0, yangForma: 'haz', tieneYang: !!perfil.yangAfin, buffs: { sobrecarga: 0, sobrecargaCd: 0 }, descansando: false, pociones: 1, monedas: 30, escudo: false, escudoAprendido: false, escudoNv: 0, escudoExp: 0, escudoVida: 0, cansancio: 100, condicionExtra: 0, gastoFatiga: 0, dot: null, invertido: 0, flags: {} };
+      x: mapa.inicio.x, y: mapa.inicio.y, dir: { x: 0, y: 1 }, anim: 0, moviendo: false, trote: false, agotado: false, invuln: 0, flash: 0, carga: 0, cargando: false, ataqueAnim: 0, cdYin: 0, cdYang: 0, cdTec: {}, dash: { t: 0, cd: 0, dx: 0, dy: 0 }, rastro: [], tecnicaIdx: 0, yangForma: 'haz', tieneYang: !!perfil.yangAfin, buffs: { sobrecarga: 0, sobrecargaCd: 0 }, descansando: false, pociones: 0, bolsaPociones: [], bolsaComida: [], karma: {}, sabores: (perfil.sabores || U.Economia.SABORES.slice()), polainas: {}, polainaEquipada: null, polainaMultCrec: 1, pasosPolainas: 0, condPolainas: 0, comidasHoy: 0, permisoHasta: 0, permisoUsos: 0, promesas: [], monedas: 0, ultimaOrilla: null, levitT: 0, enAguaT: 0, escudo: false, escudoAprendido: false, escudoNv: 0, escudoExp: 0, escudoVida: 0, cansancio: 100, condicionExtra: 0, gastoFatiga: 0, dot: null, invertido: 0, flags: {} };
     // tieneYang = Yang DESPERTADO: con afinidad naces despierto; sin ella, despierta al entrenar el estilo hasta el umbral (5).
     const npcs = ['kaelen', 'sora', 'torin', 'marisol', 'breno', 'elena', 'marco', 'pipo'].map(id => U.Emociones.crear(id, rng, mapa.npcs[id]));
     this.estado = { ui: 'mundo', mapa, mapaId: 'aldea', mapas: { aldea: mapa }, npcsPorMapa: {}, cambioCd: 0, jugador: j, npcs, enemigos: [], proyectiles: [], orbes: [], efectos: { particulas: [], textos: [], haces: [], anillos: [], cadenas: [], cortes: [], telegrafos: [] }, camara: { x: j.x * 16 - U.Render.viewW / 2, y: j.y * 16 - U.Render.viewH / 2, shake: 0 }, tiempo: 0, reloj: U.Tiempo.crear(), clima: U.Clima.crear(rng), alarmaMin: 7 * 60, historial: { derrotas: 0, victorias: 0, retos: 0, entrenos: 0, torneos: 0, misiones: 0 }, reto: null, entreno: null, bandidoT: 0, hitstop: 0, dificultad: 1, semilla, rng,
-      arena: { activa: false, ronda: 1, oleada: 1, total: 3, entre: 0, spawned: false, cuenta: 0 }, torneo: null, mision: null, misionIdx: 0, enCombate: false, zonaActual: null, interactuable: null, flags: {}, resumen: { daño: 0, recibido: 0, golpes: 0, tecnicas: 0, yang: 0, bajas: 0, esquives: 0, dashes: 0, crecimiento: {}, maestria: {} },
-      objetivos: [ { texto: 'Habla con Kaelen, el guardia de la aldea.', estado: 'actual' }, { texto: 'Visita la Ribera Húmeda y el Campo de Ceniza: siente el costo ambiental.', estado: 'pendiente' }, { texto: 'Activa la runa de la Arena (sureste) y sobrevive 3 oleadas.', estado: 'pendiente' }, { texto: 'Vuelve con Kaelen y cuéntale tu victoria.', estado: 'pendiente' }, { texto: 'Cruza la entrada norte (umbral dorado) al Bosque Susurrante: de día tranquilo; de noche salen los bandidos.', estado: 'pendiente' }, { texto: 'Visita el Desierto de Sal (borde este) y la Montaña Brumosa (norte del Campo de Ceniza).', estado: 'pendiente' }, { texto: 'Toca el obelisco de la cima de la Montaña y aprende el Hechizo de Inversión (tecla V).', estado: 'pendiente' }, { texto: 'Entra en tu casa (puerta de la casa azul), fija la alarma y duerme en tu cama.', estado: 'pendiente' }, { texto: 'Visita la OFICINA DEL GUARDIÁN (edificio dorado al sur de la plaza): conoce a Aldric y pide una MISIÓN a su secretaria Lía.', estado: 'pendiente' }, { texto: 'Gana el TORNEO DE BRUMA en la Arena: octavos, cuartos, semifinal y final (te recuperas tras cada ronda). Premio: 150 monedas.', estado: 'pendiente' }, { texto: 'Rompe un árbol o una roca que te cierre el paso: tienen vida propia y al caer dejan el camino libre.', estado: 'pendiente' } ], objetivoIdx: 0, ambienteT: 0, pajaroT: 5 };
+      arena: { activa: false, ronda: 1, oleada: 1, total: 3, entre: 0, spawned: false, cuenta: 0 }, torneo: null, mision: null, misionIdx: 0, tablon: null, escolta: null, ultimoDia: 1, peticionT: 40, peticion: null, enCombate: false, zonaActual: null, interactuable: null, flags: {}, resumen: { daño: 0, recibido: 0, golpes: 0, tecnicas: 0, yang: 0, bajas: 0, esquives: 0, dashes: 0, crecimiento: {}, maestria: {} },
+      objetivos: [ { texto: 'Habla con Kaelen, el guardia de la aldea.', estado: 'actual' }, { texto: 'Visita la Ribera Húmeda y el Campo de Ceniza: siente el costo ambiental.', estado: 'pendiente' }, { texto: 'Activa la runa de la Arena (sureste) y sobrevive 3 oleadas.', estado: 'pendiente' }, { texto: 'Vuelve con Kaelen y cuéntale tu victoria.', estado: 'pendiente' }, { texto: 'Cruza la entrada norte (umbral dorado) al Bosque Susurrante: de día tranquilo; de noche salen los bandidos.', estado: 'pendiente' }, { texto: 'Visita el Desierto de Sal (borde este) y la Montaña Brumosa (norte del Campo de Ceniza).', estado: 'pendiente' }, { texto: 'Toca el obelisco de la cima de la Montaña y aprende el Hechizo de Inversión (tecla V).', estado: 'pendiente' }, { texto: 'Entra en tu casa (puerta de la casa azul), fija la alarma y duerme en tu cama.', estado: 'pendiente' }, { texto: 'Visita la OFICINA DEL GUARDIÁN (edificio dorado al sur de la plaza): conoce a Aldric y pide una MISIÓN a su secretaria Lía.', estado: 'pendiente' }, { texto: 'Gana el TORNEO DE BRUMA en la Arena (entrada 50): solo cobra el podio — 1º 300, 2º 150, 3º 80 — y te recuperas tras cada ronda.', estado: 'pendiente' }, { texto: 'Rompe un árbol o una roca que te cierre el paso: tienen vida propia y al caer dejan el camino libre.', estado: 'pendiente' } ], objetivoIdx: 0, ambienteT: 0, pajaroT: 5 };
     this.estado.roster = npcs; this.estado.sparring = { fase: 'idle', ventana: null, consumida: null, pareja: [], bando: null, aliado: null, retirados: [], bloqueado: false, dentro: false, ofrecidoCd: 0, golpeT: 0, turno: 0, allyT: 0, centro: null }; U.Crecimiento.reset(); U.HUD.mostrar(); U.HUD.refrescarSimbolos(); U.HUD.refrescarChips(); U.Audio.musica('aldea'); U.Ambiente.actualizar();
     if (U.Guardado) setTimeout(() => U.Guardado.guardarAuto(), 400); // la nueva vida queda guardada automáticamente desde el primer momento
     U.HUD.banner('UNA NUEVA VIDA', 2); U.HUD.toast('Bienvenido, ' + nombre + '. Tu elemento es ' + U.Elementos.nombre(j.elemento) + ': concéntrate en él.', 'exito');
@@ -3708,7 +4161,12 @@ U.Juego = {
     const E = this.estado; if (!E) return;
     if (E.mapaId === destino) { if (spawn) { E.jugador.x = spawn.x; E.jugador.y = spawn.y; } return; }
     if (U.Sparring) U.Sparring.cancelarPorSalida();
+    const origenMapa = E.mapaId;
     const nuevo = this.mapaPorId(destino); E.mapa = nuevo; E.mapaId = destino;
+    if (!silencioso && E.tiempo > 1) { const crucePueblo = (origenMapa === 'aldea' && (destino === 'desierto' || destino === 'montana')) || ((origenMapa === 'desierto' || origenMapa === 'montana') && destino === 'aldea');
+      if (crucePueblo) { const jj = E.jugador; if (U.Economia.permisoVigente()) { jj.permisoUsos = (jj.permisoUsos || 0) + 1; setTimeout(() => U.HUD.toast('Cruce cubierto por tu permiso de viajero.', ''), 60); }
+        else if ((jj.monedas || 0) >= 10) { jj.monedas -= 10; setTimeout(() => U.HUD.toast('Viaje a otro pueblo: −10 🪙 por el cruce.', 'aviso'), 60); }
+        else setTimeout(() => U.HUD.toast('No traes las 10 🪙 del cruce: el guardia te deja pasar esta vez. Gana monedas con misiones.', 'aviso'), 60); } }
     if (destino === 'oficina' && !E.npcsPorMapa.oficina) { const rngO = U.TestUI.rngSemilla(E.semilla + '-oficina'); E.npcsPorMapa.oficina = ['aldric', 'lia'].map(id => U.Emociones.crear(id, rngO, nuevo.npcs[id])); }
     this.refrescarNpcs();
     const j = E.jugador; const sp = spawn || nuevo.inicio; j.x = sp.x; j.y = sp.y; j.descansando = false; j.cargando = false;
@@ -3726,6 +4184,45 @@ U.Juego = {
       if (E.objetivos[4] && E.objetivos[4].estado !== 'hecho') { E.objetivos[4].estado = 'hecho'; if (E.objetivoIdx === 4) this.siguienteObjetivo(); }
     }
     if (nuevo.spawnsAbiertos) nuevo.spawnsAbiertos.forEach(sp => { E.enemigos.push(U.Combate.crearEnemigo(sp[0], sp[1], sp[2], E.dificultad)); });
+  },
+  // DESPLAZAMIENTOS POR ELEMENTO: Agua camina sobre el agua gratis; Tierra levanta un puente
+  // de piedra (la celda se vuelve PUENTE); Viento levita hasta ~5 s sobre el agua; los demás
+  // gastan 10 de Esencia por segundo y, si se les acaba, se hunden y vuelven a la orilla.
+  moverJugador(m, j, dx, dy) {
+    const T = U.Grid.T; const enAgua = (x, y) => { const cx = Math.floor(x), cy = Math.floor(y); return cx >= 0 && cy >= 0 && cx < m.ancho && cy < m.alto && m.tiles[cy * m.ancho + cx] === T.AGUA; };
+    const destinoAgua = enAgua(j.x + dx, j.y + dy) || enAgua(j.x, j.y);
+    const puede = j.elementoActivo === 'agua' || j.elementoActivo === 'tierra' || (j.elementoActivo === 'viento' && (j.levitT || 0) < 5) || j.esencia > 0.5;
+    if (!destinoAgua || !puede) { U.Grid.mover(m, j, dx, dy); return; }
+    const tocados = [];
+    for (let i = 0; i < m.tiles.length; i++) if (m.tiles[i] === T.AGUA && m.solidos[i] === 1) { m.solidos[i] = 0; tocados.push(i); }
+    const px = j.x, py = j.y;
+    U.Grid.mover(m, j, dx, dy);
+    tocados.forEach(i => { if (m.tiles[i] === T.AGUA) m.solidos[i] = 1; });
+    if (j.elementoActivo === 'tierra' && enAgua(j.x, j.y)) { const cx = Math.floor(j.x), cy = Math.floor(j.y); const idx = cy * m.ancho + cx; if (m.tiles[idx] === T.AGUA && j.esencia >= 5) { m.tiles[idx] = T.PUENTE; m.solidos[idx] = 0; j.esencia -= 5; U.Recuperacion.registrarGasto(5); U.Combate.particulas(j.x, j.y, 4, '#d9a441', 'polvo'); } }
+  },
+  // Efectos del suelo al caminar: agua (drenaje/hundirse), ceniza (quema si no eres Fuego), polainas (pasos y Condición).
+  tickSuelo(dt, seMovio, distCel) {
+    const E = this.estado, j = E.jugador, m = E.mapa; const T = U.Grid.T;
+    const cx = Math.max(0, Math.min(m.ancho - 1, Math.floor(j.x))), cy = Math.max(0, Math.min(m.alto - 1, Math.floor(j.y)));
+    const tile = m.tiles[cy * m.ancho + cx];
+    if (tile !== T.AGUA) { j.ultimaOrilla = { x: j.x, y: j.y }; j.levitT = 0; }
+    if (tile === T.AGUA) {
+      if (j.elementoActivo === 'viento') { j.levitT = (j.levitT || 0) + dt; if (j.levitT >= 5 && j.ultimaOrilla) { j.x = j.ultimaOrilla.x; j.y = j.ultimaOrilla.y; j.levitT = 0; U.HUD.toast('La levitación se acaba: bajas a la orilla. El Viento levita unos 5 segundos, no vuela el mapa entero.', 'aviso'); } }
+      else if (j.elementoActivo !== 'agua' && j.elementoActivo !== 'tierra') {
+        j.esencia = Math.max(0, j.esencia - 10 * dt); U.Recuperacion.registrarGasto(10 * dt);
+        if (j.esencia <= 0.01) { if (j.ultimaOrilla) { j.x = j.ultimaOrilla.x; j.y = j.ultimaOrilla.y; } j.agotado = true; U.HUD.toast('Sin Esencia sobre el agua: te hundes y vuelves a la orilla. (El camino de tierra siempre es gratis; el de Agua cruza directo sin gastar.)', 'peligro'); U.Audio.sfx('agua'); }
+      }
+    }
+    if (tile === T.CENIZA && j.elementoActivo !== 'fuego') { j.vida = Math.max(0, j.vida - 3 * dt); if (Math.random() < dt * 2) U.Combate.particulas(j.x, j.y - 0.4, 1, '#ff7a2f', 'brasa'); if (j.vida <= 0) { j.vida = 0; this.fin('derrota'); return; } }
+    // POLAINAS: caminar cuenta por pasos (celdas). El dash NUNCA cuenta como entrenamiento.
+    if (seMovio && j.dash.t <= 0 && distCel > 0) {
+      if (j.polainaEquipada) { const pd = U.Economia.POLAINAS[j.polainaEquipada]; if (!pd) return;
+        j.pasosPolainas = (j.pasosPolainas || 0) + distCel;
+        j.condPolainas = (j.condPolainas || 0) + distCel;
+        while (j.pasosPolainas >= pd.pasosPunto) { j.pasosPolainas -= pd.pasosPunto; if (j.stats.velocidad < 3000) { j.stats.velocidad = Math.min(3000, j.stats.velocidad + 1); U.Combate.texto(j, 'VELOCIDAD +1 · PASOS CON POLAINAS', '#7ef0c0', 1); U.Audio.sfx('unlock'); } }
+        while (j.condPolainas >= pd.condCada) { j.condPolainas -= pd.condCada; j.cansancio = Math.max(0, (j.cansancio != null ? j.cansancio : U.Recuperacion.condicionMax(j)) - 1); }
+      }
+    }
   },
   tocarObelisco() {
     const E = this.estado, j = E.jugador;
@@ -3745,7 +4242,9 @@ U.Juego = {
   iniciarEntreno(guia) {
     const E = this.estado; if (!E || E.entreno) return;
     const defs = { kaelen: { tipo: 'esquiva', meta: 3, nombre: 'Entreno de Kaelen · 3 dashes', recompensa: 'defensa' }, torin: { tipo: 'golpes', meta: 5, nombre: 'Entreno de Torin · 5 golpes Yin que conecten', recompensa: 'ataque' }, sora: { tipo: 'meditacion', meta: 8, nombre: 'Entreno de Sora · medita 8 s (tecla R)', recompensa: 'mente' } };
-    const d = defs[guia] || defs.torin; E.entreno = { guia, tipo: d.tipo, meta: d.meta, prog: 0, nombre: d.nombre, recompensa: d.recompensa };
+    const d = defs[guia] || defs.torin;
+    if ((E.jugador.monedas || 0) >= 5) { E.jugador.monedas -= 5; U.HUD.toast('Encargo del Guía: pagas 5 🪙 de tu bolsillo (materiales y comida del entreno). La recompensa es entrenamiento, no dinero.', 'aviso'); }
+    E.entreno = { guia, tipo: d.tipo, meta: d.meta, prog: 0, nombre: d.nombre, recompensa: d.recompensa };
     U.HUD.banner('🎯 ' + d.nombre.toUpperCase(), 1.8); U.Audio.sfx('unlock');
   },
   progresoEntreno(tipo, n) {
@@ -3753,48 +4252,119 @@ U.Juego = {
     E.entreno.prog += n;
     if (E.entreno.prog >= E.entreno.meta) { const en = E.entreno; E.entreno = null; E.historial.entrenos++; U.Crecimiento.stat(en.recompensa, 0.5, 1); if (en.tipo === 'meditacion') U.Crecimiento.estilo('yang', 0.6, 1); U.HUD.banner('🎯 ¡ENTRENAMIENTO COMPLETO! · ' + U.Estadisticas.etiquetas[en.recompensa].toUpperCase() + ' +', 2); U.Audio.sfx('unlock'); const npc = E.npcs.find(x => x.id === en.guia); if (npc) { if (!npc.hechos) npc.hechos = []; npc.hechos.push('completaste su entrenamiento de guía'); U.Emociones.evento(npc, { realidad: 80, energia: 10, etiqueta: 'entreno completo' }); } }
   },
-  MISIONES: [
-    { id: 'entrega', nombre: 'Lleva el paquete sellado de la Oficina al Oasis del Desierto de Sal', tipo: 'entrega', meta: 1, recompensa: 40 },
-    { id: 'reliquia', nombre: 'Encuentra la Reliquia Perdida en el Desierto (brilla cerca del oasis, al noreste)', tipo: 'reliquia', meta: 1, recompensa: 55 },
-    { id: 'proteccion', nombre: 'Protege a Elena: derrota a los 2 bandidos que la acechan en la aldea', tipo: 'proteccion', meta: 2, recompensa: 50 },
-    { id: 'romper', nombre: 'Despeja caminos: rompe 3 árboles, rocas o cactus que bloqueen el paso', tipo: 'romper', meta: 3, recompensa: 35 },
-    { id: 'caza', nombre: 'Caza en el Bosque Susurrante: derrota 3 enemigos allí', tipo: 'caza_bosque', meta: 3, recompensa: 60 }
-  ],
-  aceptarMision() {
+  // ---------- MISIONES DEL TABLÓN: 5 al día, aleatorias, por RANGO ----------
+  aceptarMision(uid) {
     const E = this.estado; if (!E) return 'No hay oficina sin mundo.';
-    if (E.mision && E.mision.activa && !E.mision.completada) return 'Ya tienes una misión activa: «' + E.mision.nombre + '» (' + Math.floor(E.mision.prog) + '/' + E.mision.meta + '). Cúmplela y vuelve a cobrar.';
+    if (E.mision && E.mision.activa && !E.mision.completada) return 'Ya tienes una misión activa: «' + E.mision.desc + '» (' + Math.floor(E.mision.prog) + '/' + E.mision.meta + '). Cúmplela y vuelve a cobrar, o déjala caducar al final del día.';
     if (E.mision && E.mision.completada) return 'Esa misión ya está cumplida y sin cobrar: entrégala primero con la opción de entregar.';
-    const def = this.MISIONES[E.misionIdx % this.MISIONES.length];
-    E.mision = { id: def.id, tipo: def.tipo, nombre: def.nombre, meta: def.meta, recompensa: def.recompensa, prog: 0, activa: true, completada: false };
-    if (def.tipo === 'reliquia') { const md = this.mapaPorId('desierto'); if (!md.objetos.some(o => o.tipo === 'reliquia')) md.objetos.push({ tipo: 'reliquia', x: 45, y: 7, w: 1, h: 1, solido: false }); }
-    if (def.tipo === 'proteccion') { const el = E.npcs.find(n => n.id === 'elena'); const bx = el && E.mapaId === 'aldea' ? el.x : E.jugador.x + 3, by = el && E.mapaId === 'aldea' ? el.y : E.jugador.y; if (E.mapaId === 'aldea') { E.mision.spawned = true; for (let i = 0; i < 2; i++) { const e = U.Combate.crearEnemigo('bandido', bx + 2 + i * 1.5, by + 1, E.dificultad); e.esProteccion = true; E.enemigos.push(e); } } else { E.mision.spawned = false; } U.Combate.particulas(bx, by, 14, '#ff5470', 'humo'); }
-    U.HUD.banner('📜 MISIÓN ACEPTADA', 2); U.Audio.sfx('unlock');
+    const lista = U.Economia.asegurarTablon(); const def = lista.find(m => m.uid === uid) || lista[0]; if (!def) return 'El tablón está vacío hoy.';
+    const j = E.jugador;
+    if (!U.Economia.desbloqueada(def.rango, j)) return 'Rango ' + def.rango + ' bloqueado: necesitas ' + U.Economia.DESBLOQUEO[def.rango] + '% de maestría de tu elemento principal (' + U.Elementos.nombre(j.elemento) + ': llevas ' + Math.floor(j.maestria[j.elemento] || 0) + '%). El rango se desbloquea con maestría, no con dinero.';
+    E.mision = { uid: def.uid, tipo: def.tipo, rango: def.rango, elemento: def.elemento, razon: def.razon, nombre: def.desc, desc: def.desc, pago: def.pago, destino: def.destino, prog: 0, meta: 1, activa: true, completada: false, dia: E.reloj.dia, inicioMin: E.reloj.minutos + (E.reloj.dia - 1) * 1440, spawned: false };
+    const M = E.mision;
+    if (def.tipo === 'cazar') M.meta = 1;
+    if (def.tipo === 'investigar') M.meta = 3;
+    if (def.tipo === 'rescatar') M.meta = 2;
+    if (def.tipo === 'escolta') M.meta = 1;
+    if (def.tipo === 'recoger' || def.tipo === 'perdido') { const md = this.mapaPorId(def.destino.mapa); const tipoObj = def.tipo === 'recoger' ? 'encargo' : 'perdido'; if (!md.objetos.some(o => o.tipo === tipoObj)) md.objetos.push({ tipo: tipoObj, x: Math.floor(def.destino.x), y: Math.floor(def.destino.y), w: 1, h: 1, solido: false }); }
+    if (def.tipo === 'investigar') { const md = this.mapaPorId(def.destino.mapa); for (let i = 0; i < 3; i++) { if (!md.objetos.some(o => o.tipo === 'pista' && o.n === i)) md.objetos.push({ tipo: 'pista', n: i, x: Math.max(1, Math.floor(def.destino.x) + (i - 1) * 3), y: Math.max(1, Math.floor(def.destino.y) + (i % 2) * 2), w: 1, h: 1, solido: false }); } }
+    if (def.tipo === 'rescatar') { const md = this.mapaPorId(def.destino.mapa); if (!md.objetos.some(o => o.tipo === 'cautivo')) md.objetos.push({ tipo: 'cautivo', x: Math.floor(def.destino.x), y: Math.floor(def.destino.y), w: 1, h: 1, solido: false }); }
+    if (def.tipo === 'escolta') this.iniciarEscolta();
+    U.HUD.banner('📜 MISIÓN ACEPTADA · RANGO ' + def.rango, 2); U.Audio.sfx('unlock');
     if (E.objetivos[8] && E.objetivos[8].estado !== 'hecho') { E.objetivos[8].estado = 'hecho'; if (E.objetivoIdx === 8) this.siguienteObjetivo(); }
-    return 'Misión registrada: «' + def.nombre + '». Recompensa al entregarla aquí: ' + def.recompensa + ' monedas. El panel superior te muestra el progreso.';
+    return 'Misión registrada: «' + def.desc + '» · Rango ' + def.rango + ' · Especialista en: ' + U.Elementos.nombre(def.elemento) + ' (' + def.razon + ') · Paga ' + def.pago + ' 🪙 al entregarla aquí. El pago es por el rango, nunca por el elemento.';
   },
   entregarMision() {
-    const E = this.estado; if (!E || !E.mision || !E.mision.activa) return 'No tienes ninguna misión por entregar. Pide una primero.';
-    if (!E.mision.completada) return 'Aún no está cumplida: «' + E.mision.nombre + '» va ' + Math.floor(E.mision.prog) + '/' + E.mision.meta + '. El panel superior marca el progreso.';
-    const r = E.mision.recompensa; E.jugador.monedas = (E.jugador.monedas || 0) + r; E.historial.misiones = (E.historial.misiones || 0) + 1; E.mision = null; E.misionIdx++;
-    U.HUD.banner('✅ MISIÓN ENTREGADA · +' + r + ' 🪙', 2.2); U.Audio.sfx('victoria');
-    return 'Perfecto, queda asentado en el libro. Cobras ' + r + ' monedas. Bolsa: ' + Math.floor(E.jugador.monedas) + ' 🪙. Pide otra cuando quieras: el tablón rota encargos.';
+    const E = this.estado; if (!E || !E.mision || !E.mision.activa) return 'No tienes ninguna misión por entregar. Pide una en el tablón primero.';
+    if (!E.mision.completada) return 'Aún no está cumplida: «' + E.mision.desc + '» va ' + Math.floor(E.mision.prog) + '/' + E.mision.meta + '.';
+    let r = E.mision.pago;
+    if (E.mision.tipo === 'mensaje') { const ahora = E.reloj.minutos + (E.reloj.dia - 1) * 1440; if (ahora - E.mision.inicioMin > 180) r = Math.floor(r / 2); }
+    E.jugador.monedas = (E.jugador.monedas || 0) + r; E.historial.misiones = (E.historial.misiones || 0) + 1;
+    U.Economia.karmaAdd(2, 'aldea'); // hacer una misión que ayuda: +2 de karma en este pueblo
+    const rangoC = E.mision.rango; E.mision = null;
+    U.HUD.banner('✅ MISIÓN ENTREGADA · RANGO ' + rangoC + ' · +' + r + ' 🪙', 2.2); U.Audio.sfx('victoria');
+    return 'Perfecto, queda asentado en el libro. Cobras ' + r + ' monedas (rango ' + rangoC + '). Bolsa: ' + Math.floor(E.jugador.monedas) + ' 🪙. Tu karma en la Aldea de Bruma sube +2 por ayudar. El tablón de hoy sigue en el tablón: pide otra si quieres.';
   },
   progresoMision(tipo, n) {
     const E = this.estado; if (!E || !E.mision || !E.mision.activa || E.mision.completada) return;
     if (E.mision.tipo !== tipo) return;
     E.mision.prog += n;
-    if (E.mision.prog >= E.mision.meta) { E.mision.completada = true; U.HUD.banner('📜 ¡MISIÓN CUMPLIDA! · VUELVE CON LÍA A COBRAR', 2.4); U.Audio.sfx('unlock'); }
+    if (E.mision.prog >= E.mision.meta) { E.mision.completada = true; U.HUD.banner('📜 ¡MISIÓN CUMPLIDA! · VUELVE CON LÍA A COBRAR ' + E.mision.pago + ' 🪙', 2.4); U.Audio.sfx('unlock'); }
+  },
+  // ---------- ESCOLTA: el NPC CAMINA a su pueblo; los bandidos salen en oleadas ----------
+  iniciarEscolta() {
+    const E = this.estado; if (!E || !E.mision) return;
+    const npc = (E.roster || []).find(n => n.id === 'elena') || (E.roster || [])[0]; if (!npc) return;
+    npc.enEscolta = true; npc.vidaEscolta = 100; npc.mapa = 'aldea'; npc.enCasa = false; npc.x = E.jugador.x + 1.5; npc.y = E.jugador.y + 0.5; npc.ruta = []; npc.rutaKey = '';
+    E.escolta = { activa: true, npc, destino: { x: 80.5, y: 24.5 }, oleadaT: 10, bandidosTotal: 5, bandidosFuera: 0, nombre: npc.nombre };
+    if (E.mapaId !== 'aldea') U.HUD.toast('La escolta empieza en la Aldea de Bruma: ' + npc.nombre + ' te espera junto a la plaza para caminar a su pueblo (la entrada este).', 'aviso');
+    else U.HUD.toast(npc.nombre + ' camina hacia su pueblo por el camino del este. No te alejes: si sale un bandido, se pondrá detrás de ti y tú peleas.', 'exito');
+    this.refrescarNpcs();
+  },
+  tickEscolta(dt) {
+    const E = this.estado, esc = E.escolta; if (!esc || !esc.activa || E.mapaId !== 'aldea') return;
+    const npc = esc.npc, j = E.jugador; if (!npc || npc.mapa !== 'aldea') return;
+    const bandidos = E.enemigos.filter(e => e.vida > 0 && e.esEscolta);
+    let destino = esc.destino, vel = 1.7;
+    if (bandidos.length) { destino = { x: j.x - j.dir.x * 1.4, y: j.y - j.dir.y * 1.4 }; vel = 2.6; } // con peligro, se pone DETRÁS de ti
+    else if (U.Grid.dist(npc, j) > 7) { npc.moviendo = false; return; } // te espera si te alejas
+    const dx = destino.x - npc.x, dy = destino.y - npc.y, d = Math.hypot(dx, dy);
+    if (d > 0.4) { npc.dir = U.Grid.dir8(dx, dy); U.Grid.mover(E.mapa, npc, dx / d * vel * dt, dy / d * vel * dt); npc.moviendo = true; npc.anim += dt * 1.6; } else npc.moviendo = false;
+    if (!bandidos.length && U.Grid.dist(npc, esc.destino) < 1.4) { esc.activa = false; npc.enEscolta = false; this.progresoMision('escolta', 1); U.HUD.banner('🏡 ' + npc.nombre.toUpperCase() + ' LLEGÓ A SU PUEBLO · ESCOLTA CUMPLIDA', 2.4); return; }
+    esc.oleadaT -= dt;
+    if (esc.oleadaT <= 0 && !bandidos.length && esc.bandidosFuera + bandidos.length < esc.bandidosTotal) {
+      esc.oleadaT = 16 + Math.random() * 8;
+      const n = Math.min(esc.bandidosTotal - esc.bandidosFuera, Math.random() < 0.5 ? 1 : 2);
+      for (let i = 0; i < n; i++) { const e = U.Combate.crearEnemigo('bandido', Math.min(82, npc.x + 5 + i * 1.6), Math.max(2, npc.y + (i ? 2 : -2)), E.dificultad); e.esEscolta = true; E.enemigos.push(e); }
+      U.HUD.banner('⚠ ¡BANDIDOS EN EL CAMINO! · ' + npc.nombre.toUpperCase() + ' SE PONE DETRÁS DE TI', 2); U.Audio.sfx('oleada');
+    }
+  },
+  escoltaDanada(npc, dmg) {
+    const E = this.estado, esc = E.escolta; if (!esc || !esc.activa) return;
+    npc.vidaEscolta = (npc.vidaEscolta != null ? npc.vidaEscolta : 100) - dmg;
+    U.Combate.texto(npc, '-' + Math.round(dmg), '#ff5470', 1);
+    if (npc.vidaEscolta <= 0) { esc.activa = false; npc.enEscolta = false; npc.vidaEscolta = 100; if (E.mision && E.mision.tipo === 'escolta') E.mision = null; E.enemigos = E.enemigos.filter(e => !e.esEscolta); U.HUD.banner('📜 ESCOLTA FALLIDA · ' + npc.nombre.toUpperCase() + ' CAYÓ EN EL CAMINO', 2.6); U.Audio.sfx('derrota'); U.HUD.toast(npc.nombre + ' se recupera en la aldea, pero la misión de escolta falló. Pide otra en el tablón.', 'peligro'); }
+    else if (Math.random() < 0.4) U.HUD.toast('¡Protege a ' + npc.nombre + '! Vida de la escolta: ' + Math.ceil(npc.vidaEscolta) + '%', 'peligro');
   },
   chequearMision(dt) {
     const E = this.estado; if (!E || !E.mision || !E.mision.activa || E.mision.completada) return;
-    const j = E.jugador;
-    if (E.mision.tipo === 'proteccion' && E.mapaId === 'aldea' && !E.mision.spawned) { E.mision.spawned = true; const el2 = (E.npcsPorMapa.aldea || E.npcs).find(n => n.id === 'elena'); const bx = el2 ? el2.x : j.x + 2, by = el2 ? el2.y : j.y; for (let i = 0; i < 2; i++) { const e = U.Combate.crearEnemigo('bandido', bx + 2 + i * 1.5, by + 1, E.dificultad); e.esProteccion = true; E.enemigos.push(e); } U.HUD.banner('⚠ ¡BANDIDOS ACECHAN A ELENA! · PROTÉGELA', 2); U.Audio.sfx('oleada'); }
-    if (E.mision.tipo === 'entrega' && E.mapaId === 'desierto' && j.x > 36 && j.y < 19) this.progresoMision('entrega', 1);
-    if (E.mision.tipo === 'reliquia' && E.mapaId === 'desierto') { const md = E.mapa; const ri = md.objetos.findIndex(o => o.tipo === 'reliquia'); if (ri >= 0 && Math.hypot(j.x - (md.objetos[ri].x + 0.5), j.y - (md.objetos[ri].y + 0.5)) < 1.4) { md.objetos.splice(ri, 1); U.Combate.particulas(j.x, j.y - 1, 20, '#ffe14d', 'chispa'); U.HUD.toast('¡Reliquia encontrada! Brilla en tu bolsa: vuelve con Lía.', 'exito'); this.progresoMision('reliquia', 1); } }
+    const j = E.jugador, M = E.mision, D = M.destino; if (!D) return;
+    const cercaDestino = E.mapaId === D.mapa && Math.hypot(j.x - D.x, j.y - D.y) < 3;
+    if (M.tipo === 'entrega' || M.tipo === 'mensaje') { if (cercaDestino) this.progresoMision(M.tipo, 1); return; }
+    if (M.tipo === 'recoger' || M.tipo === 'perdido') { if (E.mapaId === D.mapa) { const md = E.mapa; const tipoObj = M.tipo === 'recoger' ? 'encargo' : 'perdido'; const ri = md.objetos.findIndex(o => o.tipo === tipoObj); if (ri >= 0 && Math.hypot(j.x - (md.objetos[ri].x + 0.5), j.y - (md.objetos[ri].y + 0.5)) < 1.5) { md.objetos.splice(ri, 1); U.Combate.particulas(j.x, j.y - 1, 18, '#ffe14d', 'chispa'); U.HUD.toast(M.tipo === 'recoger' ? '¡Encargo recogido! Vuelve con Lía a entregarlo.' : '¡Lo encontraste! Estaba en ' + D.lugar + '. Vuelve con Lía.', 'exito'); this.progresoMision(M.tipo, 1); } } return; }
+    if (M.tipo === 'cazar' && !M.spawned && E.mapaId === D.mapa) { M.spawned = true; const e = U.Combate.crearEnemigo(Math.random() < 0.5 ? 'veterano' : 'brasa', D.x + 2, D.y + 1, E.dificultad * 1.1); e.nombre = 'Bestia del camino'; e.esBestia = true; E.enemigos.push(e); U.HUD.banner('🐾 ¡LA BESTIA APARECE! · ' + D.lugar.toUpperCase(), 2); U.Audio.sfx('oleada'); return; }
+    if (M.tipo === 'investigar' && E.mapaId === D.mapa) { const md = E.mapa; for (let i = md.objetos.length - 1; i >= 0; i--) { const o = md.objetos[i]; if (o.tipo === 'pista' && Math.hypot(j.x - (o.x + 0.5), j.y - (o.y + 0.5)) < 1.5) { md.objetos.splice(i, 1); U.Combate.particulas(j.x, j.y - 1, 12, '#7cc4ff', 'chispa'); U.HUD.toast('Pista encontrada (' + (Math.floor(M.prog) + 1) + '/3): huellas y cosas revueltas. Alguien merodea por aquí de noche.', 'exito'); this.progresoMision('investigar', 1); } } return; }
+    if (M.tipo === 'rescatar' && E.mapaId === D.mapa) { if (!M.spawned) { M.spawned = true; for (let i = 0; i < 2; i++) { const e = U.Combate.crearEnemigo('bandido', D.x + 1.5 + i * 1.6, D.y + 1, E.dificultad); e.esRescate = true; E.enemigos.push(e); } U.HUD.banner('⚠ ¡BANDIDOS GUARDAN AL CAUTIVO! · ' + D.lugar.toUpperCase(), 2); U.Audio.sfx('oleada'); }
+      if (M.spawned && M.prog >= M.meta) { const md = E.mapa; const ci = md.objetos.findIndex(o => o.tipo === 'cautivo'); if (ci >= 0 && Math.hypot(j.x - (md.objetos[ci].x + 0.5), j.y - (md.objetos[ci].y + 0.5)) < 1.6) { md.objetos.splice(ci, 1); U.HUD.toast('¡Cautivo liberado! Te lo agradece entre lágrimas. Vuelve con Lía.', 'exito'); M.completada = true; U.HUD.banner('📜 ¡MISIÓN CUMPLIDA! · VUELVE CON LÍA A COBRAR ' + M.pago + ' 🪙', 2.4); U.Audio.sfx('unlock'); } } return; }
+  },
+  // Cambio de día: tablón nuevo, misiones sin cumplir caducan, comida del día se reinicia, promesas vencidas castigan el karma.
+  chequearDia() {
+    const E = this.estado; if (!E || !E.reloj) return;
+    if (E.ultimoDia === E.reloj.dia) return;
+    E.ultimoDia = E.reloj.dia; const j = E.jugador; j.comidasHoy = 0;
+    if (E.mision && E.mision.activa && !E.mision.completada) { if (E.escolta && E.escolta.activa) { E.escolta.activa = false; if (E.escolta.npc) E.escolta.npc.enEscolta = false; E.escolta = null; } E.mision = null; U.HUD.toast('La misión de ayer caducó sin cumplirse. El tablón trae 5 misiones nuevas.', 'aviso'); }
+    if (j.promesas && j.promesas.length) { const vencidas = j.promesas.filter(pr => E.reloj.dia > pr.diaLimite); if (vencidas.length) { j.promesas = j.promesas.filter(pr => E.reloj.dia <= pr.diaLimite); vencidas.forEach(() => { U.Economia.karmaAdd(-5); }); U.HUD.toast('Prometiste dinero y no lo diste: karma −5 por cada promesa rota.', 'peligro'); } }
+    E.tablon = { dia: E.reloj.dia, lista: U.Economia.generarTablon(E.rng || Math.random) };
+  },
+  // Los NPC TE BUSCAN: de vez en cuando uno camina hasta ti para pedirte dinero o un sabor de comida.
+  tickPeticiones(dt) {
+    const E = this.estado; if (!E || E.ui !== 'mundo' || (E.reloj && E.reloj.durmiendo)) return;
+    if (E.peticion) { const n = E.peticion.npc; if (!n || n.mapa !== E.mapaId || n.enCasa) { E.peticion = null; return; } if (U.Grid.dist(n, E.jugador) < 1.7) { const pet = E.peticion; E.peticion = null; n.buscaJugador = false; U.Dialogo.abrirPeticion(n, pet); } return; }
+    E.peticionT = (E.peticionT || 60) - dt; if (E.peticionT > 0) return; E.peticionT = 80 + Math.random() * 60;
+    const h = U.Tiempo.hora(E); if (h < 6 || h > 20) return;
+    const cands = E.npcs.filter(n => !n.enCasa && !n.enEscolta && !n.ocultoSparring && n.id !== 'pipo');
+    if (!cands.length) return;
+    const n = cands[Math.floor(Math.random() * cands.length)];
+    const esComida = Math.random() < 0.45;
+    E.peticion = { npc: n, tipo: esComida ? 'comida' : 'dinero', cantidad: 6 + Math.floor(Math.random() * 20), sabor: U.Economia.SABORES[Math.floor(Math.random() * 5)] };
+    n.buscaJugador = true;
+    U.HUD.toast(n.nombre + ' viene hacia ti: parece que quiere pedirte algo.', '');
   },
   siguienteObjetivo() { const E = this.estado; while (E.objetivoIdx < E.objetivos.length && E.objetivos[E.objetivoIdx].estado === 'hecho') E.objetivoIdx++; const o = E.objetivos[E.objetivoIdx]; if (o && o.estado === 'pendiente') o.estado = 'actual'; if (o) U.HUD.toast('Nuevo objetivo: ' + o.texto, 'exito'); },
   despertar() { const E = this.estado, j = E.jugador; if (E.mapaId !== 'aldea') this.cambiarMapa('aldea', null, true); U.Combate.limpiar(); j.x = E.mapa.inicio.x; j.y = E.mapa.inicio.y; j.vida = Math.max(1, j.stats.vida * 0.25); j.esencia = j.stats.esencia * 0.5; j.agotado = false; j.dot = null; j.escudo = false; j.buffs.sobrecarga = 0; j.invuln = 1; U.Audio.musica('aldea'); U.HUD.toast('Despiertas junto a la fogata. Sora te mira de reojo.', ''); E.historial.derrotas++; E.npcs.forEach(n => { if (!n.hechos) n.hechos = []; if (n.hechos.indexOf('te vieron caer') < 0) n.hechos.push('te vieron caer'); U.Emociones.evento(n, { realidad: 40, energia: 10, etiqueta: 'te vieron caer' }); }); },
-  fin(tipo) { const E = this.estado; if (E.ui === 'fin') return; if (tipo === 'derrota') { U.Audio.sfx('derrota'); U.Audio.musica('aldea'); } if (tipo === 'victoria' && E.historial) { E.historial.victorias++; E.npcs.forEach(n => { if (!n.hechos) n.hechos = []; if (n.hechos.indexOf('te vieron ganar la arena') < 0) n.hechos.push('te vieron ganar la arena'); }); } U.Combate.cancelarArena(); U.HUD.mostrarFin(tipo); },
+  fin(tipo) { const E = this.estado; if (E.ui === 'fin') return;
+    if (tipo === 'derrota' && E.torneo && E.torneo.activo) { if (U.Combate.derrotaTorneo()) return; }
+    if (tipo === 'derrota' && E.escolta && E.escolta.activa) { const esc = E.escolta; esc.activa = false; if (esc.npc) { esc.npc.enEscolta = false; esc.npc.vidaEscolta = 100; } E.escolta = null; if (E.mision && E.mision.tipo === 'escolta') { E.mision = null; U.HUD.banner('📜 ESCOLTA FALLIDA · CAÍSTE PROTEGIENDO', 2.4); } } if (tipo === 'derrota') { U.Audio.sfx('derrota'); U.Audio.musica('aldea'); } if (tipo === 'victoria' && E.historial) { E.historial.victorias++; E.npcs.forEach(n => { if (!n.hechos) n.hechos = []; if (n.hechos.indexOf('te vieron ganar la arena') < 0) n.hechos.push('te vieron ganar la arena'); }); } U.Combate.cancelarArena(); U.HUD.mostrarFin(tipo); },
   togglePausa() { const E = this.estado; if (!E) return; if (E.ui === 'pausa') { E.ui = 'mundo'; U.HUD.el.pausa.classList.add('oculto'); if (U.Guardado) U.Guardado.guardarAuto(); } else if (E.ui === 'mundo') { if (U.Guardado) U.Guardado.guardarAuto(); E.ui = 'pausa'; U.HUD.construirPausa(); U.HUD.el.pausa.classList.remove('oculto'); this.input.teclas = {}; E.jugador.cargando = false; } U.Audio.sfx('click'); },
   toggleSonido() { U.Audio.init(); const s = U.Audio.toggleSilencio(); U.HUD.el.sonido.textContent = 'SONIDO: ' + (s ? 'OFF' : 'ON'); U.HUD.el.sonido.style.color = s ? 'var(--peligro)' : ''; if (!s) U.Audio.sfx('click'); },
   // ---------- entrada ----------
@@ -3842,7 +4412,7 @@ U.Juego = {
     const E = this.estado, m = E.mapa; const cand = [];
     E.npcs.forEach(n => { if (!n.enCasa && !n.ocultoSparring) cand.push({ tipo: 'npc', obj: n, r: 1.8, corto: 'HABLAR', label: 'Hablar con ' + n.nombre }); });
     if (E.mapaId === 'aldea' && E.roster) { const torN = E.roster.find(n => n.id === 'torin'); if (torN && torN.mapa !== 'aldea' && !torN.enCasa) cand.push({ tipo: 'notaForja', obj: { x: 10.5, y: 19.5, w: 1, h: 1 }, r: 2.0, corto: 'NOTA', label: 'Nota en la forja de Torin (no está)' }); }
-    m.objetos.forEach(o => { if (o.tipo === 'fogata') cand.push({ tipo: 'fogata', obj: o, r: 2.0, corto: 'DESCANSAR', label: 'Fogata · dormir y despertar al 100%' }); else if (o.tipo === 'runa' && !E.arena.activa) cand.push({ tipo: 'runa', obj: o, r: 2.0, corto: 'OLEADA', label: 'Runa de la arena' }); else if (o.tipo === 'cama') cand.push({ tipo: 'cama', obj: o, r: 2.0, corto: 'DORMIR', label: 'Tu cama · dormir hasta la alarma' }); else if (o.tipo === 'puertaCasa') cand.push({ tipo: 'puertaCasa', obj: o, r: 1.8, corto: 'ENTRAR', label: 'Puerta de tu casa' }); else if (o.tipo === 'puertaOficina') cand.push({ tipo: 'puertaOficina', obj: o, r: 1.9, corto: 'OFICINA', label: 'Oficina del Guardián · Aldric y Lía (misiones)' }); else if (o.tipo === 'puertaTienda') cand.push({ tipo: 'puertaTienda', obj: o, r: 1.9, corto: 'TIENDA', label: 'Tienda de Marisol · pociones por monedas' }); else if (o.tipo === 'reliquia') cand.push({ tipo: 'cartel', obj: { x: o.x, y: o.y, w: 1, h: 1, texto: 'RELIQUIA PERDIDA · Brilla con luz antigua. Acércate para recogerla y vuelve con Lía a la Oficina.' }, r: 1.6, corto: 'RELIQUIA', label: 'Reliquia perdida' }); else if (o.tipo === 'obelisco') cand.push({ tipo: 'obelisco', obj: o, r: 2.0, corto: 'HECHIZO', label: 'Obelisco de la Inversión' }); else if (o.tipo === 'cartel') cand.push({ tipo: 'cartel', obj: o, r: 1.7, corto: 'LEER', label: 'Cartel' }); else if (o.tipo === 'pozo') cand.push({ tipo: 'pozo', obj: o, r: 1.7, corto: 'BEBER', label: 'Pozo' }); });
+    m.objetos.forEach(o => { if (o.tipo === 'fogata') cand.push({ tipo: 'fogata', obj: o, r: 2.0, corto: 'DESCANSAR', label: 'Fogata · dormir y despertar al 100%' }); else if (o.tipo === 'runa' && !E.arena.activa) cand.push({ tipo: 'runa', obj: o, r: 2.0, corto: 'OLEADA', label: 'Runa de la arena' }); else if (o.tipo === 'cama') cand.push({ tipo: 'cama', obj: o, r: 2.0, corto: 'DORMIR', label: 'Tu cama · dormir hasta la alarma' }); else if (o.tipo === 'puertaCasa') cand.push({ tipo: 'puertaCasa', obj: o, r: 1.8, corto: 'ENTRAR', label: 'Puerta de tu casa' }); else if (o.tipo === 'puertaOficina') cand.push({ tipo: 'puertaOficina', obj: o, r: 1.9, corto: 'OFICINA', label: 'Oficina del Guardián · Aldric y Lía (misiones)' }); else if (o.tipo === 'puertaTienda') cand.push({ tipo: 'puertaTienda', obj: o, r: 1.9, corto: 'TIENDA', label: 'Tienda de Marisol · pociones por monedas' }); else if (o.tipo === 'reliquia') cand.push({ tipo: 'cartel', obj: { x: o.x, y: o.y, w: 1, h: 1, texto: 'RELIQUIA PERDIDA · Brilla con luz antigua. Acércate para recogerla y vuelve con Lía a la Oficina.' }, r: 1.6, corto: 'RELIQUIA', label: 'Reliquia perdida' }); else if (o.tipo === 'obelisco') cand.push({ tipo: 'obelisco', obj: o, r: 2.0, corto: 'HECHIZO', label: 'Obelisco de la Inversión' }); else if (o.tipo === 'cartel') cand.push({ tipo: 'cartel', obj: o, r: 1.7, corto: 'LEER', label: 'Cartel' }); else if (o.tipo === 'pozo') cand.push({ tipo: 'pozo', obj: o, r: 1.7, corto: 'BEBER', label: 'Pozo' }); else if (o.tipo === 'encargo') cand.push({ tipo: 'cartel', obj: { x: o.x, y: o.y, w: 1, h: 1, texto: 'ENCARGO DE LA OFICINA · Un paquete que espera ser recogido. Acércate para tomarlo y vuelve con Lía.' }, r: 1.6, corto: 'RECOGER', label: 'Encargo por recoger' }); else if (o.tipo === 'perdido') cand.push({ tipo: 'cartel', obj: { x: o.x, y: o.y, w: 1, h: 1, texto: 'OBJETO PERDIDO · Brilla entre la hierba: es lo que alguien perdió. Acércate para tomarlo y devuélvelo con Lía.' }, r: 1.6, corto: '¡ES ESTO!', label: 'Objeto perdido' }); else if (o.tipo === 'pista') cand.push({ tipo: 'cartel', obj: { x: o.x, y: o.y, w: 1, h: 1, texto: 'PISTA · Huellas frescas y cosas revueltas: alguien merodea por aquí de noche. Acércate para registrarla.' }, r: 1.6, corto: 'PISTA', label: 'Pista de la investigación' }); else if (o.tipo === 'cautivo') cand.push({ tipo: 'cartel', obj: { x: o.x, y: o.y, w: 1, h: 1, texto: 'CAUTIVO · Está atado y asustado. Derrota a sus bandidos y acércate para liberarlo.' }, r: 1.7, corto: 'RESCATAR', label: 'Cautivo por rescatar' }); });
     return cand;
   },
   // Interactuar = tocar directamente al personaje u objeto en la pantalla (toque o clic sobre el mundo).
@@ -3882,10 +4452,14 @@ U.Juego = {
     j.trote = I.a && mag > 0;
     if ((j.invertido || 0) > 0) { vx = -vx; vy = -vy; } // HECHIZO DE INVERSIÓN: el mundo al revés
     let vel = (3.4 * (0.85 + j.stats.velocidad * 0.015)) * (j.trote ? 1.25 : 1) * (j.cargando ? 0.55 : 1) * (j.buffs.sobrecarga > 0 ? 2 : 1) * (j.agotado ? 0.85 : 1);
+    if (j.polainaEquipada && U.Economia.POLAINAS[j.polainaEquipada]) vel *= U.Economia.POLAINAS[j.polainaEquipada].velMult; // con polainas vas MÁS LENTO: lo que sube es tu nivel al entrenar
+    let distCel = 0;
     if (j.dash.t <= 0) {
-      if (mag > 0.15) { const n = Math.hypot(vx, vy) || 1; U.Grid.mover(m, j, vx / n * vel * mag * dt, vy / n * vel * mag * dt); j.dir = U.Grid.dir8(vx, vy); j.moviendo = true; j.anim += dt * (0.6 + mag); if (j.descansando) j.descansando = false; }
+      if (mag > 0.15) { const n = Math.hypot(vx, vy) || 1; const ox2 = j.x, oy2 = j.y; this.moverJugador(m, j, vx / n * vel * mag * dt, vy / n * vel * mag * dt); distCel = Math.hypot(j.x - ox2, j.y - oy2); j.dir = U.Grid.dir8(vx, vy); j.moviendo = true; j.anim += dt * (0.6 + mag); if (j.descansando) j.descansando = false; }
       else j.moviendo = false;
     } else j.moviendo = true;
+    this.tickSuelo(dt, j.moviendo, distCel);
+    this.chequearDia(); this.tickEscolta(dt); this.tickPeticiones(dt);
     // Umbrales entre mapas: pisar una salida cambia de mapa (con enfriamiento anti-rebote)
     E.cambioCd = Math.max(0, (E.cambioCd || 0) - dt);
     if (E.cambioCd <= 0 && m.salidas) { for (const s of m.salidas) { if (j.x >= s.x && j.x <= s.x + s.w && j.y >= s.y && j.y <= s.y + s.h) { this.cambiarMapa(s.destino, s.spawn); return; } } }
@@ -3961,7 +4535,7 @@ U.Guardado = {
       stats: Object.assign({}, j.stats), vida: Math.round(j.vida * 100) / 100, esencia: Math.round(j.esencia * 100) / 100,
       maestria: Object.assign({}, j.maestria), estilos: Object.assign({}, j.estilos), tieneYang: !!j.tieneYang,
       elementoActivo: j.elementoActivo, tecnicaIdx: j.tecnicaIdx || 0, yangForma: j.yangForma || 'haz',
-      pociones: j.pociones, monedas: Math.floor(j.monedas || 0), misionIdx: E.misionIdx || 0, mision: E.mision ? Object.assign({}, E.mision) : null, regenBonus: j.regenBonus || 0, crecimientoTotal: Object.assign({}, U.Crecimiento.total || {}),
+      pociones: (j.bolsaPociones || []).length, bolsaPociones: (j.bolsaPociones || []).map(x => Object.assign({}, x)), bolsaComida: (j.bolsaComida || []).slice(), karma: Object.assign({}, j.karma || {}), sabores: (j.sabores || []).slice(), polainas: Object.assign({}, j.polainas || {}), polainaEquipada: j.polainaEquipada || null, comidasHoy: j.comidasHoy || 0, permisoHasta: j.permisoHasta || 0, promesas: (j.promesas || []).map(x => Object.assign({}, x)), tablon: E.tablon ? { dia: E.tablon.dia, lista: E.tablon.lista } : null, monedas: Math.floor(j.monedas || 0), misionIdx: E.misionIdx || 0, mision: E.mision ? Object.assign({}, E.mision) : null, regenBonus: j.regenBonus || 0, crecimientoTotal: Object.assign({}, U.Crecimiento.total || {}),
       escudoAprendido: !!j.escudoAprendido, escudoNv: j.escudoNv || 0, escudoExp: j.escudoExp || 0, cansancio: Math.round((j.cansancio != null ? j.cansancio : U.Recuperacion.condicionMax(j)) * 10) / 10, condicionExtra: Math.max(0, Math.min(100, j.condicionExtra || 0)), gastoFatiga: Math.round((j.gastoFatiga || 0) * 100) / 100,
       relojMinutos: E.reloj ? E.reloj.minutos : 540, dia: E.reloj ? (E.reloj.dia || 1) : 1, diaSemana: E.reloj ? (E.reloj.diaSemana || 0) : 0, climaTipo: E.clima ? E.clima.tipo : 'despejado', climaIntensidad: E.clima ? (E.clima.intensidad || 0) : 0, alarmaMin: E.alarmaMin != null ? E.alarmaMin : 420, historial: Object.assign({}, E.historial || {}), dificultad: E.dificultad, ronda: E.arena.ronda,
       objetivos: E.objetivos.map(o => o.estado), objetivoIdx: E.objetivoIdx, flags: Object.assign({}, E.flags),
@@ -4014,7 +4588,7 @@ U.Guardado = {
   },
   cargar(d) {
     if (!d || d.juego !== 'unipar' || !d.perfil || !d.stats || !d.semilla) { this.aviso('Ese archivo no es una partida válida de Unipar.', false); return; }
-    const perfil = { elemento: d.perfil.elemento, elemento2: d.perfil.elemento2 || null, atributo: d.perfil.atributo, estilo: d.perfil.estilo || 'yin', yangAfin: !!d.perfil.yangAfin,
+    const perfil = { elemento: d.perfil.elemento, elemento2: d.perfil.elemento2 || null, atributo: d.perfil.atributo, estilo: d.perfil.estilo || 'yin', yangAfin: !!d.perfil.yangAfin, sabores: Array.isArray(d.sabores) && d.sabores.length === 5 ? d.sabores.slice() : null,
       stats: Object.assign({}, d.stats), maestria: Object.assign({ fuego: 0, agua: 0, tierra: 0, viento: 0, rayo: 0 }, d.maestria), estilos: Object.assign({ yin: 0, yang: 0 }, d.estilos), distr: {}, scores: null };
     U.Audio.init(); U.Audio.reanudar();
     U.TestUI.activo = false; U.TestUI.escena = null; document.getElementById('test').classList.add('oculto');
@@ -4022,7 +4596,8 @@ U.Guardado = {
     U.Juego.comenzarMundo(perfil, d.semilla, d.nombre || 'Sin nombre');
     const E = U.Juego.estado, j = E.jugador;
     j.vida = Math.min(j.stats.vida, d.vida != null ? d.vida : j.stats.vida); j.esencia = Math.min(j.stats.esencia, d.esencia != null ? d.esencia : j.stats.esencia);
-    j.pociones = d.pociones != null ? d.pociones : 1; j.monedas = d.monedas != null ? d.monedas : 30; E.misionIdx = d.misionIdx || 0; if (d.mision) E.mision = Object.assign({}, d.mision); j.regenBonus = d.regenBonus || 0; j.tieneYang = !!d.tieneYang;
+    j.bolsaPociones = Array.isArray(d.bolsaPociones) ? d.bolsaPociones.map(x => Object.assign({}, x)) : Array.from({ length: Math.min(3, d.pociones || 0) }, () => ({ tipo: 'vida', unidades: 50, precio: 15 })); j.pociones = j.bolsaPociones.length; j.bolsaComida = Array.isArray(d.bolsaComida) ? d.bolsaComida.slice(0, 5) : []; j.karma = Object.assign({}, d.karma || {}); if (Array.isArray(d.sabores) && d.sabores.length === 5) j.sabores = d.sabores.slice(); j.polainas = Object.assign({}, d.polainas || {}); j.polainaEquipada = d.polainaEquipada && j.polainas[d.polainaEquipada] ? d.polainaEquipada : null; j.polainaMultCrec = j.polainaEquipada ? U.Economia.POLAINAS[j.polainaEquipada].crecMult : 1; j.comidasHoy = d.comidasHoy || 0; j.permisoHasta = d.permisoHasta || 0; j.promesas = Array.isArray(d.promesas) ? d.promesas : []; if (d.tablon && Array.isArray(d.tablon.lista)) E.tablon = d.tablon; E.ultimoDia = E.reloj ? E.reloj.dia : 1;
+    j.monedas = d.monedas != null ? d.monedas : 0; E.misionIdx = d.misionIdx || 0; if (d.mision) E.mision = Object.assign({}, d.mision); j.regenBonus = d.regenBonus || 0; j.tieneYang = !!d.tieneYang;
     // Escudo aprendido y Condición: las partidas viejas no traen condicionExtra → 0 (máximo base 100 + bono de Yin) y la Condición se limita a su máximo actual.
     j.escudoAprendido = !!d.escudoAprendido; j.escudoNv = d.escudoNv || (j.escudoAprendido ? 1 : 0); j.escudoExp = d.escudoExp || 0; j.escudoVida = 0; j.escudo = false; j.condicionExtra = d.condicionExtra != null ? Math.max(0, Math.min(100, d.condicionExtra)) : 0; { const maxC = U.Recuperacion.condicionMax(j); j.cansancio = d.cansancio != null ? Math.max(0, Math.min(maxC, d.cansancio)) : maxC; } j.gastoFatiga = d.gastoFatiga || 0;
     j.tecnicaIdx = d.tecnicaIdx || 0; j.yangForma = d.yangForma || 'haz'; if (d.elementoActivo && j.elementos.indexOf(d.elementoActivo) >= 0) j.elementoActivo = d.elementoActivo;
