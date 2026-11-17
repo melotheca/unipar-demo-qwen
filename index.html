@@ -4190,7 +4190,13 @@ U.Juego = {
   // gastan 10 de Esencia por segundo y, si se les acaba, se hunden y vuelven a la orilla.
   moverJugador(m, j, dx, dy) {
     const T = U.Grid.T; const enAgua = (x, y) => { const cx = Math.floor(x), cy = Math.floor(y); return cx >= 0 && cy >= 0 && cx < m.ancho && cy < m.alto && m.tiles[cy * m.ancho + cx] === T.AGUA; };
-    const destinoAgua = enAgua(j.x + dx, j.y + dy) || enAgua(j.x, j.y);
+    // La colisión de Grid.mover usa la CAJA del personaje (radio 0.3), no su centro: el agua hay
+    // que detectarla con esa misma caja (centro y esquinas, en la posición actual y en la destino).
+    // Antes se miraba solo el centro, y la caja chocaba con el agua sólida 0.3 celdas ANTES de que
+    // el centro tocara el agua: el desbloqueo nunca se activaba, nadie podía pisar el agua caminando
+    // (ni siquiera el de Agua) y el personaje se quedaba pegado a la orilla empujando sin avanzar.
+    const R = 0.3; const cajaAgua = (x, y) => enAgua(x, y) || enAgua(x - R, y - R) || enAgua(x + R, y - R) || enAgua(x - R, y + R) || enAgua(x + R, y + R);
+    const destinoAgua = cajaAgua(j.x + dx, j.y + dy) || cajaAgua(j.x, j.y);
     const puede = j.elementoActivo === 'agua' || j.elementoActivo === 'tierra' || (j.elementoActivo === 'viento' && (j.levitT || 0) < 5) || j.esencia > 0.5;
     if (!destinoAgua || !puede) { U.Grid.mover(m, j, dx, dy); return; }
     const tocados = [];
