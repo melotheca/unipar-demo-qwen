@@ -1674,6 +1674,7 @@ U.Render = {
     m.objetos.forEach(o => { if (o.x + o.w < x0 || o.x > x1 || o.y + o.h < y0 - 2 || o.y > y1) return; draws.push({ y: (o.y + o.h) * TS, f: () => this.objeto(ctx, o) }); });
     estado.npcs.forEach(n => { if (!n.enCasa && !n.ocultoSparring) draws.push({ y: n.y * TS, f: () => this.npc(ctx, n, j) }); });
     estado.enemigos.forEach(e => { if (e.vida > 0) draws.push({ y: e.y * TS, f: () => this.enemigo(ctx, e) }); });
+    (estado.criaturas || []).forEach(c => { if (c.vida > 0) draws.push({ y: c.y * TS, f: () => this.criatura(ctx, c, j) }); });
     estado.orbes.forEach(o => draws.push({ y: o.y * TS, f: () => { const b = Math.sin(this.tiempo * 6 + o.x) * 2; ctx.fillStyle = '#4da3ff'; ctx.fillRect(Math.round(o.x * TS) - 2, Math.round(o.y * TS) - 8 + b, 4, 4); ctx.fillStyle = '#bfefff'; ctx.fillRect(Math.round(o.x * TS) - 1, Math.round(o.y * TS) - 7 + b, 1, 1); } }));
     draws.push({ y: j.y * TS, f: () => this.jugador(ctx, j) });
     draws.sort((a, b) => a.y - b.y); draws.forEach(d => d.f());
@@ -1734,6 +1735,7 @@ U.Render = {
     // Etiquetas de nombre de NPC cercanas
     ctx.translate(Math.round(-cam.x + sx), Math.round(-cam.y + sy));
     estado.npcs.forEach(n => { if (!n.enCasa && !n.ocultoSparring && U.Grid.dist(n, j) < 6) this.texto(ctx, n.nombre + (n.enCirculo ? ' · entrenando' : ''), n.x * TS, n.y * TS - 34, 1, '#e8dcc8', 'center'); });
+    (estado.criaturas || []).forEach(c => { if (c.vida > 0 && U.Grid.dist(c, j) < 6) this.texto(ctx, (c.apodo ? c.apodo + ' · ' : '') + c.nombre.toUpperCase() + (c.invocada ? ' · TU COMPAÑERA' : c.temperamento === 'hostil' ? ' · HOSTIL' : c.temperamento === 'amistosa' ? ' · VÍNCULO ' + Math.round(c.vinculo) : ''), c.x * TS, c.y * TS - 30, 1, c.invocada ? '#67e08a' : c.temperamento === 'hostil' ? '#ff8a9c' : c.temperamento === 'amistosa' ? '#a7f3c9' : '#e8dcc8', 'center'); });
     if (j.invertido > 0) this.texto(ctx, '🌀 INVERTIDO ' + Math.ceil(j.invertido), j.x * TS, j.y * TS - 46 + Math.round(Math.sin(this.tiempo * 6) * 1.5), 1, '#e8a2e0', 'center');
     if (estado.interactuable) { const o = estado.interactuable.obj; const bob = Math.round(Math.sin(this.tiempo * 3) * 1.5); this.globo(ctx, estado.interactuable.corto, o.x * TS + (o.w || 1) * 8, (o.y - 1.3) * TS + bob); }
   },
@@ -1801,6 +1803,90 @@ U.Render = {
     if (e.efectos.slow > 0) { ctx.fillStyle = '#35c6f4'; ctx.fillRect(vx, vy + 3, w, 1); }
     const el = U.Elementos.datos[e.elemento]; ctx.fillStyle = el.color; ctx.fillRect(vx + w + 2, vy, 3, 3);
   },
+  // ---------- Criaturas salvajes: sprites procedurales por especie ----------
+  criatura(ctx, c, j) {
+    const x = Math.round(c.x * 16), y = Math.round(c.y * 16); const sc = c.escala || 1;
+    const flash = c.flash > 0; const col = flash ? '#ffffff' : c.color, col2 = flash ? '#ffffff' : c.color2;
+    const paso = c.moviendo ? [0, 1, 0, -1][Math.floor(c.anim * 6) % 4] : 0;
+    const flip = c.dir && c.dir.x < 0 ? -1 : 1;
+    ctx.save(); ctx.translate(x, y); ctx.scale(flip * sc, sc);
+    ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fillRect(-6, -2, 12, 3);
+    const R = (rx, ry, w, h, cc) => { ctx.fillStyle = '#05070f'; ctx.fillRect(rx - 1, ry - 1, w + 2, h + 2); ctx.fillStyle = cc; ctx.fillRect(rx, ry, w, h); };
+    switch (c.sprite) {
+      case 'lobo': case 'bestia': {
+        R(-7, -9 + Math.abs(paso), 13, 6, col); R(5, -13 + Math.abs(paso), 6, 6, col); R(5, -16 + Math.abs(paso), 2, 3, col2); R(9, -16 + Math.abs(paso), 2, 3, col2);
+        ctx.fillStyle = '#1a1a2e'; ctx.fillRect(9, -11 + Math.abs(paso), 1, 2); ctx.fillRect(11, -9 + Math.abs(paso), 1, 1);
+        R(-11, -11, 4, 2, col2);
+        ctx.fillStyle = col2; ctx.fillRect(-5, -3 + Math.max(0, paso), 2, 4); ctx.fillRect(3, -3 + Math.max(0, -paso), 2, 4);
+        if (c.sprite === 'bestia') { ctx.fillStyle = col2; ctx.fillRect(-2, -13, 2, 4); ctx.fillRect(2, -13, 2, 4); }
+        break; }
+      case 'ciervo': {
+        R(-6, -10, 12, 6, col); R(5, -15, 5, 7, col); ctx.fillStyle = '#1a1a2e'; ctx.fillRect(8, -13, 1, 2);
+        ctx.fillStyle = col2; ctx.fillRect(5, -19, 1, 4); ctx.fillRect(8, -19, 1, 4); ctx.fillRect(4, -18, 2, 1); ctx.fillRect(8, -18, 2, 1);
+        ctx.fillStyle = col2; ctx.fillRect(-4, -4 + Math.max(0, paso), 2, 5); ctx.fillRect(3, -4 + Math.max(0, -paso), 2, 5);
+        ctx.fillStyle = '#f8fafc'; ctx.fillRect(-3, -9, 2, 2); ctx.fillRect(1, -8, 2, 2);
+        break; }
+      case 'espiritu': {
+        const bob = Math.round(Math.sin(this.tiempo * 2.4 + c.x) * 1.5);
+        ctx.globalAlpha = 0.88; R(-5, -16 + bob, 10, 11, col); ctx.globalAlpha = 1;
+        ctx.fillStyle = col2; ctx.fillRect(-5, -7 + bob, 10, 2);
+        ctx.fillStyle = '#12301f'; ctx.fillRect(-2, -12 + bob, 2, 2); ctx.fillRect(2, -12 + bob, 2, 2);
+        ctx.fillStyle = col; ctx.fillRect(-8, -13 + bob, 2, 5); ctx.fillRect(6, -13 + bob, 2, 5);
+        ctx.fillStyle = 'rgba(255,255,255,.75)'; ctx.fillRect(-1, -19 + bob, 2, 2);
+        break; }
+      case 'escorpion': {
+        R(-6, -6, 11, 4, col); ctx.fillStyle = col2; for (let i = 0; i < 3; i++) { ctx.fillRect(-4 + i * 4, -2 + Math.abs(paso), 1, 3); ctx.fillRect(-3 + i * 4, -2 + Math.abs(-paso), 1, 3); }
+        ctx.strokeStyle = col2; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-6, -5); ctx.quadraticCurveTo(-11, -10, -8, -14); ctx.stroke();
+        ctx.fillStyle = col2; ctx.fillRect(-9, -15, 2, 2); ctx.fillRect(6, -8, 3, 3); ctx.fillRect(-9, -7, 3, 2);
+        break; }
+      case 'lagarto': case 'ajolote': {
+        R(-6, -6 + Math.abs(paso), 10, 4, col); R(4, -8 + Math.abs(paso), 5, 4, col); ctx.fillStyle = '#1a1a2e'; ctx.fillRect(7, -7 + Math.abs(paso), 1, 1);
+        ctx.fillStyle = col2; ctx.fillRect(-11, -5, 5, 2); ctx.fillRect(-3, -3 + Math.max(0, paso), 2, 2); ctx.fillRect(2, -3 + Math.max(0, -paso), 2, 2);
+        if (c.sprite === 'ajolote') { ctx.fillStyle = '#e05bd0'; ctx.fillRect(3, -10, 2, 2); ctx.fillRect(8, -10, 2, 2); ctx.fillRect(3, -5, 2, 1); ctx.fillRect(8, -5, 2, 1); }
+        break; }
+      case 'yeti': {
+        R(-7, -14 + Math.abs(paso), 14, 11, col); R(-5, -20 + Math.abs(paso), 10, 7, col);
+        ctx.fillStyle = '#5b7a99'; ctx.fillRect(-3, -17 + Math.abs(paso), 6, 4); ctx.fillStyle = '#1a1a2e'; ctx.fillRect(-2, -16 + Math.abs(paso), 1, 1); ctx.fillRect(1, -16 + Math.abs(paso), 1, 1);
+        ctx.fillStyle = col2; ctx.fillRect(-9, -12, 2, 8); ctx.fillRect(7, -12, 2, 8); ctx.fillRect(-5, -3 + Math.max(0, paso), 3, 4); ctx.fillRect(2, -3 + Math.max(0, -paso), 3, 4);
+        break; }
+      case 'hielo': {
+        ctx.globalAlpha = 0.92; R(-5, -11 + Math.abs(paso), 10, 8, col); ctx.globalAlpha = 1;
+        ctx.fillStyle = '#eaf7ff'; ctx.fillRect(-3, -15, 2, 4); ctx.fillRect(1, -16, 2, 5); ctx.fillRect(-1, -9, 3, 2);
+        ctx.fillStyle = '#12303f'; ctx.fillRect(-2, -8, 1, 1); ctx.fillRect(2, -8, 1, 1);
+        ctx.fillStyle = col2; ctx.fillRect(-4, -3 + Math.max(0, paso), 2, 3); ctx.fillRect(2, -3 + Math.max(0, -paso), 2, 3);
+        break; }
+      case 'serpiente': {
+        const ond = Math.sin(this.tiempo * 6 + c.anim * 4);
+        ctx.fillStyle = col; for (let i = 0; i < 4; i++) ctx.fillRect(-8 + i * 4, -5 + Math.round(Math.sin(ond + i) * 1.5), 5, 3);
+        R(4, -8 + Math.round(ond), 6, 5, col); ctx.fillStyle = '#1a1a2e'; ctx.fillRect(8, -6 + Math.round(ond), 1, 1); ctx.fillStyle = '#ff5470'; ctx.fillRect(10, -6 + Math.round(ond), 2, 1);
+        break; }
+      case 'tortuga': {
+        R(-7, -7, 14, 5, col); ctx.fillStyle = col2; ctx.fillRect(-5, -6, 4, 3); ctx.fillRect(1, -6, 4, 3); ctx.fillRect(-2, -6, 3, 3);
+        R(7, -6, 4, 3, '#7a9a6a'); ctx.fillStyle = '#1a1a2e'; ctx.fillRect(9, -5, 1, 1);
+        ctx.fillStyle = col2; ctx.fillRect(-5, -2 + Math.max(0, paso), 2, 2); ctx.fillRect(4, -2 + Math.max(0, -paso), 2, 2);
+        break; }
+      case 'nutria': {
+        R(-6, -8 + Math.abs(paso), 11, 5, col); R(5, -11 + Math.abs(paso), 5, 5, col); ctx.fillStyle = '#1a1a2e'; ctx.fillRect(8, -9 + Math.abs(paso), 1, 1); ctx.fillRect(9, -7 + Math.abs(paso), 1, 1);
+        ctx.fillStyle = col2; ctx.fillRect(-11, -6, 5, 2); ctx.fillRect(-4, -3 + Math.max(0, paso), 2, 3); ctx.fillRect(3, -3 + Math.max(0, -paso), 2, 3);
+        ctx.fillStyle = '#e8dcc8'; ctx.fillRect(5, -6 + Math.abs(paso), 4, 2);
+        break; }
+      default: R(-6, -10, 12, 7, col); R(5, -13, 5, 5, col);
+    }
+    ctx.restore();
+    if (c.vida < c.stats.vida) { const w = 14, vx = Math.round(c.x * 16 - w / 2), vy = Math.round(c.y * 16) - 26; ctx.fillStyle = '#05070f'; ctx.fillRect(vx - 1, vy - 1, w + 2, 4); ctx.fillStyle = c.temperamento === 'hostil' ? '#ff5470' : '#67e08a'; ctx.fillRect(vx, vy, Math.round(w * Math.max(0, c.vida / c.stats.vida)), 2); }
+    if (c.estado === 'persigue') this.texto(ctx, '!', c.x * 16, c.y * 16 - 34, 1, '#ff4d4d', 'center');
+    if (c.invocada) { ctx.strokeStyle = 'rgba(103,224,138,.8)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(c.x * 16, c.y * 16 - 8, 11 + Math.sin(this.tiempo * 4) * 1.2, 0, Math.PI * 2); ctx.stroke(); }
+  },
+  // Cara de criatura para el retrato del diálogo (canvas 64×64)
+  caraBestia(cv, c) {
+    const ctx = cv.getContext('2d'); ctx.imageSmoothingEnabled = false; ctx.fillStyle = '#0e1530'; ctx.fillRect(0, 0, 64, 64);
+    const mini = document.createElement('canvas'); mini.width = 32; mini.height = 32;
+    const mctx = mini.getContext('2d'); mctx.save(); mctx.translate(16, 24);
+    const cc = { x: 0, y: 0, sprite: c.sprite, color: c.color, color2: c.color2, escala: 1.6, flash: 0, vida: c.vida, stats: c.stats, anim: 0, moviendo: false, dir: { x: 0, y: 1 }, estado: '', invocada: false, temperamento: c.temperamento };
+    this.criatura(mctx, cc, { x: 99, y: 99 });
+    mctx.restore();
+    ctx.drawImage(mini, 0, 0, 32, 32, 8, 10, 48, 48);
+  },
   minimapa(cv, estado) {
     const ctx = cv.getContext('2d'); const m = estado.mapa; const sx = cv.width / m.ancho, sy = cv.height / m.alto; const cols = ['#2e7d4f', '#8a6b46', '#1f5f9e', '#c9a86a', '#4a3a3a', '#6b7280', '#7a5a3a', '#24513a', '#dbbf85', '#e8eef4', '#5d6472'];
     ctx.fillStyle = '#0e1530'; ctx.fillRect(0, 0, cv.width, cv.height);
@@ -1810,6 +1896,7 @@ U.Render = {
     (m.salidas || []).forEach(s => { ctx.fillStyle = '#ffe14d'; ctx.fillRect((s.x + s.w / 2) * sx - 2, (s.y + s.h / 2) * sy - 2, 4, 4); });
     estado.npcs.forEach(n => { if (n.enCasa) return; ctx.fillStyle = '#35c6f4'; ctx.fillRect(n.x * sx - 1, n.y * sy - 1, 3, 3); });
     estado.enemigos.forEach(e => { if (e.vida > 0) { ctx.fillStyle = '#ff4d4d'; ctx.fillRect(e.x * sx - 1, e.y * sy - 1, 3, 3); } });
+    (estado.criaturas || []).forEach(c => { if (c.vida > 0) { ctx.fillStyle = c.invocada ? '#67e08a' : c.temperamento === 'hostil' ? '#ff8a9c' : '#e05bd0'; ctx.fillRect(c.x * sx - 1, c.y * sy - 1, 3, 3); } });
     const j = estado.jugador; const p = 0.5 + 0.5 * Math.sin(this.tiempo * 5); ctx.fillStyle = '#fff'; ctx.fillRect(j.x * sx - 1.5, j.y * sy - 1.5, 4, 4); ctx.strokeStyle = 'rgba(255,255,255,' + (0.3 + p * 0.5) + ')'; ctx.beginPath(); ctx.arc(j.x * sx, j.y * sy, 3 + p * 2, 0, Math.PI * 2); ctx.stroke();
     ctx.strokeStyle = '#6f86c9'; ctx.strokeRect(estado.camara.x / 16 * sx, estado.camara.y / 16 * sy, this.viewW / 16 * sx, this.viewH / 16 * sy);
   }
@@ -3251,6 +3338,7 @@ U.Combate = {
     // en que el redondeo a celdas dejaba fuera a un enemigo que el puño sí estaba tocando.
     const golpeadosObj = this.golpearObjetos(celdas, atk * h.power * 0.95); this.golpearObjetosArco(j, h.alcance, atk * h.power * 0.95, golpeadosObj); this.golpearInocentes(celdas, { x: j.x, y: j.y, dir: j.dir, alcance: h.alcance + 0.45 });
     let golpes = 0; this.vivos().forEach(e => { if (U.Grid.enCeldas(celdas, e) || U.Grid.enArco(j.x, j.y, j.dir, h.alcance + 0.45, e)) { golpes++; this.dañoEnemigo(e, atk * h.power, null, { desafio: this.desafio(e), cargado }); U.Recuperacion.restaurar(h.restaura); this.texto(j, '+' + h.restaura + ' ESE', '#4da3ff', 1); } });
+    if (U.Criaturas) golpes += U.Criaturas.impactoJugador(celdas, { arco: { x: j.x, y: j.y, dir: j.dir, alcance: h.alcance + 0.45 }, dmg: atk * h.power, elemento: null });
     U.Crecimiento.estilo('yin', cargado ? 0.4 : 0.15, E.enCombate ? 1 : 0.2); if (golpes && U.Juego.progresoEntreno) U.Juego.progresoEntreno('golpes', golpes);
     if (golpes) { U.Crecimiento.stat('ataque', 0.05 * golpes, this.desafio(this.vivos()[0] || j)); E.resumen.golpes += golpes; if (cargado) E.hitstop = 0.05; }
     // Canalizar: sin técnica desbloqueada, el Yin enseña el elemento (llegar a 15% desbloquea la primera)
@@ -3264,7 +3352,7 @@ U.Combate = {
     if (j.cdYang > 0) return; if (!U.Recuperacion.gastar(h.costo)) return;
     j.cdYang = h.cd; j.ataqueAnim = 0.25; j.descansando = false; const atk = j.stats.ataque * (j.buffs.sobrecarga > 0 ? 2 : 1);
     U.Audio.sfx('yang'); this.sacudir(0.3);
-    if (h.forma === 'linea') { const celdas = U.Grid.forma('linea', j.x, j.y, j.dir, h.alcance, 0); this.golpearObjetos(celdas, atk * h.power * 0.85); E.efectos.haces.push({ celdas, color: '#f8fafc', t: 0.25, max: 0.25 }); this.vivos().forEach(e => { if (U.Grid.enCeldas(celdas, e)) this.dañoEnemigo(e, atk * h.power, null, { desafio: this.desafio(e), yang: true }); }); this.particulas(j.x + j.dir.x * 2, j.y + j.dir.y * 2 - 0.5, 8, '#f8fafc', 'chispa'); }
+    if (h.forma === 'linea') { const celdas = U.Grid.forma('linea', j.x, j.y, j.dir, h.alcance, 0); this.golpearObjetos(celdas, atk * h.power * 0.85); E.efectos.haces.push({ celdas, color: '#f8fafc', t: 0.25, max: 0.25 }); this.vivos().forEach(e => { if (U.Grid.enCeldas(celdas, e)) this.dañoEnemigo(e, atk * h.power, null, { desafio: this.desafio(e), yang: true }); }); if (U.Criaturas) U.Criaturas.impactoJugador(celdas, { dmg: atk * h.power, elemento: null }); this.particulas(j.x + j.dir.x * 2, j.y + j.dir.y * 2 - 0.5, 8, '#f8fafc', 'chispa'); }
     else this.proyectil(j, h, atk * h.power, null, '#f8fafc', 'jugador');
     U.Crecimiento.estilo('yang', 0.35, 1); U.Crecimiento.stat('mente', 0.08, 1); U.Crecimiento.regenCap(0.02); E.resumen.yang++;
   },
@@ -3277,7 +3365,7 @@ U.Combate = {
     j.cdTec[h.id] = h.cd; j.ataqueAnim = 0.3; j.descansando = false; const el = U.Elementos.datos[j.elementoActivo]; const atk = j.stats.ataque * (j.buffs.sobrecarga > 0 ? 2 : 1); const base = atk * h.power;
     U.Audio.sfx(j.elementoActivo); this.sacudir(0.4); E.resumen.tecnicas++;
     let objetivo = this.vivos()[0]; let desafio = 0.5;
-    const golpear = (celdas, opts) => { this.golpearObjetos(celdas, base * 0.85); this.golpearInocentes(celdas); this.vivos().forEach(e => { if (U.Grid.enCeldas(celdas, e)) { this.dañoEnemigo(e, base, j.elementoActivo, Object.assign({ desafio: this.desafio(e) }, opts || {}, h.efecto || {})); desafio = Math.max(desafio, this.desafio(e)); objetivo = e; } }); };
+    const golpear = (celdas, opts) => { this.golpearObjetos(celdas, base * 0.85); this.golpearInocentes(celdas); if (U.Criaturas) U.Criaturas.impactoJugador(celdas, { dmg: base, elemento: j.elementoActivo }); this.vivos().forEach(e => { if (U.Grid.enCeldas(celdas, e)) { this.dañoEnemigo(e, base, j.elementoActivo, Object.assign({ desafio: this.desafio(e) }, opts || {}, h.efecto || {})); desafio = Math.max(desafio, this.desafio(e)); objetivo = e; } }); };
     switch (h.forma) {
       case 'linea': case 'rect': { const celdas = U.Grid.forma(h.forma, j.x, j.y, j.dir, h.alcance, h.radio || 0); E.efectos.haces.push({ celdas, color: el.color, t: 0.3, max: 0.3 }); golpear(celdas); this.particulas(j.x + j.dir.x * 2, j.y + j.dir.y * 2 - 0.5, 10, el.claro, j.elementoActivo === 'agua' ? 'agua' : 'chispa'); break; }
       case 'cono': { const celdas = U.Grid.forma('cono', j.x, j.y, j.dir, h.alcance, 0); E.efectos.haces.push({ celdas, color: el.color, t: 0.35, max: 0.35 }); golpear(celdas); this.particulas(j.x + j.dir.x * 1.5, j.y + j.dir.y * 1.5 - 0.5, 16, el.claro, 'brasa'); break; }
@@ -3410,7 +3498,8 @@ U.Combate = {
       if (Math.random() < dt * 30) this.particulas(p.x, p.y - 0.5, 1, p.color, p.cometa ? 'chispa' : 'polvo');
       const estallar = () => { if (p.explora) { const celdas = U.Grid.forma('circulo', p.x, p.y, { x: 1, y: 0 }, 0, p.explora.radio); E.efectos.haces.push({ celdas, color: p.color, t: 0.3, max: 0.3 }); E.efectos.anillos.push({ x: p.x, y: p.y, radio: p.explora.radio, color: p.color, t: 0.4, max: 0.4 }); this.sacudir(0.6); U.Audio.sfx(p.elemento || 'yang'); if (p.dueño === 'jugador') this.vivos().forEach(e => { if (U.Grid.enCeldas(celdas, e)) this.dañoEnemigo(e, p.base * (p.explora.power / 1.4), p.elemento, Object.assign({ desafio: this.desafio(e) }, p.efecto || {})); }); else if (U.Grid.enCeldas(celdas, j)) this.dañoJugador(p.base, null, p.efecto, { elemento: p.elemento || null, proyectil: true, ox: p.x - p.dx, oy: p.y - p.dy }); } p.vida = 0; };
       if (U.Grid.solidoEn(E.mapa, p.x, p.y)) { if (p.dueño === 'jugador') this.golpearObjetoEn(p.x, p.y, p.base * 0.9); estallar(); return; }
-      if (p.dueño === 'jugador') { for (const e of this.vivos()) { if (p.golpeados.indexOf(e) >= 0) continue; if (Math.hypot(e.x - p.x, e.y - p.y) < 0.65) { p.golpeados.push(e); this.dañoEnemigo(e, p.base, p.elemento, Object.assign({ desafio: this.desafio(e) }, p.efecto || {})); if (p.explora) estallar(); else if (!p.cometa) p.vida = 0; else { /* la onda perfora y empuja */ } break; } } }
+      if (p.dueño === 'jugador') { for (const e of this.vivos()) { if (p.golpeados.indexOf(e) >= 0) continue; if (Math.hypot(e.x - p.x, e.y - p.y) < 0.65) { p.golpeados.push(e); this.dañoEnemigo(e, p.base, p.elemento, Object.assign({ desafio: this.desafio(e) }, p.efecto || {})); if (p.explora) estallar(); else if (!p.cometa) p.vida = 0; else { /* la onda perfora y empuja */ } break; } }
+        if (p.vida > 0 && U.Criaturas && E.criaturas) { for (const c of E.criaturas) { if (c.vida <= 0 || c.invocada || p.golpeados.indexOf(c) >= 0) continue; if (Math.hypot(c.x - p.x, c.y - p.y) < 0.65) { p.golpeados.push(c); U.Criaturas.danar(c, p.base, p.elemento, {}); if (!p.cometa) p.vida = 0; break; } } } }
       else if (Math.hypot(j.x - p.x, j.y - p.y) < 0.65) { this.dañoJugador(p.base, null, p.efecto, { elemento: p.elemento || null, proyectil: true, ox: p.x - p.dx, oy: p.y - p.dy }); estallar(); }
     });
     E.proyectiles = E.proyectiles.filter(p => p.vida > 0);
@@ -3561,7 +3650,7 @@ U.Combate = {
     if (j.invertido > 0) { j.invertido = Math.max(0, j.invertido - dt); if (j.invertido === 0) U.HUD.toast('Tus controles vuelven a la normalidad.', 'exito'); }
     this.actualizarReto(dt);
     if (j.dot) { j.dot.t -= dt; j.dot.tick += dt; if (j.dot.tick >= 0.5) { j.dot.tick = 0; const d = Math.max(1, Math.round(j.dot.dmg)); j.vida -= d; this.texto(j, '-' + d, '#ff7a2f', 1); if (j.vida <= 0) { j.vida = 0; U.Juego.fin('derrota'); } } if (j.dot.t <= 0) j.dot = null; }
-    const vivosN = this.vivos(); E.enCombate = vivosN.length > 0 && (E.arena.activa || vivosN.some(e => U.Grid.dist(e, j) < 11));
+    const vivosN = this.vivos(); E.enCombate = (vivosN.length > 0 && (E.arena.activa || vivosN.some(e => U.Grid.dist(e, j) < 11))) || (U.Criaturas ? U.Criaturas.hayHostilCerca(j, 6) : false);
     this.actualizarEnemigos(dt); this.actualizarProyectiles(dt); this.actualizarEfectos(dt); this.actualizarArena(dt);
     // orbes de esencia
     E.orbes.forEach(o => { o.t -= dt; if (U.Grid.dist(o, j) < 0.9) { o.t = 0; U.Recuperacion.restaurar(10); this.texto(j, '+10 ESE', '#4da3ff', 1); U.Audio.sfx('orb'); this.particulas(o.x, o.y - 0.5, 6, '#4da3ff', 'cura'); } }); E.orbes = E.orbes.filter(o => o.t > 0);
@@ -3574,23 +3663,220 @@ U.Combate = {
 window.U = window.U || {};
 
 U.Criaturas = {
-  disponible: false, // El juego completo no implementa invocación, pilotaje ni Modo Alma.
+  disponible: true, // Las criaturas SALVAJES ya vagan por el mundo: son la fuente de los compañeros de contrato.
+  // Catálogo histórico de especies de contrato (referencia de diseño; las especies del mundo están en ESPECIES).
   catalogo: [
     { id: 'zorruna', nombre: 'Zorruna de Niebla', elemento: 'agua', insignia: ['Marea de Sangre'], modo: 'Paso de niebla', nota: 'Ve caminos ocultos como espíritu.' },
     { id: 'carbunco', nombre: 'Carbunco', elemento: 'tierra', insignia: ['Muro de Cristal'], modo: 'Coraza viva' },
     { id: 'centella', nombre: 'Ave Centella', elemento: 'rayo', insignia: ['Juicio'], modo: 'Vuelo eléctrico' }
   ],
   // Contrato de sangre: vínculo con ESTA vida, muere con la partida, hasta 3. Solo invocar (aliado con IA).
-  contratoSangre: [], // máx 3
+  contratoSangre: [], // máx 3 (espejo de E.contratos.sangre)
   // Contrato de alma: vínculo con el USUARIO, vive en el pasaporte, cruza vidas. Solo UNO, jamás, con una sola criatura (celosas).
-  // Arsenal completo + MODO. Requiere vínculo máximo + ritual en el mundo espiritual + consentimiento mutuo. Romperlo = traición recordada entre vidas.
+  // Requiere vínculo máximo (100) + ritual + consentimiento mutuo de la criatura.
   contratoAlma: null,
-  // Pilotaje (dentro del contrato de alma): 3 Esencia/s, regen pausada; el cuerpo queda en piloto automático (solo se defiende y sigue, NO ataca).
-  // Si el cuerpo está en peligro, el vínculo se rompe solo. Si la criatura cae, vuelves al cuerpo (nunca muerte permanente).
-  pilotaje: { costoPorSeg: 3, activo: false },
-  // Modo Alma: híbrido con sus poderes (NO tus fusiones). 25 Esencia al entrar + 5/s; sales agotado. Si cae, vínculo tenso, no roto.
-  modoAlma: { costoEntrada: 25, costoPorSeg: 5, activo: false },
-  proximas() { return ['Contrato de sangre (invocar)', 'Contrato de alma (ritual + consentimiento)', 'Pilotaje', 'Modo Alma']; }
+  pilotaje: { costoPorSeg: 3, activo: false }, // próximamente (contrato de alma)
+  modoAlma: { costoEntrada: 25, costoPorSeg: 5, activo: false }, // próximamente (contrato de alma)
+  proximas() { return ['Pilotaje', 'Modo Alma']; },
+
+  /* ===== ESPECIES SALVAJES POR REGIÓN =====
+     temperamento: 'hostil' (ataca si te acercas o al verte: peleas o huyes) ·
+     'timida' (huye si te acercas; si no, te ignora) ·
+     'amistosa' (curiosa: se acerca, te deja HABLARLE como a un NPC y hablarle sube su vínculo). */
+  ESPECIES: {
+    loboBosque:    { nombre: 'Lobo del bosque', temperamento: 'hostil',   elemento: 'tierra', vida: 55,  ataque: 12, defensa: 6,  mente: 5,  velocidad: 11, sprite: 'lobo',      color: '#5c6b5a', color2: '#39443a', vision: 4.6 },
+    ciervo:        { nombre: 'Ciervo susurrante', temperamento: 'timida', elemento: 'viento', vida: 40,  ataque: 6,  defensa: 4,  mente: 6,  velocidad: 13, sprite: 'ciervo',    color: '#a9825a', color2: '#7a5a38', huida: 3.2 },
+    espirituBosque:{ nombre: 'Espíritu del bosque', temperamento: 'amistosa', elemento: 'viento', vida: 45, ataque: 9, defensa: 5,  mente: 12, velocidad: 9,  sprite: 'espiritu',  color: '#7ef0c0', color2: '#2a7f5c' },
+    bestiaArena:   { nombre: 'Bestia de arena', temperamento: 'hostil',   elemento: 'tierra', vida: 72,  ataque: 13, defensa: 8,  mente: 4,  velocidad: 10, sprite: 'bestia',    color: '#c9a86a', color2: '#8a6b3a', vision: 4.6 },
+    escorpion:     { nombre: 'Escorpión de sal', temperamento: 'hostil',  elemento: 'tierra', vida: 35,  ataque: 11, defensa: 9,  mente: 3,  velocidad: 9,  sprite: 'escorpion', color: '#8a6b46', color2: '#5b3d22', vision: 3.6 },
+    lagartoArena:  { nombre: 'Lagarto de sal', temperamento: 'timida',    elemento: 'fuego',  vida: 30,  ataque: 7,  defensa: 4,  mente: 5,  velocidad: 12, sprite: 'lagarto',   color: '#d9a441', color2: '#7a5320', huida: 2.8 },
+    loboNieve:     { nombre: 'Lobo de nieve', temperamento: 'hostil',     elemento: 'agua',   vida: 60,  ataque: 13, defensa: 7,  mente: 5,  velocidad: 11, sprite: 'lobo',      color: '#dfe9f2', color2: '#8fa5b8', vision: 4.6 },
+    yeti:          { nombre: 'Yeti joven', temperamento: 'hostil',        elemento: 'agua',   vida: 115, ataque: 15, defensa: 10, mente: 5,  velocidad: 8,  sprite: 'yeti',      color: '#eef4fa', color2: '#9db4c8', vision: 4.2, escala: 1.35 },
+    criaturaHielo: { nombre: 'Criatura de hielo', temperamento: 'timida', elemento: 'agua',   vida: 38,  ataque: 8,  defensa: 8,  mente: 6,  velocidad: 10, sprite: 'hielo',     color: '#9fd8ef', color2: '#4a86a8', huida: 3 },
+    espirituHielo: { nombre: 'Espíritu de hielo', temperamento: 'amistosa', elemento: 'agua', vida: 44,  ataque: 10, defensa: 6,  mente: 12, velocidad: 9,  sprite: 'espiritu',  color: '#bfefff', color2: '#5b9ec4' },
+    serpienteAgua: { nombre: 'Serpiente de agua', temperamento: 'hostil', elemento: 'agua',   vida: 50,  ataque: 12, defensa: 5,  mente: 5,  velocidad: 11, sprite: 'serpiente', color: '#35c6f4', color2: '#1a6b94', vision: 4.2, acuatica: true },
+    nutria:        { nombre: 'Nutria del lago', temperamento: 'amistosa', elemento: 'agua',  vida: 36,  ataque: 7,  defensa: 4,  mente: 8,  velocidad: 11, sprite: 'nutria',    color: '#8a6b46', color2: '#5b3d22', acuatica: true },
+    tortugaLago:   { nombre: 'Tortuga del lago', temperamento: 'timida',  elemento: 'agua',   vida: 65,  ataque: 6,  defensa: 14, mente: 6,  velocidad: 6,  sprite: 'tortuga',   color: '#4a7a5a', color2: '#2c4a34', huida: 2.2, acuatica: true },
+    ajolote:       { nombre: 'Ajolote de la laguna', temperamento: 'amistosa', elemento: 'agua', vida: 30, ataque: 6, defensa: 3,  mente: 8,  velocidad: 8,  sprite: 'ajolote',   color: '#f2a7c3', color2: '#c46a92', acuatica: true }
+  },
+  // Instancias del mundo: unas POCAS por región (4), en su región correcta del continente continuo.
+  INSTANCIAS: [
+    { uid: 'lobo_bosque_1', especie: 'loboBosque', region: 'bosque', x: 64.5, y: 60.5 },
+    { uid: 'ciervo_1', especie: 'ciervo', region: 'bosque', x: 68.5, y: 85.5 },
+    { uid: 'ciervo_2', especie: 'ciervo', region: 'bosque', x: 61.5, y: 71.5 },
+    { uid: 'espiritu_bosque_1', especie: 'espirituBosque', region: 'bosque', x: 83.5, y: 69.5, apodo: 'Lumen', agua: { x: 81.5, y: 71.5 } },
+    { uid: 'bestia_arena_1', especie: 'bestiaArena', region: 'desierto', x: 64.5, y: 260.5 },
+    { uid: 'escorpion_1', especie: 'escorpion', region: 'desierto', x: 68.5, y: 274.5 },
+    { uid: 'lagarto_1', especie: 'lagartoArena', region: 'desierto', x: 78.5, y: 268.5 },
+    { uid: 'lagarto_curioso_1', especie: 'lagartoArena', region: 'desierto', x: 89.5, y: 258.5, apodo: 'Solín', temperamento: 'amistosa', agua: { x: 89.5, y: 256.5 } },
+    { uid: 'lobo_nieve_1', especie: 'loboNieve', region: 'nieve', x: 320.5, y: 44.5 },
+    { uid: 'yeti_1', especie: 'yeti', region: 'nieve', x: 322.5, y: 52.5 },
+    { uid: 'hielo_timido_1', especie: 'criaturaHielo', region: 'nieve', x: 332.5, y: 62.5 },
+    { uid: 'espiritu_hielo_1', especie: 'espirituHielo', region: 'nieve', x: 324.5, y: 66.5, apodo: 'Nix' },
+    { uid: 'serpiente_agua_1', especie: 'serpienteAgua', region: 'lago', x: 360.5, y: 232.5 },
+    { uid: 'nutria_1', especie: 'nutria', region: 'lago', x: 368.5, y: 219.5, apodo: 'Onda', agua: { x: 368.5, y: 224.5 } },
+    { uid: 'tortuga_1', especie: 'tortugaLago', region: 'lago', x: 382.5, y: 240.5 },
+    { uid: 'ajolote_1', especie: 'ajolote', region: 'lago', x: 240.5, y: 313.5, apodo: 'Rosal', agua: { x: 244.5, y: 316.5 } }
+  ],
+  REGION_NOMBRE: { bosque: 'el Bosque Susurrante', desierto: 'el Desierto de Sal', nieve: 'la Montaña Brumosa (nieve)', lago: 'el Lago Brisa Azul y la Laguna Serena' },
+  // ¿En qué región del continente continuo cae un punto? (mismas cajas que usa U.Vida para sus rutas)
+  regionEn(x, y) {
+    if (x >= 336 && x <= 400 && y >= 210 && y <= 252) return 'lago';
+    if (x >= 226 && x <= 272 && y >= 302 && y <= 338) return 'lago';
+    if (x >= 292 && x < 372 && y >= 30 && y < 96) return 'nieve';
+    if (x >= 36 && x < 116 && y >= 40 && y < 104) return 'bosque';
+    if (x >= 38 && x < 124 && y >= 238 && y < 304) return 'desierto';
+    return 'campos';
+  },
+  // Deja la posición en una celda caminable cercana (sin sólidos; el agua solo si la especie es acuática).
+  asegurarLibre(m, x, y, acuatica) {
+    const T = U.Grid.T;
+    const libre = (cx, cy) => { if (cx < 1 || cy < 1 || cx >= m.ancho - 1 || cy >= m.alto - 1) return false; const t = m.tiles[cy * m.ancho + cx]; if (t === T.AGUA) return !!acuatica; return m.solidos[cy * m.ancho + cx] !== 1; };
+    if (libre(Math.floor(x), Math.floor(y))) return { x, y };
+    for (let r = 1; r <= 6; r++) for (let cy = Math.floor(y) - r; cy <= Math.floor(y) + r; cy++) for (let cx = Math.floor(x) - r; cx <= Math.floor(x) + r; cx++) if (Math.max(Math.abs(cx - Math.floor(x)), Math.abs(cy - Math.floor(y))) === r && libre(cx, cy)) return { x: cx + 0.5, y: cy + 0.5 };
+    return { x, y };
+  },
+  crearTodas(m) {
+    return this.INSTANCIAS.map(def => {
+      const sp = this.ESPECIES[def.especie];
+      const pos = this.asegurarLibre(m, def.x, def.y, !!sp.acuatica);
+      const temp = def.temperamento || sp.temperamento;
+      return { tipo: 'criatura', uid: def.uid, especie: def.especie, nombre: sp.nombre, apodo: def.apodo || null, region: def.region, temperamento: temp, elemento: sp.elemento, sprite: sp.sprite, color: sp.color, color2: sp.color2, escala: sp.escala || 1, acuatica: !!sp.acuatica,
+        stats: { vida: sp.vida, esencia: 30, ataque: sp.ataque, defensa: sp.defensa, mente: sp.mente, velocidad: sp.velocidad }, vida: sp.vida,
+        x: pos.x, y: pos.y, home: { x: pos.x, y: pos.y }, agua: def.agua || null, dir: { x: 0, y: 1 }, anim: Math.random() * 4, moviendo: false, flash: 0,
+        estado: 'vaga', objetivo: null, rutinaT: 2 + Math.random() * 5, cdAtaque: 0, respawnT: 0, vinculo: temp === 'amistosa' ? 25 : temp === 'timida' ? 10 : 0, charlasSesion: 0, invocada: false, w: 1, h: 1 };
+    });
+  },
+  buscar(uid) { const E = U.Juego.estado; if (!E || !E.criaturas) return null; return E.criaturas.find(c => c.uid === uid) || null; },
+  nombreDe(c) { return c.apodo ? c.apodo + ' · ' + c.nombre : c.nombre; },
+  // Mover respetando el grid; las acuáticas cruzan el agua como los NPC que deciden cruzarla
+  // (el agua se vuelve no-sólida solo durante su paso y se restaura al terminar).
+  mover(c, m, dx, dy) {
+    if (!c.acuatica) { U.Grid.mover(m, c, dx, dy); return; }
+    const T = U.Grid.T; const tocados = [];
+    for (let i = 0; i < m.tiles.length; i++) if (m.tiles[i] === T.AGUA && m.solidos[i] === 1) { m.solidos[i] = 0; tocados.push(i); }
+    U.Grid.mover(m, c, dx, dy);
+    tocados.forEach(i => { if (m.tiles[i] === T.AGUA) m.solidos[i] = 1; });
+  },
+  hayHostilCerca(j, dist) { const E = U.Juego.estado; if (!E || !E.criaturas) return false; return E.criaturas.some(c => c.vida > 0 && c.temperamento === 'hostil' && !c.invocada && U.Grid.dist(c, j) < dist); },
+  // ===== VÍNCULO Y CONTRATOS =====
+  ganarVinculo(c, n) { const antes = c.vinculo; c.vinculo = Math.max(0, Math.min(100, c.vinculo + n)); return c.vinculo - antes; },
+  nivelVinculo(c) { return c.vinculo >= 100 ? 'VÍNCULO MÁXIMO' : c.vinculo >= 60 ? 'CONFIANZA ALTA' : c.vinculo >= 35 ? 'CONFIANZA' : c.vinculo >= 15 ? 'CURIOSIDAD' : 'DESCONFIANZA'; },
+  tieneContrato(c) { const E = U.Juego.estado; if (!E || !E.contratos) return null; if (E.contratos.alma === c.uid) return 'alma'; if (E.contratos.sangre.indexOf(c.uid) >= 0) return 'sangre'; return null; },
+  formarSangre(c) {
+    const E = U.Juego.estado; if (!E || !E.contratos) return 'sin mundo';
+    if (this.tieneContrato(c)) return 'ya';
+    if (c.vinculo < 60) return 'vinculo';
+    if (E.contratos.sangre.length >= 3) return 'lleno';
+    E.contratos.sangre.push(c.uid); this.contratoSangre = E.contratos.sangre.slice();
+    return 'ok';
+  },
+  formarAlma(c) {
+    const E = U.Juego.estado; if (!E || !E.contratos) return 'sin mundo';
+    if (E.contratos.alma === c.uid) return 'ya';
+    if (E.contratos.alma) return 'ocupado';
+    if (c.vinculo < 100) return 'vinculo';
+    E.contratos.alma = c.uid; this.contratoAlma = c.uid;
+    this.guardarAlmaPasaporte(c);
+    return 'ok';
+  },
+  // El contrato de alma CRUZA VIDAS: vive en el pasaporte del usuario (su propio guardado
+  // local, aparte del de la vida actual), como ya preveía U.Portal.
+  CLAVE_ALMA: 'unipar_pasaporte_alma_v1',
+  guardarAlmaPasaporte(c) { try { localStorage.setItem(this.CLAVE_ALMA, JSON.stringify({ uid: c.uid, especie: c.especie, apodo: c.apodo || null })); } catch (e) { /* sin almacenamiento: el alma vive en la partida actual */ } },
+  leerAlmaPasaporte() { try { const s = localStorage.getItem(this.CLAVE_ALMA); if (s) { const d = JSON.parse(s); if (d && d.uid) return d; } } catch (e) { /* sin almacenamiento */ } return null; },
+  aplicarAlmaPasaporte() {
+    const E = U.Juego.estado; if (!E || !E.contratos || E.contratos.alma) return;
+    const p = this.leerAlmaPasaporte(); if (!p) return;
+    const c = this.buscar(p.uid); if (!c) return;
+    E.contratos.alma = c.uid; this.contratoAlma = c.uid; c.vinculo = 100;
+    setTimeout(() => { if (U.HUD) U.HUD.toast('🕯 Tu contrato de alma cruza vidas: ' + this.nombreDe(c) + ' te reconoce en esta vida nueva (vínculo máximo). Está en ' + (this.REGION_NOMBRE[c.region] || 'su región') + '.', 'exito'); }, 4200);
+  },
+  invocar(c) {
+    const E = U.Juego.estado; if (!this.tieneContrato(c)) return false;
+    c.invocada = true; c.vida = Math.max(c.vida, 1); c.respawnT = 0;
+    const j = E.jugador; const pos = this.asegurarLibre(E.mapa, j.x + 1.6, j.y + 0.6, c.acuatica); c.x = pos.x; c.y = pos.y; c.estado = 'companera';
+    if (U.Combate) U.Combate.particulas(c.x, c.y - 0.5, 16, c.color, 'chispa');
+    if (U.Audio) U.Audio.sfx('yang');
+    return true;
+  },
+  despedir(c) { c.invocada = false; c.estado = 'vaga'; c.objetivo = null; const pos = this.asegurarLibre(U.Juego.estado.mapa, c.home.x, c.home.y, c.acuatica); c.x = pos.x; c.y = pos.y; },
+  // ===== DAÑO (la golpean tus Yin/Yang/técnicas, como a un enemigo) =====
+  danar(c, base, elemento, o) {
+    o = o || {}; const E = U.Juego.estado; if (!E || c.vida <= 0) return;
+    let d = U.Estadisticas.formulaDaño(base, c.stats.defensa); const mult = U.Elementos.multiplica(elemento, c.elemento); d = Math.max(1, Math.round(d * mult));
+    c.vida -= d; c.flash = 0.12; E.resumen.daño += d;
+    if (U.Combate) { U.Combate.texto(c, '-' + d, elemento ? U.Elementos.color(elemento) : '#ffd08a', 1); U.Combate.particulas(c.x, c.y - 0.5, 6, c.color, 'chispa'); }
+    if (c.temperamento !== 'hostil') { this.ganarVinculo(c, -10); c.estado = 'huye'; c.rutinaT = 2.5; if (U.HUD) U.HUD.toast('Golpeaste a ' + c.nombre + (c.temperamento === 'amistosa' ? ': su vínculo contigo cae −10.' : ', una criatura tímida: sale huyendo.'), 'peligro'); }
+    else c.estado = 'persigue';
+    if (c.vida <= 0) this.morir(c);
+  },
+  morir(c) {
+    const E = U.Juego.estado; c.vida = 0; c.respawnT = 120; c.invocada = false; E.resumen.bajas++;
+    if (U.Combate) { U.Combate.particulas(c.x, c.y - 0.5, 18, c.color, 'chispa'); U.Combate.texto(c, 'CAÍDA', '#e8dcc8', 1); }
+    if (U.Audio) U.Audio.sfx('muerte');
+    E.orbes.push({ x: c.x, y: c.y, t: 12 });
+    if (c.temperamento === 'hostil') { const premio = 5 + Math.floor(Math.random() * 5); E.jugador.monedas = (E.jugador.monedas || 0) + premio; if (U.Combate) U.Combate.texto(c, '+' + premio + ' 🪙', '#ffe14d', 1); }
+    if (c.temperamento === 'amistosa') this.ganarVinculo(c, -20);
+  },
+  // Impacto de un ataque del jugador (celdas y/o arco continuo, igual que con los enemigos).
+  impactoJugador(celdas, o) {
+    const E = U.Juego.estado; if (!E || !E.criaturas) return 0;
+    let n = 0;
+    E.criaturas.forEach(c => { if (c.vida <= 0 || c.invocada) return; if ((celdas && U.Grid.enCeldas(celdas, c)) || (o.arco && U.Grid.enArco(o.arco.x, o.arco.y, o.arco.dir, o.arco.alcance, c))) { n++; this.danar(c, o.dmg, o.elemento || null, o); } });
+    return n;
+  },
+  // ===== RUTINAS Y TEMPERAMENTOS =====
+  actualizar(dt) {
+    const E = U.Juego.estado; if (!E || !E.criaturas || E.mapaId !== 'aldea') return;
+    const j = E.jugador, m = E.mapa;
+    E.criaturas.forEach(c => {
+      c.flash = Math.max(0, c.flash - dt); c.cdAtaque = Math.max(0, c.cdAtaque - dt);
+      if (c.vida <= 0) { c.respawnT -= dt; c.moviendo = false; if (c.respawnT <= 0) { const pos = this.asegurarLibre(m, c.home.x, c.home.y, c.acuatica); c.x = pos.x; c.y = pos.y; c.vida = c.stats.vida; c.estado = 'vaga'; if (U.Combate && U.Grid.dist(c, j) < 9) U.Combate.particulas(c.x, c.y - 0.5, 8, c.color, 'humo'); } return; }
+      const d = U.Grid.dist(c, j);
+      const sp = this.ESPECIES[c.especie];
+      let destino = null, vel = 0, corriendo = false;
+      if (c.invocada) {
+        // COMPAÑERA INVOCADA: te sigue y pelea a tu lado contra los enemigos cercanos.
+        // Si se queda muy atrás (un bosque cerrado, un río), el vínculo la trae de vuelta a tu lado.
+        if (d > 14) { const posC = this.asegurarLibre(m, j.x - 1.5, j.y + 0.5, c.acuatica); c.x = posC.x; c.y = posC.y; if (U.Combate) U.Combate.particulas(c.x, c.y - 0.5, 8, c.color, 'chispa'); }
+        const enemigo = (U.Combate ? U.Combate.vivos() : []).filter(e => U.Grid.dist(e, c) < 4.5).sort((a, b) => U.Grid.dist(a, c) - U.Grid.dist(b, c))[0];
+        if (enemigo) { destino = enemigo; vel = 2.9; corriendo = true;
+          if (U.Grid.dist(c, enemigo) < 1.25 && c.cdAtaque <= 0) { c.cdAtaque = 1.2; c.dir = U.Grid.dir8(enemigo.x - c.x, enemigo.y - c.y); U.Combate.dañoEnemigo(enemigo, c.stats.ataque * 2.4, c.elemento, { desafio: U.Combate.desafio(enemigo) }); } }
+        else if (d > 2.1) { destino = { x: j.x - j.dir.x * 1.5, y: j.y - j.dir.y * 1.5 }; vel = d > 6 ? 3.6 : 2.4; corriendo = d > 6; }
+      } else if (c.temperamento === 'hostil' && d < (sp.vision || 4.5)) {
+        // HOSTIL: te vio o te acercaste — te persigue y te ataca; peleas con ella o huyes.
+        c.estado = 'persigue'; destino = j; vel = 2.7; corriendo = true;
+        if (d < 1.35 && c.cdAtaque <= 0) { c.cdAtaque = 1.5; c.dir = U.Grid.dir8(j.x - c.x, j.y - c.y); if (U.Combate) { U.Combate.texto(c, '¡' + c.nombre.toUpperCase() + ' ATACA!', '#ff4d4d', 1); U.Combate.dañoJugador(c.stats.ataque * 1.1, c, null, { elemento: null, proyectil: false, ox: c.x, oy: c.y }); } if (U.Audio) U.Audio.sfx('golpe'); }
+      } else if (c.temperamento === 'timida' && d < (sp.huida || 3)) {
+        // TÍMIDA: huye si te acercas.
+        c.estado = 'huye'; const ax = c.x + (c.x - j.x), ay = c.y + (c.y - j.y); destino = { x: ax, y: ay }; vel = 2.5; corriendo = true;
+      } else if (c.estado === 'huye' && c.temperamento !== 'hostil') {
+        if (d > 5.5) { c.estado = 'vaga'; c.rutinaT = 1; } else { destino = { x: c.x + (c.x - j.x), y: c.y + (c.y - j.y) }; vel = 2.5; corriendo = true; }
+      } else if (c.temperamento === 'amistosa' && d < 4 && d > 1.8) {
+        // AMISTOSA/CURIOSA: se acerca a mirarte; de cerca se queda y te deja hablarle.
+        c.estado = 'curiosa'; destino = j; vel = 1.1;
+      } else {
+        // RUTINA como la de los NPC: vaga por su hogar, descansa, va al agua, caza (hostiles).
+        c.rutinaT -= dt;
+        if (c.rutinaT <= 0) {
+          const r = Math.random();
+          if (c.agua && r < 0.3) { c.estado = 'agua'; c.objetivo = { x: c.agua.x, y: c.agua.y }; c.rutinaT = 14; }
+          else if (r < 0.52) { c.estado = 'descansa'; c.objetivo = null; c.rutinaT = 3.5 + Math.random() * 4; }
+          else { c.estado = c.temperamento === 'hostil' && r > 0.85 ? 'caza' : 'vaga'; const ang = Math.random() * Math.PI * 2, rad = 2.5 + Math.random() * 5.5; c.objetivo = { x: c.home.x + Math.cos(ang) * rad, y: c.home.y + Math.sin(ang) * rad }; c.rutinaT = 8 + Math.random() * 7; }
+        }
+        if (c.estado === 'descansa') { vel = 0; if (Math.random() < dt * 0.25 && U.Combate) U.Combate.texto(c, 'Z', '#9fb3d9', 1); }
+        else if (c.objetivo) { destino = c.objetivo; vel = c.estado === 'caza' ? 2.1 : 1.05; if (U.Grid.dist(c, c.objetivo) < 0.5) { c.objetivo = null; c.rutinaT = Math.min(c.rutinaT, 1.5); } }
+      }
+      if (destino && vel > 0) {
+        const dx = destino.x - c.x, dy = destino.y - c.y, dd = Math.hypot(dx, dy);
+        if (dd > 0.12) { c.dir = U.Grid.dir8(dx, dy); this.mover(c, m, dx / dd * vel * dt, dy / dd * vel * dt); c.moviendo = true; c.anim += dt * (corriendo ? 2.2 : 1.2); }
+        else c.moviendo = false;
+      } else c.moviendo = false;
+      // Separación suave entre criaturas cercanas (que no se encimen)
+      E.criaturas.forEach(o2 => { if (o2 !== c && o2.vida > 0) { const sx = c.x - o2.x, sy = c.y - o2.y, sd = Math.hypot(sx, sy); if (sd < 0.7 && sd > 0.001) this.mover(c, m, sx / sd * dt * 0.8, sy / sd * dt * 0.8); } });
+    });
+  }
 };
 </script>
 <script>
@@ -4032,6 +4318,87 @@ U.Dialogo = {
     U.HUD.toast('Casa rentada en ' + pueblo + ' por ' + this.RENTA_PRECIO + ' 🪙. Duermes en cama de verdad…', 'exito');
     U.Recuperacion.descansarFogata();
   },
+  // ===== CRIATURAS SALVAJES AMISTOSAS: hablarles como a un NPC =====
+  // Hablar y acariciar suben el VÍNCULO (la confianza de la criatura). Con 60+ se puede
+  // proponer el CONTRATO DE SANGRE (máx. 3, para invocarla como compañera) y con el
+  // vínculo al MÁXIMO (100) el CONTRATO DE ALMA: ritual + consentimiento mutuo, solo UNO
+  // y cruza vidas (queda en el pasaporte). Todo vive en U.Criaturas; aquí solo se habla.
+  abrirCriatura(c) {
+    const E = U.Juego.estado; this.npc = null; this.criatura = c; this.esCartel = false; this.modo = 'criatura'; this.fase = 'normal'; this.abierto = true; E.ui = 'dialogo'; E.jugador.descansando = false; E.jugador.cargando = false;
+    c.charlasSesion = 0;
+    document.getElementById('dialogo').classList.remove('oculto');
+    this.pintarCaraCriatura();
+    const saludo = c.vinculo >= 60 ? 'te recibe como a un amigo: ya eres parte de su manada.' : c.vinculo >= 35 ? 'te reconoce y se acerca sin miedo.' : c.vinculo >= 15 ? 'te mira con curiosidad y no huye.' : 'te observa de lejos, todavía sin fiarse.';
+    this.decir(U.Criaturas.nombreDe(c) + ' — ' + saludo + ' Es una criatura salvaje de ' + (U.Criaturas.REGION_NOMBRE[c.region] || 'esta región') + '. Las criaturas amistosas se vinculan hablando: cada charla tranquila sube su vínculo contigo.');
+    this.razon = 'Vínculo ' + Math.round(c.vinculo) + '/100 · ' + U.Criaturas.nivelVinculo(c) + ' · Sangre a los 60 (máx. 3) · Alma a los 100 (solo UNA, con ritual y su consentimiento)';
+    this.opciones = this.opcionesCriatura(c); this.pintarRazon(); this.pintarOpciones(); U.Audio.sfx('dialogo');
+  },
+  pintarCaraCriatura() {
+    const c = this.criatura; if (!c) return;
+    const cv = document.getElementById('dlgCara'); U.Render.caraBestia(cv, c);
+    document.getElementById('dlgNombre').textContent = U.Criaturas.nombreDe(c).toUpperCase();
+    const ch = document.getElementById('dlgEmocion'); ch.textContent = c.invocada ? 'tu compañera' : c.temperamento; ch.style.color = '#a7f3c9'; ch.style.borderColor = '#a7f3c9';
+    document.getElementById('dlgConfTxt').textContent = 'Vínculo ' + Math.round(c.vinculo) + ' · ' + U.Criaturas.nivelVinculo(c);
+    document.getElementById('dlgConfianza').firstElementChild.style.width = Math.max(0, Math.min(100, c.vinculo)) + '%';
+  },
+  opcionesCriatura(c) {
+    const E = U.Juego.estado, j = E.jugador; const contrato = U.Criaturas.tieneContrato(c); const ops = [];
+    ops.push({ t: 'Hablarle con calma (su vínculo sube)', cri: 'hablar' });
+    ops.push({ t: 'Acariciarla / ofrecerle tu mano abierta', cri: 'acariciar' });
+    if ((j.bolsaComida || []).length) ops.push({ t: '🍽 Ofrecerle una comida de tu mochila (' + j.bolsaComida.length + ')', cri: 'comida' });
+    if (contrato && !c.invocada) ops.push({ t: '✦ Invocarla como tu compañera (te sigue y pelea a tu lado)', cri: 'invocar' });
+    if (contrato && c.invocada) ops.push({ t: 'Despedirla (vuelve a su región)', cri: 'despedir' });
+    if (!contrato && c.vinculo >= 60) ops.push({ t: '🩸 Proponer el CONTRATO DE SANGRE (invocarla · llevas ' + E.contratos.sangre.length + '/3)', cri: 'sangre' });
+    if (!contrato || contrato === 'sangre') { if (c.vinculo >= 100 && !E.contratos.alma) ops.push({ t: '🕯 Proponer el CONTRATO DE ALMA (ritual + su consentimiento · solo UNO y cruza vidas)', cri: 'alma' }); }
+    return ops;
+  },
+  elegirCriatura(o) {
+    const E = U.Juego.estado, j = E.jugador, c = this.criatura; if (!c) { this.cerrar(); return; }
+    const nombre = U.Criaturas.nombreDe(c);
+    const refrescar = txt => { this.decir(txt); this.razon = 'Vínculo ' + Math.round(c.vinculo) + '/100 · ' + U.Criaturas.nivelVinculo(c); this.pintarRazon(); this.opciones = this.opcionesCriatura(c); this.pintarOpciones(); this.pintarCaraCriatura(); };
+    if (o.cri === 'hablar') {
+      if ((c.charlasSesion || 0) >= 3) { refrescar(nombre + ' ya charló bastante por ahora: bosteza y se acomoda. Déjala descansar y vuelve en otro momento: el vínculo crece con visitas, no con prisa.'); U.Audio.sfx('click'); return; }
+      c.charlasSesion = (c.charlasSesion || 0) + 1;
+      const gan = U.Criaturas.ganarVinculo(c, 7);
+      const frases = ['le cuentas tu camino hasta aquí, despacio, y escucha con las orejas atentas.', 'le hablas de la Metrópolis y de las aldeas: mueve la cabeza como si entendiera cada nombre.', 'le cuentas una pelea tuya sin presumir: respira más tranquila a tu lado.', 'le hablas de nada importante, como se habla con un amigo, y se queda.'];
+      refrescar('Le hablas con calma: ' + nombre + ' ' + frases[Math.floor(Math.random() * frases.length)] + ' (Vínculo +' + Math.round(gan) + ' → ' + Math.round(c.vinculo) + '/100)'); U.Audio.sfx('dialogo'); return;
+    }
+    if (o.cri === 'acariciar') {
+      if (c.vinculo < 15) { U.Criaturas.ganarVinculo(c, 2); refrescar('Acercas la mano despacio y la retiras sin tocarla del todo: que huela tu intención primero. ' + nombre + ' no huye. Es un comienzo. (Vínculo +2 → ' + Math.round(c.vinculo) + ')'); U.Audio.sfx('click'); return; }
+      const gan = U.Criaturas.ganarVinculo(c, 5);
+      refrescar(nombre + ' se deja acariciar y cierra los ojos un momento. La confianza también se toca. (Vínculo +' + Math.round(gan) + ' → ' + Math.round(c.vinculo) + '/100)'); U.Audio.sfx('cura'); return;
+    }
+    if (o.cri === 'comida') {
+      const sab = (j.bolsaComida || [])[0];
+      if (sab == null) { refrescar('No llevas comida en la mochila. La tienda vende los 5 sabores a 10 🪙.'); U.Audio.sfx('fail'); return; }
+      j.bolsaComida.splice(0, 1); const gan = U.Criaturas.ganarVinculo(c, 10);
+      refrescar('Le ofreces tu comida ' + sab + ' y la come de tu mano, sin prisa. Compartir comida es el idioma más viejo del mundo. (Vínculo +' + Math.round(gan) + ' → ' + Math.round(c.vinculo) + '/100)'); U.Audio.sfx('cura'); return;
+    }
+    if (o.cri === 'sangre') {
+      const r = U.Criaturas.formarSangre(c);
+      if (r === 'lleno') { refrescar('Ya tienes 3 contratos de sangre (el máximo). El vínculo de sangre no da para más: despide o deja ir a otra compañera antes de atarte a una nueva.'); U.Audio.sfx('fail'); return; }
+      if (r !== 'ok') { refrescar('Todavía no: el contrato de sangre pide un vínculo de 60 o más (llevas ' + Math.round(c.vinculo) + ').'); U.Audio.sfx('fail'); return; }
+      refrescar('🩸 CONTRATO DE SANGRE con ' + nombre + ': una gota tuya y su aliento, nada más. Desde ahora puedes INVOCARLA como compañera desde este diálogo o desde Ajustes → Estadísticas. El contrato de sangre vive en ESTA vida (máximo 3).'); U.Audio.sfx('unlock'); if (U.Guardado) U.Guardado.guardarAuto(); return;
+    }
+    if (o.cri === 'alma') {
+      this.decir('🕯 EL RITUAL DEL ALMA. Te arrodillas, respiras con ' + nombre + ' al mismo ritmo y le ofreces el vínculo más profundo que existe: no es de esta vida, es del USUARIO — cruza vidas, mundos y partidas, y solo puede existir UNO, jamás, con una sola criatura (las demás lo saben y lo respetan, celosas). Nada se firma: ella tiene que consentirlo libremente. ' + nombre + ' te mira largo…');
+      this.razon = 'Contrato de alma: vínculo máximo (100) + ritual + consentimiento mutuo · solo UNO · cruza vidas';
+      this.opciones = [
+        { t: 'Completar el ritual: ' + (c.apodo || 'ella') + ' consiente libremente', cri: 'almaSi' },
+        { t: 'Detener el ritual (todavía no)', cri: 'almaNo' }
+      ];
+      this.pintarRazon(); this.pintarOpciones(); U.Audio.sfx('yang'); return;
+    }
+    if (o.cri === 'almaNo') { refrescar('Detienes el ritual con respeto. ' + nombre + ' parpadea, tranquila: lo que no se consiente entero, no se hace. El vínculo sigue donde estaba.'); U.Audio.sfx('click'); return; }
+    if (o.cri === 'almaSi') {
+      const r = U.Criaturas.formarAlma(c);
+      if (r === 'ocupado') { refrescar('Tu alma ya está atada a otra criatura: solo puede haber UN contrato de alma. Ella lo entiende y se aparta con dignidad.'); U.Audio.sfx('fail'); return; }
+      if (r !== 'ok') { refrescar('El ritual no cuaja: el contrato de alma pide el vínculo al MÁXIMO (100). Llevas ' + Math.round(c.vinculo) + '.'); U.Audio.sfx('fail'); return; }
+      refrescar('🕯 ¡CONTRATO DE ALMA con ' + nombre + '! Consintió libremente, mirándote a los ojos. Este vínculo no muere con esta vida: queda en tu pasaporte y te reconocerá en las vidas que vienen. Solo puede existir uno. Invócala cuando quieras: es tu compañera de alma.'); U.Audio.sfx('victoria'); if (U.Guardado) U.Guardado.guardarAuto(); return;
+    }
+    if (o.cri === 'invocar') { this.cerrar(); if (U.Criaturas.invocar(c)) U.HUD.toast('✦ ' + nombre + ' acude a tu lado: tu compañera de contrato te sigue y pelea contigo.', 'exito'); return; }
+    if (o.cri === 'despedir') { U.Criaturas.despedir(c); refrescar('Despides a ' + nombre + ': vuelve caminando a su región. El contrato sigue: puedes invocarla de nuevo cuando quieras.'); U.Audio.sfx('click'); return; }
+  },
   mostrarTexto(titulo, texto) {
     const E = U.Juego.estado; this.npc = null; this.esCartel = true; this.abierto = true; E.ui = 'dialogo'; document.getElementById('dialogo').classList.remove('oculto');
     document.getElementById('dlgNombre').textContent = titulo; document.getElementById('dlgEmocion').textContent = 'aviso'; document.getElementById('dlgConfTxt').textContent = ''; document.getElementById('dlgConfianza').firstElementChild.style.width = '0%';
@@ -4061,6 +4428,7 @@ U.Dialogo = {
   elegir(i) {
     const o = this.opciones[i]; if (!o) { this.cerrar(); return; }
     if (this.modo === 'cama') { this.elegirCama(o); return; }
+    if (this.modo === 'criatura') { this.elegirCriatura(o); return; }
     if (this.modo === 'renta') { this.elegirRenta(o); return; }
     if (this.modo === 'tienda') { return; } // la tienda nueva se maneja con sus propios botones (pintarTienda)
     if (this.modo === 'tablon') { const respT = U.Juego.aceptarMision(o.tablonUid); this.modo = 'npc'; this.decir(respT); this.razon = ''; this.pintarRazon(); this.opciones = this.opcionesNormales(this.npc); this.pintarOpciones(); return; }
@@ -4102,7 +4470,7 @@ U.Dialogo = {
     if (o.accion === 'preguntarPor') { const t2 = U.Vida.buscar(o.target); resp = t2 ? U.Vida.respuestaDonde(n, t2) : 'No lo he visto hoy.'; if (!n.hechos) n.hechos = []; n.hechos.push('preguntaste por ' + (t2 ? t2.nombre : 'un vecino')); }
     this.decir(resp); this.pintarRazon(); this.pintarCara(); U.Audio.sfx('dialogo');
   },
-  cerrar() { if (this.modo === 'sparring' && U.Sparring) U.Sparring.cancelarOferta(); this.abierto = false; this.npc = null; this.modo = 'npc'; this.fase = 'normal'; document.getElementById('dialogo').classList.add('oculto'); if (U.Juego.estado.ui === 'dialogo') U.Juego.estado.ui = 'mundo'; U.Audio.sfx('click'); },
+  cerrar() { if (this.modo === 'sparring' && U.Sparring) U.Sparring.cancelarOferta(); this.abierto = false; this.npc = null; this.criatura = null; this.modo = 'npc'; this.fase = 'normal'; document.getElementById('dialogo').classList.add('oculto'); if (U.Juego.estado.ui === 'dialogo') U.Juego.estado.ui = 'mundo'; U.Audio.sfx('click'); },
   tecla(num) { if (!this.abierto) return; if (this.esCartel) { this.cerrar(); return; } if (num <= this.opciones.length) this.elegir(num - 1); else this.cerrar(); },
   actualizar(dt) {
     if (!this.abierto) return;
@@ -4256,10 +4624,16 @@ U.HUD = {
     { const cl = E.clima ? U.Clima.de(E) : U.Clima.TIPOS.despejado; const ff2 = U.Tiempo.faseDe(U.Tiempo.hora(E));
       html += '<section><h3>Calendario · clima · tu casa · memoria</h3><div style="font-size:12px">📅 <b>' + U.Tiempo.diaTexto(E.reloj) + '</b> · Momento: ' + ff2.nombre + ' (' + U.Tiempo.formato(E.reloj.minutos) + ') · 6 momentos por día, semana de Lunes a Domingo.<br>' + cl.icono + ' <b>Clima: ' + cl.nombre + '</b> · ' + cl.detalle + '. Cambia solo cada pocos minutos y ajusta costos. La lluvia tiene intensidades (ligera, normal, fuerte y tormenta): bajo techo (tu casa, la Oficina) no llueve ni cambian los costos; afuera, el Agua es progresiva (ligera ×0.8, normal ×0.5, fuerte y tormenta = 1) y junto a ríos, estanques u oasis paga DECIMALES (×0.15): la Esencia baja poquito a poquito. El Fuego paga más cuanto más llueve, la Tierra y el Rayo bajan un poco y el Viento sube. La TEMPERATURA también pesa: con calor el Fuego paga ×0.85 y el Agua ×1.25; con frío, al revés (Fuego ×1.2, Agua ×0.9). Todos los costos viven en decimales.<br>🏠 Tu casa (puerta de la casa azul): alarma fijada a las <b>' + U.Tiempo.formato(E.alarmaMin) + '</b> · Hechizo de Inversión: ' + (E.flags.hechizoInversion ? '<b style="color:var(--exito)">aprendido (tecla V)</b>' : 'sin aprender (obelisco de la Montaña Brumosa)') + '<br>Monedas: <b style="color:var(--rayo)">' + Math.floor(j.monedas || 0) + ' 🪙</b> (misiones por rango · arena completa 50 · podio del torneo 300/150/80 · tienda de Marisol) · Torneos ganados: ' + (E.historial.torneos || 0) + ' · Misiones entregadas: ' + (E.historial.misiones || 0) + '<br>Historial de esta vida: victorias de arena ' + E.historial.victorias + ' · caídas ' + E.historial.derrotas + ' · retos superados ' + E.historial.retos + ' · entrenamientos completos ' + E.historial.entrenos + '. Los NPC recuerdan todo esto cuando hablas con ellos (tú hablas primero).</div></section>';
     }
+    { const criaturas = E.criaturas || []; const conocidas = criaturas.filter(c => c.vinculo > 0 || U.Criaturas.tieneContrato(c));
+      html += '<section><h3>🐾 Compañeros · criaturas salvajes y contratos</h3>'
+      + '<div style="font-size:11px;color:var(--textoFrio)">Las criaturas salvajes vagan por cada región (desierto, bosque, nieve y lago) con su temperamento: las HOSTILES te atacan si te acercas, las TÍMIDAS huyen, y a las AMISTOSAS les puedes HABLAR en el mundo (tócalas cuando salga su globo) para subir su VÍNCULO. Con 60+ de vínculo: CONTRATO DE SANGRE (máximo 3, solo en esta vida). Con el vínculo al MÁXIMO (100): CONTRATO DE ALMA — ritual + su consentimiento, solo UNO, y cruza vidas (queda en tu pasaporte). Invocada, tu compañera te sigue y pelea a tu lado.</div>'
+      + (conocidas.length ? conocidas.map(c => { const ct = U.Criaturas.tieneContrato(c); return '<div class="mochilaItem"><span>🐾 <b>' + U.Criaturas.nombreDe(c) + '</b> <small style="color:var(--textoFrio)">' + U.Criaturas.REGION_NOMBRE[c.region] + ' · vínculo ' + Math.round(c.vinculo) + '/100' + (ct ? ' · contrato de ' + ct.toUpperCase() : '') + (c.invocada ? ' · CONTIGO' : '') + '</small></span><span class="acts">' + (ct ? (c.invocada ? '<button class="mini peligro" data-despedir="' + c.uid + '">DESPEDIR</button>' : '<button class="mini exito" data-invocar="' + c.uid + '">INVOCAR</button>') : '') + '</span></div>'; }).join('') : '<div style="font-size:12px;color:var(--textoFrio);margin-top:4px">Todavía no te vinculaste con ninguna criatura. Busca una AMISTOSA en su región (un espíritu del bosque, un lagarto curioso del oasis, una nutria del lago…) y háblale.</div>')
+      + '<div style="font-size:11px;color:var(--textoTenue);margin-top:4px">Contratos de sangre: ' + (E.contratos ? E.contratos.sangre.length : 0) + '/3 · Contrato de alma: ' + (E.contratos && E.contratos.alma ? U.Criaturas.nombreDe(U.Criaturas.buscar(E.contratos.alma) || { nombre: '—' }) : 'ninguno todavía') + '</div></section>';
+    }
     html += '<section><h3>Diario</h3><ul class="diario">' + E.objetivos.map(o => '<li class="' + o.estado + '">' + (o.estado === 'hecho' ? '✓ ' : o.estado === 'actual' ? '▶ ' : '○ ') + o.texto + '</li>').join('') + '</ul></section>';
     html += '<section><h3>Vecinos de Bruma · personalidad · dónde están ahora</h3>' + (E.roster || E.npcs).map(n => { const per = U.Personas ? U.Personas.de(n.id) : null; const donde = U.Vida ? U.Vida.dondeEstaTexto(n) : ''; return '<div style="font-size:12px;margin:4px 0"><b>' + n.nombre + '</b> · <span style="color:' + U.Emociones.tonos[n.emocion].color + '">' + n.emocion + '</span> · confianza ' + Math.round(n.estados.confianza) + (per ? '<br><span style="color:var(--textoFrio)">' + per.tipo + ' · le gusta: ' + per.gustos.join(', ') + '</span>' : '') + '<br><span style="color:var(--rayo)">📍 ' + n.nombre + ' ' + donde + '</span></div>'; }).join('') + '<div style="font-size:11px;color:var(--textoTenue)">Cada vecino tiene su rutina: trabaja, come en la plaza, entrena en el Bosque y vuelve a casa de noche (21:00; Pipo a las 20:00). Si alguien no está en su puesto, pregúntale a otro vecino «¿Dónde está…?» y te dirá dónde fue. Sparring: Kaelen–Marco 09:00–11:00 · Torin–Breno 14:00–17:00. El círculo no está en un lugar fijo: se forma alrededor de la pelea, donde sea que esté pasando; acércate a ese círculo y te ofrecerán unirte. El agua no los detiene a todos: cada vecino cruza según su elemento y su propia decisión — los de Agua, Viento y Tierra cruzan (los de Tierra dejan puente al pasar); los de Fuego y Rayo solo cruzan si ellos deciden hacerlo, y a los que no, el agua les bloquea el paso como a ti sin el botón.</div></section>';
     html += '<section><h3>Controles</h3><div class="controlesLista">WASD / joystick: mover (analógico)<br>E / botón A: trote +25% (mantén; el A ya no interactúa)<br>Interactuar: toca directamente al personaje u objeto cuando salga su globo (hablar, leer, beber, dormir…)<br>J / Yin: toca golpe 2 · mantén cargado 6<br>K / Yang: forma seleccionada<br>L / Técnica: técnica del elemento<br>Shift / Dash: esquiva con invulnerabilidad 4<br>Q: poción +50% · R: meditar (Esencia ×3, entrena Yang; la Vida automática sigue con techo 25%) · Fogata (tócala): dormir, despertar al 100%<br>F: cambiar forma Yang · 1-3: técnica<br>X: Sobrecarga (Yin 15) · V: Hechizo de Inversión (tras aprenderlo en el obelisco) · B: Escudo (tras aprenderlo con Kaelen; Nv.1 frente, Nv.2 frente y lados, Nv.3 cuatro lados; sin moverte) · M: sonido · Esc: pausa<br>Elemento: cámbialo aquí, en Ajustes (engrane)</div></section>';
-    html += '<section><h3>Próximamente (no activo en el juego completo)</h3><div class="listaProx">' + ['Portal', 'Pasaporte', 'Entre-Mundos', 'Eco', 'Contrato de sangre', 'Contrato de alma', 'Pilotaje', 'Modo Alma', 'Teletransportación', 'Invisibilidad', 'Intangible', 'Arte Místico', 'Técnicas combinadas', 'Transformaciones Yin/Yang', 'Sangre · Plasma · Metal · Sonido · Magnetismo', 'Destello (Rayo)', 'Vuelo (Viento)', 'Disco Cortante (Yang)'].map(s => '<span>' + s + '</span>').join('') + '</div></section>';
+    html += '<section><h3>Próximamente (no activo en el juego completo)</h3><div class="listaProx">' + ['Portal', 'Pasaporte', 'Entre-Mundos', 'Eco', 'Pilotaje', 'Modo Alma', 'Teletransportación', 'Invisibilidad', 'Intangible', 'Arte Místico', 'Técnicas combinadas', 'Transformaciones Yin/Yang', 'Sangre · Plasma · Metal · Sonido · Magnetismo', 'Destello (Rayo)', 'Vuelo (Viento)', 'Disco Cortante (Yang)'].map(s => '<span>' + s + '</span>').join('') + '</div></section>';
     this.el.pausaCuerpo.innerHTML = html; document.getElementById('selDificultad').value = String(E.dificultad);
     const bD = document.getElementById('btnDescargarPausa'); if (bD) bD.addEventListener('click', () => U.Guardado.descargar());
     const bCP = document.getElementById('btnCargarPausa'); if (bCP) bCP.addEventListener('click', () => U.Guardado.elegirArchivo());
@@ -4325,6 +4699,8 @@ U.HUD = {
     c.querySelectorAll('[data-vender]').forEach(b => b.addEventListener('click', () => { const E = U.Juego.estado, j = E.jugador; const p2 = (j.bolsaPociones || [])[parseInt(b.dataset.vender)]; if (p2) { const mitad = Math.floor((p2.precio || 0) / 2); j.bolsaPociones.splice(parseInt(b.dataset.vender), 1); j.monedas = (j.monedas || 0) + mitad; U.Recuperacion.sincronizar(j); U.HUD.toast('Poción vendida por ' + mitad + ' 🪙 (la mitad de lo que pagaste).', 'exito'); U.Audio.sfx('cura'); } this.seccionPausa('mochila'); }));
     c.querySelectorAll('[data-comer]').forEach(b => b.addEventListener('click', () => { U.Recuperacion.comer(parseInt(b.dataset.comer)); this.seccionPausa('mochila'); }));
     c.querySelectorAll('[data-polaina]').forEach(b => b.addEventListener('click', () => { const j = U.Juego.estado.jugador; const clave = b.dataset.polaina; if (!clave) { j.polainaEquipada = null; j.polainaMultCrec = 1; U.HUD.toast('Polainas fuera. Tu nivel de Velocidad se queda: lo ganado entrenando es permanente.', 'exito'); } else { j.polainaEquipada = clave; j.polainaMultCrec = U.Economia.POLAINAS[clave].crecMult; j.pasosPolainas = 0; j.condPolainas = 0; U.HUD.toast(U.Economia.POLAINAS[clave].nombre + ' puestas: vas más lento, pero tu Velocidad entrena ×' + U.Economia.POLAINAS[clave].crecMult + ' en combate.', 'aviso'); } U.Audio.sfx('click'); this.seccionPausa('mochila'); }));
+    c.querySelectorAll('[data-invocar]').forEach(b => b.addEventListener('click', () => { const cc = U.Criaturas.buscar(b.dataset.invocar); if (cc && U.Criaturas.invocar(cc)) U.HUD.toast('✦ ' + U.Criaturas.nombreDe(cc) + ' acude a tu lado al cerrar el menú.', 'exito'); this.seccionPausa('estadisticas'); }));
+    c.querySelectorAll('[data-despedir]').forEach(b => b.addEventListener('click', () => { const cc = U.Criaturas.buscar(b.dataset.despedir); if (cc) { U.Criaturas.despedir(cc); U.HUD.toast(U.Criaturas.nombreDe(cc) + ' vuelve a su región. El contrato sigue.', ''); } this.seccionPausa('estadisticas'); }));
     const bD = document.getElementById('btnDescargarPausa'); if (bD && !bD.dataset.cable) { bD.dataset.cable = '1'; bD.addEventListener('click', () => U.Guardado.descargar()); }
     const bCP = document.getElementById('btnCargarPausa'); if (bCP && !bCP.dataset.cable) { bCP.dataset.cable = '1'; bCP.addEventListener('click', () => U.Guardado.elegirArchivo()); }
     const bB = document.getElementById('btnBorrarAuto'); if (bB && !bB.dataset.cable) { bB.dataset.cable = '1'; bB.addEventListener('click', () => { if (bB.dataset.armado) { U.Guardado.borrarAuto(); bB.textContent = 'BORRADO ✓'; return; } bB.dataset.armado = '1'; bB.textContent = '¿SEGURO? TOCA OTRA VEZ'; setTimeout(() => { delete bB.dataset.armado; bB.textContent = 'BORRAR GUARDADO'; }, 3000); }); }
@@ -4659,10 +5035,12 @@ U.Juego = {
     const nombreSpawn = { agua: 'Puerto Brisa Azul', fuego: 'Aldea Ceniza Viva', tierra: 'Aldea Raíz de Piedra', viento: 'Aldea Vuelo Alto', rayo: 'Aldea Chispa Alta' }[j.elemento];
     if (spElem) { j.x = spElem.x; j.y = spElem.y; }
     const npcs = ['kaelen', 'sora', 'torin', 'marisol', 'breno', 'elena', 'marco', 'pipo', 'nami', 'orin', 'zara', 'varek'].map(id => U.Emociones.crear(id, rng, mapa.npcs[id]));
-    this.estado = { ui: 'mundo', mapa, mapaId: 'aldea', mapas: { aldea: mapa }, npcsPorMapa: {}, cambioCd: 0, jugador: j, npcs, enemigos: [], proyectiles: [], orbes: [], efectos: { particulas: [], textos: [], haces: [], anillos: [], cadenas: [], cortes: [], telegrafos: [] }, camara: { x: j.x * 16 - U.Render.viewW / 2, y: j.y * 16 - U.Render.viewH / 2, shake: 0 }, tiempo: 0, reloj: U.Tiempo.crear(), clima: U.Clima.crear(rng), alarmaMin: 7 * 60, historial: { derrotas: 0, victorias: 0, retos: 0, entrenos: 0, torneos: 0, misiones: 0 }, reto: null, entreno: null, bandidoT: 0, hitstop: 0, dificultad: 1, semilla, rng,
+    const criaturas = U.Criaturas.crearTodas(mapa);
+    this.estado = { ui: 'mundo', mapa, mapaId: 'aldea', mapas: { aldea: mapa }, npcsPorMapa: {}, cambioCd: 0, jugador: j, npcs, criaturas, contratos: { sangre: [], alma: null }, enemigos: [], proyectiles: [], orbes: [], efectos: { particulas: [], textos: [], haces: [], anillos: [], cadenas: [], cortes: [], telegrafos: [] }, camara: { x: j.x * 16 - U.Render.viewW / 2, y: j.y * 16 - U.Render.viewH / 2, shake: 0 }, tiempo: 0, reloj: U.Tiempo.crear(), clima: U.Clima.crear(rng), alarmaMin: 7 * 60, historial: { derrotas: 0, victorias: 0, retos: 0, entrenos: 0, torneos: 0, misiones: 0 }, reto: null, entreno: null, bandidoT: 0, hitstop: 0, dificultad: 1, semilla, rng,
       arena: { activa: false, ronda: 1, oleada: 1, total: 3, entre: 0, spawned: false, cuenta: 0 }, torneo: null, mision: null, misionIdx: 0, tablon: null, escolta: null, ultimoDia: 1, peticionT: 40, peticion: null, enCombate: false, zonaActual: null, interactuable: null, flags: {}, resumen: { daño: 0, recibido: 0, golpes: 0, tecnicas: 0, yang: 0, bajas: 0, esquives: 0, dashes: 0, crecimiento: {}, maestria: {} },
       objetivos: [ { texto: 'Habla con Kaelen, el guardia de la aldea.', estado: 'actual' }, { texto: 'Visita la Ribera Húmeda y el Campo de Ceniza: siente el costo ambiental.', estado: 'pendiente' }, { texto: 'Activa la runa de la Arena (sureste) y sobrevive 3 oleadas.', estado: 'pendiente' }, { texto: 'Vuelve con Kaelen y cuéntale tu victoria.', estado: 'pendiente' }, { texto: 'Camina al noroeste hasta el Bosque Susurrante (todo es un solo mapa continuo, sin transiciones): de día tranquilo; de noche salen los bandidos.', estado: 'pendiente' }, { texto: 'Visita el Desierto de Sal (al oeste de Bruma, por el camino del oasis) y la Montaña Brumosa (al noreste, pasando la Metrópolis y Pueblo Rocafirme). Todo caminando por el continente continuo: no hay transiciones.', estado: 'pendiente' }, { texto: 'Toca el obelisco de la cima de la Montaña y aprende el Hechizo de Inversión (tecla V).', estado: 'pendiente' }, { texto: 'Entra en tu casa (puerta de la casa azul), fija la alarma y duerme en tu cama.', estado: 'pendiente' }, { texto: 'Visita la OFICINA DEL GUARDIÁN (edificio dorado al sur de la plaza): conoce a Aldric y pide una MISIÓN a su secretaria Lía.', estado: 'pendiente' }, { texto: 'Gana el TORNEO DE BRUMA en la Arena (entrada 50): solo cobra el podio — 1º 300, 2º 150, 3º 80 — y te recuperas tras cada ronda.', estado: 'pendiente' }, { texto: 'Rompe un árbol o una roca que te cierre el paso: tienen vida propia y al caer dejan el camino libre.', estado: 'pendiente' } ], objetivoIdx: 0, ambienteT: 0, pajaroT: 5 };
     this.estado.roster = npcs; this.estado.sparring = { fase: 'idle', ventana: null, consumida: null, pareja: [], bando: null, aliado: null, retirados: [], bloqueado: false, dentro: false, ofrecidoCd: 0, golpeT: 0, turno: 0, allyT: 0, centro: null }; U.Crecimiento.reset(); U.HUD.mostrar(); U.HUD.refrescarSimbolos(); U.HUD.refrescarChips(); U.Audio.musica('aldea'); U.Ambiente.actualizar();
+    U.Criaturas.contratoSangre = []; U.Criaturas.contratoAlma = null; U.Criaturas.aplicarAlmaPasaporte(); // el contrato de alma cruza vidas: si ya existe en el pasaporte, esta vida lo hereda
     if (U.Guardado) setTimeout(() => U.Guardado.guardarAuto(), 400); // la nueva vida queda guardada automáticamente desde el primer momento
     U.HUD.banner('UNA NUEVA VIDA', 2); U.HUD.toast('Bienvenido, ' + nombre + '. Tu elemento es ' + U.Elementos.nombre(j.elemento) + ': concéntrate en él.', 'exito');
     if (spElem && nombreSpawn) setTimeout(() => U.HUD.toast('Apareces en ' + nombreSpawn + ', la aldea de tu elemento. La METRÓPOLIS te espera en el centro del continente, y la Aldea de Bruma (tu casa, la Oficina y la Arena) queda cerca de ella: el viaje es parte del juego.', 'aviso'), 3400);
@@ -5036,6 +5414,7 @@ U.Juego = {
   interactuar() {
     const E = this.estado, it = E.interactuable; if (!it) return; const j = E.jugador;
     if (it.tipo === 'npc') U.Dialogo.abrir(it.obj);
+    else if (it.tipo === 'criatura') U.Dialogo.abrirCriatura(it.obj);
     else if (it.tipo === 'notaForja') { const torF = (E.roster || []).find(n => n.id === 'torin'); U.Dialogo.mostrarTexto('NOTA EN LA FORJA', 'Una nota clavada junto a la forja, con letra de martillo: «Salí. — Torin». ' + (torF ? 'Torin ' + U.Vida.dondeEstaTexto(torF) + '. Pregúntale a cualquier vecino por él: la aldea entera sabe dónde anda cada quien, y en Ajustes (engrane) tienes la lista de dónde está cada uno.' : '')); }
     else if (it.tipo === 'fogata') U.Recuperacion.descansarFogata();
     else if (it.tipo === 'runa') U.Combate.iniciarArena();
@@ -5052,6 +5431,7 @@ U.Juego = {
   candidatos() {
     const E = this.estado, m = E.mapa; const cand = [];
     E.npcs.forEach(n => { if (!n.enCasa && !n.ocultoSparring) cand.push({ tipo: 'npc', obj: n, r: 1.8, corto: 'HABLAR', label: 'Hablar con ' + n.nombre }); });
+    (E.criaturas || []).forEach(c => { if (c.vida > 0 && c.temperamento === 'amistosa') cand.push({ tipo: 'criatura', obj: c, r: 1.9, corto: 'HABLAR', label: 'Hablar con ' + U.Criaturas.nombreDe(c) + ' · vínculo ' + Math.round(c.vinculo) }); });
     if (E.mapaId === 'aldea' && E.roster) { const torN = E.roster.find(n => n.id === 'torin'); if (torN && !torN.enCasa && Math.hypot(torN.x - 145.5, torN.y - 242.5) > 12) cand.push({ tipo: 'notaForja', obj: { x: 144.5, y: 241.5, w: 1, h: 1 }, r: 2.0, corto: 'NOTA', label: 'Nota en la forja de Torin (no está)' }); }
     m.objetos.forEach(o => { if (o.tipo === 'fogata') cand.push({ tipo: 'fogata', obj: o, r: 2.0, corto: 'DESCANSAR', label: 'Fogata · dormir y despertar al 100%' }); else if (o.tipo === 'runa' && !E.arena.activa) cand.push({ tipo: 'runa', obj: o, r: 2.0, corto: 'OLEADA', label: 'Runa de la arena' }); else if (o.tipo === 'cama') cand.push({ tipo: 'cama', obj: o, r: 2.0, corto: 'DORMIR', label: 'Tu cama · dormir hasta la alarma' }); else if (o.tipo === 'puertaCasa') cand.push({ tipo: 'puertaCasa', obj: o, r: 1.8, corto: 'ENTRAR', label: 'Puerta de tu casa' }); else if (o.tipo === 'puertaOficina') cand.push({ tipo: 'puertaOficina', obj: o, r: 1.9, corto: 'OFICINA', label: 'Oficina del Guardián · Aldric y Lía (misiones)' }); else if (o.tipo === 'puertaTienda') cand.push({ tipo: 'puertaTienda', obj: o, r: 1.9, corto: 'TIENDA', label: o.dueno ? 'Tienda de pociones · ' + o.dueno : 'Tienda de Marisol · pociones por monedas' }); else if (o.tipo === 'puertaRenta') cand.push({ tipo: 'puertaRenta', obj: o, r: 1.9, corto: 'RENTAR', label: 'Casa para rentar · 15 🪙 la noche · dormir y despertar al 100%' }); else if (o.tipo === 'reliquia') cand.push({ tipo: 'cartel', obj: { x: o.x, y: o.y, w: 1, h: 1, texto: 'RELIQUIA PERDIDA · Brilla con luz antigua. Acércate para recogerla y vuelve con Lía a la Oficina.' }, r: 1.6, corto: 'RELIQUIA', label: 'Reliquia perdida' }); else if (o.tipo === 'obelisco') cand.push({ tipo: 'obelisco', obj: o, r: 2.0, corto: 'HECHIZO', label: 'Obelisco de la Inversión' }); else if (o.tipo === 'cartel') cand.push({ tipo: 'cartel', obj: o, r: 1.7, corto: 'LEER', label: 'Cartel' }); else if (o.tipo === 'pozo') cand.push({ tipo: 'pozo', obj: o, r: 1.7, corto: 'BEBER', label: 'Pozo' }); else if (o.tipo === 'encargo') cand.push({ tipo: 'cartel', obj: { x: o.x, y: o.y, w: 1, h: 1, texto: 'ENCARGO DE LA OFICINA · Un paquete que espera ser recogido. Acércate para tomarlo y vuelve con Lía.' }, r: 1.6, corto: 'RECOGER', label: 'Encargo por recoger' }); else if (o.tipo === 'perdido') cand.push({ tipo: 'cartel', obj: { x: o.x, y: o.y, w: 1, h: 1, texto: 'OBJETO PERDIDO · Brilla entre la hierba: es lo que alguien perdió. Acércate para tomarlo y devuélvelo con Lía.' }, r: 1.6, corto: '¡ES ESTO!', label: 'Objeto perdido' }); else if (o.tipo === 'pista') cand.push({ tipo: 'cartel', obj: { x: o.x, y: o.y, w: 1, h: 1, texto: 'PISTA · Huellas frescas y cosas revueltas: alguien merodea por aquí de noche. Acércate para registrarla.' }, r: 1.6, corto: 'PISTA', label: 'Pista de la investigación' }); else if (o.tipo === 'cautivo') cand.push({ tipo: 'cartel', obj: { x: o.x, y: o.y, w: 1, h: 1, texto: 'CAUTIVO · Está atado y asustado. Derrota a sus bandidos y acércate para liberarlo.' }, r: 1.7, corto: 'RESCATAR', label: 'Cautivo por rescatar' }); });
     return cand;
@@ -5108,6 +5488,7 @@ U.Juego = {
     // NPC: emociones, deambular y choque
     E.npcs.forEach(n => { U.Emociones.actualizar(n, dt, j); const d = U.Grid.dist(n, j); if (d < 0.75) { const dx = j.x - n.x, dy = j.y - n.y, dd = d || 0.01; U.Grid.mover(m, j, dx / dd * 0.05, dy / dd * 0.05); if (n.bumpCd <= 0) { n.bumpCd = 3; const r = U.Emociones.evento(n, { realidad: 32, energia: 12, etiqueta: 'choque' }); U.HUD.toast(n.nombre + ' se aparta, molesto por el empujón (confianza ' + r.delta.toFixed(1) + ').', 'aviso'); } } });
     if (U.Vida) U.Vida.tickGlobal(E, dt); if (U.Sparring) U.Sparring.actualizar(dt);
+    if (U.Criaturas) U.Criaturas.actualizar(dt); // criaturas salvajes: rutinas y temperamentos (hostil persigue, tímida huye, amistosa se acerca)
     this.chequearMision(dt);
     if (E.objetivos[9] && E.objetivos[9].estado === 'actual' && (E.historial.torneos || 0) > 0) { E.objetivos[9].estado = 'hecho'; this.siguienteObjetivo(); }
     if (E.objetivos[10] && E.objetivos[10].estado === 'actual' && E.flags.rompioObjeto) { E.objetivos[10].estado = 'hecho'; this.siguienteObjetivo(); }
@@ -5181,7 +5562,9 @@ U.Guardado = {
       escudoAprendido: !!j.escudoAprendido, escudoNv: j.escudoNv || 0, escudoExp: j.escudoExp || 0, cansancio: Math.round((j.cansancio != null ? j.cansancio : U.Recuperacion.condicionMax(j)) * 10) / 10, condicionExtra: Math.max(0, Math.min(100, j.condicionExtra || 0)), gastoFatiga: Math.round((j.gastoFatiga || 0) * 100) / 100,
       relojMinutos: E.reloj ? E.reloj.minutos : 540, dia: E.reloj ? (E.reloj.dia || 1) : 1, diaSemana: E.reloj ? (E.reloj.diaSemana || 0) : 0, climaTipo: E.clima ? E.clima.tipo : 'despejado', climaIntensidad: E.clima ? (E.clima.intensidad || 0) : 0, alarmaMin: E.alarmaMin != null ? E.alarmaMin : 420, historial: Object.assign({}, E.historial || {}), dificultad: E.dificultad, ronda: E.arena.ronda,
       objetivos: E.objetivos.map(o => o.estado), objetivoIdx: E.objetivoIdx, flags: Object.assign({}, E.flags),
-      npcs: (E.roster || E.npcs || []).map(n => ({ id: n.id, estados: Object.assign({}, n.estados), emocion: n.emocion, saludado: !!n.saludado, entreno: !!n.entreno, stockPociones: n.stockPociones, hechos: (n.hechos || []).slice(), veces: n.veces || 0, mapa: n.mapa || 'aldea', x: Math.round(n.x * 100) / 100, y: Math.round(n.y * 100) / 100 }))
+      npcs: (E.roster || E.npcs || []).map(n => ({ id: n.id, estados: Object.assign({}, n.estados), emocion: n.emocion, saludado: !!n.saludado, entreno: !!n.entreno, stockPociones: n.stockPociones, hechos: (n.hechos || []).slice(), veces: n.veces || 0, mapa: n.mapa || 'aldea', x: Math.round(n.x * 100) / 100, y: Math.round(n.y * 100) / 100 })),
+      criaturas: (E.criaturas || []).map(c => ({ uid: c.uid, vinculo: Math.round(c.vinculo * 10) / 10, vida: Math.round(c.vida), invocada: !!c.invocada, x: Math.round(c.x * 100) / 100, y: Math.round(c.y * 100) / 100 })),
+      contratos: E.contratos ? { sangre: E.contratos.sangre.slice(), alma: E.contratos.alma || null } : { sangre: [], alma: null }
     };
   },
   // --- Guardado automático: siempre activo, sin que el jugador haga nada ---
@@ -5253,6 +5636,9 @@ U.Guardado = {
     if (Array.isArray(d.objetivos)) d.objetivos.forEach((s, i) => { if (E.objetivos[i]) E.objetivos[i].estado = s; });
     E.objetivoIdx = Math.min(d.objetivoIdx || 0, E.objetivos.length - 1);
     (d.npcs || []).forEach(sn => { const n = (E.roster || E.npcs).find(x => x.id === sn.id); if (n) { Object.assign(n.estados, sn.estados || {}); n.emocion = sn.emocion || n.emocion; n.saludado = !!sn.saludado; n.entreno = !!sn.entreno; if (sn.stockPociones != null) n.stockPociones = sn.stockPociones; if (Array.isArray(sn.hechos)) n.hechos = sn.hechos.slice(); if (sn.veces) n.veces = sn.veces; if (sn.mapa) n.mapa = sn.mapa; if (sn.x != null && sn.y != null) { n.x = sn.x; n.y = sn.y; } if (!d.mundoContinuo) { if (n.mapa === 'bosque') { n.x += 4; n.y += 4; n.mapa = 'aldea'; } else if (n.mapa === 'aldea') { n.x += 58; n.y += 60; } } n.ruta = []; n.rutaKey = ''; n.viaje = null; } }); if (U.Juego.refrescarNpcs) U.Juego.refrescarNpcs();
+    // Criaturas salvajes y contratos: vínculo, posición e invocación de esta vida (el de alma, además, vive en el pasaporte).
+    if (Array.isArray(d.criaturas)) d.criaturas.forEach(sc => { const c = (E.criaturas || []).find(x => x.uid === sc.uid); if (c) { if (sc.vinculo != null) c.vinculo = Math.max(0, Math.min(100, sc.vinculo)); if (sc.vida != null) c.vida = Math.max(0, Math.min(c.stats.vida, sc.vida)); if (sc.x != null && sc.y != null && c.vida > 0) { c.x = sc.x; c.y = sc.y; } c.invocada = !!sc.invocada && !!(d.contratos && ((d.contratos.sangre || []).indexOf(c.uid) >= 0 || d.contratos.alma === c.uid)); if (c.invocada) c.estado = 'companera'; } });
+    if (d.contratos) { E.contratos = { sangre: Array.isArray(d.contratos.sangre) ? d.contratos.sangre.slice(0, 3) : [], alma: d.contratos.alma || null }; U.Criaturas.contratoSangre = E.contratos.sangre.slice(); U.Criaturas.contratoAlma = E.contratos.alma; }
     if (d.mapaId && d.mapaId !== 'aldea') U.Juego.cambiarMapa(d.mapaId, { x: d.x, y: d.y }, true);
     else if (!d.mundoContinuo && d.x != null && d.y != null && d.x < 84 && d.y < 62) { j.x = d.x + 58; j.y = d.y + 60; }
     else { j.x = d.x != null ? d.x : j.x; j.y = d.y != null ? d.y : j.y; }
