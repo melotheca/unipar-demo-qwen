@@ -379,20 +379,20 @@ U.Combate = {
     const E = U.Juego.estado, A = E.arena; const def = this.OLEADAS[Math.min(2, A.oleada - 1)]; const mult = E.dificultad * (1 + 0.2 * (A.ronda - 1));
     const lista = def.slice(); if (A.ronda > 1 && A.oleada < 3) lista.push(A.ronda % 2 ? 'brasa' : 'chaman'); if (A.ronda > 2 && A.oleada === 3) lista.push('veterano');
     const puntos = E.mapa.spawns.slice().sort(() => Math.random() - 0.5);
-    lista.forEach((clase, i) => { const p = puntos[i % puntos.length]; const e = this.crearEnemigo(clase, p[0] + 0.5 + (Math.random() - 0.5) * 0.6, p[1] + 0.5 + (Math.random() - 0.5) * 0.6, mult); E.enemigos.push(e); this.particulas(e.x, e.y - 0.5, 12, U.Elementos.color(e.elemento), 'humo'); });
+    lista.forEach((clase, i) => { const p = puntos[i % puntos.length]; const e = this.crearEnemigo(clase, p[0] + 0.5 + (Math.random() - 0.5) * 0.6, p[1] + 0.5 + (Math.random() - 0.5) * 0.6, mult); e.esArena = true; E.enemigos.push(e); this.particulas(e.x, e.y - 0.5, 12, U.Elementos.color(e.elemento), 'humo'); });
     A.spawned = true; A.entre = 0; U.Audio.sfx('oleada');
   },
   actualizarArena(dt) {
     const E = U.Juego.estado, A = E.arena, j = E.jugador; if (!A.activa) return;
     if (U.Grid.dist(j, { x: E.mapa.arena.x + 0.5, y: E.mapa.arena.y + 0.5 }) > E.mapa.arena.r + 2.5) { this.cancelarArena('Saliste de la arena. La ronda queda pendiente.'); return; }
-    const vivos = this.vivos().length;
+    const vivos = this.vivos().filter(e => e.esArena).length; // solo cuentan los DE LA ARENA: un enemigo del mundo (perseguidor, bandido) fuera del círculo no bloquea el avance de oleada
     if (A.entre > 0) { A.entre -= dt; A.cuenta += dt; if (A.cuenta >= 1) { A.cuenta = 0; if (A.entre > 0.5) U.HUD.banner('OLEADA ' + A.oleada + ' EN ' + Math.ceil(A.entre), 0.9); } if (A.entre <= 0) this.spawnOleada(); return; }
     if (A.spawned && vivos === 0) {
       if (A.oleada >= A.total) { A.activa = false; const premioArena = 50; E.jugador.monedas = (E.jugador.monedas || 0) + premioArena; E.flags.ultimoPremio = premioArena; E.flags.victoria = true; E.objetivos[2].estado = 'hecho'; U.Audio.musica('aldea'); U.Audio.sfx('victoria'); U.HUD.toast('Ronda completa: +50 🪙. (Nada por oleada: solo se cobra al terminar toda la ronda.)', 'exito'); U.Juego.fin('victoria'); }
       else { A.oleada++; A.spawned = false; A.entre = 4; A.cuenta = 0; U.HUD.toast('Oleada ' + (A.oleada - 1) + ' superada. Respira: sin enemigos la Esencia se recarga más rápido… pero sigues en la arena.', 'exito'); U.Recuperacion.restaurar(j.stats.esencia * 0.15); }
     }
   },
-  cancelarArena(msg) { const E = U.Juego.estado; E.arena.activa = false; E.enemigos = []; E.proyectiles = []; E.efectos.telegrafos = []; U.Audio.musica('aldea'); if (msg) U.HUD.toast(msg, 'aviso'); },
+  cancelarArena(msg) { const E = U.Juego.estado; E.arena.activa = false; E.enemigos = E.enemigos.filter(e => !e.esArena); E.proyectiles = []; E.efectos.telegrafos = []; U.Audio.musica('aldea'); if (msg) U.HUD.toast(msg, 'aviso'); },
   limpiar() { const E = U.Juego.estado; E.enemigos = []; E.proyectiles = []; E.orbes = []; E.efectos = { particulas: [], textos: [], haces: [], anillos: [], cadenas: [], cortes: [], telegrafos: [] }; E.arena.activa = false; },
 
   // ---------- TORNEO DE BRUMA: octavos → cuartos → semifinal → final (1 contra 1) ----------
