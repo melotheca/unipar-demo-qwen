@@ -234,6 +234,15 @@ button{font-family:var(--fuente);color:var(--texto);cursor:pointer}
 .btnAjustes:hover{color:var(--texto);border-color:var(--bordeClaro)}
 .btnAjustes:active{transform:translateY(3px) rotate(40deg);box-shadow:none}
 #minimapa{width:128px;height:96px;image-rendering:pixelated;border:3px solid var(--borde);box-shadow:0 0 0 3px var(--sombra);background:#0e1530}
+/* MODO COMBATE: escondido temporal — sin minimapa, sin objetivo y sin reloj.
+   Se quedan las barras de Vida/Esencia/Condición, la poción y las monedas (dentro de #barrasFlotantes)
+   y todos los botones de combate. Al salir de combate la clase se quita y todo reaparece. */
+#hud.enCombate #minimapa,
+#hud.enCombate #btnReloj,
+#hud.enCombate #objetivo,
+#hud.enCombate #filaTopInfo,
+#hud.enCombate #objetivoDetalle,
+#hud.enCombate #infoDetalle{display:none!important}
 #objetivo{position:relative;padding:6px 10px;font-size:11.5px;display:inline-flex;gap:6px;align-items:center;cursor:pointer;text-align:left;transition:filter .15s,transform .08s;border-radius:999px!important}
 #objetivo:hover{filter:brightness(1.2)}
 #objetivo:active{transform:translateY(2px)}
@@ -4486,7 +4495,7 @@ U.Dialogo = {
 window.U = window.U || {};
 
 U.HUD = {
-  el: {}, tNum: 0, tMini: 0, bannerT: 0, joy: { activo: false, id: null, cx: 0, cy: 0, r: 60 },
+  el: {}, tNum: 0, tMini: 0, bannerT: 0, _enCombate: false, joy: { activo: false, id: null, cx: 0, cy: 0, r: 60 },
   init() {
     const $ = id => document.getElementById(id); this.el = { hud: $('hud'), rellVida: $('rellVida'), numVida: $('numVida'), rellEsencia: $('rellEsencia'), numEsencia: $('numEsencia'), rellCansancio: $('rellCansancio'), numCansancio: $('numCansancio'), agotado: $('agotado'), simbolos: $('simbolos'), pocion: $('btnPocion'), mini: $('minimapa'), obj: $('objTexto'), btnObj: $('objetivo'), objDetalle: $('objetivoDetalle'), objDetalleTexto: $('objDetalleTexto'), objDetalleLista: $('objDetalleLista'), banner: $('banner'), descanso: $('descansoInd'), rellDescanso: $('rellDescanso'), descansoTxt: $('descansoTxt'), btnInfo: $('btnReloj'), infoDetalle: $('infoDetalle'), calTexto: $('calTexto'), horaTexto: $('horaTexto'), horaMomento: $('horaMomento'), climaIcono: $('climaIcono'), climaTexto: $('climaTexto'), climaDetalle: $('climaDetalle'), tempTexto: $('tempTexto'), sensTexto: $('sensTexto'), sensNota: $('sensNota'), precipTexto: $('precipTexto'), precipNota: $('precipNota'), humTexto: $('humTexto'), vientoTexto: $('vientoTexto'), vientoNota: $('vientoNota'), btnA: $('btnA'), btnYin: $('btnYin'), btnYang: $('btnYang'), btnTec: $('btnTec'), btnDash: $('btnDash'), btnSobre: $('btnSobrecarga'), btnAgua: $('btnAgua'), btnAguaEstado: $('btnAguaEstado'), chipsTec: $('chipsTec'), chipsYang: $('chipsYang'), sonido: $('btnSonido'), pausa: $('pausa'), pausaCuerpo: $('pausaCuerpo'), fin: $('panelFin') };
     // Iconos de acción (vectoriales suaves, sin pixelar)
@@ -4531,13 +4540,16 @@ U.HUD = {
     U.Habilidades.yangOrden.forEach(k => { const h = U.Habilidades.yang[k]; const b = document.createElement('button'); const lock = j.estilos.yang < h.umbral; b.className = (k === j.yangForma ? 'sel ' : '') + (lock ? 'lock' : ''); b.textContent = lock ? h.nombre + ' Y' + h.umbral : h.nombre; b.title = h.desc + ' · ' + h.costo + ' Esencia'; b.addEventListener('click', () => U.Combate.seleccionarYang(k)); cy.appendChild(b); });
     this.el.btnSobre.classList.toggle('oculto', j.estilos.yin < U.Habilidades.yin.sobrecarga.umbral);
   },
-  toggleInfo() { const abierto = this.el.infoDetalle.classList.toggle('oculto') === false; this.el.btnInfo.classList.toggle('abierto', abierto); this.el.btnInfo.setAttribute('aria-expanded', String(abierto)); if (abierto && !this.el.objDetalle.classList.contains('oculto')) { this.el.objDetalle.classList.add('oculto'); this.el.btnObj.classList.remove('abierto'); this.el.btnObj.setAttribute('aria-expanded', 'false'); } },
-  toggleObjetivo() { const abierto = this.el.objDetalle.classList.toggle('oculto') === false; this.el.btnObj.classList.toggle('abierto', abierto); this.el.btnObj.setAttribute('aria-expanded', String(abierto)); if (abierto) { this.refrescarObjetivoDetalle(); if (this.el.infoDetalle && !this.el.infoDetalle.classList.contains('oculto')) { this.el.infoDetalle.classList.add('oculto'); this.el.btnInfo.classList.remove('abierto'); this.el.btnInfo.setAttribute('aria-expanded', 'false'); } } },
+  toggleInfo() { if ((U.Juego.estado && U.Juego.estado.enCombate) || (this.el.hud && this.el.hud.classList.contains('enCombate'))) return; const abierto = this.el.infoDetalle.classList.toggle('oculto') === false; this.el.btnInfo.classList.toggle('abierto', abierto); this.el.btnInfo.setAttribute('aria-expanded', String(abierto)); if (abierto && !this.el.objDetalle.classList.contains('oculto')) { this.el.objDetalle.classList.add('oculto'); this.el.btnObj.classList.remove('abierto'); this.el.btnObj.setAttribute('aria-expanded', 'false'); } },
+  toggleObjetivo() { if ((U.Juego.estado && U.Juego.estado.enCombate) || (this.el.hud && this.el.hud.classList.contains('enCombate'))) return; const abierto = this.el.objDetalle.classList.toggle('oculto') === false; this.el.btnObj.classList.toggle('abierto', abierto); this.el.btnObj.setAttribute('aria-expanded', String(abierto)); if (abierto) { this.refrescarObjetivoDetalle(); if (this.el.infoDetalle && !this.el.infoDetalle.classList.contains('oculto')) { this.el.infoDetalle.classList.add('oculto'); this.el.btnInfo.classList.remove('abierto'); this.el.btnInfo.setAttribute('aria-expanded', 'false'); } } },
   refrescarObjetivoDetalle() { const E = U.Juego.estado; if (!E || !E.objetivos) return; const ob = E.objetivos[E.objetivoIdx]; this.el.objDetalleTexto.textContent = ob ? ob.texto : 'Entrena libremente: la arena acepta rondas más difíciles.'; this.el.objDetalleLista.innerHTML = E.objetivos.map(o => '<li class="' + o.estado + '">' + (o.estado === 'hecho' ? '✓ ' : o.estado === 'actual' ? '▶ ' : '○ ') + o.texto + '</li>').join(''); },
   toast(txt, tipo) { /* HUD minimalista: sin registro de eventos en pantalla. El feedback va por sonido, banner y números flotantes del mundo. */ },
   banner(txt, dur) { this.el.banner.textContent = txt; this.el.banner.classList.remove('oculto'); this.el.banner.style.animation = 'none'; void this.el.banner.offsetWidth; this.el.banner.style.animation = ''; this.bannerT = dur || 1.5; },
   actualizar(dt) {
     const E = U.Juego.estado, j = E.jugador, el = this.el;
+    // MODO COMBATE: escondido temporal del minimapa, el objetivo y el reloj.
+    // Solo se toggla la clase en #hud (CSS display:none) — las barras, la poción y las monedas no se tocan.
+    { const enCombateAhora = !!E.enCombate || !!(E.arena && E.arena.activa) || !!(E.torneo && E.torneo.activo) || !!E.reto; if (this._enCombate !== enCombateAhora) { this._enCombate = enCombateAhora; if (el.hud) el.hud.classList.toggle('enCombate', enCombateAhora); if (enCombateAhora) { if (el.objDetalle && !el.objDetalle.classList.contains('oculto')) { el.objDetalle.classList.add('oculto'); } if (el.btnObj) { el.btnObj.classList.remove('abierto'); el.btnObj.setAttribute('aria-expanded', 'false'); } if (el.infoDetalle && !el.infoDetalle.classList.contains('oculto')) { el.infoDetalle.classList.add('oculto'); } if (el.btnInfo) { el.btnInfo.classList.remove('abierto'); el.btnInfo.setAttribute('aria-expanded', 'false'); } } } else if (el.hud && enCombateAhora && !el.hud.classList.contains('enCombate')) { el.hud.classList.add('enCombate'); } }
     el.rellVida.style.transform = 'scaleX(' + Math.max(0, j.vida / j.stats.vida) + ')'; el.rellEsencia.style.transform = 'scaleX(' + Math.max(0, j.esencia / j.stats.esencia) + ')';
     if (el.rellCansancio) { const maxC = U.Recuperacion.condicionMax(j); const can = j.cansancio != null ? j.cansancio : maxC; el.rellCansancio.style.transform = 'scaleX(' + Math.max(0, can / maxC) + ')'; if (el.numCansancio) el.numCansancio.textContent = 'CONDICIÓN ' + Math.floor(can) + '/' + maxC + ' · RECARGA ×' + U.Recuperacion.multCansancio().toFixed(2); }
     const m = j.maestria[j.elementoActivo] || 0;
@@ -4561,7 +4573,7 @@ U.HUD = {
       const ob = E.objetivos[E.objetivoIdx]; el.obj.textContent = ob ? ob.texto : 'Entrena libremente: la arena acepta rondas más difíciles.';
       if (!el.objDetalle.classList.contains('oculto')) this.refrescarObjetivoDetalle();
     }
-    this.tMini += dt; if (this.tMini > 0.2) { this.tMini = 0; U.Render.minimapa(el.mini, E); }
+    this.tMini += dt; if (this.tMini > 0.2) { this.tMini = 0; if (!this._enCombate) U.Render.minimapa(el.mini, E); }
     /* Panel superior de oleadas (ARENA DE ECOS / torneo / misión / reto) eliminado: no se crea ni se muestra. El progreso sigue visible en Objetivo, banners y diálogos. */
     if (this.bannerT > 0) { this.bannerT -= dt; if (this.bannerT <= 0) el.banner.classList.add('oculto'); }
   },
