@@ -89,6 +89,27 @@ U.Juego = {
     }
     if (nuevo.spawnsAbiertos) nuevo.spawnsAbiertos.forEach(sp => { E.enemigos.push(U.Combate.crearEnemigo(sp[0], sp[1], sp[2], E.dificultad)); });
   },
+  // Seguridad al cargar (o al reaparecer): si el jugador quedó en una celda no
+  // transitable (sólida o fuera del mapa), buscar la celda libre más cercana,
+  // anillo a anillo; si no hay ninguna cerca, ir al inicio del mapa. Evita quedarse
+  // atrapado en una esquina sin poder moverse (el bug de "continuar partida").
+  asegurarPosicionValida() {
+    const E = this.estado, j = E.jugador, m = E.mapa; if (!E || !j || !m) return;
+    if (!isFinite(j.x) || !isFinite(j.y)) { j.x = m.inicio.x; j.y = m.inicio.y; return; }
+    const libre = (x, y) => { const cx = Math.floor(x), cy = Math.floor(y); if (cx < 0 || cy < 0 || cx >= m.ancho || cy >= m.alto) return false; return !m.solidos[cy * m.ancho + cx]; };
+    if (libre(j.x, j.y)) return;
+    const jx = Math.floor(j.x), jy = Math.floor(j.y);
+    for (let r = 1; r <= 12; r++) {
+      let mejor = null, bd = 1e9;
+      for (let cy = jy - r; cy <= jy + r; cy++) for (let cx = jx - r; cx <= jx + r; cx++) {
+        if (Math.max(Math.abs(cx - jx), Math.abs(cy - jy)) !== r) continue;
+        const px = cx + 0.5, py = cy + 0.5;
+        if (libre(px, py)) { const d = Math.hypot(px - j.x, py - j.y); if (d < bd) { bd = d; mejor = { x: px, y: py }; } }
+      }
+      if (mejor) { j.x = mejor.x; j.y = mejor.y; return; }
+    }
+    j.x = m.inicio.x; j.y = m.inicio.y;
+  },
   // PUENTE DE PIEDRA DE TIERRA: NO es permanente. Cada baldosa que levanta Tierra (el
   // jugador o un NPC de Tierra) dura UN DÍA DEL JUEGO (1440 minutos de juego) y luego el
   // agua se la traga: la baldosa vuelve a ser AGUA (y sólida como agua). Construirla cuesta
@@ -134,6 +155,10 @@ U.Juego = {
   // despiertan en la fogata. Desde la ORILLA, con Esencia en 0, NO se puede entrar al agua
   // aunque el botón esté activo: el permiso de abajo exige Esencia > 0.5 para pisar agua
   // nueva, y solo deja seguir a quien YA está sobre el agua (centro en celda de agua).
+  // NADAR: si apagas el botón A MITAD DEL AGUA, ya no te hundes a la orilla: NADAS
+  // (mitad de velocidad, gratis). Siempre hay una forma de parar el drenaje de Esencia
+  // y Vida: apagas y nadas hasta la orilla. El botón sigue siendo necesario para ENTRAR
+  // al agua desde la orilla y para cruzarla rápido (caminando gastas Esencia; nadando no).
   moverJugador(m, j, dx, dy) {
     const T = U.Grid.T; const enAgua = (x, y) => { const cx = Math.floor(x), cy = Math.floor(y); return cx >= 0 && cy >= 0 && cx < m.ancho && cy < m.alto && m.tiles[cy * m.ancho + cx] === T.AGUA; };
     // La colisión de Grid.mover usa la CAJA del personaje (radio 0.3), no su centro: el agua hay
@@ -149,32 +174,58 @@ U.Juego = {
     // del lago sin poder avanzar ni volver. Para Fuego y Rayo TODO pasa por el interruptor
     // j.caminarAgua: apagado = el agua es sólida y bloquea, como antes de cualquier arreglo.
     const esAuto = j.elementoActivo === 'agua' || j.elementoActivo === 'tierra' || j.elementoActivo === 'viento';
-    const puede = j.elementoActivo === 'agua' || j.elementoActivo === 'tierra' || (j.elementoActivo === 'viento' && (j.levitT || 0) < 5) || (!esAuto && !!j.caminarAgua && (j.esencia > 0.5 || enAgua(j.x, j.y)));
+    // NADAR: Fuego/Rayo con el botón APAGADO pero YA en el agua pueden moverse por ella
+    // (a mitad de velocidad, ver actualizarMundo; gratis, sin Esencia ni Vida). No pueden
+    // ENTRAR desde la orilla sin el botón: enAgua(j.x, j.y) es falso en tierra, así que el
+    // agua sigue bloqueando la entrada como siempre.
+    const nadando = !esAuto && !j.caminarAgua && enAgua(j.x, j.y);
+    const puede = j.elementoActivo === 'agua' || j.elementoActivo === 'tierra' || (j.elementoActivo === 'viento' && (j.levitT || 0) < 5) || (!esAuto && !!j.caminarAgua && (j.esencia > 0.5 || enAgua(j.x, j.y))) || nadando;
     if (!destinoAgua || !puede) { U.Grid.mover(m, j, dx, dy); return; }
     const tocados = [];
     for (let i = 0; i < m.tiles.length; i++) if (m.tiles[i] === T.AGUA && m.solidos[i] === 1) { m.solidos[i] = 0; tocados.push(i); }
     const px = j.x, py = j.y;
     U.Grid.mover(m, j, dx, dy);
     tocados.forEach(i => { if (m.tiles[i] === T.AGUA) m.solidos[i] = 1; });
+    // Salir del agua NADANDO: al pisar tierra, centra al jugador en la celda. Si no,
+    // queda a 0.01 de la orilla con su caja (radio 0.3) todavía tocando el agua — y como
+    // el agua es sólida con el botón apagado, no se puede mover en ninguna dirección
+    // (la misma cuña que atrapaba al apagar el botón). Al centrarlo, la caja queda
+    // entera dentro de la celda de tierra y se camina normal. (Al salir caminando
+    // sobre el agua no hace falta: el botón sigue encendido hasta alejarse de la orilla.)
+    if (nadando && !enAgua(j.x, j.y)) { j.x = Math.floor(j.x) + 0.5; j.y = Math.floor(j.y) + 0.5; }
     if (j.elementoActivo === 'tierra' && enAgua(j.x, j.y)) { const cx = Math.floor(j.x), cy = Math.floor(j.y); const idx = cy * m.ancho + cx; if (m.tiles[idx] === T.AGUA && j.esencia >= this.PUENTE_COSTO && this.levantarPuente(m, idx)) { j.esencia -= this.PUENTE_COSTO; U.Recuperacion.registrarGasto(this.PUENTE_COSTO); U.Combate.particulas(j.x, j.y, 4, '#d9a441', 'polvo'); } }
+  },
+  // ¿Está NADANDO? Fuego/Rayo, botón APAGADO y centro ya en una celda de agua.
+  // Nadar es más lento que caminar sobre el agua (vel ×0.5, ver actualizarMundo) y
+  // gratis: sin Esencia ni Vida. Es la salida del drenaje: apagas y nadas a la orilla.
+  estaNadando(j) {
+    if (!j || j.elementoActivo === 'agua' || j.elementoActivo === 'tierra' || j.elementoActivo === 'viento') return false;
+    if (j.caminarAgua) return false;
+    const E = this.estado, m = E && E.mapa; if (!m) return false;
+    const cx = Math.floor(j.x), cy = Math.floor(j.y);
+    return cx >= 0 && cy >= 0 && cx < m.ancho && cy < m.alto && m.tiles[cy * m.ancho + cx] === U.Grid.T.AGUA;
   },
   // CAMINAR SOBRE EL AGUA (solo Fuego y Rayo): interruptor como la Sobrecarga, con su estado
   // visible en el propio botón (ENCENDIDO/APAGADO). Por defecto APAGADO: el agua bloquea.
   // El botón solo aparece cerca del agua o ya sobre ella (HUD.actualizar mira j.cercaAgua y
   // j.sobreAgua); al alejarse de la orilla el interruptor se apaga solo (ver tickSuelo), para
   // que cada cruce sea una decisión del jugador y nunca un paso automático como antes.
+  // Si lo apagas A MITAD DEL AGUA, NADAS (ver estaNadando): más lento y gratis, hasta la
+  // orilla. Nunca te quedas sin forma de parar el drenaje de Esencia y Vida.
   toggleCaminarAgua() {
     const E = this.estado, j = E.jugador; if (!E || !j) return;
     if (j.elementoActivo === 'agua' || j.elementoActivo === 'viento' || j.elementoActivo === 'tierra') return; // esos tres cruzan solos, sin botón
     if (j.caminarAgua) { j.caminarAgua = false; U.Audio.sfx('click');
-      if (j.sobreAgua) { this.hundirAgua(); U.HUD.toast('Caminar sobre el agua APAGADO a mitad del agua: te hundes y vuelves a la orilla más cercana.', 'aviso'); }
+      if (j.sobreAgua) { U.HUD.toast('Caminar sobre el agua APAGADO: ahora NADAS (más lento, sin gastar Esencia ni Vida). Nada hasta la orilla.', 'aviso'); }
       else U.HUD.toast('Caminar sobre el agua APAGADO: el agua vuelve a bloquearte el paso.', '');
       return; }
     j.caminarAgua = true; U.Audio.sfx('agua');
     if (j.esencia <= 0.5) U.HUD.toast('Caminar sobre el agua ENCENDIDO, pero sin Esencia NO puedes entrar desde la orilla: recupera Esencia primero. (Ya sobre el agua, sin Esencia, el costo pasaría a tu Vida.)', 'aviso');
     else U.HUD.toast('Caminar sobre el agua ENCENDIDO: cruzas gastando 10 de Esencia por segundo; si se acaba a mitad del agua, 10 de Vida por segundo. Apágalo cuando quieras con el mismo botón.', 'exito');
   },
-  // Hundirse: vuelves a la orilla más cercana. ultimaOrilla es la última posición en tierra
+  // Hundirse: vuelves a la orilla más cercana. (Ya no se usa al apagar el botón: ahora
+  // se nada. Queda como red de seguridad por si algún día hace falta devolver a
+  // alguien a tierra firme.) ultimaOrilla es la última posición en tierra
   // firme que pisaste; si no sirve (no existe o su celda ya no es tierra), se busca la celda
   // de tierra libre más cercana alrededor, anillo a anillo.
   hundirAgua() {
@@ -212,11 +263,12 @@ U.Juego = {
       j.cercaAgua = cerca; }
     if (tile !== T.AGUA) { j.ultimaOrilla = { x: j.x, y: j.y }; j.levitT = 0; if (!j.cercaAgua) j.caminarAgua = false; }
     // Fuego/Rayo sobre el agua SIN el interruptor (p. ej. cambiaron de elemento a mitad del
-    // agua): no se sostienen — se hunden y vuelven a la orilla más cercana.
-    if (tile === T.AGUA && j.elementoActivo !== 'agua' && j.elementoActivo !== 'tierra' && j.elementoActivo !== 'viento' && !j.caminarAgua) { this.hundirAgua(); U.HUD.toast('Sin el botón de caminar sobre el agua activado no te sostienes sobre el agua: vuelves a la orilla.', 'aviso'); return; }
+    // agua, o lo apagaron): ya NO se hunden — NADAN (ver estaNadando): se mueven por el
+    // agua a mitad de velocidad, sin gastar Esencia ni Vida. El drenaje de abajo solo
+    // corre con el botón ENCENDIDO (caminar sobre el agua cuesta; nadar es gratis).
     if (tile === T.AGUA) {
       if (j.elementoActivo === 'viento') { j.levitT = (j.levitT || 0) + dt; if (j.levitT >= 5 && j.ultimaOrilla) { j.x = j.ultimaOrilla.x; j.y = j.ultimaOrilla.y; j.levitT = 0; U.HUD.toast('La levitación se acaba: bajas a la orilla. El Viento levita unos 5 segundos, no vuela el mapa entero.', 'aviso'); } }
-      else if (j.elementoActivo !== 'agua' && j.elementoActivo !== 'tierra') {
+      else if (j.elementoActivo !== 'agua' && j.elementoActivo !== 'tierra' && j.caminarAgua) {
         if (j.esencia > 0) { // Fase Esencia: caminar sobre el agua cuesta 10 de Esencia por segundo.
           j.esencia = Math.max(0, j.esencia - 10 * dt); U.Recuperacion.registrarGasto(10 * dt);
           if (j.esencia <= 0.01) { j.esencia = 0; j.agotado = true; U.HUD.toast('Sin Esencia sobre el agua: NO te hundes — sigues caminando, pero ahora te cuesta VIDA (10/s, la misma tasa). Llega a la orilla o toma un tónico; si tu Vida llega a 0, despiertas en la fogata.', 'peligro'); U.Audio.sfx('agua'); }
@@ -484,6 +536,7 @@ U.Juego = {
     j.trote = I.a && mag > 0;
     if ((j.invertido || 0) > 0 && (vx || vy)) { if (!j.invMapa && U.Inversion) j.invMapa = U.Inversion.generar(); const mv = U.Inversion ? U.Inversion.aplicar(j.invMapa, vx, vy) : { x: -vx, y: -vy }; vx = mv.x; vy = mv.y; j.dir = U.Grid.dir8(vx, vy); } // HECHIZO DE INVERSIÓN: remapeo ALEATORIO de las 8 direcciones (desarreglo: ninguna dirección queda igual); el mapeo se muestra en pantalla
     let vel = (3.4 * (0.85 + (U.Reliquias ? U.Reliquias.statEf(j, 'velocidad') : j.stats.velocidad) * 0.015)) * (j.trote ? 1.25 : 1) * (j.cargando ? 0.55 : 1) * (j.buffs.sobrecarga > 0 ? 2 : 1) * (j.agotado ? 0.85 : 1);
+    if (this.estaNadando(j)) vel *= 0.5; // nadar es más lento que caminar sobre el agua (y gratis: sin Esencia ni Vida)
     if (j.polainaEquipada && U.Economia.POLAINAS[j.polainaEquipada]) vel *= U.Economia.POLAINAS[j.polainaEquipada].velMult; // con polainas vas MÁS LENTO: lo que sube es tu nivel al entrenar
     let distCel = 0;
     if (j.dash.t <= 0) {

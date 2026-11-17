@@ -120,9 +120,21 @@ U.Guardado = {
     if (d.contratos) { E.contratos = { sangre: Array.isArray(d.contratos.sangre) ? d.contratos.sangre.slice(0, 3) : [], alma: d.contratos.alma || null }; U.Criaturas.contratoSangre = E.contratos.sangre.slice(); U.Criaturas.contratoAlma = E.contratos.alma; }
     if (d.prog && U.Progresion) { const base = U.Progresion.nuevo(); E.prog = Object.assign(base, d.prog); E.prog.examen = Object.assign({ intentos: 0, aprobado: false, nota: 0 }, d.prog.examen || {}); E.prog.patrulla = Object.assign({ rango: null, misiones: 0 }, d.prog.patrulla || {}); E.prog.duelo = null; E.prog._examen = null; }
     if (d.destelloModo) E.destelloModo = d.destelloModo;
-    if (d.mapaId && d.mapaId !== 'aldea') U.Juego.cambiarMapa(d.mapaId, { x: d.x, y: d.y }, true);
-    else if (!d.mundoContinuo && d.x != null && d.y != null && d.x < 84 && d.y < 62) { j.x = d.x + 58; j.y = d.y + 60; }
+    // Restaurar mapa y posición. OJO: comenzarMundo deja al jugador DENTRO de la casa
+    // (mapaId 'casa'); si la partida se guardó fuera (mapaId 'aldea'), hay que cambiar
+    // al mapa continuo ANTES de poner las coordenadas. Antes el código solo ponía las
+    // coordenadas del continente (p. ej. 144.5, 253.5) con el mapa todavía en la casa
+    // (22×16): al primer movimiento el clamp de Grid.mover te dejaba en la esquina
+    // inferior derecha (21.5, 15.5), rodeada de muro, sin poder moverte. Ese era el bug
+    // de "continuar partida te deja atrapado en la casa".
+    const tienePos = d.x != null && d.y != null;
+    if (d.mapaId && d.mapaId !== 'aldea') U.Juego.cambiarMapa(d.mapaId, tienePos ? { x: d.x, y: d.y } : null, true);
+    else if (d.mapaId === 'aldea' && !d.mundoContinuo && tienePos && d.x < 84 && d.y < 62) U.Juego.cambiarMapa('aldea', { x: d.x + 58, y: d.y + 60 }, true); // guardado viejo: coordenadas del submapa de la aldea
+    else if (d.mapaId === 'aldea') U.Juego.cambiarMapa('aldea', tienePos ? { x: d.x, y: d.y } : null, true);
     else { j.x = d.x != null ? d.x : j.x; j.y = d.y != null ? d.y : j.y; }
+    // Seguridad: si la celda restaurada no es transitable (sólida o fuera del mapa),
+    // buscar la celda libre más cercana; si no hay ninguna cerca, ir al inicio del mapa.
+    U.Juego.asegurarPosicionValida();
     E.camara.x = j.x * 16 - U.Render.viewW / 2; E.camara.y = j.y * 16 - U.Render.viewH / 2;
     E.ui = 'mundo';
     U.HUD.refrescarSimbolos(); U.HUD.refrescarChips();
