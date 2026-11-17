@@ -1998,7 +1998,8 @@ U.Vida = {
   // LOS NPC TAMBIÉN PUEDEN CAMINAR SOBRE EL AGUA, y lo deciden ELLOS, como el jugador con su
   // botón: su elemento manda. Agua cruza gratis; Viento levita; Tierra levanta su puente al
   // pasar (la celda queda como PUENTE para todos, igual que cuando lo hace el jugador de
-  // Tierra). Fuego y Rayo DECIDEN: la decisión es de cada NPC, se toma una sola vez, es
+  // Tierra; ese puente de piedra NO es permanente: dura un día del juego y el agua se lo
+  // traga, y cuesta 5 de Esencia por baldosa al levantarlo). Fuego y Rayo DECIDEN: la decisión es de cada NPC, se toma una sola vez, es
   // estable (sale de su propio id: no cambia entre partidas) y queda en n.cruzaAgua — unos
   // cruzan y otros no, y a los que no, el agua les sigue bloqueando el paso como siempre.
   // Sin elemento conocido, no cruzan.
@@ -2023,7 +2024,14 @@ U.Vida = {
     for (let i = 0; i < m.tiles.length; i++) if (m.tiles[i] === T.AGUA && m.solidos[i] === 1) { m.solidos[i] = 0; tocados.push(i); }
     U.Grid.mover(m, n, dx, dy);
     tocados.forEach(i => { if (m.tiles[i] === T.AGUA) m.solidos[i] = 1; });
-    if (this.elementoDe(n) === 'tierra' && enAgua(n.x, n.y)) { const cx = Math.floor(n.x), cy = Math.floor(n.y); const idx = cy * m.ancho + cx; if (m.tiles[idx] === T.AGUA) { m.tiles[idx] = T.PUENTE; m.solidos[idx] = 0; if (U.Combate) U.Combate.particulas(n.x, n.y, 3, '#d9a441', 'polvo'); } }
+    // NPC DE TIERRA: levanta la misma baldosa de puente de piedra que el jugador, con las
+    // mismas reglas — paga 5 de Esencia por baldosa al crearla (una sola vez por baldosa;
+    // cruzar sobre un puente ya creado es gratis) y la baldosa dura UN DÍA DEL JUEGO, luego
+    // el agua se la traga (ver U.Juego.levantarPuente / actualizarPuentes). Los NPC no
+    // tienen barra de Esencia propia: pagan de su reserva n.esenciaPuente (100, se rellena
+    // al cambiar el día en U.Juego.chequearDia). Sin reserva suficiente no levanta la
+    // baldosa (cruza igual, sin dejar puente, como el jugador de Tierra sin Esencia).
+    if (this.elementoDe(n) === 'tierra' && enAgua(n.x, n.y)) { const cx = Math.floor(n.x), cy = Math.floor(n.y); const idx = cy * m.ancho + cx; if (m.tiles[idx] === T.AGUA) { if (n.esenciaPuente == null) n.esenciaPuente = 100; if (n.esenciaPuente >= U.Juego.PUENTE_COSTO && U.Juego.levantarPuente(m, idx)) { n.esenciaPuente -= U.Juego.PUENTE_COSTO; if (U.Combate) U.Combate.particulas(n.x, n.y, 3, '#d9a441', 'polvo'); } } }
   },
   caminarDirecto(n, dt, p, vel, E) {
     const dx = p.x - n.x, dy = p.y - n.y, d = Math.hypot(dx, dy);
@@ -2395,6 +2403,10 @@ U.Tiempo = {
   diaTexto(r) { return this.DIAS[((r.diaSemana || 0) % 7 + 7) % 7] + ' · Día ' + (r.dia || 1); },
   esNoche(h) { return h >= 21 || h < 5; },
   hora(E) { return E && E.reloj ? E.reloj.minutos / 60 : 9; },
+  // Minutos de juego transcurridos desde el inicio de la vida (día 1 a las 00:00 = 0).
+  // Sirve para fechar cosas que duran días de juego completos (p. ej. el puente de Tierra:
+  // dura 1440 de estos minutos y luego el agua se lo traga).
+  absoluto(E) { return E && E.reloj ? ((E.reloj.dia || 1) - 1) * 1440 + (E.reloj.minutos || 0) : 0; },
   formato(minutos) { return this.formatoHora(minutos) + ' ' + this.formatoAmpm(minutos); },
   formatoHora(minutos) { const m = Math.floor(minutos) % 1440; const hh24 = Math.floor(m / 60), mm = m % 60; const hh = hh24 % 12 === 0 ? 12 : hh24 % 12; return (hh < 10 ? '0' : '') + hh + ':' + (mm < 10 ? '0' : '') + mm; },
   formatoAmpm(minutos) { const m = Math.floor(minutos) % 1440; return Math.floor(m / 60) < 12 ? 'AM' : 'PM'; },
@@ -4337,6 +4349,40 @@ U.Juego = {
     }
     if (nuevo.spawnsAbiertos) nuevo.spawnsAbiertos.forEach(sp => { E.enemigos.push(U.Combate.crearEnemigo(sp[0], sp[1], sp[2], E.dificultad)); });
   },
+  // PUENTE DE PIEDRA DE TIERRA: NO es permanente. Cada baldosa que levanta Tierra (el
+  // jugador o un NPC de Tierra) dura UN DÍA DEL JUEGO (1440 minutos de juego) y luego el
+  // agua se la traga: la baldosa vuelve a ser AGUA (y sólida como agua). Construirla cuesta
+  // 5 de Esencia por baldosa, una sola vez por baldosa, al crearla; mientras el puente
+  // dure, cualquiera cruza sobre él gratis (es piedra sólida, sin costo por cruzar). El
+  // puente de MADERA original del mapa (el de la Ribera) no es de Tierra: no caduca.
+  PUENTE_COSTO: 5,
+  PUENTE_DURACION: 1440, // minutos de juego = un día completo del juego
+  // Levanta UNA baldosa de puente de piedra sobre una celda de AGUA y la fecha: queda
+  // registrada en m.puentesTierra[idx] con su vencimiento (en minutos absolutos de juego).
+  // Devuelve true solo si la baldosa se creó ahora (si ya era PUENTE, no se cobra ni se
+  // renueva: cruzar sobre un puente ya creado es gratis mientras dure).
+  levantarPuente(m, idx) {
+    const T = U.Grid.T; if (!m || m.tiles[idx] !== T.AGUA) return false;
+    m.tiles[idx] = T.PUENTE; m.solidos[idx] = 0;
+    if (!m.puentesTierra) m.puentesTierra = {};
+    m.puentesTierra[idx] = U.Tiempo.absoluto(this.estado) + this.PUENTE_DURACION;
+    return true;
+  },
+  // El agua se traga los puentes vencidos: recorre TODOS los mapas conocidos y cada
+  // baldosa de puente de Tierra cuyo día ya pasó vuelve a ser AGUA (sólida como agua).
+  // Si el vencido está en el mapa actual, se ve la salpicadura y sale un aviso (uno solo
+  // por tanda). Quien esté parado sobre la baldosa cuando se hunde queda sobre el agua y
+  // le aplican las reglas de siempre de su elemento (tickSuelo / moverNPC).
+  actualizarPuentes() {
+    const E = this.estado; if (!E || !E.reloj || !E.mapas) return;
+    const ahora = U.Tiempo.absoluto(E), T = U.Grid.T; let hundidosAqui = 0;
+    for (const id in E.mapas) { const m = E.mapas[id]; if (!m || !m.puentesTierra) continue;
+      for (const k in m.puentesTierra) { if (ahora < m.puentesTierra[k]) continue;
+        const idx = +k; delete m.puentesTierra[k];
+        if (m.tiles[idx] === T.PUENTE) { m.tiles[idx] = T.AGUA; m.solidos[idx] = 1;
+          if (m === E.mapa) { hundidosAqui++; if (U.Combate) U.Combate.particulas(idx % m.ancho + 0.5, Math.floor(idx / m.ancho) + 0.5, 5, '#35c6f4', 'agua'); } } } }
+    if (hundidosAqui > 0) U.HUD.toast('🌊 El agua se tragó el puente de piedra de Tierra: duró un día del juego y sus baldosas volvieron a ser agua.', 'aviso');
+  },
   // DESPLAZAMIENTOS POR ELEMENTO: Agua camina sobre el agua gratis y automático (sin botón);
   // Tierra levanta un puente de piedra automático (la celda se vuelve PUENTE, sin botón);
   // Viento levita automático hasta ~5 s sobre el agua (sin botón). FUEGO y RAYO son distintos:
@@ -4370,7 +4416,7 @@ U.Juego = {
     const px = j.x, py = j.y;
     U.Grid.mover(m, j, dx, dy);
     tocados.forEach(i => { if (m.tiles[i] === T.AGUA) m.solidos[i] = 1; });
-    if (j.elementoActivo === 'tierra' && enAgua(j.x, j.y)) { const cx = Math.floor(j.x), cy = Math.floor(j.y); const idx = cy * m.ancho + cx; if (m.tiles[idx] === T.AGUA && j.esencia >= 5) { m.tiles[idx] = T.PUENTE; m.solidos[idx] = 0; j.esencia -= 5; U.Recuperacion.registrarGasto(5); U.Combate.particulas(j.x, j.y, 4, '#d9a441', 'polvo'); } }
+    if (j.elementoActivo === 'tierra' && enAgua(j.x, j.y)) { const cx = Math.floor(j.x), cy = Math.floor(j.y); const idx = cy * m.ancho + cx; if (m.tiles[idx] === T.AGUA && j.esencia >= this.PUENTE_COSTO && this.levantarPuente(m, idx)) { j.esencia -= this.PUENTE_COSTO; U.Recuperacion.registrarGasto(this.PUENTE_COSTO); U.Combate.particulas(j.x, j.y, 4, '#d9a441', 'polvo'); } }
   },
   // CAMINAR SOBRE EL AGUA (solo Fuego y Rayo): interruptor como la Sobrecarga, con su estado
   // visible en el propio botón (ENCENDIDO/APAGADO). Por defecto APAGADO: el agua bloquea.
@@ -4570,6 +4616,7 @@ U.Juego = {
     const E = this.estado; if (!E || !E.reloj) return;
     if (E.ultimoDia === E.reloj.dia) return;
     E.ultimoDia = E.reloj.dia; const j = E.jugador; j.comidasHoy = 0;
+    (E.roster || E.npcs || []).forEach(n => { if (n.esenciaPuente != null) n.esenciaPuente = 100; }); // la reserva de Esencia para puentes de los NPC de Tierra se rellena con el día nuevo
     if (E.mision && E.mision.activa && !E.mision.completada) { if (E.escolta && E.escolta.activa) { E.escolta.activa = false; if (E.escolta.npc) E.escolta.npc.enEscolta = false; E.escolta = null; } E.mision = null; U.HUD.toast('La misión de ayer caducó sin cumplirse. El tablón trae 5 misiones nuevas.', 'aviso'); }
     if (j.promesas && j.promesas.length) { const vencidas = j.promesas.filter(pr => E.reloj.dia > pr.diaLimite); if (vencidas.length) { j.promesas = j.promesas.filter(pr => E.reloj.dia <= pr.diaLimite); vencidas.forEach(() => { U.Economia.karmaAdd(-5); }); U.HUD.toast('Prometiste dinero y no lo diste: karma −5 por cada promesa rota.', 'peligro'); } }
     E.tablon = { dia: E.reloj.dia, lista: U.Economia.generarTablon(E.rng || Math.random) };
@@ -4687,6 +4734,7 @@ U.Juego = {
       else j.moviendo = false;
     } else j.moviendo = true;
     this.tickSuelo(dt, j.moviendo, distCel);
+    this.actualizarPuentes(); // el puente de piedra de Tierra dura un día del juego: el agua se traga las baldosas vencidas
     this.chequearDia(); this.tickEscolta(dt); this.tickPeticiones(dt);
     // Umbrales entre mapas: pisar una salida cambia de mapa (con enfriamiento anti-rebote)
     E.cambioCd = Math.max(0, (E.cambioCd || 0) - dt);
