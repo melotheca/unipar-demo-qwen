@@ -760,7 +760,7 @@ U.Habilidades = {
     normal:   { costo: 2, power: 1.0, forma: 'cono', alcance: 1.8, restaura: 6 },
     cargado:  { costo: 6, power: 1.9, forma: 'cono', alcance: 2.2, restaura: 12 },
     dash:     { costo: 4 },
-    sobrecarga: { id: 'sobrecarga', nombre: 'Sobrecarga', umbral: 15, dur: 6, mult: 2, drain: 0.02, cd: 20, desc: 'Estilo Yin (Kaioken): Ataque y Velocidad ×2 por poco tiempo; drena Vida y al terminar quedas Agotado.' }
+    sobrecarga: { id: 'sobrecarga', nombre: 'Sobrecarga', umbral: 15, mult: 2, drain: 0.05, desc: 'Estilo Yin (Kaioken): es un INTERRUPTOR, sin duración fija ni enfriamiento — Ataque y Velocidad ×2 mientras esté activa, y la apagas con el mismo botón cuando quieras. Drena SOLO Esencia: 5% de tu Esencia máxima por segundo (mientras está activa, la recarga de Esencia se pausa, para que el drenaje sea real). Cuando la Esencia llega a 0, el drenaje pasa a VIDA a la MISMA tasa (5% de tu Vida máxima por segundo; el costo por segundo no cambia, solo cambia de dónde sale) y solamente puedes GOLPEAR (puños Yin): las técnicas quedan bloqueadas porque cuestan Esencia y no tienes. Al desactivarla se detiene el drenaje y termina el aumento de fuerza. Si la Vida llega a 0 con ella activa, caes y despiertas en la fogata, como cualquier derrota.' }
   },
 
   // ---- PRÓXIMAMENTE (datos listos, lógica NO activa en el juego completo) ----
@@ -2649,7 +2649,9 @@ U.Recuperacion = {
     // Ahora: fuera de combate ritmo completo, en combate 40% (nunca cero), descansar triplica.
     // Encima de eso se aplica el escalón de Condición (multCansancio: ×1.0 / ×0.5 / ×0.1).
     // Golpear con Yin sigue devolviendo Esencia extra, como siempre.
-    { const cap = this.capacidad(); let r = E.enCombate ? cap * 0.4 : cap; if (j.descansando) r *= 3; r *= this.multCansancio(); j.esencia = Math.min(j.stats.esencia, j.esencia + r * dt); }
+    // Con la SOBRECARGA activa la recarga se PAUSA: su drenaje (5% del máx./s) tiene que ser real;
+    // si la recarga siguiera corriendo, fuera de combate la compensaría y la Esencia nunca bajaría.
+    { const cap = this.capacidad(); let r = E.enCombate ? cap * 0.4 : cap; if (j.descansando) r *= 3; r *= this.multCansancio(); if (!(j.buffs && j.buffs.sobrecarga > 0)) j.esencia = Math.min(j.stats.esencia, j.esencia + r * dt); }
     // Condición: se recupera MUCHO más lento que la Esencia y según el atributo — la misma
     // capacidad de la Esencia (base 5, Sabio 10, Duro 2) pero POR HORA DE JUEGO, no por
     // segundo — y SOLO fuera de combate (en combate no se recupera, solo baja).
@@ -2798,12 +2800,15 @@ U.Combate = {
     U.HUD.toast(this.escudoNombre(j) + ' ACTIVO · Nv.' + (j.escudoNv || 1) + ' (' + nv.nombre + '): NO puedes moverte y drena Esencia/s. Pulsa B para bajarlo.', 'exito');
   },
   // ---------- acciones del jugador ----------
-  puedeYin() { const j = U.Juego.estado.jugador; return !j.agotado && j.esencia >= 2 && j.cdYin <= 0; },
-  iniciarCarga() { const j = U.Juego.estado.jugador; if (j.agotado || j.cdYin > 0) { U.Audio.sfx('fail'); return; } if (j.esencia < 2) { U.HUD.toast('Sin Esencia para Yin.', 'aviso'); U.Audio.sfx('fail'); return; } j.cargando = true; j.carga = 0; j.descansando = false; U.Audio.sfx('cargando'); },
+  // Puño libre de Sobrecarga: con la Sobrecarga ACTIVA y la Esencia en 0, el golpe Yin SÍ funciona
+  // (la Sobrecarga ya está drenando tu Vida: ese es el costo). Todo lo demás sigue bloqueado por Agotado.
+  puñoSobre(j) { return j.buffs.sobrecarga > 0 && j.esencia <= 0.01; },
+  puedeYin() { const j = U.Juego.estado.jugador; return j.cdYin <= 0 && ((!j.agotado && j.esencia >= 2) || this.puñoSobre(j)); },
+  iniciarCarga() { const j = U.Juego.estado.jugador; if (j.cdYin > 0) { U.Audio.sfx('fail'); return; } if (!this.puñoSobre(j)) { if (j.agotado) { U.Audio.sfx('fail'); return; } if (j.esencia < 2) { U.HUD.toast('Sin Esencia para Yin.', 'aviso'); U.Audio.sfx('fail'); return; } } j.cargando = true; j.carga = 0; j.descansando = false; U.Audio.sfx('cargando'); },
   soltarYin() { const j = U.Juego.estado.jugador; if (!j.cargando) return; const cargado = j.carga >= 0.35; j.cargando = false; this.yin(cargado); },
   yin(cargado) {
     const E = U.Juego.estado, j = E.jugador; const h = cargado ? U.Habilidades.yin.cargado : U.Habilidades.yin.normal;
-    if (j.cdYin > 0) return; if (!U.Recuperacion.gastar(h.costo)) return;
+    if (j.cdYin > 0) return; if (!this.puñoSobre(j) && !U.Recuperacion.gastar(h.costo)) return; // con Sobrecarga activa y Esencia en 0, el puño no cobra Esencia: ya estás pagando con Vida
     j.cdYin = (cargado ? 0.6 : Math.max(0.18, 0.42 - j.stats.velocidad * 0.012)) * (j.buffs.sobrecarga > 0 ? 0.5 : 1); j.ataqueAnim = 0.2; j.descansando = false;
     const atk = j.stats.ataque * (j.buffs.sobrecarga > 0 ? 2 : 1);
     const celdas = U.Grid.forma('cono', j.x, j.y, j.dir, h.alcance, 1); const el = U.Elementos.datos[j.elementoActivo];
@@ -2859,9 +2864,10 @@ U.Combate = {
   },
   sobrecarga() {
     const j = U.Juego.estado.jugador; const s = U.Habilidades.yin.sobrecarga;
+    // INTERRUPTOR: si ya está activa, este mismo botón la APAGA (se detiene el drenaje y el ×2).
+    if (j.buffs.sobrecarga > 0) { j.buffs.sobrecarga = 0; j.cargando = false; U.Audio.sfx('click'); U.HUD.toast('Sobrecarga DESACTIVADA: el drenaje se detiene y el aumento de fuerza termina.', 'exito'); return; }
     if (j.estilos.yin < s.umbral) { U.HUD.toast('Sobrecarga requiere Yin ' + s.umbral + '.', 'aviso'); return; }
-    if (j.buffs.sobrecarga > 0 || j.buffs.sobrecargaCd > 0) { U.HUD.toast('Sobrecarga en enfriamiento.', 'aviso'); return; }
-    j.buffs.sobrecarga = s.dur; j.buffs.sobrecargaCd = s.cd + s.dur; U.Audio.sfx('sobrecarga'); this.sacudir(1); this.particulas(j.x, j.y - 0.6, 30, '#ff5470', 'brasa'); U.HUD.banner('SOBRECARGA', 1.2); U.HUD.toast('Ataque y Velocidad ×2. Drena Vida; al terminar quedarás Agotado.', 'peligro');
+    j.buffs.sobrecarga = 1; U.Audio.sfx('sobrecarga'); this.sacudir(1); this.particulas(j.x, j.y - 0.6, 30, '#ff5470', 'brasa'); U.HUD.banner('SOBRECARGA', 1.2); U.HUD.toast('Sobrecarga ACTIVA: Ataque y Velocidad ×2. Drena SOLO Esencia (5%/s); si la Esencia llega a 0, drena VIDA a la misma tasa y solo podrás golpear. Pulsa X otra vez para desactivarla cuando quieras.', 'peligro');
   },
   cambiarElemento(id) { const j = U.Juego.estado.jugador; if (j.elementos.indexOf(id) < 0 || j.elementoActivo === id) return; j.elementoActivo = id; j.tecnicaIdx = 0; U.Audio.sfx('click'); U.HUD.refrescarSimbolos(); U.HUD.refrescarChips(); U.HUD.toast('Elemento activo: ' + U.Elementos.nombre(id), ''); U.Ambiente.actualizar(); },
   seleccionarTec(i) { const j = U.Juego.estado.jugador; const h = U.Habilidades.elementos[j.elementoActivo][i]; if (!h) return; if ((j.maestria[j.elementoActivo] || 0) < h.umbral) { U.HUD.toast(h.nombre + ': maestría ' + h.umbral + '% requerida.', 'aviso'); U.Audio.sfx('fail'); return; } j.tecnicaIdx = i; U.Audio.sfx('click'); U.HUD.refrescarChips(); },
@@ -3106,7 +3112,16 @@ U.Combate = {
     if (j.cargando) { j.carga = Math.min(1.2, j.carga + dt); if (Math.random() < dt * 12) this.particulas(j.x + (Math.random() - 0.5) * 1.2, j.y - 0.6 + (Math.random() - 0.5), 1, U.Elementos.datos[j.elementoActivo].claro, 'cura'); }
     if (j.dash.t > 0) { j.dash.t -= dt; U.Grid.mover(E.mapa, j, j.dash.dx * dt, j.dash.dy * dt); j.rastro.push({ x: j.x, y: j.y, t: 0.5 }); }
     j.rastro.forEach(r => r.t -= dt); j.rastro = j.rastro.filter(r => r.t > 0);
-    if (j.buffs.sobrecarga > 0) { j.buffs.sobrecarga -= dt; j.vida = Math.max(1, j.vida - j.stats.vida * U.Habilidades.yin.sobrecarga.drain * dt); if (Math.random() < dt * 10) this.particulas(j.x, j.y - 0.8, 1, '#ff5470', 'brasa'); if (j.buffs.sobrecarga <= 0) { j.esencia = 0; j.agotado = true; U.HUD.toast('Sobrecarga terminada: Agotado.', 'peligro'); U.Audio.sfx('fail'); } }
+    if (j.buffs.sobrecarga > 0) { // SOBRECARGA (interruptor, sin duración): drena SOLO Esencia a drain×máx./s.
+      // Al llegar la Esencia a 0, el drenaje pasa a VIDA a la MISMA tasa (el costo/s no cambia, cambia la fuente)
+      // y quedas Agotado: las técnicas (gastar) quedan bloqueadas y solo el puño Yin funciona (ver yin()).
+      // Si la Vida llega a 0, es derrota normal: despiertas en la fogata. Se apaga solo con el botón (X).
+      const sS = U.Habilidades.yin.sobrecarga;
+      if (Math.random() < dt * 10) this.particulas(j.x, j.y - 0.8, 1, '#ff5470', 'brasa');
+      if (j.esencia > 0) { const dS = Math.min(j.esencia, j.stats.esencia * sS.drain * dt); j.esencia -= dS; U.Recuperacion.registrarGasto(dS);
+        if (j.esencia <= 0.01) { j.esencia = 0; if (!j.agotado) { j.agotado = true; U.HUD.toast('Sobrecarga: Esencia agotada — ahora drena tu VIDA a la misma tasa (5%/s) y solo puedes GOLPEAR (puños). Las técnicas cuestan Esencia: bloqueadas. Desactívala con X cuando quieras.', 'peligro'); U.Audio.sfx('fail'); } } }
+      else { j.vida -= j.stats.vida * sS.drain * dt; if (j.vida <= 0) { j.vida = 0; j.buffs.sobrecarga = 0; U.Juego.fin('derrota'); } }
+    }
     j.buffs.sobrecargaCd = Math.max(0, j.buffs.sobrecargaCd - dt);
     if (j.invertido > 0) { j.invertido = Math.max(0, j.invertido - dt); if (j.invertido === 0) U.HUD.toast('Tus controles vuelven a la normalidad.', 'exito'); }
     this.actualizarReto(dt);
@@ -3686,9 +3701,9 @@ U.HUD = {
       j.pociones = (j.bolsaPociones || []).length; el.pocion.textContent = '🧪 ×' + j.pociones; el.pocion.disabled = j.pociones <= 0; const nm = document.getElementById('numMonedas'); if (nm) nm.textContent = Math.floor(j.monedas || 0); if (el.btnEscudo) { el.btnEscudo.classList.toggle('apagado', !j.escudoAprendido || (!j.escudo && (j.agotado || j.esencia < 10))); el.btnEscudo.style.filter = j.escudo ? 'brightness(1.5)' : ''; el.btnEscudo.style.borderColor = j.escudoAprendido ? U.Combate.escudoColor(j) : '#7cc4ff'; el.btnEscudo.title = j.escudoAprendido ? U.Combate.escudoNombre(j) + ' (B) · Nv.' + (j.escudoNv || 1) + ' (' + U.Habilidades.escudo.niveles[j.escudoNv || 1].nombre + ') · integridad ' + Math.max(0, Math.round(j.escudoVida || 0)) + '/' + U.Combate.escudoMax(j) + ' · no te mueves, drena Esencia/s' : 'Escudo (B): aún no lo conoces. Es una técnica: Kaelen, el guardia, puede enseñártela.'; }
       const h = U.Habilidades.elementos[j.elementoActivo][j.tecnicaIdx]; const z = E.zonaActual; const c = U.Ambiente.costo(h, j.elementoActivo, z, j.atributo);
       const y = U.Habilidades.yang[j.yangForma];
-      el.btnTec.classList.toggle('apagado', m < h.umbral || j.agotado); el.btnYang.classList.toggle('apagado', j.agotado || j.estilos.yang < y.umbral); el.btnYin.classList.toggle('apagado', j.agotado); el.btnDash.classList.toggle('apagado', j.agotado);
+      el.btnTec.classList.toggle('apagado', m < h.umbral || j.agotado); el.btnYang.classList.toggle('apagado', j.agotado || j.estilos.yang < y.umbral); el.btnYin.classList.toggle('apagado', j.agotado && !U.Combate.puñoSobre(j)); el.btnDash.classList.toggle('apagado', j.agotado);
       el.btnTec.title = h.nombre + ' (L) · costo ' + c.costo + ' Esencia' + (c.plano ? ' (plano por el clima)' : '') + ' · ' + (c.razon || 'ambiente neutro') + ' · Temp. ' + Math.round(U.Clima.temperatura(E) * 100) + '% · Precip. ' + Math.round(U.Clima.precipitacion(E) * 100) + '%';
-      el.btnSobre.classList.toggle('apagado', j.buffs.sobrecargaCd > 0);
+      el.btnSobre.classList.toggle('apagado', false); el.btnSobre.style.filter = j.buffs.sobrecarga > 0 ? 'brightness(1.7)' : ''; el.btnSobre.title = j.buffs.sobrecarga > 0 ? 'Sobrecarga ACTIVA (X): toca para DESACTIVARLA. Drena Esencia; sin Esencia drena Vida y solo puedes golpear.' : 'Sobrecarga (X): interruptor. Ataque y Velocidad ×2; drena Esencia y, sin Esencia, Vida. Toca otra vez para apagarla.';
       el.btnTec.querySelector('.cd').style.height = (h.cd ? Math.min(1, (j.cdTec[h.id] || 0) / h.cd) * 100 : 0) + '%'; el.btnYang.querySelector('.cd').style.height = Math.min(1, j.cdYang / y.cd) * 100 + '%'; el.btnYin.querySelector('.cd').style.height = Math.min(1, j.cdYin / 0.4) * 100 + '%';
       Array.from(el.chipsTec.children).forEach((b, i) => { const hh = U.Habilidades.elementos[j.elementoActivo][i]; b.querySelector('i').style.height = Math.min(1, (j.cdTec[hh.id] || 0) / hh.cd) * 100 + '%'; });
       el.btnA.querySelector('.lbl').textContent = j.trote ? 'TROTE +' : 'TROTE';
@@ -4187,7 +4202,11 @@ U.Juego = {
   },
   // DESPLAZAMIENTOS POR ELEMENTO: Agua camina sobre el agua gratis; Tierra levanta un puente
   // de piedra (la celda se vuelve PUENTE); Viento levita hasta ~5 s sobre el agua; los demás
-  // gastan 10 de Esencia por segundo y, si se les acaba, se hunden y vuelven a la orilla.
+  // gastan 10 de Esencia por segundo. Si la Esencia se acaba A MITAD DEL AGUA, NO se hunden ni
+  // vuelven a la orilla: el costo pasa a VIDA a la misma tasa (10/s) y siguen caminando (ver
+  // tickSuelo); si la Vida llega a 0, derrota normal y despiertan en la fogata. Desde la ORILLA,
+  // con Esencia en 0, NO se puede entrar al agua: el permiso de abajo exige Esencia > 0.5 para
+  // pisar agua nueva, y solo deja seguir a quien YA está sobre el agua (centro en celda de agua).
   moverJugador(m, j, dx, dy) {
     const T = U.Grid.T; const enAgua = (x, y) => { const cx = Math.floor(x), cy = Math.floor(y); return cx >= 0 && cy >= 0 && cx < m.ancho && cy < m.alto && m.tiles[cy * m.ancho + cx] === T.AGUA; };
     // La colisión de Grid.mover usa la CAJA del personaje (radio 0.3), no su centro: el agua hay
@@ -4197,7 +4216,10 @@ U.Juego = {
     // (ni siquiera el de Agua) y el personaje se quedaba pegado a la orilla empujando sin avanzar.
     const R = 0.3; const cajaAgua = (x, y) => enAgua(x, y) || enAgua(x - R, y - R) || enAgua(x + R, y - R) || enAgua(x - R, y + R) || enAgua(x + R, y + R);
     const destinoAgua = cajaAgua(j.x + dx, j.y + dy) || cajaAgua(j.x, j.y);
-    const puede = j.elementoActivo === 'agua' || j.elementoActivo === 'tierra' || (j.elementoActivo === 'viento' && (j.levitT || 0) < 5) || j.esencia > 0.5;
+    // enAgua(j.x, j.y) = YA estás sobre el agua: puedes seguir caminando aunque la Esencia sea 0
+    // (te cuesta Vida, ver tickSuelo). Sin ese término, al llegar la Esencia a 0 el agua volvería
+    // a ser sólida bajo tus pies y te quedarías pegado a mitad del lago sin poder avanzar ni volver.
+    const puede = j.elementoActivo === 'agua' || j.elementoActivo === 'tierra' || (j.elementoActivo === 'viento' && (j.levitT || 0) < 5) || j.esencia > 0.5 || enAgua(j.x, j.y);
     if (!destinoAgua || !puede) { U.Grid.mover(m, j, dx, dy); return; }
     const tocados = [];
     for (let i = 0; i < m.tiles.length; i++) if (m.tiles[i] === T.AGUA && m.solidos[i] === 1) { m.solidos[i] = 0; tocados.push(i); }
@@ -4206,7 +4228,7 @@ U.Juego = {
     tocados.forEach(i => { if (m.tiles[i] === T.AGUA) m.solidos[i] = 1; });
     if (j.elementoActivo === 'tierra' && enAgua(j.x, j.y)) { const cx = Math.floor(j.x), cy = Math.floor(j.y); const idx = cy * m.ancho + cx; if (m.tiles[idx] === T.AGUA && j.esencia >= 5) { m.tiles[idx] = T.PUENTE; m.solidos[idx] = 0; j.esencia -= 5; U.Recuperacion.registrarGasto(5); U.Combate.particulas(j.x, j.y, 4, '#d9a441', 'polvo'); } }
   },
-  // Efectos del suelo al caminar: agua (drenaje/hundirse), ceniza (quema si no eres Fuego), polainas (pasos y Condición).
+  // Efectos del suelo al caminar: agua (drenaje de Esencia y, sin Esencia a mitad del agua, de Vida a la misma tasa), ceniza (quema si no eres Fuego), polainas (pasos y Condición).
   tickSuelo(dt, seMovio, distCel) {
     const E = this.estado, j = E.jugador, m = E.mapa; const T = U.Grid.T;
     const cx = Math.max(0, Math.min(m.ancho - 1, Math.floor(j.x))), cy = Math.max(0, Math.min(m.alto - 1, Math.floor(j.y)));
@@ -4215,8 +4237,14 @@ U.Juego = {
     if (tile === T.AGUA) {
       if (j.elementoActivo === 'viento') { j.levitT = (j.levitT || 0) + dt; if (j.levitT >= 5 && j.ultimaOrilla) { j.x = j.ultimaOrilla.x; j.y = j.ultimaOrilla.y; j.levitT = 0; U.HUD.toast('La levitación se acaba: bajas a la orilla. El Viento levita unos 5 segundos, no vuela el mapa entero.', 'aviso'); } }
       else if (j.elementoActivo !== 'agua' && j.elementoActivo !== 'tierra') {
-        j.esencia = Math.max(0, j.esencia - 10 * dt); U.Recuperacion.registrarGasto(10 * dt);
-        if (j.esencia <= 0.01) { if (j.ultimaOrilla) { j.x = j.ultimaOrilla.x; j.y = j.ultimaOrilla.y; } j.agotado = true; U.HUD.toast('Sin Esencia sobre el agua: te hundes y vuelves a la orilla. (El camino de tierra siempre es gratis; el de Agua cruza directo sin gastar.)', 'peligro'); U.Audio.sfx('agua'); }
+        if (j.esencia > 0) { // Fase Esencia: caminar sobre el agua cuesta 10 de Esencia por segundo.
+          j.esencia = Math.max(0, j.esencia - 10 * dt); U.Recuperacion.registrarGasto(10 * dt);
+          if (j.esencia <= 0.01) { j.esencia = 0; j.agotado = true; U.HUD.toast('Sin Esencia sobre el agua: NO te hundes — sigues caminando, pero ahora te cuesta VIDA (10/s, la misma tasa). Llega a la orilla o toma un tónico; si tu Vida llega a 0, despiertas en la fogata.', 'peligro'); U.Audio.sfx('agua'); }
+        } else { // Fase Vida: MISMA tasa (10/s), otra fuente. Sin teletransporte: sigues sobre el agua.
+          j.vida -= 10 * dt;
+          if (Math.random() < dt * 6) U.Combate.particulas(j.x, j.y - 0.4, 1, '#ff5470', 'brasa');
+          if (j.vida <= 0) { j.vida = 0; this.fin('derrota'); return; }
+        }
       }
     }
     if (tile === T.CENIZA && j.elementoActivo !== 'fuego') { j.vida = Math.max(0, j.vida - 3 * dt); if (Math.random() < dt * 2) U.Combate.particulas(j.x, j.y - 0.4, 1, '#ff7a2f', 'brasa'); if (j.vida <= 0) { j.vida = 0; this.fin('derrota'); return; } }
