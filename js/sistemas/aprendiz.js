@@ -1,6 +1,6 @@
 /* === js/sistemas/aprendiz.js === */
 /* Unipar — SER GUÍA (tener un aprendiz): de alumno a Guía, progresión tardía.
-   Ren, un aspirante de Bruma, te pide que seas su Guía SOLO cuando ya eres alguien
+   Taro, un aspirante de Bruma, te pide que seas su Guía SOLO cuando ya eres alguien
    en el pueblo: 1+ título honorífico Y fama ≥20 en el pueblo actual (U.Progresion
    + U.Orgs.fama). A partir de ahí lo entrenas como Torin te entrena a ti (mismo
    E.entreno con meta/prog/recompensa, mismo progresoEntreno contando tus golpes,
@@ -9,7 +9,7 @@
    j.tecnicasAprendidas / j.equipo vía U.Habilidades.aprendida — nunca se hardcodea
    un id nuevo del catálogo), te acompaña y pelea a tu lado, y te reta cuando crece.
    Al dominar su elemento (70%) con 10 entrenos se gradúa y ganas el título
-   'Guía de Ren'.
+   'Guía de Taro'.
    INTEGRACIÓN (sin tocar otros archivos, solo estas líneas las pone el coordinador):
    · index.html: <script src="js/datos/aprendiz.js"> tras personas.js y
      <script src="js/sistemas/aprendiz.js"> al final, tras guardado.js.
@@ -19,21 +19,21 @@
    · guardado.js cargar, tras restaurar prog: if (d.aprendiz && U.Aprendiz) U.Aprendiz.restaurar(d.aprendiz);
    · (opcional) progresion.js htmlPausa/resumenPerfil: + (U.Aprendiz ? U.Aprendiz.htmlResumen() : '')
    NOTAS DE DISEÑO:
-   · El diálogo de Ren vive en U.Dialogo.guiones['ren'] (registrado aquí en init,
+   · El diálogo de Taro vive en U.Dialogo.guiones['taro'] (registrado aquí en init,
      con getter: las opciones se construyen frescas cada vez que se abre el menú, así
      enseñan su progreso real y solo muestran lo disponible). Las acciones propias
      ('apr*') se atienden con un envoltorio fino de U.Dialogo.elegir instalado en
-     init(): solo intercepta opciones apr* con Ren abierto; TODO lo demás delega al
-     elegir original sin tocarlo. El resto de acciones de Ren ('reto', rumores,
+     init(): solo intercepta opciones apr* con Taro abierto; TODO lo demás delega al
+     elegir original sin tocarlo. El resto de acciones de Taro ('reto', rumores,
      regalos, gustos…) son las nativas de dialogo.js.
-   · El reto usa U.Combate.iniciarReto('ren'): combate.js solo tiene defs de Kaelen
+   · El reto usa U.Combate.iniciarReto('taro'): combate.js solo tiene defs de Kaelen
      y Torin y cae en la de Kaelen (veterano, 60 s). Funciona, pero el banner dice
-     'RETO DE KAELEN · EL MURO'. Para que diga 'RETO DE REN' basta añadir una línea
-     a defs en combate.js: ren: { nombre: 'Reto de Ren · El aprendiz', clases: ['bandido'], t: 60, mult: 0.95 }.
+     'RETO DE KAELEN · EL MURO'. Para que diga 'RETO DE TARO' basta añadir una línea
+     a defs en combate.js: taro: { nombre: 'Reto de Taro · El aprendiz', clases: ['bandido'], t: 60, mult: 0.95 }.
      No se toca aquí porque combate.js está fuera de este encargo.
    · U.HUD.toast es un no-op en este juego (HUD minimalista): todo el feedback
      visible va por U.HUD.banner, texto flotante (U.Combate.texto) y el diálogo.
-   · Ren no tiene muerte: los enemigos solo persiguen al jugador, así que como
+   · Taro no tiene muerte: los enemigos solo persiguen al jugador, así que como
      acompañante pega pero nadie le pega a él. Simplificación deliberada. */
 window.U = window.U || {};
 
@@ -181,7 +181,7 @@ U.Aprendiz = {
     const E = U.Juego.estado; if (!E || !E.jugador || E.ui === 'test') return;
     const a = this.asegurar(); if (!a) return;
     const D = U.AprendizDatos;
-    // LA PETICIÓN: cuando cumples el umbral, Ren te lo pide (por diálogo, no por arte
+    // LA PETICIÓN: cuando cumples el umbral, Taro te lo pide (por diálogo, no por arte
     // de magia). El banner te avisa; la conversación es con él, en la plaza. Si lo
     // rechazas, no insiste hasta pasados 2 días.
     if (a.estado === 'ninguno') {
@@ -189,14 +189,14 @@ U.Aprendiz = {
       const dia = E.reloj ? (E.reloj.dia || 1) : 1;
       if (p.ok && dia - (a.ultimoPedidoDia || -99) >= 2) {
         a.estado = 'pendiente'; a.pedidoDia = dia; a.ultimoPedidoDia = dia;
-        U.HUD.banner('🌿 ¡REN QUIERE HABLAR CONTIGO! · TE ESPERA EN LA PLAZA DE BRUMA', 3);
+        U.HUD.banner('🌿 ¡TARO QUIERE HABLAR CONTIGO! · TE ESPERA EN LA PLAZA DE BRUMA', 3);
         if (U.Audio) U.Audio.sfx('unlock');
         if (U.Guardado) U.Guardado.guardarAuto();
       }
     }
     // VIGILANCIA DEL ENTRENO: la sesión la lleva E.entreno (como con Torin) y la
     // completa progresoEntreno (golpes/dash/meditación). Aquí solo detectamos que
-    // terminó (historial.entrenos subió) y le damos a REN su crecimiento.
+    // terminó (historial.entrenos subió) y le damos a TARO su crecimiento.
     if (a._vigilando) {
       if (!E.entreno) {
         const vistos = E.historial ? (E.historial.entrenos || 0) : 0;
@@ -243,7 +243,7 @@ U.Aprendiz = {
         U.Combate.dañoEnemigo(mejor, dmg, a.elemento, { desafio: 0.5 });
         U.Combate.particulas(mejor.x, mejor.y - 0.6, 6, U.Elementos.color(a.elemento), 'chispa');
         const tec = this.tecnicaFavorita();
-        U.Combate.texto(mejor, 'REN · ' + (tec || '¡Toma!') + ' −' + dmg, U.Elementos.color(a.elemento), 1);
+        U.Combate.texto(mejor, 'TARO · ' + (tec || '¡Toma!') + ' −' + dmg, U.Elementos.color(a.elemento), 1);
         a.maestria[a.elemento] = Math.min(100, (a.maestria[a.elemento] || 0) + 0.05); // pelear a tu lado también le enseña
         if (U.Audio) U.Audio.sfx('golpe');
       }
@@ -262,15 +262,15 @@ U.Aprendiz = {
     const decir = txt => { U.Dialogo.decir(txt); U.Dialogo.razon = ''; U.Dialogo.pintarRazon(); U.Dialogo.pintarCara(); if (U.Audio) U.Audio.sfx('dialogo'); };
     const refrescar = () => { if (U.Dialogo.mostrarSecciones) U.Dialogo.mostrarSecciones(n); };
     if (!d) { decir('Ese entreno no existe.'); refrescar(); return; }
-    if (a.estado !== 'aprendiz' && a.estado !== 'graduado') { decir('Ren aún no es tu aprendiz: primero tiene que pedirte que seas su Guía (eso pasa cuando ya tienes títulos y fama en Bruma).'); refrescar(); return; }
-    if (E.entreno) { decir('Ya tienes un entrenamiento en curso (' + E.entreno.nombre + '). Termínalo primero y luego entrenas a Ren: un entreno a la vez, como con Torin.'); refrescar(); return; }
+    if (a.estado !== 'aprendiz' && a.estado !== 'graduado') { decir('Taro aún no es tu aprendiz: primero tiene que pedirte que seas su Guía (eso pasa cuando ya tienes títulos y fama en Bruma).'); refrescar(); return; }
+    if (E.entreno) { decir('Ya tienes un entrenamiento en curso (' + E.entreno.nombre + '). Termínalo primero y luego entrenas a Taro: un entreno a la vez, como con Torin.'); refrescar(); return; }
     E.entreno = { guia: D.NPC_ID, tipo: d.tipo, meta: d.meta, prog: 0, nombre: d.nombre, recompensa: d.recompensa };
     a._vigilando = d.tipo;
     a._entrenosVistosPrev = E.historial ? (E.historial.entrenos || 0) : 0;
     a._entrenosVistos = a._entrenosVistosPrev;
     U.HUD.banner('🎯 ' + d.nombre.toUpperCase(), 1.8);
     if (U.Audio) U.Audio.sfx('unlock');
-    decir('Ren deja el palo y se pone en guardia: «' + d.nombre + '. ¡Vamos, Guía!» (El entreno es el mismo que con Torin: TÚ haces la tarea —golpes, dashes o meditación— y ÉL aprende contigo. Tu recompensa también llega: ' + (U.Estadisticas ? U.Estadisticas.etiquetas[d.recompensa] : d.recompensa) + ' +.)');
+    decir('Taro deja el palo y se pone en guardia: «' + d.nombre + '. ¡Vamos, Guía!» (El entreno es el mismo que con Torin: TÚ haces la tarea —golpes, dashes o meditación— y ÉL aprende contigo. Tu recompensa también llega: ' + (U.Estadisticas ? U.Estadisticas.etiquetas[d.recompensa] : d.recompensa) + ' +.)');
     refrescar();
   },
   completarEntreno(tipo) {
@@ -295,7 +295,7 @@ U.Aprendiz = {
       n.hechos.push('completó un entreno contigo (' + d.tipo + ')');
       if (U.Emociones) U.Emociones.evento(n, { realidad: 80, energia: 10, etiqueta: 'entreno completo' });
     }
-    U.HUD.banner('🎯 ¡REN COMPLETÓ EL ENTRENO! · ' + subidas.join(' · '), 2.4);
+    U.HUD.banner('🎯 ¡TARO COMPLETÓ EL ENTRENO! · ' + subidas.join(' · '), 2.4);
     if (U.Audio) U.Audio.sfx('unlock');
     if (n && U.Combate && U.Combate.texto) U.Combate.texto(n, '▲ ' + subidas.join(' · '), '#7ef0c0', 1);
     if (U.Guardado) U.Guardado.guardarAuto();
@@ -303,8 +303,8 @@ U.Aprendiz = {
   graduar() {
     const a = this.asegurar(); if (!a || a.estado !== 'aprendiz') return;
     a.estado = 'graduado';
-    if (U.Progresion) U.Progresion.otorgarTitulo('Guía de Ren');
-    U.HUD.banner('🌿 ¡REN DOMINA LA TIERRA! · YA NO ES TU APRENDIZ: ES UN GUÍA EN FORMACIÓN', 3.5);
+    if (U.Progresion) U.Progresion.otorgarTitulo('Guía de Taro');
+    U.HUD.banner('🌿 ¡TARO DOMINA LA TIERRA! · YA NO ES TU APRENDIZ: ES UN GUÍA EN FORMACIÓN', 3.5);
     if (U.Audio) U.Audio.sfx('victoria');
     const n = this.buscar();
     if (n) { if (!n.hechos) n.hechos = []; n.hechos.push('se graduó como tu aprendiz'); if (U.Emociones) U.Emociones.evento(n, { realidad: 95, energia: 20, etiqueta: 'graduación' }); }
@@ -323,25 +323,25 @@ U.Aprendiz = {
     const E = U.Juego.estado, j = E.jugador, D = U.AprendizDatos, a = this.asegurar();
     const tec = U.Habilidades ? U.Habilidades.porId(j, tecId) : null;
     if (!tec) return 'Esa técnica no existe en tu registro: no puedes enseñar lo que ni tú conoces.';
-    if (a.tecnicas.indexOf(tecId) >= 0) return 'Ren ya sabe «' + tec.nombre + '»: ya está en su set. Enséñale otra, o que olvide esta primero.';
+    if (a.tecnicas.indexOf(tecId) >= 0) return 'Taro ya sabe «' + tec.nombre + '»: ya está en su set. Enséñale otra, o que olvide esta primero.';
     if (a.tecnicas.length >= D.MAX_TECNICAS) return 'Su set está lleno (' + D.MAX_TECNICAS + '/' + D.MAX_TECNICAS + '): para enseñarle «' + tec.nombre + '» tiene que OLVIDAR una primero. El set lo decides tú, pero no crece sin límite — como en Pokémon.';
     // GENÉRICO: ¿la dominas TÚ? Vale maestría ≥ umbral, concedida por un Guía
     // (j.tecnicasAprendidas) o estilo Yang/Yin según el caso. Nada hardcodeado.
     if (!U.Habilidades.aprendida(j, tec)) return 'Tú aún no dominas «' + tec.nombre + '»: no puedes enseñar lo que no has aprendido. (Se aprende por maestría, de un Guía o, el Yang, entrenando el estilo.)';
     a.tecnicas.push(tecId);
     const n = this.buscar(); if (n) { if (!n.hechos) n.hechos = []; n.hechos.push('le enseñaste «' + tec.nombre + '»'); }
-    U.HUD.banner('📖 REN APRENDIÓ «' + tec.nombre.toUpperCase() + '» · SU SET: ' + a.tecnicas.length + '/' + D.MAX_TECNICAS, 2.2);
+    U.HUD.banner('📖 TARO APRENDIÓ «' + tec.nombre.toUpperCase() + '» · SU SET: ' + a.tecnicas.length + '/' + D.MAX_TECNICAS, 2.2);
     if (U.Audio) U.Audio.sfx('unlock');
     if (U.Guardado) U.Guardado.guardarAuto();
-    return 'Le enseñas «' + tec.nombre + '» paso a paso, como Torin te enseñó a ti: primero el gesto, luego la respiración, luego la Esencia. Ren lo repite hasta que le sale: ya es SUYA. Su set ahora es: ' + this.nombresSet().join(', ') + ' (' + a.tecnicas.length + '/' + D.MAX_TECNICAS + ').';
+    return 'Le enseñas «' + tec.nombre + '» paso a paso, como Torin te enseñó a ti: primero el gesto, luego la respiración, luego la Esencia. Taro lo repite hasta que le sale: ya es SUYA. Su set ahora es: ' + this.nombresSet().join(', ') + ' (' + a.tecnicas.length + '/' + D.MAX_TECNICAS + ').';
   },
   olvidar(tecId) {
     const a = this.asegurar();
-    const i = a.tecnicas.indexOf(tecId); if (i < 0) return 'Ren no tiene esa técnica en su set.';
+    const i = a.tecnicas.indexOf(tecId); if (i < 0) return 'Taro no tiene esa técnica en su set.';
     const nombre = this.nombresSet()[i];
     a.tecnicas.splice(i, 1);
     if (U.Guardado) U.Guardado.guardarAuto();
-    return 'Ren asiente, serio: «Vale, Guía. La dejo ir.» «' + nombre + '» sale de su set (ahora: ' + (this.nombresSet().join(', ') || 'vacío') + '). Ya le puedes enseñar otra en su lugar.';
+    return 'Taro asiente, serio: «Vale, Guía. La dejo ir.» «' + nombre + '» sale de su set (ahora: ' + (this.nombresSet().join(', ') || 'vacío') + '). Ya le puedes enseñar otra en su lugar.';
   },
   cambiarAcompanar() {
     const a = this.asegurar(); const n = this.buscar();
@@ -349,8 +349,8 @@ U.Aprendiz = {
     if (n) n.enEscolta = !!a.acompana;
     if (U.Guardado) U.Guardado.guardarAuto();
     return a.acompana
-      ? 'Ren se pone a tu lado, palo en mano: «Voy contigo, Guía. Si sale algo, yo también pego.» (Te sigue por Bruma y en combate golpea al enemigo más cercano. Si entras en tu casa o en la Oficina, te espera fuera.)'
-      : 'Ren asiente y vuelve a su puesto en la plaza: «Aquí te espero, Guía. Cuando quieras, volvemos.»';
+      ? 'Taro se pone a tu lado, palo en mano: «Voy contigo, Guía. Si sale algo, yo también pego.» (Te sigue por Bruma y en combate golpea al enemigo más cercano. Si entras en tu casa o en la Oficina, te espera fuera.)'
+      : 'Taro asiente y vuelve a su puesto en la plaza: «Aquí te espero, Guía. Cuando quieras, volvemos.»';
   },
 
   // ---------- textos ----------
@@ -360,7 +360,7 @@ U.Aprendiz = {
   },
   textoSueno() {
     const p = this.puedeSerGuia(); const a = this.asegurar();
-    let t = 'Ren mira al suelo, luego a ti: «Quiero ser guardia como Kaelen. De verdad, no de mentiritas. Practico todos los días con mi palo, pero… solo llego hasta aquí. Necesito un Guía que me enseñe en serio.»';
+    let t = 'Taro mira al suelo, luego a ti: «Quiero ser guardia como Kaelen. De verdad, no de mentiritas. Practico todos los días con mi palo, pero… solo llego hasta aquí. Necesito un Guía que me enseñe en serio.»';
     if (a.estado === 'aprendiz' || a.estado === 'graduado') t += ' (Ya eres su Guía: háblale para entrenarlo, enseñarle tu set o pedirle que te acompañe.)';
     else if (p.ok) t += ' (Y mírate: ya cumples lo que pide un Guía — títulos y fama. ¿A qué esperas? Háblale y escucha lo que te quiere pedir.)';
     else {
@@ -377,7 +377,7 @@ U.Aprendiz = {
     const el = U.Elementos.nombre(a.elemento);
     const estadoTxt = a.estado === 'graduado' ? 'GRADUADO: ya domina su elemento, un Guía en formación (sigue entrenando contigo si quieres)' : a.estado === 'aprendiz' ? 'Tu APRENDIZ' : 'Aún no es tu aprendiz';
     const st = a.stats;
-    let t = 'Ren · ' + estadoTxt + ' · Elemento: ' + el + ' (maestría ' + Math.floor(a.maestria[a.elemento] || 0) + '%) · Yin ' + Math.floor(a.estilos.yin) + ' · Yang ' + Math.floor(a.estilos.yang)
+    let t = 'Taro · ' + estadoTxt + ' · Elemento: ' + el + ' (maestría ' + Math.floor(a.maestria[a.elemento] || 0) + '%) · Yin ' + Math.floor(a.estilos.yin) + ' · Yang ' + Math.floor(a.estilos.yang)
       + ' · Vida ' + Math.floor(st.vida) + ' · Esencia ' + Math.floor(st.esencia) + ' · Ataque ' + Math.floor(st.ataque) + ' · Defensa ' + Math.floor(st.defensa) + ' · Mente ' + Math.floor(st.mente) + ' · Velocidad ' + Math.floor(st.velocidad)
       + ' · Entrenos completados: ' + (a.entrenos || 0) + ' · Retos: ' + (a.retosGanados || 0) + ' ganados, ' + (a.retosPerdidos || 0) + ' perdidos'
       + ' · Su set (' + a.tecnicas.length + '/' + U.AprendizDatos.MAX_TECNICAS + '): ' + (this.nombresSet().join(', ') || 'vacío — enséñale TUS técnicas')
@@ -394,16 +394,16 @@ U.Aprendiz = {
     const R = (t, extra) => Object.assign({ t, realidad: 66, energia: 5, resp: { pos: '…', neg: '…' } }, extra || {});
     const ops = [];
     if (a.estado === 'pendiente') {
-      ops.push(R('🌿 Escuchar lo que Ren quiere pedirte (parece importante)', { accion: 'aprPedir', et: 'pregunta' }));
-      ops.push(R('🌿 Preguntarle a Ren qué quiere ser de mayor', { accion: 'aprSueno', et: 'pregunta' }));
+      ops.push(R('🌿 Escuchar lo que Taro quiere pedirte (parece importante)', { accion: 'aprPedir', et: 'pregunta' }));
+      ops.push(R('🌿 Preguntarle a Taro qué quiere ser de mayor', { accion: 'aprSueno', et: 'pregunta' }));
       return ops;
     }
     if (a.estado === 'ninguno') {
-      ops.push(R('🌿 Preguntarle a Ren qué quiere ser de mayor', { accion: 'aprSueno', et: 'pregunta' }));
+      ops.push(R('🌿 Preguntarle a Taro qué quiere ser de mayor', { accion: 'aprSueno', et: 'pregunta' }));
       return ops;
     }
     // aprendiz o graduado
-    ops.push(R('📋 Ver cómo va Ren (stats, maestría y su set)', { accion: 'aprVer', et: 'pregunta' }));
+    ops.push(R('📋 Ver cómo va Taro (stats, maestría y su set)', { accion: 'aprVer', et: 'pregunta' }));
     const enCurso = !!E.entreno;
     Object.keys(D.ENTRENOS).forEach(k => {
       const d = D.ENTRENOS[k];
@@ -425,11 +425,11 @@ U.Aprendiz = {
     if (a.tecnicas.length >= D.MAX_TECNICAS) ops.push(R('📖 Su set está lleno (' + D.MAX_TECNICAS + '/' + D.MAX_TECNICAS + '): que olvide una para enseñarle otra', { accion: 'aprVer', et: 'pregunta' }));
     a.tecnicas.forEach(id => {
       const tec = U.Habilidades ? U.Habilidades.porId(j, id) : null;
-      ops.push(R('🗑 Que Ren olvide «' + (tec ? tec.nombre : id) + '»', { accion: 'aprOlvidar', tecId: id, et: 'entrenar' }));
+      ops.push(R('🗑 Que Taro olvide «' + (tec ? tec.nombre : id) + '»', { accion: 'aprOlvidar', tecId: id, et: 'entrenar' }));
     });
-    ops.push(R(a.acompana ? '🚶 Que Ren vuelva a la plaza (deja de acompañarte)' : '🤝 Que Ren te acompañe (pelea a tu lado)', { accion: 'aprAcompanar', et: 'entrenar' }));
+    ops.push(R(a.acompana ? '🚶 Que Taro vuelva a la plaza (deja de acompañarte)' : '🤝 Que Taro te acompañe (pelea a tu lado)', { accion: 'aprAcompanar', et: 'entrenar' }));
     if ((a.maestria[a.elemento] || 0) >= D.RETO_MAESTRIA_MIN || (a.entrenos || 0) >= D.RETO_ENTRENOS_MIN) {
-      ops.push(R('⚔ Retar a Ren a un duelo (60 s, como con Kaelen y Torin)', { accion: 'reto', et: 'reto', resp: { pos: 'Acepto el reto.', neg: 'Sin reto.' } }));
+      ops.push(R('⚔ Retar a Taro a un duelo (60 s, como con Kaelen y Torin)', { accion: 'reto', et: 'reto', resp: { pos: 'Acepto el reto.', neg: 'Sin reto.' } }));
     }
     return ops;
   },
@@ -440,10 +440,10 @@ U.Aprendiz = {
     switch (o.accion) {
       case 'aprPedir': {
         if (U.Emociones) U.Emociones.evento(n, { realidad: 72, energia: 8, etiqueta: 'te pide ser su Guía' });
-        decir('Ren se quita el palo de la espalda, lo deja en el suelo y te mira a los ojos, serio por primera vez desde que lo conoces: «' + this.textoPeticion() + '»');
+        decir('Taro se quita el palo de la espalda, lo deja en el suelo y te mira a los ojos, serio por primera vez desde que lo conoces: «' + this.textoPeticion() + '»');
         U.Dialogo.opciones = [
-          { t: '🌿 «Sí, Ren. Seré tu Guía.» (aceptar: entrenarlo es tu trabajo ahora)', accion: 'aprAceptar', realidad: 80, energia: 10, et: 'guia' },
-          { t: '«Ahora no, Ren. Todavía no.» (rechazar: te lo volverá a pedir en unos días)', accion: 'aprRechazar', realidad: 40, energia: 5, et: 'guia' }
+          { t: '🌿 «Sí, Taro. Seré tu Guía.» (aceptar: entrenarlo es tu trabajo ahora)', accion: 'aprAceptar', realidad: 80, energia: 10, et: 'guia' },
+          { t: '«Ahora no, Taro. Todavía no.» (rechazar: te lo volverá a pedir en unos días)', accion: 'aprRechazar', realidad: 40, energia: 5, et: 'guia' }
         ];
         U.Dialogo.pintarOpciones();
         return;
@@ -453,9 +453,9 @@ U.Aprendiz = {
         if (U.Emociones) U.Emociones.evento(n, { realidad: 95, energia: 20, etiqueta: 'aceptaste ser su Guía' });
         if (!n.hechos) n.hechos = [];
         n.hechos.push('aceptaste ser su Guía');
-        U.HUD.banner('🌿 ¡ERES EL GUÍA DE REN! · ENTRENA CON ÉL Y ENSÉÑALE TU SET', 3);
+        U.HUD.banner('🌿 ¡ERES EL GUÍA DE TARO! · ENTRENA CON ÉL Y ENSÉÑALE TU SET', 3);
         if (U.Audio) U.Audio.sfx('victoria');
-        decir('Ren suelta el aire que estaba aguantando y sonríe como si le hubieran dado la plaza entera: «¡Gracias, Guía! Empiezo ahora mismo: dime qué entrenamos primero.» (Háblale cuando quieras: entrenarlo como Torin te entrena a ti, enseñarle TUS técnicas —su set lo decides tú— o pedirle que te acompañe y pelee a tu lado.)');
+        decir('Taro suelta el aire que estaba aguantando y sonríe como si le hubieran dado la plaza entera: «¡Gracias, Guía! Empiezo ahora mismo: dime qué entrenamos primero.» (Háblale cuando quieras: entrenarlo como Torin te entrena a ti, enseñarle TUS técnicas —su set lo decides tú— o pedirle que te acompañe y pelee a tu lado.)');
         refrescar();
         if (U.Guardado) U.Guardado.guardarAuto();
         return;
@@ -464,7 +464,7 @@ U.Aprendiz = {
         a.estado = 'ninguno';
         a.ultimoPedidoDia = E.reloj ? (E.reloj.dia || 1) : 1;
         if (U.Emociones) U.Emociones.evento(n, { realidad: 45, energia: 5, etiqueta: 'rechazaste ser su Guía' });
-        decir('Ren baja la mirada, recoge su palo y asiente despacio: «Vale… lo entiendo. Seguiré practicando solo. Si algún día cambias de idea… aquí estaré, en la plaza.» (Te lo volverá a pedir en unos días, si sigues cumpliendo el umbral.)');
+        decir('Taro baja la mirada, recoge su palo y asiente despacio: «Vale… lo entiendo. Seguiré practicando solo. Si algún día cambias de idea… aquí estaré, en la plaza.» (Te lo volverá a pedir en unos días, si sigues cumpliendo el umbral.)');
         refrescar();
         if (U.Guardado) U.Guardado.guardarAuto();
         return;
@@ -484,7 +484,7 @@ U.Aprendiz = {
     const esc = s => (U.HUD && U.HUD.escHtml) ? U.HUD.escHtml(s) : String(s);
     const st = a.stats;
     const estadoTxt = a.estado === 'graduado' ? 'GRADUADO (Guía en formación)' : a.estado === 'aprendiz' ? 'Tu aprendiz' : a.estado === 'pendiente' ? 'Te pidió ser su Guía (háblale en la plaza)' : 'Aún no es tu aprendiz';
-    return '<section><h3>🌿 Tu aprendiz · Ren</h3><div style="font-size:12.5px">Estado: <b>' + estadoTxt + '</b> · Elemento: ' + esc(U.Elementos.nombre(a.elemento)) + ' · Maestría: <b>' + Math.floor(a.maestria[a.elemento] || 0) + '%</b>'
+    return '<section><h3>🌿 Tu aprendiz · Taro</h3><div style="font-size:12.5px">Estado: <b>' + estadoTxt + '</b> · Elemento: ' + esc(U.Elementos.nombre(a.elemento)) + ' · Maestría: <b>' + Math.floor(a.maestria[a.elemento] || 0) + '%</b>'
       + '<br>Vida ' + Math.floor(st.vida) + ' · Esencia ' + Math.floor(st.esencia) + ' · Ataque ' + Math.floor(st.ataque) + ' · Defensa ' + Math.floor(st.defensa) + ' · Mente ' + Math.floor(st.mente) + ' · Velocidad ' + Math.floor(st.velocidad)
       + ' · Yin ' + Math.floor(a.estilos.yin) + ' · Yang ' + Math.floor(a.estilos.yang)
       + '<br>Entrenos: <b>' + (a.entrenos || 0) + '</b> · Retos: ' + (a.retosGanados || 0) + ' ganados / ' + (a.retosPerdidos || 0) + ' perdidos' + (a.acompana ? ' · <b>Te acompaña</b>' : '')

@@ -3,15 +3,15 @@
    en js/sistemas/aprendiz.js. No depende del orden de carga: solo define
    U.AprendizDatos; el registro (catálogo, personas, rutinas, guion) lo hace
    U.Aprendiz.init() cuando el juego ya arrancó.
-   EL APRENDIZ ES REN: un chico de Bruma que practica la guardia con un palo en la
+   EL APRENDIZ ES TARO: un chico de Bruma que practica la guardia con un palo en la
    plaza. No es un NPC inventado de la nada para la ocasión: vive en Bruma desde el
    primer día, con su rutina y su casa, y solo cuando el jugador ya es ALGUIEN en el
    pueblo (títulos + fama) se atreve a pedirle que sea su Guía. */
 window.U = window.U || {};
 
 U.AprendizDatos = {
-  NPC_ID: 'ren',
-  NOMBRE: 'Ren',
+  NPC_ID: 'taro',
+  NOMBRE: 'Taro',
   ROL: 'Aspirante de Bruma · tu aprendiz',
   ELEMENTO: 'tierra',
   // DESBLOQUEO (explícito y sensato, juego tardío): 1+ título honorífico Y fama ≥20
@@ -22,20 +22,20 @@ U.AprendizDatos = {
   // El set que TÚ le enseñas: como en Pokémon, el aprendiz lleva el set que su
   // entrenador le pone. Máximo 5 técnicas, como el equipo del jugador (MAX_EQUIPO).
   MAX_TECNICAS: 5,
-  // Reto: Ren solo te reta cuando ya creció un poco (maestría ≥15 en su elemento,
+  // Reto: Taro solo te reta cuando ya creció un poco (maestría ≥15 en su elemento,
   // el umbral de la primera técnica, O 3 entrenos completados).
   RETO_MAESTRIA_MIN: 15,
   RETO_ENTRENOS_MIN: 3,
   // Graduación: deja de ser tu aprendiz cuando domina su elemento (70%, el umbral
   // de la tercera técnica) Y completó 10 entrenos. El jugador gana el título
-  // 'Guía de Ren' (U.Progresion.otorgarTitulo).
+  // 'Guía de Taro' (U.Progresion.otorgarTitulo).
   GRADUACION_MAESTRIA: 70,
   GRADUACION_ENTRENOS: 10,
-  // Ren empieza como un principiante de verdad: stats bajos, maestría 5% en Tierra.
+  // Taro empieza como un principiante de verdad: stats bajos, maestría 5% en Tierra.
   STATS_INICIALES: { vida: 60, esencia: 30, ataque: 8, defensa: 8, mente: 8, velocidad: 8 },
   MAESTRIA_INICIAL: 5,
-  // Paleta propia (U.Render.paletaNPC['ren']): si no existiera, el render usa la de
-  // Kaelen como fallback, así que Ren siempre se ve; con esta, se ve DISTINTO.
+  // Paleta propia (U.Render.paletaNPC['taro']): si no existiera, el render usa la de
+  // Kaelen como fallback, así que Taro siempre se ve; con esta, se ve DISTINTO.
   PALETA: { piel: '#e8c39e', pelo: '#2a4a2a', ropa: '#7a9a5b', ropa2: '#4a6b3a', detalle: '#f3d9a0' },
   // Plaza de Bruma, coordenadas del CONTINENTE (aldea +134,+222): junto a la fogata
   // pero sin pisarla (la fogata es sólida en 150.5,246.5). Casa: puerta vecina.
@@ -77,26 +77,26 @@ U.AprendizDatos = {
   SALUDO: {
     alegre: ['¡Guía! ¡Justo te buscaba! ¿Entrenamos hoy? ¡Traigo el palo!', '¡Qué bueno verte! Hoy practiqué el doble, ¿me miras?'],
     sereno: ['Buen día, Guía. Practiqué esta mañana. Creo que ya me sale mejor.'],
-    neutral: ['Hola… soy Ren. Practico la guardia con un palo, en la plaza. ¿Me viste alguna vez?'],
+    neutral: ['Hola… soy Taro. Practico la guardia con un palo, en la plaza. ¿Me viste alguna vez?'],
     triste: ['Hoy no me sale nada… ¿tú también tuviste días así, cuando empezabas?'],
     enojado: ['¡No me mires así! ¡Yo también puedo! ¡Mira, mira cómo practico!'],
     asustado: ['¡Ay! …ah, eres tú, Guía. Perdón, pensé que era un bandido.']
   },
   // ENTRENOS: espejo de Torin (main.js iniciarEntreno / progresoEntreno). El jugador
   // hace la tarea (golpes Yin que conecten, dashes, meditación con R) y el que crece
-  // es REN: sus stats y su maestría suben de forma visible. El jugador también gana
+  // es TARO: sus stats y su maestría suben de forma visible. El jugador también gana
   // lo suyo por el entreno normal (progresoEntreno), como cuando entrena con Torin:
   // entrenar juntos hace crecer a los dos.
   // tipo = el tipo de E.entreno que progresoEntreno ya sabe contar ('golpes',
   // 'esquiva', 'meditacion'); meta = lo que hay que completar; recompensa = el stat
   // que sube EL JUGADOR al completar (igual que con Torin); crecimiento = lo que
-  // sube REN al completar.
+  // sube TARO al completar.
   ENTRENOS: {
-    golpes: { tipo: 'golpes', meta: 5, nombre: 'Entreno de Ren · 5 golpes Yin que conecten', recompensa: 'ataque',
+    golpes: { tipo: 'golpes', meta: 5, nombre: 'Entreno de Taro · 5 golpes Yin que conecten', recompensa: 'ataque',
       crecimiento: { stats: { ataque: 1, vida: 2 }, maestria: 1.2, yin: 1 } },
-    esquiva: { tipo: 'esquiva', meta: 3, nombre: 'Entreno de Ren · 3 dashes', recompensa: 'defensa',
+    esquiva: { tipo: 'esquiva', meta: 3, nombre: 'Entreno de Taro · 3 dashes', recompensa: 'defensa',
       crecimiento: { stats: { defensa: 1, velocidad: 1 }, maestria: 1.0, yin: 0.5 } },
-    meditacion: { tipo: 'meditacion', meta: 8, nombre: 'Entreno de Ren · medita 8 s (tecla R)', recompensa: 'mente',
+    meditacion: { tipo: 'meditacion', meta: 8, nombre: 'Entreno de Taro · medita 8 s (tecla R)', recompensa: 'mente',
       crecimiento: { stats: { mente: 1, esencia: 2 }, maestria: 1.0, yang: 0.5 } }
   }
 };

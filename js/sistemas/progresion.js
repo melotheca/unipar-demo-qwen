@@ -158,7 +158,7 @@ U.Progresion = {
     h += '<section><h3>🏅 Tus títulos (' + p.titulos.length + ')</h3>' + (p.titulos.length ? '<div class="listaProx">' + p.titulos.map(t => '<span style="border-style:solid;color:var(--rayo)">🏅 ' + esc(t) + '</span>').join('') + '</div>' : '<div style="font-size:12px;color:var(--textoFrio)">Aún no tienes títulos. Se ganan por hazañas concretas (defender un pueblo, domar una criatura, ganar un torneo, juntar todas las medallas…), no por subir una escalera: son independientes y puedes tener varios a la vez.</div>') + '</section>';
     // AJUSTE DESTELLOS
     h += '<section><h3>✦ Ajuste · destellos de pantalla (Destello de Rayo)</h3><div style="font-size:12px;color:var(--textoFrio)">El destello es suave y gradual, nunca un parpadeo brusco. Si te molesta la luz, redúcelo o apágalo: la técnica sigue cegando igual.</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">' + ['normal', 'suave', 'off'].map(m2 => '<button class="mini' + ((E.destelloModo || 'normal') === m2 ? ' exito' : '') + '" data-prog="destelloModo" data-v="' + m2 + '">' + ({ normal: 'NORMAL', suave: 'REDUCIDO', off: 'DESACTIVADO' })[m2] + '</button>').join('') + '</div></section>';
-    h += (U.Aprendiz ? U.Aprendiz.htmlResumen() : ''); // IDEA 4: el progreso de Ren, tu aprendiz
+    h += (U.Aprendiz ? U.Aprendiz.htmlResumen() : ''); // IDEA 4: el progreso de Taro, tu aprendiz
     return h;
   },
   resumenPerfil() {

@@ -509,4 +509,13 @@ U.Vida = {
     { d: 12, h: 18, m: 'aldea', x: 64.5, y: 160.5, l: 'la plaza de Arcana, junto a la fogata', a: 'cuenta lo que dicen las estrellas, sin certezas' },
     { d: 18, h: 22, m: 'aldea', x: 77.5, y: 169.5, l: 'la plaza de Arcana, junto al brasero', a: 'mira las estrellas desde la plaza, con té' }
   ];
+  // Vesper, maestro hechicero: mañana medita en su rincón junto a la biblioteca
+  // (58.5,157.5: baldosa libre de la plaza, al oeste del puesto de Esteban, sin pisar
+  // a nadie), mediodía en la plaza junto a la fogata y tarde junto al brasero del
+  // suroeste. Coordenadas CONTINUAS directas, como esteban/miriam: sin OFFR.
+  U.Vida.RUTINAS.vesper = [
+    { d: 5, h: 12, m: 'aldea', x: 58.5, y: 157.5, l: 'su rincón de meditación de Arcana', a: 'medita en silencio junto a la biblioteca', fijo: true },
+    { d: 12, h: 18, m: 'aldea', x: 66.5, y: 160.5, l: 'la plaza de Arcana, junto a la fogata', a: 'escucha a quien llega y responde despacio' },
+    { d: 18, h: 22, m: 'aldea', x: 54.5, y: 168.5, l: 'la plaza de Arcana, junto al brasero del suroeste', a: 'medita al caer el sol, con el brasero encendido', fijo: true }
+  ];
 })();

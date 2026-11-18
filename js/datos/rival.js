@@ -19,8 +19,11 @@
    'el Vendaval'; Fuego 'el Incendio', Agua 'la Marea', Rayo 'el Relámpago',
    Tierra 'la Montaña'. Las líneas de diálogo escriben 'el Vendaval' como texto
    base y U.Rival.dialogo() lo sustituye por el apodo efectivo (mismo artículo).
-   ALDEA: Bruma, siempre. No se mueve a otra aldea (pendiente de decisión del
-   usuario: misma aldea o aldea contraria; aquí NO se decide).
+   ALDEA (DECISIÓN 3, 2026-11-18): Ren vive en la aldea de SU elemento — la
+   contraria a la del jugador, porque su elemento es el contrario. El torneo
+   final y la Arena de Ecos siguen siendo EVENTOS en Bruma (no su casa): ahí
+   aparece igual que antes. El mapa ALDEAS dice dónde vive por elemento, y
+   rutinaDe() su rutina diaria en esa aldea (plaza, entreno, entrada, fogata).
    PERSONALIDAD: arrogante y competitivo, pero con código: respeta a quien le
    gana de verdad y no deja tirado a un rival herido. Quiere ser el mejor del
    continente y te usa a ti como medida: si tú subes, él sube más.
@@ -62,6 +65,127 @@ U.RivalDatos = {
   apodoDe(elRen) { return (elRen && this.APODOS[elRen]) || 'el Vendaval'; },
   tituloDe(elRen) { return 'REN · ' + this.apodoDe(elRen).toUpperCase(); },
   emojiDe(elRen) { return (elRen && this.EMOJIS[elRen]) || '🌪'; },
+  // ---- ALDEA (Decisión 3): vive en la aldea de SU elemento ----
+  // Coordenadas del CONTINENTE, mapa 'aldea'. La plaza es donde spawnea y hace
+  // su vida; la casa es donde duerme de noche (horaCasa 21, vía Personas).
+  // NOTA: la casa NO es el punto exacto del encargo (380,206) etc.: ahí hay
+  // una casa SÓLIDA (el objeto 'casa' ocupa esa celda) y un NPC no puede estar
+  // dentro de un sólido — al despertar, Vida lo deja EN casaPos. Por eso cada
+  // casa es la baldosa transitable pegada a la casa (1 celda al norte, 1.4 en
+  // Ceniza Viva), igual que las casas de los NPC de Bruma, que también están
+  // en baldosa libre junto a su casa. Verificado en el mapa real.
+  NPC_ID: 'rival', // NUNCA 'ren': ese id ya es el aprendiz de Bruma (U.AprendizDatos)
+  ALDEAS: {
+    agua: { nombre: 'Puerto Brisa Azul', plaza: { x: 360.5, y: 196.5 }, casa: { x: 380.5, y: 205.5 } },
+    rayo: { nombre: 'Chispa Alta', plaza: { x: 355.5, y: 135.5 }, casa: { x: 366.5, y: 129.5 } },
+    tierra: { nombre: 'Raíz de Piedra', plaza: { x: 148.5, y: 332.5 }, casa: { x: 160.5, y: 323.5 } },
+    viento: { nombre: 'Vuelo Alto', plaza: { x: 219.5, y: 50.5 }, casa: { x: 235.5, y: 39.5 } },
+    fuego: { nombre: 'Ceniza Viva', plaza: { x: 330.5, y: 311.5 }, casa: { x: 338.5, y: 314.5 } }
+  },
+  // Aldea de Ren para SU elemento (desconocido → Viento / Vuelo Alto, el respaldo).
+  // Copias: quien la reciba no muta el mapa.
+  aldeaDe(elRen) {
+    const el = (elRen && this.ALDEAS[elRen]) ? elRen : 'viento';
+    const a = this.ALDEAS[el];
+    return { nombre: a.nombre, plaza: { x: a.plaza.x, y: a.plaza.y }, casa: { x: a.casa.x, y: a.casa.y } };
+  },
+  rolDe(elRen) { return 'Rival · Ren, ' + this.apodoDe(elRen); },
+  // ---- RUTINA POR ALDEA: plaza, entreno, entrada del pueblo, fogata ----
+  // Mismo formato que U.Vida.RUTINAS (d/h = horas, m = 'aldea', coordenadas del
+  // continente). Todas las paradas quedan a pocos pasos de SU plaza: es su
+  // pueblo, no un viajero. De noche (21h–04h) Vida lo mete en su casa solo.
+  RUTINAS: {
+    agua: [
+      { d: 5, h: 9, m: 'aldea', x: 360.5, y: 196.5, l: 'la plaza de Puerto Brisa Azul', a: 'entrena solo en la plaza, midiendo a quien pasa' },
+      { d: 9, h: 13, m: 'aldea', x: 367.5, y: 190.5, l: 'el muelle de entreno del puerto', a: 'practica sobre el agua, como si el lago fuera suyo' },
+      { d: 13, h: 17, m: 'aldea', x: 352.5, y: 201.5, l: 'la entrada del puerto, junto al puente del Río del Este', a: 'vigila la entrada, buscando rivales que crucen' },
+      { d: 17, h: 21, m: 'aldea', x: 362.5, y: 199.5, l: 'la fogata del puerto', a: 'escucha historias junto al fuego, sin admitir que le gustan' }
+    ],
+    rayo: [
+      { d: 5, h: 9, m: 'aldea', x: 355.5, y: 135.5, l: 'la plaza de Chispa Alta', a: 'entrena solo en la plaza, midiendo a quien pasa' },
+      { d: 9, h: 13, m: 'aldea', x: 362.5, y: 129.5, l: 'la meseta de entreno de Chispa Alta', a: 'practica bajo el cielo de tormenta, esperando un rayo' },
+      { d: 13, h: 17, m: 'aldea', x: 348.5, y: 140.5, l: 'la entrada de Chispa Alta', a: 'vigila la entrada, buscando rivales que suban' },
+      { d: 17, h: 21, m: 'aldea', x: 357.5, y: 138.5, l: 'la fogata de Chispa Alta', a: 'escucha historias junto al fuego, sin admitir que le gustan' }
+    ],
+    tierra: [
+      { d: 5, h: 9, m: 'aldea', x: 148.5, y: 332.5, l: 'la plaza de Raíz de Piedra', a: 'entrena solo en la plaza, midiendo a quien pasa' },
+      { d: 9, h: 13, m: 'aldea', x: 156.5, y: 326.5, l: 'el claro de entreno entre las rocas', a: 'practica contra las piedras, que no se quejan nunca' },
+      { d: 13, h: 17, m: 'aldea', x: 141.5, y: 338.5, l: 'la entrada de Raíz de Piedra', a: 'vigila la entrada, buscando rivales que bajen' },
+      { d: 17, h: 21, m: 'aldea', x: 150.5, y: 335.5, l: 'la fogata de Raíz de Piedra', a: 'escucha historias junto al fuego, sin admitir que le gustan' }
+    ],
+    viento: [
+      { d: 5, h: 9, m: 'aldea', x: 219.5, y: 50.5, l: 'la plaza de Vuelo Alto', a: 'entrena solo en la plaza, midiendo a quien pasa' },
+      { d: 9, h: 13, m: 'aldea', x: 228.5, y: 45.5, l: 'la meseta de entreno de Vuelo Alto', a: 'practica con el viento de la meseta, que nunca se está quieto' },
+      { d: 13, h: 17, m: 'aldea', x: 212.5, y: 56.5, l: 'la entrada de Vuelo Alto', a: 'vigila la entrada, buscando rivales que suban' },
+      { d: 17, h: 21, m: 'aldea', x: 221.5, y: 53.5, l: 'la fogata de Vuelo Alto', a: 'escucha historias junto al fuego, sin admitir que le gustan' }
+    ],
+    fuego: [
+      { d: 5, h: 9, m: 'aldea', x: 330.5, y: 311.5, l: 'la plaza de Ceniza Viva', a: 'entrena solo en la plaza, midiendo a quien pasa' },
+      { d: 9, h: 13, m: 'aldea', x: 338.5, y: 305.5, l: 'el brasero de entreno de Ceniza Viva', a: 'practica entre las brasas, que no perdonan un paso en falso' },
+      { d: 13, h: 17, m: 'aldea', x: 323.5, y: 317.5, l: 'la entrada de Ceniza Viva', a: 'vigila la entrada, buscando rivales que crucen la ceniza' },
+      { d: 17, h: 21, m: 'aldea', x: 332.5, y: 314.5, l: 'la fogata de Ceniza Viva', a: 'escucha historias junto al fuego, sin admitir que le gustan' }
+    ]
+  },
+  // Rutina de Ren para SU elemento (copias: el registro no muta el mapa).
+  rutinaDe(elRen) {
+    const el = (elRen && this.RUTINAS[elRen]) ? elRen : 'viento';
+    return this.RUTINAS[el].map(s => Object.assign({}, s));
+  },
+  // ---- PERSONA (para U.Personas.datos['rival']): elemento dinámico ----
+  // Reutiliza personalidad/descripcion de arriba; las frases son suyas: arrogante
+  // con código, no el Ren tímido del aprendiz. El elemento es el efectivo.
+  personaDe(elRen) {
+    const el = (elRen && this.ALDEAS[elRen]) ? elRen : 'viento';
+    return {
+      tipo: 'Arrogante y competitivo, con código',
+      elemento: el,
+      ritmo: 1.15,
+      horaCasa: 21,
+      desc: this.descripcion + ' Vive en ' + this.ALDEAS[el].nombre + ', la aldea de su elemento.',
+      gustos: ['un buen duelo', 'que le reconozcan que es el mejor', 'entrenar hasta que duela'],
+      disgustos: ['perder', 'que le digan que solo es ruido', 'los rivales que no aparecen'],
+      frases: {
+        calor: ['Con este calor entreno mejor. El que se queja, pierde.', 'Calor: el que aguanta, gana. Yo aguanto.'],
+        lluvia: ['Lluvia. El suelo resbala y el duelo se pone interesante.', 'Con lluvia peleo igual: el agua no me asusta.'],
+        tormenta: ['Tormenta. El cielo entrena conmigo, parece.', 'Que truene: un duelo con truenos suena mejor.'],
+        viento: ['Viento: empuja a los débiles y a mí me despeina. Nada más.', 'Con este viento los novatos ni se paran firmes. Yo sí.'],
+        niebla: ['Niebla. El rival que no ves es el que más te enseña.', 'Con niebla entreno el oído. El que se esconde, pierde.'],
+        despejado: ['Día claro: se ve lejos y se pelea mejor. ¿Te atreves?', 'Cielo limpio: día de duelo. No hay excusa que valga.'],
+        nublado: ['Nublado. Ni el cielo se decide hoy. Yo sí: entreno.', 'Día gris, guardia firme. Como siempre.']
+      },
+      victoria: '¿Eso era todo? Vuelve cuando tus golpes pesen de verdad.',
+      derrota: '…Vale. Me ganaste. No pongas esa cara: mañana entreno el doble.',
+      debil: 'Tch… estoy débil. Me retiro. No es huida: es estrategia.',
+      expulsa: '¡ALTO! Te miras muy débil. Fuera del círculo: un rival herido no me sirve.',
+      cortoDebil: 'Estoy débil… me salgo.'
+    };
+  },
+  // ---- SALUDO (para U.Dialogo.guiones['rival']): con su apodo efectivo ----
+  saludoDe(elRen) {
+    const ap = this.apodoDe(elRen);
+    return {
+      alegre: ['¡Ahí estás! Justo te buscaba: ¿un duelo, o vienes solo a mirar?', '¡Qué bueno verte! Hoy entrené el doble. ¿Lo notaste?'],
+      sereno: ['Buen día. Entrené esta mañana. Creo que ya me sale mejor que a ti.', 'Pasa. Estoy en mi aldea, en mi plaza. Aquí mando yo.'],
+      neutral: ['¿Tú otra vez? Soy Ren, ' + ap + '. Si vienes a retarme, habla. Si no, no me quites el sol.', 'Hmm. Tú debes ser el de Bruma. Yo soy Ren, ' + ap + '.'],
+      triste: ['Hoy no me sale nada… ¿tú también tienes días así? No me lo digas: no me importa.', 'Mal día. Pero un mal día mío sigue siendo mejor que tu buen día.'],
+      enojado: ['¿Qué quieres? Estoy entrenando, no de niñera.', '¡No me mires así! ¡Yo también puedo! ¡Mira cómo entreno!'],
+      asustado: ['¡No te acerques tan rápido! …ah, eres tú. Perdón. O no.']
+    };
+  },
+  // ---- PALETA (para U.Render.paletaNPC['rival']): el color de SU elemento ----
+  // Espejo de U.Elementos.datos por si aún no cargó: mismos hexágonos.
+  COLORES: {
+    fuego: { color: '#ff7a2f', claro: '#ffd08a', oscuro: '#a33b12' },
+    agua: { color: '#35c6f4', claro: '#bfefff', oscuro: '#1a6b94' },
+    tierra: { color: '#d9a441', claro: '#f3d9a0', oscuro: '#7a5320' },
+    viento: { color: '#7ef0c0', claro: '#dbfff0', oscuro: '#2a7f5c' },
+    rayo: { color: '#ffe14d', claro: '#fff7c2', oscuro: '#9c8410' }
+  },
+  paletaDe(elRen) {
+    const el = (elRen && this.ALDEAS[elRen]) ? elRen : 'viento';
+    const c = (typeof U !== 'undefined' && U.Elementos && U.Elementos.datos && U.Elementos.datos[el]) || this.COLORES[el] || this.COLORES.viento;
+    return { piel: '#e8c39e', pelo: '#2b2b33', ropa: c.color, ropa2: c.oscuro, detalle: c.claro };
+  },
   // Título por ganarle 3 duelos: 'Azote del Vendaval' / 'Azote de la Marea' / ...
   azoteDe(elRen) { const a = this.apodoDe(elRen); return a.indexOf('el ') === 0 ? 'Azote del ' + a.slice(3) : 'Azote de ' + a; },
   claseBase: 'chaman', // Viento a distancia, como su Haz: la clase de la que parte crearEnemigo

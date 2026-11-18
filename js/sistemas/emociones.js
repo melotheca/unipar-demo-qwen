@@ -16,7 +16,7 @@ U.Emociones = {
     omar: { nombre: 'Omar', rol: 'Pescador de Puerto Brisa Azul' }, rosa: { nombre: 'Rosa', rol: 'Cocinera de Puerto Brisa Azul' },
     hugo: { nombre: 'Hugo', rol: 'Carbonero de Ceniza Viva' }, emma: { nombre: 'Emma', rol: 'Alfarera de Ceniza Viva' },
     pablo: { nombre: 'Pablo', rol: 'Cantero de Raíz de Piedra' }, ana: { nombre: 'Ana', rol: 'Herbolaria de Raíz de Piedra' },
-    esteban: { nombre: 'Esteban', rol: 'Bibliotecario de Arcana' }, miriam: { nombre: 'Miriam', rol: 'Astróloga de Arcana' }
+    esteban: { nombre: 'Esteban', rol: 'Bibliotecario de Arcana' }, miriam: { nombre: 'Miriam', rol: 'Astróloga de Arcana' }, vesper: { nombre: 'Vesper', rol: 'Maestro hechicero de Arcana' }
   },
   tonos: {
     alegre: { color: '#ffe14d', suf: '!', vel: 34 }, sereno: { color: '#7ef0c0', suf: '.', vel: 28 }, neutral: { color: '#9fb3d9', suf: '.', vel: 30 },

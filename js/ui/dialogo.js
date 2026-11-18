@@ -377,6 +377,15 @@ U.Dialogo = {
         { t: 'Preguntar por el cielo de Arcana', realidad: 62, energia: 4, resp: { pos: 'El cielo de Arcana es el más limpio del continente: sin humo de fraguas ni luces de ciudad grande. Con viento, las nubes se van y las estrellas quedan. Con niebla, ni las estrellas se ven: día de té. Y con tormenta, el cielo habla fuerte. Yo escucho.', neg: 'El cielo más limpio del continente.' }, et: 'pregunta' },
         { t: 'Saludarla con calidez', realidad: 72, energia: 4, resp: { pos: 'Qué amable. Las estrellas lo vieron venir. Yo también, casi.', neg: '…hola.' }, et: 'saludo' }
       ]
+    },
+    vesper: {
+      saludo: { alegre: ['Día claro. La mente se ve entera. Siéntate, si vienes a escuchar.', 'Sol y silencio: así se oye lo que la mente dice.'], sereno: ['La mente no admite prisas. Yo tampoco. Pregunta despacio y te respondo despacio.'], neutral: ['Soy Vesper, maestro hechicero de Arcana. Guío a quien quiere despertar el Arte Místico. No enseño atajos: enseño a escuchar la mente.'], triste: ['Con este calor la mente se seca… a meditar a la sombra y a cuidar el silencio.'] },
+      opciones: [
+        { t: 'Preguntar por el Arte Místico', realidad: 64, energia: 4, resp: { pos: 'El Arte Místico es la capa mental del mundo: no se ve, se siente. Sentido, Rastreo y Barrera mental son lo primero que se aprende, en orden, con los hechiceros de Arcana. Después vienen las técnicas mayores, según tu camino. Y ser hechicero es casi otra vida: dominarlo de verdad toma años, no días.', neg: 'Mente, silencio y años. Eso es el Arte Místico.' }, et: 'pregunta' },
+        { t: 'Preguntar por los hechiceros de Arcana', realidad: 62, energia: 4, resp: { pos: 'Los hechiceros de Arcana no enseñan a cualquiera: enseñan a quien viene a aprender, sin prisa. Esteban te presenta y ellos te enseñan lo básico, en orden, y tú pones los años. Yo soy quien despierta y guía: si quieres convertirte en uno, ven a mí.', neg: 'Hechiceros de Arcana: vienen a aprender, no a presumir.' }, et: 'pregunta' },
+        { t: '✨ Pedir el despertar de hechicero', realidad: 68, energia: 10, resp: { pos: '¿Quieres despertar? No es un truco ni un examen: es un momento. Pongo la mano sobre tu frente, el mundo se queda en silencio un instante, y el Arte Místico empieza a correr por ti. Después, las tres básicas las aprendes con los hechiceros, en orden. ¿Lo hacemos ahora?', neg: 'El despertar no se pide con prisa. Vuelve cuando lo quieras de verdad.' }, accion: 'despertarHechicero', et: 'entrenar' },
+        { t: 'Saludarlo con respeto', realidad: 70, energia: 4, resp: { pos: 'Respeto y silencio. Así se entra a la mente.', neg: '…asiente despacio, sin abrir los ojos.' }, et: 'saludo' }
+      ]
     }
   },
   init() {
@@ -1039,6 +1048,12 @@ U.Dialogo = {
         if (r.ok) { U.Audio.sfx('unlock'); resp = 'Los hechiceros de Arcana te aceptan como aprendiz y te enseñan «' + sig.nombre + '»: ' + sig.desc + ' Básicas de hechicero: ' + r.basicos + '/3.' + (sig.id === 'sentido' ? ' Con 1 básica, la Mirada que Pesa ya es tuya: equípala en Pausa → Ajustes → Equipo (máx. 5).' : sig.id === 'rastreo' ? ' Con 2 básicas, la Prisión del Espejo ya es tuya: equípala en Pausa → Ajustes → Equipo (máx. 5).' : ' Las tres básicas son tuyas: ya dominas lo básico del Arte Místico. Las técnicas mayores se te abren según tu camino.') + ' Ser hechicero es casi otra vida: esto es solo el principio, y dominarlo de verdad toma años.';
           if (!n.hechos) n.hechos = []; n.hechos.push('te presentó a los hechiceros de Arcana para aprender ' + sig.nombre); }
         else resp = 'Los hechiceros niegan con la cabeza: ' + r.motivo + '.'; }
+    }
+    if (o.accion === 'despertarHechicero') { // DESPERTAR DE HECHICERO: momento de historia/diálogo con Vesper, no un grind ni una barrera nueva — marca j.hechicero.despertado = true (flag para uso futuro; no inventa efectos). No toca las 3 básicas: Esteban las sigue enseñando en orden.
+      const j = U.Juego.estado.jugador; if (!j.hechicero) j.hechicero = { potencial: false, basicos: 0, basicas: [], despertado: false };
+      if (j.hechicero.despertado) resp = 'Ya despertaste: el Arte Místico ya corre por ti. Lo demás —Sentido, Rastreo, Barrera mental— lo aprendes con los hechiceros de Arcana, en orden, y dominarlo de verdad toma años. Yo solo te abrí la puerta; el camino lo andas tú.';
+      else { j.hechicero.despertado = true; U.Audio.sfx('unlock'); U.HUD.banner('✨ ¡DESPERTAR DE HECHICERO! · El Arte Místico ya corre por ti', 3); resp = 'Vesper pone una mano sobre tu frente y el mundo se queda en silencio un instante. «Listo. Ya no eres solo alguien que mira la mente: eres hechicero. El Arte Místico ya corre por ti, despacio, como un río bajo la tierra. Las tres básicas —Sentido, Rastreo y Barrera mental— las aprendes con los hechiceros de Arcana, en orden; yo te guiaré cuando las busques. Ser hechicero es casi otra vida: esto es solo el principio, y dominarlo de verdad toma años.»';
+        if (!n.hechos) n.hechos = []; n.hechos.push('te despertó como hechicero'); }
     }
     if (o.accion === 'aprenderEspecial') { // TÉCNICA ESPECIAL de un Guía: minijuego de aprendizaje (U.Aprendizaje)
       const j = U.Juego.estado.jugador; const esp = (U.Habilidades.especiales || []).find(h => h.id === o.tecId);

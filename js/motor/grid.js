@@ -426,7 +426,7 @@ U.Grid = {
     npcsPos.omar = { x: 363.5, y: 193.5 }; npcsPos.rosa = { x: 373.5, y: 191.5 };
     npcsPos.hugo = { x: 318.5, y: 308.5 }; npcsPos.emma = { x: 332.5, y: 314.5 };
     npcsPos.pablo = { x: 145.5, y: 333.5 }; npcsPos.ana = { x: 151.5, y: 325.5 };
-    npcsPos.esteban = { x: 61.5, y: 157.5 }; npcsPos.miriam = { x: 81.5, y: 169.5 };
+    npcsPos.esteban = { x: 61.5, y: 157.5 }; npcsPos.miriam = { x: 81.5, y: 169.5 }; npcsPos.vesper = { x: 58.5, y: 157.5 };
     // ================================================================
     // ALDEA VUELO ALTO (Viento) — al norte, en la meseta ventosa
     // ================================================================

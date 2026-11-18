@@ -764,7 +764,7 @@ U.Combate = {
   // RETOS DE COMBATE de los guías: un duelo con tiempo límite junto al guía que lo propone.
   iniciarReto(guia) {
     const E = U.Juego.estado, j = E.jugador; if (E.reto || E.arena.activa) return;
-    const defs = { kaelen: { nombre: 'Reto de Kaelen · El muro', clases: ['veterano'], t: 60, mult: 1.05 }, torin: { nombre: 'Reto de Torin · Puño y brasa', clases: ['bandido', 'brasa'], t: 60, mult: 1.0 }, ren: { nombre: 'Reto de Ren · El aprendiz', clases: ['bandido'], t: 60, mult: 0.95 } };
+    const defs = { kaelen: { nombre: 'Reto de Kaelen · El muro', clases: ['veterano'], t: 60, mult: 1.05 }, torin: { nombre: 'Reto de Torin · Puño y brasa', clases: ['bandido', 'brasa'], t: 60, mult: 1.0 }, taro: { nombre: 'Reto de Taro · El aprendiz', clases: ['bandido'], t: 60, mult: 0.95 } };
     const d = defs[guia] || defs.kaelen;
     E.reto = { guia, nombre: d.nombre, t: d.t, total: d.t };
     d.clases.forEach((cl, i) => { const a = (i / Math.max(1, d.clases.length)) * Math.PI * 2 + 0.6; const e = this.crearEnemigo(cl, j.x + Math.cos(a) * 3, j.y + Math.sin(a) * 3, d.mult * E.dificultad); e.esReto = true; E.enemigos.push(e); this.particulas(e.x, e.y - 0.5, 14, '#e05bd0', 'humo'); });

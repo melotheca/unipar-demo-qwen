@@ -22,6 +22,12 @@
    de cada duelo y las técnicas desbloqueadas; el diálogo cambia con el marcador.
    AYUDA: si vas herido (<30% Vida), sin enemigos vivos y sin haberle visto hoy,
    Ren aparece, te cura un 30% y te da 1 poción (máx. 3 en bolsa): a veces ayuda.
+   CAMINANTE (Decisión 3): además de los duelos, Ren VIVE como NPC en la aldea
+   de su elemento (la contraria a la tuya): registrarNpc() lo da de alta en
+   Emociones, Personas, Vida.RUTINAS, Render.paletaNPC y Dialogo.guiones con el
+   id 'rival' (NO 'ren': ese es el aprendiz de Bruma), y crearNpc() lo spawnea
+   en SU plaza con su casa en SU aldea. El torneo y la Arena siguen siendo
+   eventos en Bruma: ahí aparece igual que antes, no es su casa.
    NO TOCA: Escudo, los 6 momentos, combo de golpes, Presentimiento, guardado
    (solo expone serializar/cargar para el hook del coordinador). */
 window.U = window.U || {};
@@ -48,7 +54,127 @@ U.Rival = {
     if (r._idxDialogo == null) r._idxDialogo = 0;
     return r;
   },
-  init(E) { return this.asegurar(E); }, // hook: U.Rival.init(this.estado) en comenzarMundo
+  // ---------- registro como NPC caminante (Decisión 3, patrón U.Aprendiz) ----------
+  // Todo en tiempo de ejecución, sin tocar los archivos de datos de otros
+  // sistemas. Se resuelve en init(), cuando el elemento del jugador ya se
+  // conoce por el test. Si el elemento cambia entre vidas (nueva vida en la
+  // misma sesión), se vuelve a registrar con la aldea nueva y el NPC se reubica.
+  _registrado: false, _registradoEl: null,
+  registrarNpc(E) {
+    const elRen = this.elementoRen(E);
+    if (this._registrado && this._registradoEl === elRen) return;
+    this._registrado = true; this._registradoEl = elRen;
+    const D = U.RivalDatos;
+    if (U.Emociones && U.Emociones.catalogo) U.Emociones.catalogo[D.NPC_ID] = { nombre: D.nombre, rol: D.rolDe(elRen) };
+    if (U.Personas && U.Personas.datos) U.Personas.datos[D.NPC_ID] = D.personaDe(elRen);
+    if (U.Vida && U.Vida.RUTINAS) U.Vida.RUTINAS[D.NPC_ID] = D.rutinaDe(elRen);
+    if (U.Render && U.Render.paletaNPC) U.Render.paletaNPC[D.NPC_ID] = D.paletaDe(elRen);
+    if (U.Dialogo && U.Dialogo.guiones) {
+      const self = this;
+      U.Dialogo.guiones[D.NPC_ID] = {
+        saludo: D.saludoDe(elRen),
+        get opciones() { return self.guionOpciones(); } // frescas cada vez: aldea y marcador reales
+      };
+    }
+    this.instalarDialogo();
+  },
+  // Envoltorio fino de U.Dialogo.elegir (como U.Aprendiz.instalarDialogo): solo
+  // intercepta opciones riv* con el rival abierto; TODO lo demás delega al
+  // elegir original sin tocarlo (que puede ser ya el envoltorio del aprendiz).
+  instalarDialogo() {
+    if (!U.Dialogo || !U.Dialogo.elegir || U.Dialogo._rivEnvuelto) return;
+    const orig = U.Dialogo.elegir.bind(U.Dialogo);
+    U.Dialogo._rivEnvuelto = true;
+    U.Dialogo.elegir = function (i) {
+      const o = this.opciones && this.opciones[i];
+      const n = this.npc;
+      if (o && o.accion && o.accion.indexOf('riv') === 0 && n && n.id === U.RivalDatos.NPC_ID && U.Rival) {
+        U.Rival.elegirDialogo(o, n);
+        return;
+      }
+      return orig(i);
+    };
+  },
+  init(E) {
+    this.asegurar(E);
+    this.registrarNpc(E);
+    const n = this.buscar();
+    if (!n) this.crearNpc();
+    else this.reubicarNpc(n); // otra vida, otro elemento: vive en otra aldea
+    return this.asegurar(E);
+  }, // hook: U.Rival.init(this.estado) en comenzarMundo
+  // Aldea de Ren en esta vida (su elemento = contrario al del jugador).
+  aldeaRen(E) { return U.RivalDatos.aldeaDe(this.elementoRen(E)); },
+  buscar() {
+    const E = U.Juego.estado; if (!E) return null;
+    const id = U.RivalDatos.NPC_ID;
+    const enRoster = (E.roster || []).find(x => x.id === id);
+    if (enRoster) return enRoster;
+    return (U.Vida && U.Vida.buscar) ? U.Vida.buscar(id) : null;
+  },
+  crearNpc() {
+    const E = U.Juego.estado, D = U.RivalDatos;
+    const aldea = D.aldeaDe(this.elementoRen(E));
+    const rng = (E && E.rng) || Math.random;
+    const n = U.Emociones.crear(D.NPC_ID, rng, { x: aldea.plaza.x, y: aldea.plaza.y });
+    n.casaPos = { x: aldea.casa.x, y: aldea.casa.y };
+    n.mapa = 'aldea';
+    E.roster = E.roster || [];
+    E.roster.push(n);
+    if (!E.npcsPorMapa) E.npcsPorMapa = {};
+    E.npcsPorMapa.aldea = E.npcsPorMapa.aldea || [];
+    if (E.npcsPorMapa.aldea.indexOf(n) < 0) E.npcsPorMapa.aldea.push(n);
+    if (U.Juego.refrescarNpcs) U.Juego.refrescarNpcs();
+    return n;
+  },
+  // Mueve al NPC a SU aldea si su casa guardada es de otro elemento (cambio de
+  // vida en la misma sesión). No toca nada si ya vive donde le toca.
+  reubicarNpc(n) {
+    const E = U.Juego.estado; if (!E || !n) return n;
+    const aldea = U.RivalDatos.aldeaDe(this.elementoRen(E));
+    const cx = (n.casaPos && n.casaPos.x) || 0, cy = (n.casaPos && n.casaPos.y) || 0;
+    if (Math.hypot(cx - aldea.casa.x, cy - aldea.casa.y) > 1) {
+      n.casaPos = { x: aldea.casa.x, y: aldea.casa.y };
+      n.home = { x: aldea.plaza.x, y: aldea.plaza.y };
+      n.x = aldea.plaza.x; n.y = aldea.plaza.y;
+      n.ruta = []; n.rutaKey = ''; n.viaje = null; n.enCasa = false; n.mapa = 'aldea';
+    }
+    return n;
+  },
+  // ---------- guion del caminante (hablar con Ren en SU aldea) ----------
+  guionOpciones() {
+    const E = U.Juego.estado; if (!E || !E.jugador) return [];
+    const aldea = this.aldeaRen(E);
+    const R = (t, extra) => Object.assign({ t, realidad: 66, energia: 5, resp: { pos: '…', neg: '…' } }, extra || {});
+    return [
+      R('⚔ Retarlo a un duelo aquí y ahora (un duelo, sin público ni excusas)', { accion: 'rivDuelo', et: 'reto', resp: { pos: '¿Un duelo? ¡Por fin alguien con agallas! Venga, aquí mismo.', neg: '¿Un duelo? Hoy no: ni me hagas perder el tiempo.' } }),
+      R('🏘 Preguntarle por qué vive en ' + aldea.nombre, { accion: 'rivAldea', et: 'pregunta', resp: { pos: 'Vivo aquí porque es MI aldea. Pregunta lo que quieras.', neg: '¿Mi casa? ¿Y a ti qué te importa dónde vivo?' } }),
+      R('📋 Ver el marcador de duelos con Ren', { accion: 'rivHistorial', et: 'pregunta', resp: { pos: 'El marcador no miente. Míralo tú mismo.', neg: '¿El marcador? No hace falta mirarlo: voy ganando.' } })
+    ];
+  },
+  elegirDialogo(o, n) {
+    const E = U.Juego.estado; if (!E) return;
+    const decir = txt => { U.Dialogo.decir(txt); U.Dialogo.razon = ''; U.Dialogo.pintarRazon(); U.Dialogo.pintarCara(); if (U.Audio) U.Audio.sfx('dialogo'); };
+    const refrescar = () => { if (U.Dialogo.mostrarSecciones) U.Dialogo.mostrarSecciones(n); };
+    if (o.accion === 'rivAldea') {
+      const elRen = this.elementoRen(E), aldea = U.RivalDatos.aldeaDe(elRen);
+      decir('Ren se encoge de hombros, como si fuera obvio: «Vivo en ' + aldea.nombre + ': es la aldea de mi elemento, ' + U.Elementos.nombre(elRen) + ', el contrario al tuyo. Tú eres de Bruma y yo de aquí; así es el espejo. Eso sí: en el Torneo de Bruma y en la Arena nos vemos igual que siempre — eso no es mi casa, es donde se pelea.»');
+      refrescar(); return;
+    }
+    if (o.accion === 'rivHistorial') { decir(this.textoHistorial(E)); refrescar(); return; }
+    if (o.accion === 'rivDuelo') {
+      const r = this.asegurar(E);
+      if (r.duelo && r.duelo.activo) { decir('Ya estamos en un duelo, ¿o te dio amnesia de repente? Termínalo primero.'); refrescar(); return; }
+      if (E.torneo || (E.arena && E.arena.activa) || E.reto) { decir('Ahora no: hay torneo, arena o reto en marcha, y yo no mezclo peleas. Cuando se acabe, ven a buscarme.'); refrescar(); return; }
+      if (E.jugador.vida <= 0) { decir('¿Un duelo así, en el suelo? Levántate primero.'); refrescar(); return; }
+      if (U.Emociones) U.Emociones.evento(n, { realidad: 72, energia: 8, etiqueta: 'duelo' });
+      // Cerrar PRIMERO: iniciarDuelo exige E.ui === 'mundo' (cerrar lo restaura).
+      U.Dialogo.cerrar();
+      const e = this.iniciarDuelo(E, 'mundo');
+      if (!e) this.banner('No se pudo iniciar el duelo con Ren ahora mismo.', 2);
+      return;
+    }
+  },
   diaActual(E) { return (E && E.reloj && E.reloj.dia) || 1; },
   // ---------- espejo: Ren es el elemento CONTRARIO al del jugador (test) ----------
   // El elemento del jugador es fijo en esta vida (j.elemento = perfil.elemento);
