@@ -261,7 +261,7 @@ U.HUD = {
     // Radar hexagonal de las 6 estadísticas con los valores ACTUALES de j.stats:
     // se reconstruye en cada apertura de Opciones, así que crece solo con el personaje.
     const orden = ['vida', 'esencia', 'ataque', 'defensa', 'mente', 'velocidad'];
-    const refs = { vida: 200, esencia: 200, ataque: 20, defensa: 20, mente: 20, velocidad: 20 }; // misma escala que las barras de este apartado
+    const refs = { vida: 300, esencia: 300, ataque: 100, defensa: 100, mente: 100, velocidad: 100 }; // escala FIJA y amplia, propia del hexágono: que un valor alto no parezca "casi completo" (antes 200/20, relativo, y Velocidad 23 ya tocaba el borde)
     const cols = { vida: '#ff8a9c', esencia: '#7cc4ff', ataque: '#ffd08a', defensa: '#67e08a', mente: '#e8a2e0', velocidad: '#7ef0c0' };
     const cx = 180, cy = 158, R = 96;
     const pt = (i, f) => { const a = (-90 + i * 60) * Math.PI / 180; return [cx + R * f * Math.cos(a), cy + R * f * Math.sin(a)]; };
@@ -280,7 +280,7 @@ U.HUD = {
       const yNom = (i === 0) ? lp[1] - 4 : (i === 3) ? lp[1] + 12 : lp[1] - 2;
       s += '<text text-anchor="' + anc + '" x="' + lp[0].toFixed(1) + '" y="' + yNom.toFixed(1) + '"><tspan class="radarNom" fill="' + cols[k] + '">' + U.Estadisticas.etiquetas[k] + '</tspan><tspan class="radarVal" x="' + lp[0].toFixed(1) + '" dy="13">' + (+j.stats[k]).toFixed(2) + '</tspan></text>';
     });
-    s += '</svg><div class="radarNota">Tus estadísticas actuales, en vivo: el polígono crece contigo y se actualiza solo, sin ir a ningún lado. Anillos al 25 · 50 · 75 · 100% de la escala de las barras (Vida y Esencia hasta 200; Ataque, Defensa, Mente y Velocidad hasta 20). El tope real de cada estadística es 3000.</div></div>';
+    s += '</svg><div class="radarNota">El hexágono muestra tu equilibrio entre estadísticas, no tu progreso: cada eje se mide contra un máximo fijo (Vida y Esencia hasta 300; Ataque, Defensa, Mente y Velocidad hasta 100), así que el polígono se ve pequeño aunque ya entrenes. Tu progreso real está en los niveles (Nv.) y las barras de XP de abajo. Tope real de cada estadística: 3000.</div></div>';
     return s;
   },
   construirPausaBase() {

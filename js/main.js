@@ -663,6 +663,7 @@ U.Juego = {
     if (U.Criaturas) U.Criaturas.actualizar(dtM); // criaturas salvajes: rutinas y temperamentos (hostil persigue, tímida huye, amistosa se acerca)
     this.chequearMision(dt);
     if (U.Orgs) U.Orgs.tick(dtM); // organizaciones: emboscadas de los que drenan dominio, la jaula de la Red de Jade, la reliquia de los Coleccionistas y los objetivos abiertos
+    if (U.ZonasSeguras) U.ZonasSeguras.tick(dtM); // zonas seguras: spawn de día 0 dentro del pueblo, ladrones fuera, huida de aldeanos y patrulleros contra intrusos
     if (U.Escondites) U.Escondites.tick(dtM); // escondites secretos: colocar los lugares (sin marcar), descubrir por exploración o por seguir a un miembro
     if (U.Reliquias) U.Reliquias.tick(dtM); // máscaras y artefactos: tesoros escondidos en el mundo, emboscadas de Los Coleccionistas si llevas una máscara puesta en zona salvaje, y agentes del sello si llevas la Llave contigo
     if (U.Prohibidas) U.Prohibidas.tick(dtM); // técnicas prohibidas: pergaminos escondidos en lugares peligrosos, espíritu oscuro invocado, control mental sobre vecinos y emboscadas de Los Coleccionistas si llevas un pergamino encima en zona salvaje

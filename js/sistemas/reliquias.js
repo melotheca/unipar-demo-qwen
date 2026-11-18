@@ -147,6 +147,10 @@ U.Reliquias = {
   llevaArtefacto(j, id) { return !!(j && j.reliquias && Array.isArray(j.reliquias.artefactos) && j.reliquias.artefactos.indexOf(id) >= 0); },
   esSalvaje(E) {
     if (!E || E.mapaId !== 'aldea') return false; // interiores (tu casa, la Oficina): a salvo
+    // ZONA SEGURA CIRCULAR (U.ZonasSeguras, radio 10 desde la fogata del pueblo):
+    // dentro del círculo es pueblo, fuera es salvaje. Si el módulo no está
+    // cargado, se usa la regla vieja por rectángulo de zona.
+    if (U.ZonasSeguras) return !U.ZonasSeguras.enZonaSegura(E.jugador.x, E.jugador.y);
     const z = E.zonaActual; if (!z || !z.id) return false;
     return this.ZONAS_SEGURAS.indexOf(z.id) < 0;
   },

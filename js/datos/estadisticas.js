@@ -23,10 +23,16 @@ U.Estadisticas = {
   // Fluido) NO es una de las 6 stats: para Fluido las 6 son neutrales salvo
   // Esencia (penalizada); la maestría de elemento conserva su propia curva.
   factorXP(atributo, stat) { if (U.Atributos.esFavorita(atributo, stat)) return 0.5; if (U.Atributos.esPenalizada(atributo, stat)) return 5 / 3; return 1; },
-  // XP para subir del nivel n al n+1: base = n × factor, redondeo al entero
-  // más cercano. L1→2: Fav 1, Neu 1, Pen 2 · L5→6: 3/5/8 · L10→11: 5/10/17 ·
-  // L25→26: 13/25/42 · L50→51: 25/50/83 · L100→101: 50/100/167. Sin tope de nivel.
-  xpParaNivel(nivel, atributo, stat) { return Math.max(1, Math.round(Math.max(1, nivel || 1) * this.factorXP(atributo, stat))); },
+  // XP para subir del nivel n al n+1: curva CUADRÁTICA SUAVE, sin tope de
+  // nivel y sin explosión (un ×1.5 literal por nivel pediría decenas de
+  // miles en Nv. 25 y millones en Nv. 50). Base neutra = round(10 + 10n +
+  // 0.5n²), luego × factor de atributo (fav ×0.5, neutral ×1, pen ×5/3).
+  // L1→2: Fav 10, Neu 21, Pen 34 · L5→6: 36/73/121 · L10→11: 80/160/267 ·
+  // L25→26: 286/573/954 · L50→51: 880/1760/2933 · L100→101: 3005/6010/10017.
+  // Crece rápido al inicio y más suave después: Nv. 200 ≈ 22010, Nv. 1000
+  // ≈ 510010 (nunca millones en niveles jugables). El XP sobrante se conserva
+  // al subir de nivel (crecimiento.js: el while resta solo lo necesario).
+  xpParaNivel(nivel, atributo, stat) { const n = Math.max(1, nivel || 1); return Math.max(1, Math.round((10 + 10 * n + 0.5 * n * n) * this.factorXP(atributo, stat))); },
   descrip: {
     vida: 'Tu cuerpo. En campo abierto se recupera solo cuando está bajo el 25% del máximo, y el 25% es el tope de esa recuperación automática. Dormir en la fogata sí te despierta al 100%.',
     esencia: 'Tu reserva de energía. A 0 quedas Agotado hasta recuperar el 25%.',

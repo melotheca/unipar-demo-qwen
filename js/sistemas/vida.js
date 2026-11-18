@@ -253,6 +253,11 @@ U.Vida = {
   mover(n, dt, j) {
     const E = U.Juego.estado; if (!E || !E.mapa) return;
     if (n.enEscolta) { n.moviendo = false; return; } // la escolta camina con su propia lógica (U.Juego.tickEscolta)
+    // HUIDA (ZonasSeguras): si un enemigo entró en el pueblo y está cerca, el
+    // aldeano corre en dirección CONTRARIA a la amenaza mientras dure
+    // n.huyendo (lo refresca U.ZonasSeguras.tickHuida cada cuadro que el
+    // peligro siga cerca; al agotarse vuelve a su rutina normal).
+    if (n.huyendo && n.huyendo.t > 0 && !n.enCasa) { const dx = n.x - n.huyendo.x, dy = n.y - n.huyendo.y, d = Math.hypot(dx, dy) || 0.001; n.dir = U.Grid.dir8(dx, dy); this.moverNPC(n, E.mapa && n.mapa === E.mapaId ? E.mapa : U.Juego.mapaPorId(n.mapa), dx / d * 2.6 * dt, dy / d * 2.6 * dt); n.moviendo = true; n.anim += dt * 1.6; n.huyendo.t -= dt; if (n.huyendo.t <= 0) n.huyendo = null; return; }
     if (n.buscaJugador && n.mapa === E.mapaId && !n.enCasa) { this.caminarA(n, dt, { x: j.x, y: j.y }, 2.9, E); return; } // un NPC que te busca para pedirte algo
     const hora = U.Tiempo.hora(E);
     const dest = this.slotDe(n, hora, E); n.destinoActual = dest;
