@@ -34,7 +34,7 @@ U.Crecimiento = {
     return j.maestria[elem] - antes;
   },
   estilo(cual, base, desafio) {
-    const j = U.Juego.estado.jugador; const antes = j.estilos[cual]; j.estilos[cual] = Math.min(100, antes + base * (desafio == null ? 1 : desafio));
+    const j = U.Juego.estado.jugador; const antes = j.estilos[cual]; j.estilos[cual] = Math.min(100, antes + base * (desafio == null ? 1 : desafio) * (cual === j.estiloNatural ? 1.5 : 1)); // ESTILO NATURAL: tu inclinación del test (yin o yang) crece ×1.5 más rápido; es tu talento natural
     if (cual === 'yang') { U.Habilidades.yangOrden.forEach(k => { const h = U.Habilidades.yang[k]; if (antes < h.umbral && j.estilos.yang >= h.umbral) { U.HUD.toast((h.forma === 'cono' ? 'Técnica Yang desbloqueada: ' : 'Forma Yang desbloqueada: ') + h.nombre, 'exito'); U.Audio.sfx('unlock'); U.HUD.refrescarChips(); } });
       // Tiempo Lento (Yang avanzado, interruptor): se desbloquea al llegar a Yang 25.
       const tl = U.Habilidades.yang.tiempoLento; if (tl && antes < tl.umbral && j.estilos.yang >= tl.umbral) { U.HUD.toast('Técnica Yang desbloqueada: ' + tl.nombre + ' — el mundo se pone lento y tú sigues a tu velocidad. Drena Esencia rápido.' + (j.desdeCero ? ' Aparece entre tus botones si hay hueco libre; si no, equípala en Pausa → Ajustes → Equipo.' : ' Equípala en Pausa → Ajustes → Equipo.'), 'exito'); U.Audio.sfx('unlock'); U.HUD.refrescarChips(); }

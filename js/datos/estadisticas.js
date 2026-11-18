@@ -9,10 +9,10 @@ U.Estadisticas = {
   // Perfil inicial por elemento (el test lo suma a las respuestas y al atributo)
   porElemento: {
     fuego:  { ataque: 2, velocidad: 1, defensa: -1 },
-    agua:   { mente: 2, vida: 5, ataque: -1 },
+    agua:   { mente: 2, vida: 10, ataque: -1 },
     tierra: { vida: 10, defensa: 2, velocidad: -1 },
-    viento: { velocidad: 3, esencia: -5 },
-    rayo:   { ataque: 1, mente: 2, vida: -5 }
+    viento: { velocidad: 3, esencia: 5, defensa: -1 },
+    rayo:   { velocidad: 3, mente: 2, vida: -5 }
   },
   etiquetas: { vida: 'Vida', esencia: 'Esencia', ataque: 'Ataque', defensa: 'Defensa', mente: 'Mente', velocidad: 'Velocidad' },
   descrip: {
