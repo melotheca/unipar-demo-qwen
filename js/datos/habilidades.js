@@ -268,6 +268,34 @@ U.Habilidades = {
   // Ataque BÁSICO del elemento principal: siempre disponible, sin aprender nada.
   // Es lo que dispara el botón TÉC cuando no llevas ninguna técnica equipada.
   BASICO: { costo: 4, power: 0.9, cd: 0.8, alcanceMax: 3, desc: 'Ataque básico de tu elemento: línea corta, poco coste, siempre disponible.' },
+  // CORRECCIÓN 2 · EL ATAQUE BÁSICO DE CADA ELEMENTO: la técnica general con el
+  // requisito de maestría más bajo (la primera del catálogo, umbral 15%). Es lo
+  // ÚNICO que una partida nueva lleva dominado y equipado, además del puño.
+  // Fuego: Llamarada · Agua: Chorro · Tierra: Roca · Viento: Ráfaga · Rayo: Chispa.
+  BASICO_POR_ELEMENTO: { fuego: 'llamarada', agua: 'chorro', tierra: 'roca', viento: 'rafaga', rayo: 'chispa' },
+  basicoId(elemento) { const id = this.BASICO_POR_ELEMENTO[elemento]; return id ? 'tec:' + elemento + ':' + id : null; },
+  // ¿Es ESTA técnica el ataque básico del elemento principal del jugador?
+  // (Solo el del elemento principal: el básico de un segundo elemento se aprende
+  // entrenando ese elemento hasta el 15%, como cualquier otra técnica.)
+  esBasico(j, tec) { return !!tec && tec.kind === 'elemento' && !!j && tec.elemento === j.elemento && tec.tecId === this.BASICO_POR_ELEMENTO[tec.elemento]; },
+  // CORRECCIÓN 2 · KIT DE PARTIDA NUEVA ('desde cero'): lo único que lleva un
+  // principiante. Lo usa U.Juego.comenzarMundo (y el test de simulación).
+  // desdeCero + los valores iniciales (maestría/estilos/basicos al nacer) son la
+  // prueba de lo que el test te DIO, no de lo que APRENDISTE: aprendida() solo
+  // da por dominada una técnica si la entrenaste POR ENCIMA de ese valor inicial
+  // (o te la concedió un Guía / un contrato de alma). Las partidas VIEJAS no
+  // llevan esta marca: para ellas aprendida() sigue como antes.
+  nuevoJugador(perfil) {
+    const basico = this.basicoId(perfil.elemento);
+    const visto = {}; if (basico) visto[basico] = 1;
+    return { desdeCero: true,
+      maestriaInicial: Object.assign({}, perfil.maestria || {}),
+      estilosInicial: Object.assign({}, perfil.estilos || {}),
+      hechiceroBasicosInicial: 0,
+      equipo: basico ? [basico] : [],
+      tecnicasAprendidas: basico ? [basico] : [],
+      _equipoVisto: visto };
+  },
   // Registro canónico de todo lo equipable. id único por técnica:
   // 'tec:<elemento>:<id>' (elemental), 'yin:<id>', 'yang:<forma>', 'mistico:<id>',
   // 'especial:<id>' (kind 'elemento' + especial:true), 'fusion:<par>' (kind
@@ -315,12 +343,28 @@ U.Habilidades = {
   // al umbral. Yang: despierto + estilo ≥ umbral. Yin: estilo ≥ umbral. Místico:
   // puerta de hechicero (potencial o basicos>0) + basicos ≥ umbral (NO maestría);
   // Invisibilidad: nunca para el jugador. Escudo: aprendido de Kaelen.
+  // CORRECCIÓN 2 · PARTIDAS NUEVAS (j.desdeCero): NADA viene dominado del test.
+  // El test reparte maestría/estilos iniciales (5% como mucho), pero eso es lo
+  // que TRAES, no lo que DOMINAS: una técnica solo cuenta como dominada si la
+  // entrenaste POR ENCIMA de tu valor inicial en esta vida, o te la concedieron.
+  // Excepción: el ataque BÁSICO de tu elemento principal, que es tuyo desde el
+  // inicio (es lo único dominado al nacer). Sin la marca, partidas viejas: igual
+  // que antes, para no romperlas.
   aprendida(j, tec) {
     if (!tec) return false;
+    const desdeCero = !!(j && j.desdeCero);
+    const iniM = el => (j && j.maestriaInicial && j.maestriaInicial[el]) || 0;
+    const iniE = cual => (j && j.estilosInicial && j.estilosInicial[cual]) || 0;
     if (tec.kind === 'elemento') {
       if (tec.especial) return (j.tecnicasAprendidas || []).indexOf(tec.id) >= 0;
-      if (tec.fusion) return (j.tecnicasAprendidas || []).indexOf(tec.id) >= 0 || ((j.maestria[tec.par[0]] || 0) >= tec.umbral && (j.maestria[tec.par[1]] || 0) >= tec.umbral);
-      return (j.tecnicasAprendidas || []).indexOf(tec.id) >= 0 || (j.maestria[tec.elemento] || 0) >= tec.umbral;
+      if (tec.fusion) {
+        if ((j.tecnicasAprendidas || []).indexOf(tec.id) >= 0) return true;
+        const mA = (j.maestria[tec.par[0]] || 0), mB = (j.maestria[tec.par[1]] || 0);
+        if (mA < tec.umbral || mB < tec.umbral) return false;
+        return !desdeCero || mA > iniM(tec.par[0]) || mB > iniM(tec.par[1]);
+      }
+      if (desdeCero && this.esBasico(j, tec)) return true;
+      return (j.tecnicasAprendidas || []).indexOf(tec.id) >= 0 || ((j.maestria[tec.elemento] || 0) >= tec.umbral && (!desdeCero || (j.maestria[tec.elemento] || 0) > iniM(tec.elemento)));
     }
     if (tec.kind === 'alma') {
       if ((j.tecnicasAprendidas || []).indexOf(tec.id) >= 0) return true;
@@ -332,12 +376,12 @@ U.Habilidades = {
       }
       return false;
     }
-    if (tec.kind === 'yang') return !!j.tieneYang && (j.estilos.yang || 0) >= tec.umbral;
-    if (tec.kind === 'yin') return (j.estilos.yin || 0) >= tec.umbral;
+    if (tec.kind === 'yang') return !!j.tieneYang && (j.estilos.yang || 0) >= tec.umbral && (!desdeCero || (j.estilos.yang || 0) > iniE('yang'));
+    if (tec.kind === 'yin') return (j.estilos.yin || 0) >= tec.umbral && (!desdeCero || (j.estilos.yin || 0) > iniE('yin'));
     if (tec.kind === 'mistico') {
       if (tec.aprendiblePorJugador === false) return false;
       const h = j.hechicero || {};
-      return (h.potencial || (h.basicos || 0) > 0) && (h.basicos || 0) >= (tec.umbral || 0);
+      return (h.potencial || (h.basicos || 0) > 0) && (h.basicos || 0) >= (tec.umbral || 0) && (!desdeCero || (h.basicos || 0) > (j.hechiceroBasicosInicial || 0));
     }
     if (tec.kind === 'escudo') return !!j.escudoAprendido;
     return false;

@@ -29,7 +29,7 @@ U.Crecimiento = {
     // así un elemento con 2 técnicas en el mismo umbral (Rayo: Destello y Relámpago en
     // cadena, ambas al 40%) avisa las dos, y Juicio (70%) no se pierde ni se confunde
     // con la anterior. UMBRALES [15,40,70] queda como dato histórico en habilidades.js.
-    U.Habilidades.elementos[elem].forEach(h => { if (antes < h.umbral && j.maestria[elem] >= h.umbral) { U.HUD.toast('¡Maestría mínima alcanzada (' + h.umbral + '%): ya puedes aprender ' + h.nombre + ' de un Guía, por tarea! Las técnicas son POCAS y se aprenden, no caen solas.', 'exito'); U.HUD.banner(h.nombre.toUpperCase(), 1.6); U.Audio.sfx('unlock'); U.HUD.refrescarChips(); } });
+    U.Habilidades.elementos[elem].forEach(h => { if (antes < h.umbral && j.maestria[elem] >= h.umbral) { if (j.desdeCero) U.HUD.toast('¡' + h.nombre + ' dominada! Ya es tuya y aparece entre tus botones si hay hueco libre (máx. 5); si no hay hueco, equípala en Pausa → Ajustes → Equipo.', 'exito'); else U.HUD.toast('¡Maestría mínima alcanzada (' + h.umbral + '%): ya puedes aprender ' + h.nombre + ' de un Guía, por tarea! Las técnicas son POCAS y se aprenden, no caen solas.', 'exito'); U.HUD.banner(h.nombre.toUpperCase(), 1.6); U.Audio.sfx('unlock'); U.HUD.refrescarChips(); } });
     if (antes < 100 && j.maestria[elem] >= 100) { U.HUD.banner('DOMINACIÓN DE ' + U.Elementos.nombre(elem).toUpperCase(), 2.5); U.Audio.sfx('victoria'); }
     return j.maestria[elem] - antes;
   },
@@ -37,11 +37,11 @@ U.Crecimiento = {
     const j = U.Juego.estado.jugador; const antes = j.estilos[cual]; j.estilos[cual] = Math.min(100, antes + base * (desafio == null ? 1 : desafio));
     if (cual === 'yang') { U.Habilidades.yangOrden.forEach(k => { const h = U.Habilidades.yang[k]; if (antes < h.umbral && j.estilos.yang >= h.umbral) { U.HUD.toast((h.forma === 'cono' ? 'Técnica Yang desbloqueada: ' : 'Forma Yang desbloqueada: ') + h.nombre, 'exito'); U.Audio.sfx('unlock'); U.HUD.refrescarChips(); } });
       // Tiempo Lento (Yang avanzado, interruptor): se desbloquea al llegar a Yang 25.
-      const tl = U.Habilidades.yang.tiempoLento; if (tl && antes < tl.umbral && j.estilos.yang >= tl.umbral) { U.HUD.toast('Técnica Yang desbloqueada: ' + tl.nombre + ' — el mundo se pone lento y tú sigues a tu velocidad. Drena Esencia rápido. Equípala en Pausa → Ajustes → Equipo.', 'exito'); U.Audio.sfx('unlock'); U.HUD.refrescarChips(); }
+      const tl = U.Habilidades.yang.tiempoLento; if (tl && antes < tl.umbral && j.estilos.yang >= tl.umbral) { U.HUD.toast('Técnica Yang desbloqueada: ' + tl.nombre + ' — el mundo se pone lento y tú sigues a tu velocidad. Drena Esencia rápido.' + (j.desdeCero ? ' Aparece entre tus botones si hay hueco libre; si no, equípala en Pausa → Ajustes → Equipo.' : ' Equípala en Pausa → Ajustes → Equipo.'), 'exito'); U.Audio.sfx('unlock'); U.HUD.refrescarChips(); }
       // Despertar: sin afinidad se empieza en 0, pero entrenando hasta el umbral el Yang despierta igual (como dominar otro elemento).
       if (!j.tieneYang && j.estilos.yang >= U.Habilidades.yangDespertar) { j.tieneYang = true; U.HUD.banner('¡YANG DESPERTADO!', 2.4); U.Audio.sfx('unlock'); U.HUD.refrescarChips(); } }
     else { const s = U.Habilidades.yin.sobrecarga; if (antes < s.umbral && j.estilos.yin >= s.umbral) { U.HUD.toast('Técnica Yin desbloqueada: Sobrecarga (X)', 'exito'); U.Audio.sfx('unlock'); U.HUD.refrescarChips(); }
-      const ac = U.Habilidades.yin.acero; if (ac && antes < ac.umbral && j.estilos.yin >= ac.umbral) { U.HUD.toast('Técnica Yin desbloqueada: ' + ac.nombre + ' — tu cuerpo se endurece como acero: el daño que recibes se reduce a la mitad. Equípala en Pausa → Ajustes → Equipo.', 'exito'); U.Audio.sfx('unlock'); U.HUD.refrescarChips(); } }
+      const ac = U.Habilidades.yin.acero; if (ac && antes < ac.umbral && j.estilos.yin >= ac.umbral) { U.HUD.toast('Técnica Yin desbloqueada: ' + ac.nombre + ' — tu cuerpo se endurece como acero: el daño que recibes se reduce a la mitad.' + (j.desdeCero ? ' Aparece entre tus botones si hay hueco libre; si no, equípala en Pausa → Ajustes → Equipo.' : ' Equípala en Pausa → Ajustes → Equipo.'), 'exito'); U.Audio.sfx('unlock'); U.HUD.refrescarChips(); } }
   },
   regenCap(base) { const j = U.Juego.estado.jugador; j.regenBonus = Math.min(U.Atributos.de(j.atributo).regen, (j.regenBonus || 0) + base); },
   flush(dt) {

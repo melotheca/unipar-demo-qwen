@@ -43,7 +43,7 @@
     <!-- ================= Controles ================= -->
     <div id="controles">
       <div id="joystick" aria-label="Joystick virtual"><div id="joyBase"></div><div id="joyKnob"></div></div>
-      <button id="btnAgua" class="oculto" title="Caminar sobre el agua (C): interruptor. Por defecto está APAGADO y el agua te bloquea; actívalo para cruzar. Si lo apagas a mitad del agua, nadas (más lento, gratis) hasta la orilla."><span>🌊 CAMINAR SOBRE EL AGUA</span><span class="aguaEstado" id="btnAguaEstado">APAGADO</span></button>
+      <button id="btnAgua" class="oculto" title="Caminar sobre el agua (C): interruptor. Por defecto está APAGADO y el agua te bloquea; actívalo para cruzar. Agua gasta 2 de Esencia/s; Tierra levanta piedra al caminar (5 de Esencia por baldosa). Si lo apagas a mitad del agua, nadas (más lento, gratis) hasta la orilla."><span id="btnAguaTexto">🌊 CAMINAR SOBRE EL AGUA</span><span class="aguaEstado" id="btnAguaEstado">APAGADO</span></button>
       <button id="btnProh" class="boton small oculto" title="Técnica prohibida seleccionada (G): la excepción — se aprende de un pergamino, no de un Guía, y usarla tiene consecuencias" style="position:absolute;left:calc(18px + env(safe-area-inset-left));bottom:calc(214px + env(safe-area-inset-bottom));border-color:#ff4d4d;background:linear-gradient(180deg,#7a1f2f,#2a0a12)"><canvas width="72" height="72"></canvas><span class="lbl">PROH</span><i class="cd"></i></button>
       <div id="botones">
         <div id="chipsTec" aria-label="Técnicas del elemento"></div>
@@ -57,7 +57,7 @@
         <button id="btnYin" class="boton yin" title="Yin: toca = golpe, mantén = cargado (J)"><canvas width="96" height="96"></canvas><span class="lbl">YIN</span><i class="cd"></i><span class="cdNum"></span></button>
         <button id="btnA" class="boton a" title="Trote: mantén para avanzar más rápido (E). No interactúa: para hablar o leer, toca al personaje u objeto en pantalla."><canvas width="96" height="96"></canvas><span class="lbl">TROTE</span></button>
       </div>
-      <div id="hintTeclado">WASD mover · E trote · Toca un personaje u objeto para interactuar · J Yin · K Yang · L técnica · G técnica PROHIBIDA seleccionada (se aprende de un pergamino, no de un Guía) · B Escudo (se aprende con Kaelen; no te mueves, drena Esencia) · C Caminar sobre el agua (botón que solo aparece cerca del agua; Fuego y Rayo) · V Inversión · Shift dash · Q poción · R meditar · F Yang · 1-3 técnica · Esc pausa · Torneo y misiones por rango: Oficina del Guardián · Pausa (Esc): Mochila, Mapa, Estadísticas, Reputación, Ajustes y Guardar</div>
+      <div id="hintTeclado">WASD mover · E trote · Toca un personaje u objeto para interactuar · J Yin · K Yang · L técnica · G técnica PROHIBIDA seleccionada (se aprende de un pergamino, no de un Guía) · B Escudo (se aprende con Kaelen; no te mueves, drena Esencia) · C Caminar sobre el agua (botón que solo aparece cerca del agua; Fuego y Rayo caminan sobre ella, Agua también pero solo 2 Esencia/s, Tierra levanta piedra: 5 de Esencia por baldosa) · V Inversión · Shift dash · Q poción · R meditar · F Yang · 1-5 técnica · Esc pausa · Torneo y misiones por rango: Oficina del Guardián · Pausa (Esc): Mochila, Mapa, Estadísticas, Reputación, Ajustes y Guardar</div>
     </div>
   </div>
 
