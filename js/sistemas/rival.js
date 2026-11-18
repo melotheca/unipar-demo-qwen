@@ -1,5 +1,5 @@
 /* === js/sistemas/rival.js === */
-/* Unipar — EL RIVAL (Ren, el Vendaval): memoria, crecimiento, duelos y encuentros.
+/* Unipar — EL RIVAL (Ren, el espejo): memoria, crecimiento, duelos y encuentros.
    CÓMO FUNCIONA: U.Rival.actualizar(dt) se llama UNA vez por cuadro desde
    U.Juego.actualizarMundo (hook del coordinador, ver abajo). Todo lo demás son
    reacciones a lo que ya existe: el torneo (E.torneo), la arena (E.mapa.arena),
@@ -50,6 +50,14 @@ U.Rival = {
   },
   init(E) { return this.asegurar(E); }, // hook: U.Rival.init(this.estado) en comenzarMundo
   diaActual(E) { return (E && E.reloj && E.reloj.dia) || 1; },
+  // ---------- espejo: Ren es el elemento CONTRARIO al del jugador (test) ----------
+  // El elemento del jugador es fijo en esta vida (j.elemento = perfil.elemento);
+  // Ren se resuelve en vivo en cada uso: nada que guardar, nada que migrar.
+  elementoJugador(E) { const j = E && E.jugador; return (j && (j.elemento || j.elementoActivo || (j.perfil && j.perfil.elemento))) || 'viento'; },
+  elementoRen(E) { return U.RivalDatos.elementoContrarioDe(this.elementoJugador(E)); },
+  apodoRen(E) { return U.RivalDatos.apodoDe(this.elementoRen(E)); },
+  tituloRen(E) { return U.RivalDatos.tituloDe(this.elementoRen(E)); },
+  emojiRen(E) { return U.RivalDatos.emojiDe(this.elementoRen(E)); },
   // ---------- crecimiento ----------
   crecerPorTiempo(E) {
     const r = this.asegurar(E); const dia = this.diaActual(E);
@@ -77,35 +85,43 @@ U.Rival = {
     });
     return s;
   },
-  tecnicasDesbloqueadas(E) { return U.RivalDatos.desbloqueadas(this.asegurar(E).duelos); },
+  tecnicasDesbloqueadas(E) { return U.RivalDatos.desbloqueadas(this.asegurar(E).duelos, this.elementoRen(E)); },
   // ---------- diálogo (cambia con el historial) ----------
   // Devuelve la línea elegida (rotación, sin azar: testeable) y la muestra si hay UI.
+  // Las líneas escriben 'el Vendaval' como apodo base: aquí se sustituye por el
+  // apodo efectivo de Ren según su elemento (p. ej. 'la Marea').
   dialogo(situacion) {
     const E = U.Juego.estado, r = this.asegurar(E);
     let sit = situacion;
     if (sit === 'encuentro') sit = r.ganados > r.perdidos ? 'encuentroVentaja' : r.perdidos > r.ganados ? 'encuentroDesventaja' : 'encuentroEmpate';
     const lista = (U.RivalDatos.lineas[sit] && U.RivalDatos.lineas[sit].length ? U.RivalDatos.lineas[sit] : U.RivalDatos.lineas.encuentroEmpate);
-    const linea = lista[(r._idxDialogo || 0) % lista.length];
+    const base = lista[(r._idxDialogo || 0) % lista.length];
+    const ap = this.apodoRen(E);
+    const linea = ap === 'el Vendaval' ? base : base.split('el Vendaval').join(ap);
     r._idxDialogo = (r._idxDialogo || 0) + 1; r.ultimaLinea = linea;
     return linea;
   },
   mostrarDialogo(situacion) {
     const linea = this.dialogo(situacion);
     if (U.Dialogo && U.Dialogo.mostrarTexto && typeof document !== 'undefined') {
-      try { U.Dialogo.mostrarTexto(U.RivalDatos.titulo, linea); } catch (e) { /* sin UI: queda en ultimaLinea */ }
+      try { U.Dialogo.mostrarTexto(this.tituloRen(U.Juego.estado), linea); } catch (e) { /* sin UI: queda en ultimaLinea */ }
     }
     return linea;
   },
   banner(txt, dur) { if (U.HUD && U.HUD.banner) { try { U.HUD.banner(txt, dur || 2); } catch (e) {} } },
   // ---------- duelos ----------
   // Spawn del rival como enemigo (API existente + flag propio). lugar: 'arena' | 'torneo' | 'mundo'.
+  // ESPEJO: su elemento es el contrario al del jugador y su set ejecutable es el
+  // del catálogo de ESE elemento (setTecManual, solo las desbloqueadas por duelos):
+  // sin esto, crearEnemigo('chaman') le dejaría el set de Viento con cualquier elemento.
   spawnDuelo(E, lugar) {
     const D = U.RivalDatos, j = E.jugador;
     let x, y;
     if ((lugar === 'arena' || lugar === 'torneo') && E.mapa && E.mapa.arena) { x = E.mapa.arena.x + 0.5 + 2.5; y = E.mapa.arena.y + 0.5; }
     else { x = j.x + 3; y = j.y; }
     const e = U.Combate.crearEnemigo(D.claseBase, x, y, (E.dificultad || 1));
-    e.nombre = D.nombre + ' · ' + D.apodo; e.elemento = D.elemento;
+    e.nombre = D.nombre + ' · ' + this.apodoRen(E); e.elemento = this.elementoRen(E);
+    e.setTec = this.tecnicasDesbloqueadas(E).map(t => t.id); e.setTecManual = true;
     e.esRival = true; e.esDuelo = true; e.tecnicaRival = null; e._tecIdx = 0;
     e.stats = this.statsRival(E); e.vida = e.stats.vida;
     E.enemigos.push(e);
@@ -125,7 +141,7 @@ U.Rival = {
       derrotasAlInicio: (E.historial && E.historial.derrotas) || 0,
       t: 0, fueraT: 0, enemigo: e };
     r.conocido = true;
-    this.banner('⚔ DUELO CONTRA REN · EL VENDAVAL', 2.2);
+    this.banner('⚔ DUELO CONTRA REN · ' + this.apodoRen(E).toUpperCase(), 2.2);
     return e;
   },
   // La FINAL del torneo ES Ren (gancho del coordinador en spawnTorneo: si
@@ -138,7 +154,7 @@ U.Rival = {
     if (!e) return null;
     e.esTorneo = true;
     if (E.torneo) E.torneo.spawned = true;
-    this.banner('🏆 FINAL DEL TORNEO · REN, EL VENDAVAL', 2.4);
+    this.banner('🏆 FINAL DEL TORNEO · REN, ' + this.apodoRen(E).toUpperCase(), 2.4);
     return e;
   },
   // Rotación del set propio en combate: cada vez que Ren va a atacar, cambia a
@@ -158,10 +174,10 @@ U.Rival = {
   // Crecimiento tras CADA duelo (gane quien gane) + aviso si aprende técnica nueva.
   crecerPorDuelo(E) {
     const r = this.asegurar(E);
-    const antes = U.RivalDatos.desbloqueadas(r.duelos).map(t => t.id);
+    const antes = U.RivalDatos.desbloqueadas(r.duelos, this.elementoRen(E)).map(t => t.id);
     r.nivel++; r.bonusDuelos = (r.bonusDuelos || 0) + U.RivalDatos.POR_DUELO;
-    const ahora = U.RivalDatos.desbloqueadas(r.duelos);
-    ahora.forEach(t => { if (antes.indexOf(t.id) < 0) this.banner('🌪 REN APRENDIÓ «' + t.nombre.toUpperCase() + '» · LA PRÓXIMA VEZ LA USARÁ', 2.6); });
+    const ahora = U.RivalDatos.desbloqueadas(r.duelos, this.elementoRen(E));
+    ahora.forEach(t => { if (antes.indexOf(t.id) < 0) this.banner(this.emojiRen(E) + ' REN APRENDIÓ «' + t.nombre.toUpperCase() + '» · LA PRÓXIMA VEZ LA USARÁ', 2.6); });
     return r.nivel;
   },
   registrar(E, resultado, lugar) {
@@ -181,7 +197,7 @@ U.Rival = {
     this.registrar(E, 'victoria', lugar);
     const j = E.jugador;
     if (lugar !== 'torneo') { j.monedas = (j.monedas || 0) + U.RivalDatos.RECOMPENSA_DUELO; } // en la final, el premio es el podio del torneo
-    if (r.ganados === 3 && U.Progresion && U.Progresion.otorgarTitulo) { try { U.Progresion.otorgarTitulo('Azote del Vendaval'); } catch (err) {} }
+    if (r.ganados === 3 && U.Progresion && U.Progresion.otorgarTitulo) { try { U.Progresion.otorgarTitulo(U.RivalDatos.azoteDe(this.elementoRen(E))); } catch (err) {} }
     this.banner('🏆 ¡LE GANASTE A REN! · ' + (lugar === 'torneo' ? 'LA FINAL ES TUYA' : '+' + U.RivalDatos.RECOMPENSA_DUELO + ' 🪙 · REN ENTRENARÁ MÁS'), 2.6);
     this.mostrarDialogo('ganaJugador');
     return true;
@@ -191,7 +207,7 @@ U.Rival = {
     if (!r.duelo || !r.duelo.activo) return false;
     const lugar = r.duelo.lugar; r.duelo = null;
     this.registrar(E, 'derrota', lugar);
-    this.banner('🌪 REN TE GANÓ · ÉL TAMBIÉN ENTRENARÁ MÁS', 2.4);
+    this.banner(this.emojiRen(E) + ' REN TE GANÓ · ÉL TAMBIÉN ENTRENARÁ MÁS', 2.4);
     this.mostrarDialogo('ganaRival');
     return true;
   },
@@ -228,7 +244,7 @@ U.Rival = {
     r.ultimoAyudaDia = dia;
     j.vida = Math.min(j.stats.vida, j.vida + j.stats.vida * 0.30);
     if ((j.bolsaPociones || []).length < 3) { j.bolsaPociones.push({ tipo: 'vida', unidades: 50, precio: 0 }); if (U.Recuperacion && U.Recuperacion.sincronizar) { try { U.Recuperacion.sincronizar(j); } catch (err) {} } }
-    this.banner('🌪 REN TE AYUDA · +30% VIDA · +1 POCIÓN', 2.2);
+    this.banner(this.emojiRen(E) + ' REN TE AYUDA · +30% VIDA · +1 POCIÓN', 2.2);
     this.mostrarDialogo('ayuda');
     return true;
   },
@@ -289,7 +305,8 @@ U.Rival = {
   // ---------- consulta (pausa / depuración) ----------
   textoHistorial(E) {
     const r = this.asegurar(E || U.Juego.estado);
-    if (!r.conocido) return 'Aún no conoces a Ren, el Vendaval.';
-    return 'Ren, el Vendaval · Duelos: ' + r.duelos + ' · Tú ' + r.ganados + ' — Ren ' + r.perdidos + ' · Nv. rival ' + r.nivel;
+    const ap = this.apodoRen(E || U.Juego.estado);
+    if (!r.conocido) return 'Aún no conoces a Ren, ' + ap + '.';
+    return 'Ren, ' + ap + ' · Duelos: ' + r.duelos + ' · Tú ' + r.ganados + ' — Ren ' + r.perdidos + ' · Nv. rival ' + r.nivel;
   }
 };

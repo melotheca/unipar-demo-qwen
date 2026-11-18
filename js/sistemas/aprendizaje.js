@@ -17,7 +17,10 @@
      tan rápida). NO es el guardado general (guardado.js no serializa j.aprendizaje:
      para que viaje con la partida hace falta 1 línea allí — ver nota al final).
    - NO se usa para el Escudo (se aprende como siempre, de Kaelen) ni para los
-     movimientos generales (maestría o Guía, sin minijuego). Solo ESPECIALES.
+     movimientos generales (maestría o Guía, sin minijuego). Solo ESPECIALES
+     y el PRESENTIMIENTO (U.Presentimiento.DEF: habilidad pasiva de
+     Entre-Mundos, no técnica equipable — por eso su definición NO vive en
+     habilidades.js; _resolverTec la busca en U.Presentimiento).
    - Entrada: U.Aprendizaje.iniciar('dragonLago', 'sora') — la abre quien enseña
      (diálogo del Guía, por cablear: U.Aprendizaje.ofrecer('sora') lista lo que
      ese Guía enseña). Mientras está abierto, U.Aprendizaje.activo = true (el
@@ -43,7 +46,17 @@ U.Aprendizaje = {
 
   // ---- matemáticas puras (testeables sin DOM) ----
   periodoTras(n) { return this.PERIODO_INICIAL * Math.pow(this.FACTOR_LENTO, Math.max(0, n || 0)); },
-  dominioAlcanzado(prog) { return !!prog && (prog.aciertos || 0) >= this.ACIERTOS_DOMINIO && this.periodoTras(prog.aciertos) >= this.PERIODO_DOMINIO; },
+  dominioAlcanzado(prog, aciertosNecesarios) { const n = aciertosNecesarios || this.ACIERTOS_DOMINIO; return !!prog && (prog.aciertos || 0) >= n && this.periodoTras(prog.aciertos) >= this.PERIODO_DOMINIO; },
+  // Lo que se puede aprender por demostración: las ESPECIALES de
+  // habilidades.js y el PRESENTIMIENTO (U.Presentimiento.DEF). El
+  // Presentimiento NO está en habilidades.js a propósito: no es una
+  // técnica equipable ni va en el registro/equipo.
+  _resolverTec(tecId) {
+    const esp = (U.Habilidades.especiales || []).find(h => h.id === tecId);
+    if (esp) return esp;
+    if (U.Presentimiento && U.Presentimiento.DEF && U.Presentimiento.DEF.id === tecId) return U.Presentimiento.DEF;
+    return null;
+  },
 
   // ---- progreso por técnica ----
   _mapa(j) { if (!j) return {}; j.aprendizaje = j.aprendizaje || {}; return j.aprendizaje; },
@@ -61,7 +74,7 @@ U.Aprendizaje = {
     try { if (U.Guardado) U.Guardado.guardarAuto(); } catch (e) { /* el guardado general no corre aquí */ }
   },
   // Lo que un Guía enseña (para el diálogo: qué especiales ofrece cada Guía).
-  ofrecer(guiaId) { return U.Habilidades.especialesDeGuia(guiaId); },
+  ofrecer(guiaId) { const l = U.Habilidades.especialesDeGuia(guiaId); if (U.Presentimiento && U.Presentimiento.DEF.maestro === guiaId) l.push(U.Presentimiento.DEF); return l; },
   puedeEnseñar(guiaId, tecId) { return this.ofrecer(guiaId).some(h => h.id === tecId); },
 
   // ---- apertura ----
@@ -70,14 +83,24 @@ U.Aprendizaje = {
     if (typeof document === 'undefined') return false;
     const j = U.Juego && U.Juego.estado ? U.Juego.estado.jugador : null;
     if (!j) return false;
-    const tec = (U.Habilidades.especiales || []).find(h => h.id === tecId);
+    const tec = this._resolverTec(tecId);
     if (!tec) return false;
     if (tec.maestro && guiaId && tec.maestro !== guiaId) return false; // ese Guía no enseña esta técnica
-    if (!U.Habilidades.porId(j, 'especial:' + tecId)) return false; // no está en tu registro (no es de tu elemento): el Guía no puede enseñártela
-    if (U.Habilidades.aprendida(j, U.Habilidades.porId(j, 'especial:' + tecId))) { if (U.HUD) U.HUD.toast('Ya dominas ' + tec.nombre + '.', 'exito'); return false; }
+    // PRESENTIMIENTO: no es técnica de registro (no va en porId/equipo):
+    // el cerrojo es su propio requisito (Mente alta + maestría 70%).
+    if (tec.esPresentimiento) {
+      if (!U.Presentimiento) return false;
+      const g = U.Presentimiento.puedeAprender(j);
+      if (!g.ok) { if (U.HUD) U.HUD.toast(g.motivo, 'aviso'); return false; }
+      if (U.Presentimiento.aprendido(j)) { if (U.HUD) U.HUD.toast('Ya dominas el Presentimiento.', 'exito'); return false; }
+    } else {
+      if (!U.Habilidades.porId(j, 'especial:' + tecId)) return false; // no está en tu registro (no es de tu elemento): el Guía no puede enseñártela
+      if (U.Habilidades.aprendida(j, U.Habilidades.porId(j, 'especial:' + tecId))) { if (U.HUD) U.HUD.toast('Ya dominas ' + tec.nombre + '.', 'exito'); return false; }
+    }
     const prog = this.progreso(j, tecId);
     if (prog.dominada) return false;
     this.activo = true; this.tecId = tecId; this.guiaId = guiaId || tec.maestro;
+    this._aciertos = tec.aciertos || this.ACIERTOS_DOMINIO; // el Presentimiento pide 14: cuesta más desarrollarlo
     this._fase = 0; this._ultimo = 0; this._zona = Math.random() * (1 - this.ANCHO_ZONA);
     this._construirUI(tec, prog);
     this._tecla = e => { if (e.code === 'Space' || e.code === 'Enter') { e.preventDefault(); this.presionar(); } else if (e.code === 'Escape') this.cerrar(); };
@@ -98,9 +121,9 @@ U.Aprendizaje = {
     raiz.style.cssText = 'position:fixed;inset:0;z-index:999;background:rgba(5,7,15,.92);display:flex;align-items:center;justify-content:center;font-family:inherit;color:#f8fafc;';
     const guia = (U.Personas && U.Personas.de ? U.Personas.de(this.guiaId).tipo : '') || '';
     raiz.innerHTML = '<div style="width:min(92vw,460px);background:#141a2e;border:2px solid #e8a2e0;border-radius:14px;padding:18px;text-align:center">'
-      + '<div style="font-size:12px;color:#e8a2e0">✦ TÉCNICA ESPECIAL · APRENDIZAJE CON GUÍA ✦</div>'
+      + '<div style="font-size:12px;color:#e8a2e0">' + (tec.esPresentimiento ? '✦ HABILIDAD · PRESENTIMIENTO · APRENDIZAJE CON GUÍA ✦' : '✦ TÉCNICA ESPECIAL · APRENDIZAJE CON GUÍA ✦') + '</div>'
       + '<h2 style="margin:8px 0 2px">' + tec.nombre + '</h2>'
-      + '<div style="font-size:12px;color:#9fb3d9">' + (this.guiaId || '') + (guia ? ' · ' + guia : '') + ' te la demuestra. Al principio va MUY rápida: apenas la sigues. Con cada acierto se pone más lenta, hasta que la dominas.</div>'
+      + '<div style="font-size:12px;color:#9fb3d9">' + (this.guiaId || '') + (guia ? ' · ' + guia : '') + (tec.esPresentimiento ? ' te lo demuestra. ' + (tec.desc || '') : ' te la demuestra. Al principio va MUY rápida: apenas la sigues. Con cada acierto se pone más lenta, hasta que la dominas.') + '</div>'
       + '<div id="aprPista" style="position:relative;height:30px;margin:16px 0 8px;background:#05070f;border:1px solid #5b6b8a;border-radius:8px;overflow:hidden">'
       + '<div id="aprZona" style="position:absolute;top:0;bottom:0;background:rgba(232,162,224,.45);border-left:2px solid #e8a2e0;border-right:2px solid #e8a2e0"></div>'
       + '<div id="aprMarca" style="position:absolute;top:2px;bottom:2px;width:10px;margin-left:-5px;background:#ffe14d;border-radius:4px"></div></div>'
@@ -126,7 +149,7 @@ U.Aprendizaje = {
   _pintarEstado(prog) {
     if (!this._els) return;
     const per = this.periodoTras(prog.aciertos);
-    this._els.estado.textContent = 'Aciertos: ' + prog.aciertos + '/' + this.ACIERTOS_DOMINIO + ' · Fallos: ' + prog.fallos + ' · Velocidad: 1 barrido cada ' + per.toFixed(2) + ' s' + (prog.aciertos === 0 ? ' (¡rapidísima!)' : per >= this.PERIODO_DOMINIO ? ' (ya la sigues con calma)' : ' (se va poniendo lenta)');
+    this._els.estado.textContent = 'Aciertos: ' + prog.aciertos + '/' + (this._aciertos || this.ACIERTOS_DOMINIO) + ' · Fallos: ' + prog.fallos + ' · Velocidad: 1 barrido cada ' + per.toFixed(2) + ' s' + (prog.aciertos === 0 ? ' (¡rapidísima!)' : per >= this.PERIODO_DOMINIO ? ' (ya la sigues con calma)' : ' (se va poniendo lenta)');
   },
   // ---- el pulso ----
   presionar() {
@@ -138,7 +161,7 @@ U.Aprendizaje = {
     if (acierto) {
       prog.aciertos++;
       if (U.Audio) U.Audio.sfx('unlock');
-      if (this.dominioAlcanzado(prog)) { this._aprender(j, prog); return; }
+      if (this.dominioAlcanzado(prog, this._aciertos)) { this._aprender(j, prog); return; }
     } else {
       prog.fallos++;
       if (U.Audio) U.Audio.sfx('fail');
@@ -150,6 +173,13 @@ U.Aprendizaje = {
   _aprender(j, prog) {
     prog.dominada = true;
     this.guardarProgreso(j);
+    // PRESENTIMIENTO: no es técnica de registro: no entra a
+    // tecnicasAprendidas ni al equipo — queda en j.presentimientoAprendido.
+    if (this.tecId === 'presentimiento' && U.Presentimiento) {
+      this.cerrar();
+      U.Presentimiento.conceder(j);
+      return;
+    }
     const id = 'especial:' + this.tecId;
     const tec = U.Habilidades.porId(j, id);
     U.Habilidades.aprenderTecnica(id);

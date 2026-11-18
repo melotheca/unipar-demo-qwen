@@ -236,8 +236,22 @@ U.Habilidades = {
   // HECHICEROS (Arte Místico / Mente): casi otra vida. El test puede revelar POTENCIAL;
   // sin potencial revelado, cualquiera puede CONVERTIRSE en hechicero entrenándose con
   // los hechiceros (en Arcana): primero lo básico, durante una vida entera de práctica.
+  // Las 3 BÁSICAS se aprenden EN ARCANA, con los hechiceros, EN ORDEN (Sentido →
+  // Rastreo → Barrera mental), una cada vez: cada una sube +1 j.hechicero.basicos
+  // (U.Habilidades.aprenderBasico, abajo). Con 1 básica se abre la Mirada que Pesa
+  // (umbral 1), con 2 la Prisión del Espejo (umbral 2); la 3ª deja basicos en 3.
+  // NO piden potencial: son EL CAMINO para convertirse sin potencial revelado.
+  // La puerta de las técnicas mayores (aprendida()) sigue pidiendo potencial O
+  // basicos>0, y basicos ≥ umbral. Sin costo ni minijuego: como el Escudo de
+  // Kaelen, se aprende hablando (el viaje a Arcana y el orden son el coste);
+  // no se inventa otro grind. La Invisibilidad NO está aquí: sigue sin poder
+  // aprenderse nunca (umbral 99, aprendiblePorJugador:false, solo Gamma).
   // Las técnicas de combate de Místico viven en elementos.mistico (arriba).
-  hechiceros: { nombre: 'Arte Místico · Mente', basicas: ['Sentido', 'Rastreo', 'Barrera mental'],
+  hechiceros: { nombre: 'Arte Místico · Mente', basicas: [
+    { id: 'sentido', nombre: 'Sentido', desc: 'Sentir la Mente ajena: notar presencias, intenciones y mentiras antes de verlas. Lo primero que enseña un hechicero.' },
+    { id: 'rastreo', nombre: 'Rastreo', desc: 'Seguir el rastro de una mente: saber por dónde pasó alguien y hacia dónde va. Los hechiceros del Escuadrón Gamma lo usan para investigar.' },
+    { id: 'barrera', nombre: 'Barrera mental', desc: 'Cerrar tu mente: que nadie lea lo que piensas ni te confunda con ilusiones. Sin ella, un hechicero está desnudo ante otro.' }
+  ],
     invisibilidad: { nombre: 'Invisibilidad', aprendiblePorJugador: false, razon: 'Es mental (Arte Místico), no elemental: ningún elemento la hace congruente, así que un dominador no la aprende como técnica suya. La tienen los hechiceros del Escuadrón Gamma.' },
     nota: 'Ser hechicero es casi otra vida: súper difícil, toma una vida. Primero se aprenden cosas básicas (Sentido, Rastreo, Barrera mental) y solo tras años llegan las técnicas mayores.' },
   // Reclasificadas: Destello (Rayo), Vuelo (Viento), Disco Cortante (Yang). Presentimiento/Supresión/Dominio: no se programan.
@@ -329,6 +343,33 @@ U.Habilidades = {
     return false;
   },
   dominadas(j) { return this.registro(j).filter(t => this.aprendida(j, t)); },
+  // ---- BÁSICAS DE HECHICERO (Arte Místico / Mente) ----
+  // aprenderBasico(j, id?) concede la SIGUIENTE básica en orden (Sentido →
+  // Rastreo → Barrera mental); si se pasa un id, tiene que ser justo esa
+  // siguiente (fuera de orden o repetida: {ok:false}, sin subir nada). Cada
+  // básica aprendida sube +1 j.hechicero.basicos (máx. 3) y queda registrada
+  // en j.hechicero.basicas (lista de ids, en orden). NO pide potencial: las
+  // básicas SON el camino para convertirse en hechicero sin potencial revelado;
+  // la puerta de las técnicas mayores (aprendida()) sigue intacta. Tampoco
+  // pide costo ni minijuego (precedente: el Escudo de Kaelen se aprende
+  // hablando). Acepta partidas viejas: si j.hechicero.basicas no existe, la
+  // crea. Guarda automáticamente (como U.Aprendizaje.guardarProgreso).
+  basicaPorId(id) { return (this.hechiceros.basicas || []).find(b => b.id === id) || null; },
+  basicasAprendidas(j) { const h = (j && j.hechicero) || {}; const ids = Array.isArray(h.basicas) ? h.basicas : []; return (this.hechiceros.basicas || []).filter(b => ids.indexOf(b.id) >= 0); },
+  siguienteBasico(j) { const h = (j && j.hechicero) || {}; const ids = Array.isArray(h.basicas) ? h.basicas : []; return (this.hechiceros.basicas || []).find(b => ids.indexOf(b.id) < 0) || null; },
+  aprenderBasico(j, id) {
+    if (!j) return { ok: false, motivo: 'sin jugador' };
+    const sig = this.siguienteBasico(j);
+    if (!sig) return { ok: false, motivo: 'ya aprendiste las tres básicas' };
+    if (id && id !== sig.id) return { ok: false, motivo: 'primero va ' + sig.nombre };
+    const h = j.hechicero = j.hechicero || {};
+    h.basicas = Array.isArray(h.basicas) ? h.basicas.slice() : [];
+    if (h.basicas.indexOf(sig.id) >= 0) return { ok: false, motivo: 'ya la aprendiste' };
+    h.basicas.push(sig.id);
+    h.basicos = Math.min(3, h.basicas.length);
+    try { if (U.Guardado) U.Guardado.guardarAuto(); } catch (e) { /* sin guardado aquí (p. ej. test) */ }
+    return { ok: true, basico: sig, basicos: h.basicos };
+  },
   // Un Guía concede una técnica (futuro sistema de enseñanza por tarea): queda
   // registrada como aprendida aunque la maestría aún no llegue al umbral, y se
   // auto-equipa si hay hueco libre. Las ESPECIALES llegan por aquí, desde el

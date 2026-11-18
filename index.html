@@ -52,9 +52,9 @@
         <button id="btnSobrecarga" class="boton small oculto" title="Sobrecarga Yin (X)"><canvas width="72" height="72"></canvas><span class="lbl">SOBRE</span></button>
         <button id="btnDash" class="boton small" title="Dash (Shift)"><canvas width="72" height="72"></canvas><span class="lbl">DASH</span></button>
         <button id="btnEscudo" class="boton small" title="Escudo (B): técnica que se aprende de un Guía (Kaelen). Toma la naturaleza de tu elemento, no te deja moverte y drena Esencia" style="right:142px;bottom:142px;border-color:#7cc4ff;background:linear-gradient(180deg,#2a4a7a,#162a4a)"><canvas width="72" height="72"></canvas><span class="lbl">ESCUDO</span></button>
-        <button id="btnTec" class="boton elem" title="Técnica del elemento (L)"><canvas width="96" height="96"></canvas><span class="lbl">TÉC</span><i class="cd"></i></button>
-        <button id="btnYang" class="boton yang" title="Yang (K)"><canvas width="96" height="96"></canvas><span class="lbl">YANG</span><i class="cd"></i></button>
-        <button id="btnYin" class="boton yin" title="Yin: toca = golpe, mantén = cargado (J)"><canvas width="96" height="96"></canvas><span class="lbl">YIN</span><i class="cd"></i></button>
+        <button id="btnTec" class="boton elem" title="Técnica del elemento (L)"><canvas width="96" height="96"></canvas><span class="lbl">TÉC</span><i class="cd"></i><span class="cdNum"></span></button>
+        <button id="btnYang" class="boton yang" title="Yang (K)"><canvas width="96" height="96"></canvas><span class="lbl">YANG</span><i class="cd"></i><span class="cdNum"></span></button>
+        <button id="btnYin" class="boton yin" title="Yin: toca = golpe, mantén = cargado (J)"><canvas width="96" height="96"></canvas><span class="lbl">YIN</span><i class="cd"></i><span class="cdNum"></span></button>
         <button id="btnA" class="boton a" title="Trote: mantén para avanzar más rápido (E). No interactúa: para hablar o leer, toca al personaje u objeto en pantalla."><canvas width="96" height="96"></canvas><span class="lbl">TROTE</span></button>
       </div>
       <div id="hintTeclado">WASD mover · E trote · Toca un personaje u objeto para interactuar · J Yin · K Yang · L técnica · G técnica PROHIBIDA seleccionada (se aprende de un pergamino, no de un Guía) · B Escudo (se aprende con Kaelen; no te mueves, drena Esencia) · C Caminar sobre el agua (botón que solo aparece cerca del agua; Fuego y Rayo) · V Inversión · Shift dash · Q poción · R meditar · F Yang · 1-3 técnica · Esc pausa · Torneo y misiones por rango: Oficina del Guardián · Pausa (Esc): Mochila, Mapa, Estadísticas, Reputación, Ajustes y Guardar</div>
@@ -114,6 +114,7 @@
 
   <div id="veloInversion" aria-hidden="true"></div>
   <div id="veloDestello" aria-hidden="true"></div>
+  <div id="veloPresentimiento" aria-hidden="true"></div>
   <div id="invIndicador" class="oculto" aria-live="polite"><div class="invTit">🌀 INVERSIÓN</div><div class="invBar"><i id="invBarRelleno"></i></div></div>
   <div id="veloDescanso" aria-hidden="true"></div>
   <div id="scanlines" aria-hidden="true"></div>
@@ -125,6 +126,7 @@
 <script src="js/datos/estadisticas.js"></script>
 <script src="js/datos/test-banco.js"></script>
 <script src="js/datos/habilidades.js"></script>
+<script src="js/datos/presentimiento.js"></script>
 <script src="js/datos/tecnicas_alma.js"></script>
 <script src="js/datos/rival.js"></script>
 <script src="js/datos/apuestas.js"></script>

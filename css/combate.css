@@ -82,6 +82,7 @@
 .guardadoBtns .mini{font-size:12px;padding:7px 12px}
 #veloDescanso{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none;transition:opacity .8s ease;z-index:48}
 #veloDestello{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:47}
+#veloPresentimiento{position:absolute;inset:0;background:transparent;opacity:0;pointer-events:none;z-index:45;box-shadow:inset 0 0 90px 22px rgba(220,38,38,.85)}
 #veloInversion{position:absolute;inset:0;background:rgba(224,91,208,.13);opacity:0;pointer-events:none;z-index:46;transition:opacity .25s ease}
 #invIndicador{position:absolute;left:50%;top:calc(86px + env(safe-area-inset-top));transform:translateX(-50%);z-index:25;pointer-events:none;background:rgba(14,21,48,.92);border:2px solid #e05bd0;border-radius:10px;padding:6px 10px;text-align:center;box-shadow:0 3px 0 var(--sombra),0 0 14px rgba(224,91,208,.45);max-width:94vw}
 #invIndicador .invTit{font-size:11px;letter-spacing:2px;color:#e8a2e0;font-weight:700}
@@ -104,6 +105,11 @@
 .boton canvas{width:23px;height:23px}
 .boton .lbl{font-size:9px;letter-spacing:.5px;line-height:1;margin-top:1px}
 .boton .cd{position:absolute;left:0;right:0;bottom:0;height:0;background:rgba(5,7,15,.65);pointer-events:none}
+/* Número de segundos de enfriamiento (solo visible mientras hay CD; vacío en
+   reposo, para no romper el HUD minimalista). No existe ninguna clase `.costo`
+   en el CSS: el estilo sigue al `.lbl` del botón (pequeño, blanco, con sombra). */
+.boton .cdNum{position:absolute;left:0;right:0;top:1px;text-align:center;font-size:13px;font-weight:700;line-height:1;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.9),0 0 4px rgba(0,0,0,.8);pointer-events:none;z-index:2}
+.boton.equipo .cdNum,.boton.small .cdNum{font-size:11px}
 .boton:active,.boton.presionado{transform:translateY(3px);box-shadow:0 0 0 var(--sombra);filter:brightness(1.25)}
 .boton.apagado{opacity:.45;filter:grayscale(.6)}
 .boton.a{right:0;bottom:0;width:64px;height:64px;border-radius:16px;border-color:var(--exito);background:linear-gradient(180deg,#2f7d4f,#1d5233)}

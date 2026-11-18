@@ -787,7 +787,7 @@ U.Combate = {
       j.esencia -= dren * dt; U.Recuperacion.registrarGasto(dren * dt);
       if (j.esencia <= 0) { j.esencia = 0; j.escudo = false; j.agotado = true; U.HUD.toast('Escudo caído: te quedaste sin Esencia y estás Agotado.', 'peligro'); U.Audio.sfx('fail'); } else if (Math.random() < dt * 8) this.particulas(j.x, j.y - 0.8, 1, this.escudoColor(j), 'chispa'); }
     if (this.actualizarTorneo) this.actualizarTorneo(dt);
-    j.cdYin = Math.max(0, j.cdYin - dt); j.cdYang = Math.max(0, j.cdYang - dt); for (const k in j.cdTec) j.cdTec[k] = Math.max(0, j.cdTec[k] - dt);
+    j.cdYin = Math.max(0, j.cdYin - dt); j.cdYang = Math.max(0, j.cdYang - dt); j.cdBasico = Math.max(0, (j.cdBasico || 0) - dt); for (const k in j.cdTec) j.cdTec[k] = Math.max(0, j.cdTec[k] - dt);
     j.dash.cd = Math.max(0, j.dash.cd - dt); j.invuln = Math.max(0, j.invuln - dt); j.flash = Math.max(0, j.flash - dt); j.ataqueAnim = Math.max(0, j.ataqueAnim - dt);
     if (j.cargando) { j.carga = Math.min(1.2, j.carga + dt); if (Math.random() < dt * 12) this.particulas(j.x + (Math.random() - 0.5) * 1.2, j.y - 0.6 + (Math.random() - 0.5), 1, U.Elementos.datos[j.elementoActivo].claro, 'cura'); }
     if (j.dash.t > 0) { j.dash.t -= dt; U.Grid.mover(E.mapa, j, j.dash.dx * dt, j.dash.dy * dt); j.rastro.push({ x: j.x, y: j.y, t: 0.5 }); this.golpeDash(); }
