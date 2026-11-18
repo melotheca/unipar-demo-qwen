@@ -92,7 +92,7 @@ U.Guardado = {
   cargar(d) {
     if (!d || d.juego !== 'unipar' || !d.perfil || !d.stats || !d.semilla) { this.aviso('Ese archivo no es una partida válida de Unipar.', false); return; }
     const perfil = { elemento: d.perfil.elemento, elemento2: d.perfil.elemento2 || null, atributo: d.perfil.atributo, estilo: d.perfil.estilo || 'yin', yangAfin: !!d.perfil.yangAfin, sabores: Array.isArray(d.sabores) && d.sabores.length === 5 ? d.sabores.slice() : null,
-      stats: Object.assign({}, d.stats), maestria: Object.assign({ fuego: 0, agua: 0, tierra: 0, viento: 0, rayo: 0 }, d.maestria), xpElemento: Object.assign({ fuego: 0, agua: 0, tierra: 0, viento: 0, rayo: 0 }, d.xpElemento), metaDespertar: Object.assign({ fuego: 100, agua: 100, tierra: 100, viento: 100, rayo: 100 }, d.metaDespertar), estilos: Object.assign({ yin: 0, yang: 0 }, d.estilos), distr: {}, scores: null };
+      stats: Object.assign({}, d.stats), maestria: Object.assign({ fuego: 0, agua: 0, tierra: 0, viento: 0, rayo: 0 }, d.maestria), xpElemento: Object.assign({ fuego: 0, agua: 0, tierra: 0, viento: 0, rayo: 0 }, d.xpElemento), metaDespertar: Object.assign({ fuego: 150, agua: 150, tierra: 150, viento: 150, rayo: 150 }, d.metaDespertar), estilos: Object.assign({ yin: 0, yang: 0 }, d.estilos), distr: {}, scores: null };
     U.Audio.init(); U.Audio.reanudar();
     U.TestUI.activo = false; U.TestUI.escena = null; document.getElementById('test').classList.add('oculto');
     const pausa = document.getElementById('pausa'); if (pausa) pausa.classList.add('oculto');
@@ -120,23 +120,26 @@ U.Guardado = {
     // partida VIEJA (sin estos campos) NO la lleva: se le quita la marca que
     // comenzarMundo le puso al cargarla, y sigue con la regla de antes
     // (maestría = dominio), con su equipo y sus técnicas intactos.
-    // XP POR ELEMENTO (piso de afinidad): el segundo elemento nace con 10/100 XP.
-    // Partida guardada DESPUÉS del cambio trae xpElemento/xpElementoInicial y se
-    // restauran tal cual. Partida VIEJA (sin estos campos): no hay XP que perder
-    // — el sistema no existía — así que se reconstruye el piso natural: ceros
-    // con el segundo elemento en 10 si hay elemento2 (la afinidad es, por
-    // definición, el segundo elemento); sin elemento2 no hay forma de saberlo
-    // y queda todo en ceros. En ambos casos la partida carga sin romperse.
+    // XP POR ELEMENTO (afinidad como ADN): el test reparte el 50% de cada
+    // barra en partes iguales entre los elementos tocados con las respuestas.
+    // Partida guardada DESPUÉS del cambio trae xpElemento/xpElementoInicial y
+    // se restauran tal cual. Partida VIEJA (sin estos campos): no se pueden
+    // reconstruir los puntajes del test (no se guardan), así que se conserva
+    // el piso heredado: ceros con el segundo elemento en 10 XP si hay
+    // elemento2; sin elemento2 no hay forma de saberlo y queda todo en ceros.
+    // En ambos casos la partida carga sin romperse.
     // META DESPERTAR (partidas viejas): se deriva del elemento principal guardado
-    // — 200 XP para los 2 elementos que le ganan al principal en la tabla de
-    // ventajas (su opuesto), 100 para los demás — en vez de poner 100 en todos,
-    // porque el principal sí se conoce en cualquier partida vieja y la regla es
-    // fija por vida. La meta no cambia durante la vida, así que el snapshot
-    // inicial es igual a la meta actual.
+    // — 300 XP para los 2 elementos que le ganan al principal en la tabla de
+    // ventajas (sus contrarios), 150 para los demás — en vez de poner 150 en
+    // todos, porque el principal sí se conoce en cualquier partida vieja y la
+    // regla es fija por vida. La meta no cambia durante la vida, así que el
+    // snapshot inicial es igual a la meta actual. Las partidas guardadas con
+    // la regla anterior (100/200) se re-derivan con la nueva (150/300).
     const GANA_A = { fuego: ['agua', 'tierra'], agua: ['viento', 'rayo'], tierra: ['agua', 'viento'], viento: ['fuego', 'rayo'], rayo: ['fuego', 'tierra'] };
-    const metaDe = el => { const m = { fuego: 100, agua: 100, tierra: 100, viento: 100, rayo: 100 }; (GANA_A[el] || []).forEach(x => { m[x] = 200; }); return m; };
-    if (!d.metaDespertar) j.metaDespertar = metaDe(j.elemento);
-    if (d.desdeCero) { j.desdeCero = true; if (d.maestriaInicial) j.maestriaInicial = Object.assign({}, d.maestriaInicial); if (d.estilosInicial) j.estilosInicial = Object.assign({}, d.estilosInicial); j.hechiceroBasicosInicial = d.hechiceroBasicosInicial || 0; if (d.xpElementoInicial) j.xpElementoInicial = Object.assign({}, d.xpElementoInicial); else { j.xpElementoInicial = { fuego: 0, agua: 0, tierra: 0, viento: 0, rayo: 0 }; if (j.elemento2) j.xpElementoInicial[j.elemento2] = 10; } if (!d.xpElemento && j.elemento2) j.xpElemento[j.elemento2] = 10; if (d.metaDespertarInicial) j.metaDespertarInicial = Object.assign({}, d.metaDespertarInicial); else j.metaDespertarInicial = Object.assign({}, j.metaDespertar); }
+    const metaDe = el => { const m = { fuego: 150, agua: 150, tierra: 150, viento: 150, rayo: 150 }; (GANA_A[el] || []).forEach(x => { m[x] = 300; }); return m; };
+    const metaVieja = !d.metaDespertar || U.Elementos.ids.some(e => d.metaDespertar[e] === 100 || d.metaDespertar[e] === 200);
+    if (metaVieja) j.metaDespertar = metaDe(j.elemento);
+    if (d.desdeCero) { j.desdeCero = true; if (d.maestriaInicial) j.maestriaInicial = Object.assign({}, d.maestriaInicial); if (d.estilosInicial) j.estilosInicial = Object.assign({}, d.estilosInicial); j.hechiceroBasicosInicial = d.hechiceroBasicosInicial || 0; if (d.xpElementoInicial) j.xpElementoInicial = Object.assign({}, d.xpElementoInicial); else { j.xpElementoInicial = { fuego: 0, agua: 0, tierra: 0, viento: 0, rayo: 0 }; if (j.elemento2) j.xpElementoInicial[j.elemento2] = 10; } if (!d.xpElemento && j.elemento2) j.xpElemento[j.elemento2] = 10; if (d.metaDespertarInicial && !metaVieja) j.metaDespertarInicial = Object.assign({}, d.metaDespertarInicial); else j.metaDespertarInicial = Object.assign({}, j.metaDespertar); }
     else { j.desdeCero = false; delete j.maestriaInicial; delete j.estilosInicial; delete j.hechiceroBasicosInicial; delete j.xpElementoInicial; delete j.metaDespertarInicial; if (!d.xpElemento) { j.xpElemento = { fuego: 0, agua: 0, tierra: 0, viento: 0, rayo: 0 }; if (j.elemento2) j.xpElemento[j.elemento2] = 10; } }
     if (d.explorado) E.explorado = { bloques: Object.assign({}, d.explorado.bloques || {}), zonas: Array.isArray(d.explorado.zonas) ? d.explorado.zonas.slice() : [] };
     if (d.crecimientoTotal) U.Crecimiento.total = Object.assign({}, d.crecimientoTotal);
