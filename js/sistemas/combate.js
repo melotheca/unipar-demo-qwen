@@ -138,7 +138,10 @@ U.Combate = {
           if (E.flags) E.flags.rompioObjeto = yaRompio; // el enemigo no completa el objetivo del jugador
           this.particulas(e.x + d.x * 0.7, e.y - 0.5 + d.y * 0.7, 4, '#8b93a3', 'chispa');
           this.texto(e, '¡ROMPE!', '#ffd08a', 1);
-          U.Audio.sfx('tierra');
+          // Sonido con distancia (el trabajador A define sfxCerca en audio.js;
+          // si aún no existe en runtime, sfx normal: no se rompe Node).
+          if (U.Audio && typeof U.Audio.sfxCerca === 'function') U.Audio.sfxCerca('tierra', e.x, e.y, 2);
+          else if (U.Audio) U.Audio.sfx('tierra');
           return true;
         }
       }
@@ -541,7 +544,7 @@ U.Combate = {
   morir(e) {
     if (e.esRival && U.Rival) U.Rival.alDerrotaRival(e); // IDEA 1: si cae Ren, el duelo se resuelve al instante (el sondeo de U.Rival es el respaldo)
     if (e.esSparring) { e.vida = Math.max(1, Math.ceil(e.stats.vida * 0.10)); e.retirarSparring = true; return; }
-    const E = U.Juego.estado; e.vida = 0; e.estado = 'muerto'; E.resumen.bajas++; U.Audio.sfx('muerte'); this.particulas(e.x, e.y - 0.6, 24, U.Elementos.color(e.elemento), 'chispa'); this.particulas(e.x, e.y - 0.6, 8, '#9fb3d9', 'humo'); this.sacudir(0.6); E.hitstop = 0.06;
+    const E = U.Juego.estado; e.vida = 0; e.estado = 'muerto'; E.resumen.bajas++; if (U.Audio && typeof U.Audio.sfxCerca === 'function') U.Audio.sfxCerca('muerte', e.x, e.y, 2); else U.Audio.sfx('muerte'); this.particulas(e.x, e.y - 0.6, 24, U.Elementos.color(e.elemento), 'chispa'); this.particulas(e.x, e.y - 0.6, 8, '#9fb3d9', 'humo'); this.sacudir(0.6); E.hitstop = 0.06;
     E.orbes.push({ x: e.x, y: e.y, t: 12 });
     { const premio = { bandido: 6, brasa: 7, chaman: 10, ilusionista: 12, veterano: 16 }[e.clase] || 5; E.jugador.monedas = (E.jugador.monedas || 0) + premio; this.texto(e, '+' + premio + ' 🪙', '#ffe14d', 1);
       if (e.esOrg && U.Orgs) U.Orgs.enemigoDerrotado(e);
@@ -552,19 +555,165 @@ U.Combate = {
     this.texto(e, 'CAÍDO', '#e8dcc8', 1);
   },
 
+  // ---------- CANVAS / TOLERANCIA (Tarea 3) ----------
+  // ZONA VISIBLE = el canvas. distAlCanvas(x,y) = celdas más allá del borde
+  // del canvas (0 = dentro). Tolerancia = 10 celdas más allá del borde: ahí
+  // el enemigo SIGUE EXISTIENDO (se mueve, se le puede perseguir) pero NO
+  // puede atacar ni dar XP defensiva. Más allá (>10) desaparece, salvo
+  // exentos. La cámara (estado.camara, px) sigue al jugador cada cuadro
+  // (render.js), así que el rect se calcula desde ella en vivo.
+  TOLERANCIA: 10,        // celdas más allá del borde del canvas
+  HUIDA_UMBRAL: 0.25,    // ≤25% de vida máx: el débil huye (alineado con Banter.UMBRAL)
+  HUIDA_VEL: 3.4,        // celdas/s alejándose del jugador
+  HUIDA_MAX_T: 6,        // s huyendo antes de desaparecer
+  SPAWN_CERCA: 12,       // un spawn a ≤12 celdas del jugador es "cercano": se sujeta al canvas
+  // Rect visible en celdas: x0..x1, y0..y1. Sin cámara/render (Node/tests),
+  // se estima centrado en el jugador (±8 en X, ±6 en Y). Sin jugador, null.
+  rectCanvas() {
+    const E = U.Juego && U.Juego.estado;
+    const j = E && E.jugador;
+    const R = U.Render;
+    if (E && E.camara && R && isFinite(R.viewW) && isFinite(R.viewH) && R.viewW > 0 && R.viewH > 0) {
+      const TS = 16;
+      return { x0: E.camara.x / TS, x1: (E.camara.x + R.viewW) / TS, y0: E.camara.y / TS, y1: (E.camara.y + R.viewH) / TS };
+    }
+    if (j && isFinite(j.x) && isFinite(j.y)) return { x0: j.x - 8, x1: j.x + 8, y0: j.y - 6, y1: j.y + 6 };
+    return null;
+  },
+  // Distancia en celdas más allá del borde del canvas (0 = dentro). Acepta
+  // (x, y) o un objeto {x, y}. Si el runtime ya trae U.Render.distAlCanvas
+  // (trabajador A) se prefiere, con una comprobación de cordura: el jugador
+  // SIEMPRE está dentro del canvas, así que si ese helper no lo ve a
+  // distancia 0 (otra definición u otras unidades), se ignora y se usa el
+  // cálculo propio. Sin rect conocido, 0 (dentro: no se despawnea a ciegas).
+  distAlCanvas(x, y) {
+    if (x && typeof x === 'object') { y = x.y; x = x.x; }
+    const R = U.Render;
+    if (R && typeof R.distAlCanvas === 'function') {
+      try {
+        const d = R.distAlCanvas(x, y);
+        const E = U.Juego && U.Juego.estado, j = E && E.jugador;
+        const dj = j ? R.distAlCanvas(j.x, j.y) : 0;
+        if (typeof d === 'number' && isFinite(d) && dj === 0) return Math.max(0, d);
+      } catch (err) { /* cae al cálculo propio */ }
+    }
+    const r = this.rectCanvas();
+    if (!r) return 0;
+    const dx = x < r.x0 ? r.x0 - x : (x > r.x1 ? x - r.x1 : 0);
+    const dy = y < r.y0 ? r.y0 - y : (y > r.y1 ? y - r.y1 : 0);
+    return Math.hypot(dx, dy);
+  },
+  // ¿Este enemigo puede despawnear por lejanía? NO: nocturnos (tienen su
+  // ciclo noche/amanecer; si no se eximen, el spawn nocturno entraría en
+  // bucle spawn→despawn), ni los de evento/misión (arena, torneo, reto,
+  // sparring, jefe de guarida, rival, protección, escolta, rescate, bestia,
+  // patrulla de zona), ni los de organizaciones (esOrg: guardias de
+  // escondite con s.spawned=true que no re-spawnean si despawnean), ni la
+  // población fija del mundo (esPoblacion: spawns fijos lejanos que existen
+  // donde están hasta que el jugador llega; ver crearEnemigo). El GATE DE
+  // ATAQUE sí aplica a todos, exentos incluidos.
+  puedeDespawn(e) {
+    return !e.nocturno && !e.esArena && !e.esTorneo && !e.esReto && !e.esSparring && !e.esJefeGuarida && !e.esRival && !e.esProteccion && !e.esEscolta && !e.esRescate && !e.esBestia && !e.esPatrullaZona && !e.esPoblacion && !e.esOrg;
+  },
+  // Sujeta un punto de spawn al borde INTERIOR del canvas (margen celdas
+  // dentro del borde), en la dirección en que cae: el enemigo aparece
+  // dentro y entra caminando, nunca en tolerancia ni más allá. Sin rect
+  // conocido, lo deja como está. También lo sujeta a los límites del mapa.
+  sujetarAlCanvas(x, y, margen) {
+    const r = this.rectCanvas();
+    if (!r) return { x, y };
+    const m = (margen == null ? 1 : margen);
+    let nx = Math.max(r.x0 + m, Math.min(r.x1 - m, x));
+    let ny = Math.max(r.y0 + m, Math.min(r.y1 - m, y));
+    const E = U.Juego && U.Juego.estado, mp = E && E.mapa;
+    if (mp && isFinite(mp.ancho) && isFinite(mp.alto)) {
+      nx = Math.max(0.5, Math.min(mp.ancho - 0.5, nx));
+      ny = Math.max(0.5, Math.min(mp.alto - 0.5, ny));
+    }
+    return { x: nx, y: ny };
+  },
+  // Desaparición silenciosa: SIN XP, SIN monedas, SIN orbe, SIN banner.
+  // morir() NO se llama: no hay recompensas. Sus telegrafías se limpian
+  // solas: actualizarEfectos filtra por vivos() (que lee E.enemigos).
+  desaparecer(e) {
+    const E = U.Juego.estado;
+    if (E.efectos) E.efectos.telegrafos = E.efectos.telegrafos.filter(t => t.owner !== e);
+    const i = E.enemigos.indexOf(e);
+    if (i >= 0) E.enemigos.splice(i, 1);
+  },
+  // ¿Este enemigo puede HUIR al quedar débil? Solo enemigos del mundo. Se
+  // excluyen sparring, arena, torneo, reto, jefe de guarida, rival,
+  // protección, patrulla de zona, defensores y los de misión (escolta,
+  // rescate, bestia) y de organización (emboscadas, cazadores, guardias de
+  // guarida): si huyeran y desaparecieran, su misión/evento quedaría
+  // bloqueado sin forma de completarlo (la bestia que huye no se puede
+  // cazar, los guardias que huyen no dejan entrar a la guarida). Los
+  // nocturnos SÍ pueden huir: son bandidos del mundo y su ciclo
+  // noche/amanecer no depende de ellos.
+  puedeHuir(e) {
+    if (!e || e.huyendo) return false;
+    if (e.esSparring || e.esArena || e.esTorneo || e.esReto || e.esJefeGuarida || e.esRival || e.esProteccion || e.esPatrullaZona || e.esDefensor) return false;
+    if (e.esEscolta || e.esRescate || e.esBestia) return false;
+    if (e.esOrg) return false;
+    return true;
+  },
+  // Cruce a ≤25%: empieza la huida (una sola vez por enemigo, marca
+  // e.huyendo). Limpia la telegrafía en curso: el débil deja de
+  // telegrafiar/atacar en el acto.
+  iniciarHuida(e) {
+    e.huyendo = true; e.huyendoT = 0;
+    if (e.estado === 'telegrafia') { e.estado = 'persigue'; e.t = 0; e.tele = null; e.tecActual = null; }
+    const E = U.Juego.estado;
+    if (E.efectos) E.efectos.telegrafos = E.efectos.telegrafos.filter(t => t.owner !== e);
+  },
+
   // ---------- enemigos ----------
   crearEnemigo(clase, x, y, mult) {
     const c = this.CLASES[clase]; const s = {}; for (const k in c.stats) s[k] = Math.round(c.stats[k] * mult * (k === 'vida' || k === 'esencia' ? 1 : 1));
-    return { tipo: 'enemigo', clase, nombre: c.nombre, elemento: c.elemento, x, y, dir: { x: 0, y: 1 }, stats: s, vida: s.vida, estado: 'persigue', t: 0, cd: 1 + Math.random(), anim: Math.random(), moviendo: false, flash: 0, efectos: { stun: 0, slow: 0, dot: null, invertido: 0, invMapa: null, cegado: 0 }, tele: null, esReto: false, nocturno: false, escudoT: 0, escudoCd: 2 + Math.random() * 3, esTorneo: false, esProteccion: false, setTec: (this.SETS[clase] || []).slice(), setTecManual: false, tecActual: null };
+    // SPAWN DENTRO DEL CANVAS: un spawn CERCANO (a ≤12 celdas del jugador:
+    // ladrones de zonasSeguras, patrullas, retos, emboscadas, duelos, arena)
+    // se sujeta al borde interior del canvas (1 celda dentro), nunca en
+    // tolerancia ni más allá. Un spawn LEJANO (puntos fijos del mundo a más
+    // de 12 celdas: spawnsAbiertos, bandidos nocturnos lejanos) se deja
+    // DONDE ESTÁ y se marca esPoblacion: es población fija del mundo, existe
+    // en su punto hasta que el jugador llega (el gate de ataque la mantiene
+    // inactiva fuera del canvas) y no despawnea por lejanía. Sin esta
+    // distinción, sujetar TODOS los puntos fijos los teletransportaría junto
+    // al jugador al cambiar de mapa (10 spawnsAbiertos del mapa continuo de
+    // la aldea, a 14–150 celdas del inicio: una emboscada de 10 enemigos
+    // cada vez que se entra a la aldea) o los borraría en el primer tick.
+    const E = U.Juego && U.Juego.estado, j = E && E.jugador;
+    let px = x, py = y, esPoblacion = false;
+    if (j && isFinite(j.x) && isFinite(j.y) && isFinite(x) && isFinite(y)) {
+      if (Math.hypot(x - j.x, y - j.y) <= this.SPAWN_CERCA) { const sp = this.sujetarAlCanvas(x, y, 1); px = sp.x; py = sp.y; }
+      else esPoblacion = true;
+    }
+    return { tipo: 'enemigo', clase, nombre: c.nombre, elemento: c.elemento, x: px, y: py, dir: { x: 0, y: 1 }, stats: s, vida: s.vida, estado: 'persigue', t: 0, cd: 1 + Math.random(), anim: Math.random(), moviendo: false, flash: 0, efectos: { stun: 0, slow: 0, dot: null, invertido: 0, invMapa: null, cegado: 0 }, tele: null, esReto: false, nocturno: false, escudoT: 0, escudoCd: 2 + Math.random() * 3, esTorneo: false, esProteccion: false, esPoblacion, setTec: (this.SETS[clase] || []).slice(), setTecManual: false, tecActual: null };
   },
   actualizarEnemigos(dt) {
     const E = U.Juego.estado, j = E.jugador; const vivos = this.vivos();
     vivos.forEach(e => {
+      // DESPAWN POR LEJANÍA (canvas + tolerancia 10): fuera de la tolerancia
+      // desaparece silencioso (sin XP, sin monedas, sin orbe, sin banner),
+      // salvo exentos (puedeDespawn). Sin temporizador: la tolerancia de 10
+      // celdas YA es el margen; más allá, fuera.
+      if (this.puedeDespawn(e) && this.distAlCanvas(e.x, e.y) > this.TOLERANCIA) { this.desaparecer(e); return; }
+      // HUIDA DEL DÉBIL: al CRUZAR ≤25% de vida máx (una sola vez por
+      // enemigo, marca e.huyendo; alineado con Banter.UMBRAL para que la
+      // línea 'casiPierde' y la huida coincidan en el mismo cuadro).
+      if (!e.huyendo && this.puedeHuir(e) && e.vida > 0 && e.vida <= (e.stats.vida || 1) * this.HUIDA_UMBRAL) this.iniciarHuida(e);
+      if (e.huyendo) {
+        e.huyendoT = (e.huyendoT || 0) + dt;
+        // Desaparición por huida: fuera de la tolerancia O ≥6 s huyendo.
+        // Sin XP, sin monedas, sin orbe, sin banner. Si lo matan antes
+        // (jugador o patrullero), morir() normal con recompensas.
+        if (this.distAlCanvas(e.x, e.y) > this.TOLERANCIA || e.huyendoT >= this.HUIDA_MAX_T) { this.desaparecer(e); return; }
+      }
       e.flash = Math.max(0, e.flash - dt); e.cd -= dt;
       // ESCUDO MÁGICO de hechiceros (chamán e ilusionista): se protegen, NO se mueven ni atacan mientras dura.
       e.escudoCd = Math.max(0, (e.escudoCd || 0) - dt);
       if (e.escudoT > 0) { e.escudoT -= dt; e.moviendo = false; if (Math.random() < dt * 6) this.particulas(e.x, e.y - 0.8, 1, '#e05bd0', 'chispa'); return; }
-      if ((e.clase === 'chaman' || e.clase === 'ilusionista') && e.escudoCd <= 0 && e.vida < e.stats.vida * 0.75 && Math.random() < dt * 0.55) { e.escudoT = 2.4; e.escudoCd = 9; this.texto(e, '¡ESCUDO MÁGICO!', '#e8a2e0', 1); U.Audio.sfx('yang'); return; }
+      if ((e.clase === 'chaman' || e.clase === 'ilusionista') && e.escudoCd <= 0 && e.vida < e.stats.vida * 0.75 && Math.random() < dt * 0.55) { e.escudoT = 2.4; e.escudoCd = 9; this.texto(e, '¡ESCUDO MÁGICO!', '#e8a2e0', 1); if (U.Audio && typeof U.Audio.sfxCerca === 'function') U.Audio.sfxCerca('yang', e.x, e.y, 2); else U.Audio.sfx('yang'); return; }
       if (e.efectos.stun > 0) { e.efectos.stun -= dt; e.moviendo = false; return; }
       if (e.efectos.slow > 0) e.efectos.slow -= dt;
       if (e.efectos.dot) { const d = e.efectos.dot; d.t -= dt; d.tick += dt; if (d.tick >= 0.5) { d.tick = 0; const dd = Math.max(1, Math.round(d.dmg)); e.vida -= dd; E.resumen.daño += dd; this.texto(e, '-' + dd, '#ff7a2f', 1); this.particulas(e.x, e.y - 0.8, 2, '#ff7a2f', 'brasa'); if (e.vida <= 0) { this.morir(e); return; } } if (d.t <= 0) e.efectos.dot = null; }
@@ -586,12 +735,17 @@ U.Combate = {
       }
       // movimiento
       let mx = 0, my = 0;
+      if (e.huyendo) { mx = -dx / d; my = -dy / d; } // HUYE: corre ALEJÁNDOSE del jugador (U.Grid.mover desliza por ejes)
+      else {
       if (e.clase === 'chaman') { if (d < 3.5) { mx = -dx / d; my = -dy / d; } else if (d > c.rango + 1) { mx = dx / d; my = dy / d; } }
       else if (d > c.rango) { mx = dx / d; my = dy / d; }
       if (e.efectos.invertido > 0 && (mx || my)) { if (!e.efectos.invMapa && U.Inversion) e.efectos.invMapa = U.Inversion.generar(); const mv = U.Inversion ? U.Inversion.aplicar(e.efectos.invMapa, mx, my) : { x: -mx, y: -my }; mx = mv.x; my = mv.y; }
       // Reposición activa (mago): sigue de lado mientras dure
       if (e.reposicion && e.reposicion.t > 0) { mx = e.reposicion.dx; my = e.reposicion.dy; e.reposicion.t -= dt; if (e.reposicion.t <= 0) e.reposicion = null; }
-      // ATORADO: intenta moverse pero su posición casi no cambia durante ~1.5 s (una roca/árbol le bloquea el paso)
+      // ATORADO (solo si NO huye: el que huye no se para a romper rocas ni a
+      // rodear; si queda acorralado, el temporizador de 6 s lo hace
+      // desaparecer igual): intenta moverse pero su posición casi no cambia
+      // durante ~1.5 s (una roca/árbol le bloquea el paso)
       if (mx || my) {
         if (e._atoradoX == null) { e._atoradoX = e.x; e._atoradoY = e.y; e._atoradoT = 0; }
         else {
@@ -612,14 +766,21 @@ U.Combate = {
           }
         }
       } else { e._atoradoT = 0; e._atoradoX = e.x; e._atoradoY = e.y; }
-      if (mx || my) { U.Grid.mover(E.mapa, e, mx * vel * dt, my * vel * dt); e.moviendo = true; e.anim += dt; } else e.moviendo = false;
+      } // fin del else (no huye)
+      const velEf = e.huyendo ? this.HUIDA_VEL * (e.efectos.slow > 0 ? 0.45 : 1) : vel;
+      if (mx || my) { U.Grid.mover(E.mapa, e, mx * velEf * dt, my * velEf * dt); e.moviendo = true; e.anim += dt; } else e.moviendo = false;
       // separación
       vivos.forEach(o => { if (o !== e) { const sx = e.x - o.x, sy = e.y - o.y, sd = Math.hypot(sx, sy); if (sd < 0.8 && sd > 0.001) { U.Grid.mover(E.mapa, e, sx / sd * dt * 1.5, sy / sd * dt * 1.5); } } });
       // ataque con telegrafía: el enemigo elige UNA técnica de su set según la
       // distancia (no un solo ataque fijo). La telegrafía marca la forma elegida.
       const tecE = this.elegirTec(e, d);
       const enRango = tecE ? (['linea', 'proyectil', 'alterna', 'cadena'].indexOf(tecE.forma) >= 0 ? d <= (tecE.alcance || c.alcance) : d <= (tecE.alcance || c.rango) + 0.4) : (e.clase === 'chaman' ? d <= c.alcance : d <= c.rango + 0.4);
-      if (enRango && e.cd <= 0) { e.estado = 'telegrafia'; e.t = c.tele / Math.sqrt(E.dificultad); e.tecActual = tecE; const fE = tecE || c; e.tele = fE.forma === 'proyectil' ? U.Grid.forma('linea', e.x, e.y, e.dir, Math.min(3, fE.alcance || 3), 0) : U.Grid.forma(fE.forma, e.x, e.y, e.dir, fE.alcance || c.alcance, fE.radio || c.radio || 0); E.efectos.telegrafos.push({ celdas: e.tele, owner: e, t: e.t }); U.Audio.sfx(e.clase === 'brasa' ? 'fuego' : e.clase === 'chaman' ? 'viento' : 'cargando'); }
+      // GATE DE ATAQUE (canvas): un enemigo SOLO puede telegrafiar/atacar si
+      // está DENTRO del canvas (distAlCanvas === 0). Fuera, en tolerancia,
+      // sigue existiendo y moviéndose (huye o se acerca) pero NO ataca: esto
+      // cierra la XP defensiva fantasma (dañoJugador solo se alcanza desde
+      // ataques enemigos). El que huye tampoco telegrafía nunca.
+      if (!e.huyendo && enRango && e.cd <= 0 && this.distAlCanvas(e.x, e.y) === 0) { e.estado = 'telegrafia'; e.t = c.tele / Math.sqrt(E.dificultad); e.tecActual = tecE; const fE = tecE || c; e.tele = fE.forma === 'proyectil' ? U.Grid.forma('linea', e.x, e.y, e.dir, Math.min(3, fE.alcance || 3), 0) : U.Grid.forma(fE.forma, e.x, e.y, e.dir, fE.alcance || c.alcance, fE.radio || c.radio || 0); E.efectos.telegrafos.push({ celdas: e.tele, owner: e, t: e.t }); U.Audio.sfx(e.clase === 'brasa' ? 'fuego' : e.clase === 'chaman' ? 'viento' : 'cargando'); }
     });
     E.enemigos = E.enemigos.filter(e => e.vida > 0 || e.t < 1);
   },
@@ -629,6 +790,12 @@ U.Combate = {
   // telegrafiadas. El efecto de la CLASE se suma al de la técnica (p. ej. el
   // ilusionista siempre invierte, use la técnica que use).
   ataqueEnemigo(e, c) {
+    // DEFENSA EN PROFUNDIDAD (canvas): fuera del canvas el ataque NO se
+    // ejecuta, aunque la telegrafía se hubiera iniciado dentro (el jugador
+    // puede haber corrido y sacado al enemigo del canvas a mitad de
+    // telegrafía). Los proyectiles YA en vuelo siguen su curso normal y su
+    // impacto se resuelve normal (actualizarProyectiles no se toca).
+    if (this.distAlCanvas(e.x, e.y) > 0) return;
     const E = U.Juego.estado, j = E.jugador; const el = U.Elementos.datos[e.elemento];
     if (e.efectos.cegado > 0) { this.texto(e, '👁 ¡FALLA! (CEGADO)', '#fff7c2', 1); U.Audio.sfx('esquiva'); return; } // cegado por Destello: ataca a ciegas y falla
     const tec = e.tecActual || this.elegirTec(e, U.Grid.dist(e, j)) || c;
@@ -649,7 +816,7 @@ U.Combate = {
     E.proyectiles.forEach(p => {
       p.vida -= dt; p.x += p.dx * p.vel * dt; p.y += p.dy * p.vel * dt;
       if (Math.random() < dt * 30) this.particulas(p.x, p.y - 0.5, 1, p.color, p.cometa ? 'chispa' : 'polvo');
-      const estallar = () => { if (p.explora) { const celdas = U.Grid.forma('circulo', p.x, p.y, { x: 1, y: 0 }, 0, p.explora.radio); E.efectos.haces.push({ celdas, color: p.color, t: 0.3, max: 0.3 }); E.efectos.anillos.push({ x: p.x, y: p.y, radio: p.explora.radio, color: p.color, t: 0.4, max: 0.4 }); this.sacudir(0.6); U.Audio.sfx(p.elemento || 'yang'); if (p.dueño === 'jugador') this.vivos().forEach(e => { if (U.Grid.enCeldas(celdas, e)) this.dañoEnemigo(e, p.base * (p.explora.power / 1.4), p.elemento, Object.assign({ desafio: this.desafio(e), alcance: p.alcance, dist: (p.ox != null ? Math.hypot(e.x - p.ox, e.y - p.oy) : null) }, p.efecto || {})); }); else if (U.Grid.enCeldas(celdas, j)) this.dañoJugador(p.base, null, p.efecto, { elemento: p.elemento || null, proyectil: true, ox: p.x - p.dx, oy: p.y - p.dy }); } p.vida = 0; };
+      const estallar = () => { if (p.explora) { const celdas = U.Grid.forma('circulo', p.x, p.y, { x: 1, y: 0 }, 0, p.explora.radio); E.efectos.haces.push({ celdas, color: p.color, t: 0.3, max: 0.3 }); E.efectos.anillos.push({ x: p.x, y: p.y, radio: p.explora.radio, color: p.color, t: 0.4, max: 0.4 }); this.sacudir(0.6); if (U.Audio && typeof U.Audio.sfxCerca === 'function') U.Audio.sfxCerca(p.elemento || 'yang', p.x, p.y, 2); else U.Audio.sfx(p.elemento || 'yang'); if (p.dueño === 'jugador') this.vivos().forEach(e => { if (U.Grid.enCeldas(celdas, e)) this.dañoEnemigo(e, p.base * (p.explora.power / 1.4), p.elemento, Object.assign({ desafio: this.desafio(e), alcance: p.alcance, dist: (p.ox != null ? Math.hypot(e.x - p.ox, e.y - p.oy) : null) }, p.efecto || {})); }); else if (U.Grid.enCeldas(celdas, j)) this.dañoJugador(p.base, null, p.efecto, { elemento: p.elemento || null, proyectil: true, ox: p.x - p.dx, oy: p.y - p.dy }); } p.vida = 0; };
       if (U.Grid.solidoEn(E.mapa, p.x, p.y)) { if (p.dueño === 'jugador') this.golpearObjetoEn(p.x, p.y, p.base * 0.9); estallar(); return; }
       if (p.dueño === 'jugador') { for (const e of this.vivos()) { if (p.golpeados.indexOf(e) >= 0) continue; if (Math.hypot(e.x - p.x, e.y - p.y) < 0.65) { p.golpeados.push(e); this.dañoEnemigo(e, p.base, p.elemento, Object.assign({ desafio: this.desafio(e), alcance: p.alcance, dist: (p.ox != null ? Math.hypot(e.x - p.ox, e.y - p.oy) : null) }, p.efecto || {})); if (p.explora) estallar(); else if (!p.cometa) p.vida = 0; else { /* la onda perfora y empuja */ } break; } }
         if (p.vida > 0 && U.Criaturas && E.criaturas) { for (const c of E.criaturas) { if (c.vida <= 0 || c.invocada || p.golpeados.indexOf(c) >= 0) continue; if (Math.hypot(c.x - p.x, c.y - p.y) < 0.65) { p.golpeados.push(c); U.Criaturas.danar(c, p.base, p.elemento, {}); if (!p.cometa) p.vida = 0; break; } } } }

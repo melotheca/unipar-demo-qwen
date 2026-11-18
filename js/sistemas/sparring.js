@@ -75,7 +75,7 @@ U.Sparring = {
           const atk = S.turno % 2 ? A : B, def = S.turno % 2 ? B : A;
           atk.atacando = 0.25; atk.dir = U.Grid.dir8(def.x - atk.x, def.y - atk.y); def.dir = U.Grid.dir8(atk.x - def.x, atk.y - def.y);
           def.vidaSim = Math.max(55, (def.vidaSim || 100) - 4);
-          U.Combate.particulas(def.x, def.y - 0.6, 6, '#ffd08a', 'chispa'); U.Audio.sfx('golpe');
+          U.Combate.particulas(def.x, def.y - 0.6, 6, '#ffd08a', 'chispa'); if (U.Audio && typeof U.Audio.sfxCerca === 'function') U.Audio.sfxCerca('golpe', def.x, def.y, 2); else U.Audio.sfx('golpe');
           if (Math.random() < 0.3) U.Combate.texto(def, ['¡Ja!', '¡Buena!', '¡Otra!', '¡Eso!'][Math.floor(Math.random() * 4)], '#e8dcc8', 1);
         }
       }
@@ -298,7 +298,7 @@ U.Sparring = {
     U.Emociones.evento(n, { realidad: 45, energia: 15, etiqueta: 'se retiró del sparring al 10%' });
     if (!n.hechos) n.hechos = []; n.hechos.push('se retiró del sparring al quedar al 10% de Vida');
     const F = E.efectos.textos; F.push({ x: n.x, y: n.y, txt: per.cortoDebil || 'Estoy débil… me salgo.', color: '#ffb347', escala: 1, vida: 2.4, max: 2.4 });
-    U.Combate.particulas(n.x, n.y - 0.6, 10, '#ffb347', 'polvo'); U.Audio.sfx('esquiva');
+    U.Combate.particulas(n.x, n.y - 0.6, 10, '#ffb347', 'polvo'); if (U.Audio && typeof U.Audio.sfxCerca === 'function') U.Audio.sfxCerca('esquiva', n.x, n.y, 2); else U.Audio.sfx('esquiva');
     U.HUD.banner('🛑 ' + n.nombre.toUpperCase() + ' SE RETIRA · QUEDÓ AL 10% DE VIDA', 2);
   },
   finComun() {
@@ -390,7 +390,7 @@ U.Sparring = {
           atk.atacando = 0.25;
           const key = P.turno % 2 ? 'a' : 'b';
           if (key === 'a') P.vidaA = Math.max(15, (P.vidaA || 100) - (4 + Math.random() * 4)); else P.vidaB = Math.max(15, (P.vidaB || 100) - (4 + Math.random() * 4));
-          U.Combate.particulas(def.x, def.y - 0.6, 6, '#ffd08a', 'chispa'); U.Audio.sfx('golpe');
+          U.Combate.particulas(def.x, def.y - 0.6, 6, '#ffd08a', 'chispa'); if (U.Audio && typeof U.Audio.sfxCerca === 'function') U.Audio.sfxCerca('golpe', def.x, def.y, 2); else U.Audio.sfx('golpe');
           if (Math.random() < 0.3) U.Combate.texto(def, ['¡Ay!', '¡Eso dolió!', '¡Ya verás!', '¡Toma!'][Math.floor(Math.random() * 4)], '#e8dcc8', 1);
         }
         const dC = Math.hypot(j.x - P.centro.x, j.y - P.centro.y);

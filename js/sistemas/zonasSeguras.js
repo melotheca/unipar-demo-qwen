@@ -131,11 +131,19 @@ U.ZonasSeguras = {
   },
   spawnLadron(E, j, noche, dentro) {
     const ang = Math.random() * Math.PI * 2, d = 6 + Math.random() * 3;
-    const c = this.celdaLibre(E.mapa, Math.floor(j.x + Math.cos(ang) * d), Math.floor(j.y + Math.sin(ang) * d));
+    // SPAWN DENTRO DEL CANVAS: 6-9 celdas caen fuera del canvas estrecho de
+    // móvil vertical (cssW 390 → ~8 celdas de ancho): se sujeta el punto al
+    // borde interior del canvas (1 celda dentro), en la dirección del spawn,
+    // ANTES de buscar celda libre; celdaLibre busca en anillos y puede
+    // devolver una celda fuera del borde, así que el resultado se vuelve a
+    // sujetar. (crearEnemigo también sujeta: triple red.)
+    const sp = U.Combate.sujetarAlCanvas(j.x + Math.cos(ang) * d, j.y + Math.sin(ang) * d, 1);
+    const c = this.celdaLibre(E.mapa, Math.floor(sp.x), Math.floor(sp.y));
+    const sc = U.Combate.sujetarAlCanvas(c.x + 0.5, c.y + 0.5, 1);
     let clase = 'bandido', nombre = 'Ladrón del camino';
     if (noche) { clase = Math.random() < 0.7 ? 'bandido' : 'chaman'; nombre = 'Bandido del camino'; }
     else if (Math.random() < 0.5) nombre = 'Ratero del camino';
-    const e = U.Combate.crearEnemigo(clase, c.x + 0.5, c.y + 0.5, E.dificultad);
+    const e = U.Combate.crearEnemigo(clase, sc.x, sc.y, E.dificultad);
     e.nombre = nombre; e.esLadron = true;
     if (noche) e.nocturno = true; // como los del bosque: se retiran al amanecer
     E.enemigos.push(e);
@@ -215,7 +223,10 @@ U.ZonasSeguras = {
       if (mios.length >= this.PATRULLA_MAX) return;
       if (mios.some(d => d.rangoPatrulla === rango)) return;
       const c = this.celdaLibre(E.mapa, Math.floor(pueblo.x) + (i % 2 ? 3 : -3), Math.floor(pueblo.y) + (i < 1 ? 2 : -2));
-      const e = U.Combate.crearEnemigo('veterano', c.x + 0.5, c.y + 0.5, E.dificultad * (rango === 'patrullero' ? 1.25 : 1.05));
+      // La plaza puede quedar fuera del canvas si el jugador está en el borde
+      // del pueblo: se sujeta el patrullero al borde interior del canvas.
+      const sc = U.Combate.sujetarAlCanvas(c.x + 0.5, c.y + 0.5, 1);
+      const e = U.Combate.crearEnemigo('veterano', sc.x, sc.y, E.dificultad * (rango === 'patrullero' ? 1.25 : 1.05));
       e.nombre = 'Patrullero · ' + rango[0].toUpperCase() + rango.slice(1) + ' de servicio';
       e.esPatrullaZona = true; e.rangoPatrulla = rango; e.esOrg = 'patrullaZona';
       E.enemigos.push(e);

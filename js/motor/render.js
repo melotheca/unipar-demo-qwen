@@ -45,6 +45,26 @@ U.Render = {
     this.viewW = this.cssW / this.zoom; this.viewH = this.cssH / this.zoom; this.ctx.imageSmoothingEnabled = false;
     this.vineta = null;
   },
+  // ---------- Visibilidad del canvas (para sfx con posición) ----------
+  // Rectángulo visible en CELDAS: la cámara (estado.camara, en px) sigue al
+  // jugador; viewW/viewH ya están en px del mundo (cssW/zoom) y TS = 16 px/celda.
+  // Sin estado o sin cámara no hay rect: null.
+  rectVisibleCells(estado) {
+    const E = estado || (U.Juego ? U.Juego.estado : null);
+    const cam = E && E.camara;
+    if (!cam || !isFinite(cam.x) || !isFinite(cam.y) || !this.viewW || !this.viewH) return null;
+    const TS = 16;
+    return { x0: cam.x / TS, y0: cam.y / TS, x1: (cam.x + this.viewW) / TS, y1: (cam.y + this.viewH) / TS };
+  },
+  // Distancia en celdas del punto (x, y) al rectángulo visible: 0 si está
+  // dentro, si no la distancia euclidiana al borde más cercano. null sin rect.
+  distAlCanvas(x, y) {
+    const r = this.rectVisibleCells();
+    if (!r) return null;
+    const dx = x < r.x0 ? r.x0 - x : x > r.x1 ? x - r.x1 : 0;
+    const dy = y < r.y0 ? r.y0 - y : y > r.y1 ? y - r.y1 : 0;
+    return Math.hypot(dx, dy);
+  },
   mulberry(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; },
   mk(w, h, fn) { const c = document.createElement('canvas'); c.width = w; c.height = h; const x = c.getContext('2d'); fn(x); return c; },
 

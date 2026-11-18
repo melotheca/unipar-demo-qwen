@@ -595,7 +595,10 @@ U.Grid = {
     for (let y = o.y; y < o.y + (o.h || 1); y++) for (let x = o.x; x < o.x + (o.w || 1); x++) if (x >= 0 && y >= 0 && x < m.ancho && y < m.alto && m.tiles[y * m.ancho + x] !== this.T.AGUA) m.solidos[y * m.ancho + x] = 0;
     const E = window.U && U.Juego ? U.Juego.estado : null;
     if (E && E.jugador) { if (U.Combate) U.Combate.particulas(o.x + 0.5, o.y, 10, o.tipo === 'arbol' ? '#46a06a' : '#8b93a3', 'chispa'); if (U.HUD) U.HUD.toast((o.tipo === 'arbol' ? 'Árbol' : o.tipo === 'roca' ? 'Roca' : 'Cactus') + ' destruido: el paso queda libre. (Los materiales no son monedas: el dinero se gana con misiones, arena y torneo.)', 'exito'); E.flags.rompioObjeto = true; }
-    if (window.U && U.Audio) U.Audio.sfx('tierra');
+    // El golpe suena en la POSICIÓN del objeto: si lo rompe un enemigo lejos
+    // del canvas (romperObstaculoFrente), no se oye; si lo rompes tú, el
+    // objeto está frente a ti, dentro del canvas, y suena igual que antes.
+    if (window.U && U.Audio) { if (U.Audio.sfxCerca) U.Audio.sfxCerca('tierra', o.x + (o.w || 1) / 2, o.y + (o.h || 1) / 2, 2); else U.Audio.sfx('tierra'); }
     if (window.U && U.Reliquias) U.Reliquias.objetoRoto(o); // si la roca/árbol guardaba una máscara, la revela como tesoro recogible
     return true;
   },
@@ -605,8 +608,38 @@ U.Grid = {
   mover(m, e, dx, dy) {
     const r = 0.3;
     const libre = (x, y) => !this.esSolido(m, Math.floor(x - r), Math.floor(y - r)) && !this.esSolido(m, Math.floor(x + r), Math.floor(y - r)) && !this.esSolido(m, Math.floor(x - r), Math.floor(y + r)) && !this.esSolido(m, Math.floor(x + r), Math.floor(y + r));
+    const ox = e.x, oy = e.y;
     if (libre(e.x + dx, e.y)) e.x += dx;
     if (libre(e.x, e.y + dy)) e.y += dy;
+    // DESATORO DE ESQUINA: movimiento DIAGONAL bloqueado en los DOS ejes (la
+    // caja roza la esquina de una celda sólida: boca de un pasillo de 1 celda,
+    // esquina de una casa). Un empujón corto en eje despega la caja de la
+    // esquina y deja deslizar; sin él el actor se queda parado aunque el paso
+    // esté libre a 0.2 celdas. Solo diagonal: de frente contra una pared (un
+    // solo eje) el actor se detiene limpio, sin derivar de lado. El empujón
+    // solo vale si abre el paso DIAGONAL (tras él, el paso (dx, dy) completo
+    // está libre): si la diagonal sigue bloqueada es un callejón sin salida
+    // (bolsillo cóncavo, hueco diagonal de 1 celda) y empujar solo haría
+    // vibrar al actor en el sitio. El destino del empujón también debe estar
+    // libre, así que nunca atraviesa un sólido.
+    if (dx && dy && e.x === ox && e.y === oy) {
+      const dirs = Math.abs(dy) > Math.abs(dx)
+        ? [[1, 0], [-1, 0], [0, 1], [0, -1]]
+        : [[0, 1], [0, -1], [1, 0], [-1, 0]];
+      let desatorado = false;
+      for (const n of [0.2, 0.35]) {
+        for (const d of dirs) {
+          const nx = e.x + d[0] * n, ny = e.y + d[1] * n;
+          if (libre(nx, ny) && libre(nx + dx, ny + dy)) {
+            e.x = nx; e.y = ny;
+            if (libre(e.x + dx, e.y)) e.x += dx;
+            if (libre(e.x, e.y + dy)) e.y += dy;
+            desatorado = true; break;
+          }
+        }
+        if (desatorado) break;
+      }
+    }
     e.x = Math.max(0.5, Math.min(m.ancho - 0.5, e.x)); e.y = Math.max(0.5, Math.min(m.alto - 0.5, e.y));
   },
   dist(a, b) { return Math.hypot(a.x - b.x, a.y - b.y); },

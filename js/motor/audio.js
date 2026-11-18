@@ -72,6 +72,17 @@ U.Audio = {
       case 'pajaro': this.tono(2200, 0.06, 'sine', 0.03, 2800); setTimeout(() => this.tono(2500, 0.05, 'sine', 0.025, 2000), 90); break;
     }
   },
+  // SFX CON POSICIÓN: toca el sfx `n` solo si el punto (x, y) está dentro del
+  // canvas visible o a ≤ `radio` celdas de su borde (radio por defecto 2).
+  // Los sonidos de origen ENEMIGO (romper obstáculos, telegrafías, ataques)
+  // sonaban en cualquier parte del mapa y el jugador los oía como un golpe
+  // sordo al caminar. Esos puntos deben llamar a sfxCerca con la posición
+  // del enemigo; los sonidos del JUGADOR siguen por sfx() normal, sin filtro.
+  // Sin rect visible (sin cámara) suena igual: no se pierde ningún sonido.
+  sfxCerca(n, x, y, radio) {
+    const d = (U.Render && U.Render.distAlCanvas) ? U.Render.distAlCanvas(x, y) : null;
+    if (d == null || d <= (radio == null ? 2 : radio)) this.sfx(n);
+  },
   musica(escena) { if (this.escena === escena) return; this.escena = escena; this.paso = 0; if (this.ctx) this.nextNota = this.ctx.currentTime + 0.1; },
   // MÚSICA ADAPTATIVA: elige el patrón según el estado del juego. La arena sigue
   // siendo SOLO para arena / torneo / reto; fuera de ahí, si hay un enemigo hostil
