@@ -41,7 +41,7 @@ U.Guardado = {
       npcs: (E.roster || E.npcs || []).map(n => ({ id: n.id, estados: Object.assign({}, n.estados), emocion: n.emocion, saludado: !!n.saludado, entreno: !!n.entreno, stockPociones: n.stockPociones, hechos: (n.hechos || []).slice(), veces: n.veces || 0, mapa: n.mapa || 'aldea', x: Math.round(n.x * 100) / 100, y: Math.round(n.y * 100) / 100 })),
       criaturas: (E.criaturas || []).map(c => ({ uid: c.uid, vinculo: Math.round(c.vinculo * 10) / 10, vida: Math.round(c.vida), invocada: !!c.invocada, x: Math.round(c.x * 100) / 100, y: Math.round(c.y * 100) / 100 })),
       contratos: E.contratos ? { sangre: E.contratos.sangre.slice(), alma: E.contratos.alma || null } : { sangre: [], alma: null },
-      prog: (E.prog && U.Progresion) ? U.Progresion.serializable() : null, destelloModo: E.destelloModo || 'normal',
+      prog: (E.prog && U.Progresion) ? U.Progresion.serializable() : null, destelloModo: E.destelloModo || 'normal', radarModo: E.radarModo || 'relativo',
       rival: (E.rival && U.Rival) ? U.Rival.serializar() : null, aprendiz: U.Aprendiz ? U.Aprendiz.serializable() : null, apuestas: U.Apuestas ? U.Apuestas.serializable() : null, aprendizaje: j.aprendizaje ? JSON.parse(JSON.stringify(j.aprendizaje)) : null
     };
   },
@@ -166,6 +166,7 @@ U.Guardado = {
     if (d.contratos) { E.contratos = { sangre: Array.isArray(d.contratos.sangre) ? d.contratos.sangre.slice(0, 3) : [], alma: d.contratos.alma || null }; U.Criaturas.contratoSangre = E.contratos.sangre.slice(); U.Criaturas.contratoAlma = E.contratos.alma; }
     if (d.prog && U.Progresion) { const base = U.Progresion.nuevo(); E.prog = Object.assign(base, d.prog); E.prog.examen = Object.assign({ intentos: 0, aprobado: false, nota: 0 }, d.prog.examen || {}); E.prog.patrulla = Object.assign({ rango: null, misiones: 0 }, d.prog.patrulla || {}); E.prog.duelo = null; E.prog._examen = null; }
     if (d.destelloModo) E.destelloModo = d.destelloModo;
+    if (d.radarModo) E.radarModo = d.radarModo; // chip del hexágono: 'relativo' o 'nivel' (persiste como destelloModo)
     if (d.rival && U.Rival) U.Rival.cargar(d.rival); // IDEA 1: la memoria de Ren (duelos, rachas, historial)
     if (d.aprendiz && U.Aprendiz) U.Aprendiz.restaurar(d.aprendiz); // IDEA 4: el progreso de Taro, tu aprendiz
     if (d.apuestas && U.Apuestas) U.Apuestas.restaurar(d.apuestas); // IDEA 5: el historial de apuestas (si se cargó en plena pelea, devuelve la apuesta abierta)

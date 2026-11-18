@@ -258,29 +258,49 @@ U.HUD = {
   setCdNum(btn, rest) { const n = btn ? btn.querySelector('.cdNum') : null; if (n) n.textContent = rest > 0 ? String(Math.ceil(rest)) : ''; },
   escHtml(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); },
   radarStats(j) {
-    // Radar hexagonal de las 6 estadísticas con los valores ACTUALES de j.stats:
-    // se reconstruye en cada apertura de Opciones, así que crece solo con el personaje.
+    // Radar hexagonal de las 6 estadísticas, con CHIP para cambiar de vista:
+    // · RELATIVO (por defecto, el de siempre): cada eje se mide contra un máximo
+    //   propio de la estadística (Vida/Esencia 200; resto 20). Muestra tu EQUILIBRIO:
+    //   de un vistazo ves cuál es tu más fuerte y cuál tu más débil. Al inicio todas
+    //   se ven llenas porque están parejas; al entrenar una, esa crece y las demás
+    //   se ven más chicas en comparación. Las etiquetas muestran el VALOR.
+    // · REAL · POR NIVEL: cada eje es el NIVEL de la estadística (j.nivelStat) contra
+    //   un máximo de nivel fijo (NIVEL_MAX = 20). Así ninguna domina por ser número
+    //   grande (Vida/Esencia en valor son ~10× las de combate) y se ve cuánto has
+    //   ENTRENADO cada una. Las etiquetas muestran el NIVEL. Nv. 20 es un hito serio:
+    //   con la curva lenta, llegar a Nv. 20 cuesta ~3 300 XP acumulados (neutral).
+    // La elección del chip persiste en el guardado (E.radarModo). Las barritas de
+    // valor de abajo NO cambian: siguen en 300/100 con texto valor/3000.
+    const modo = (U.Juego.estado && U.Juego.estado.radarModo === 'nivel') ? 'nivel' : 'relativo';
+    const NIVEL_MAX = 20;
     const orden = ['vida', 'esencia', 'ataque', 'defensa', 'mente', 'velocidad'];
-    const refs = { vida: 300, esencia: 300, ataque: 100, defensa: 100, mente: 100, velocidad: 100 }; // escala FIJA y amplia, propia del hexágono: que un valor alto no parezca "casi completo" (antes 200/20, relativo, y Velocidad 23 ya tocaba el borde)
+    const refs = modo === 'nivel'
+      ? { vida: NIVEL_MAX, esencia: NIVEL_MAX, ataque: NIVEL_MAX, defensa: NIVEL_MAX, mente: NIVEL_MAX, velocidad: NIVEL_MAX }
+      : { vida: 200, esencia: 200, ataque: 20, defensa: 20, mente: 20, velocidad: 20 };
+    const valor = k => modo === 'nivel' ? ((j.nivelStat && j.nivelStat[k]) || 1) : (j.stats[k] || 0);
+    const textoVal = k => modo === 'nivel' ? ('Nv. ' + valor(k)) : (+valor(k)).toFixed(2);
     const cols = { vida: '#ff8a9c', esencia: '#7cc4ff', ataque: '#ffd08a', defensa: '#67e08a', mente: '#e8a2e0', velocidad: '#7ef0c0' };
     const cx = 180, cy = 158, R = 96;
     const pt = (i, f) => { const a = (-90 + i * 60) * Math.PI / 180; return [cx + R * f * Math.cos(a), cy + R * f * Math.sin(a)]; };
     const ptsAnillo = f => orden.map((k, i) => pt(i, f).map(n => n.toFixed(1)).join(',')).join(' ');
     const colElem = U.Elementos.color(j.elementoActivo);
-    let s = '<div class="radarWrap"><svg class="radarSvg" viewBox="0 0 360 330" role="img" aria-label="Gráfico hexagonal con tus estadísticas actuales: ' + orden.map(k => U.Estadisticas.etiquetas[k] + ' ' + (+j.stats[k]).toFixed(2)).join(', ') + '">';
+    let s = '<div class="radarWrap"><div class="radarChips"><button class="mini' + (modo === 'relativo' ? ' activo' : '') + '" data-radar="relativo" title="Equilibrio entre tus estadísticas: cuál es tu más fuerte y cuál tu más débil">⚖ RELATIVO · equilibrio</button><button class="mini' + (modo === 'nivel' ? ' activo' : '') + '" data-radar="nivel" title="Por nivel: cuánto has entrenado cada estadística (Nv. 20 = hito)">📈 REAL · por nivel</button></div><svg class="radarSvg" viewBox="0 0 360 330" role="img" aria-label="Gráfico hexagonal con tus estadísticas actuales (' + (modo === 'nivel' ? 'por nivel' : 'relativo') + '): ' + orden.map(k => U.Estadisticas.etiquetas[k] + ' ' + textoVal(k)).join(', ') + '">';
     [1, 0.75, 0.5, 0.25].forEach(f => { s += '<polygon points="' + ptsAnillo(f) + '" fill="' + (f === 1 ? 'rgba(11,16,32,.55)' : 'none') + '" stroke="#3b4d86" stroke-width="' + (f === 1 ? 2 : 1) + '"/>'; });
     orden.forEach((k, i) => { const p = pt(i, 1); s += '<line x1="' + cx + '" y1="' + cy + '" x2="' + p[0].toFixed(1) + '" y2="' + p[1].toFixed(1) + '" stroke="#3b4d86" stroke-width="1"/>'; });
     [0.25, 0.5, 0.75, 1].forEach(f => { const p = pt(0, f); s += '<text class="radarPct" x="' + (p[0] + 5).toFixed(1) + '" y="' + (p[1] + 3).toFixed(1) + '">' + Math.round(f * 100) + '%</text>'; });
-    const datos = orden.map((k, i) => pt(i, Math.min(1, Math.max(0.02, (j.stats[k] || 0) / refs[k]))));
+    const datos = orden.map((k, i) => pt(i, Math.min(1, Math.max(0.02, valor(k) / refs[k]))));
     s += '<polygon points="' + datos.map(p => p.map(n => n.toFixed(1)).join(',')).join(' ') + '" fill="' + colElem + '" fill-opacity="0.35" stroke="' + colElem + '" stroke-width="2.5" stroke-linejoin="round"/>';
     orden.forEach((k, i) => {
       const p = datos[i];
       s += '<circle cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="3.5" fill="' + cols[k] + '" stroke="#05070f" stroke-width="1"/>';
       const lp = pt(i, 1.32); const anc = (i === 0 || i === 3) ? 'middle' : (i === 1 || i === 2) ? 'start' : 'end';
       const yNom = (i === 0) ? lp[1] - 4 : (i === 3) ? lp[1] + 12 : lp[1] - 2;
-      s += '<text text-anchor="' + anc + '" x="' + lp[0].toFixed(1) + '" y="' + yNom.toFixed(1) + '"><tspan class="radarNom" fill="' + cols[k] + '">' + U.Estadisticas.etiquetas[k] + '</tspan><tspan class="radarVal" x="' + lp[0].toFixed(1) + '" dy="13">' + (+j.stats[k]).toFixed(2) + '</tspan></text>';
+      s += '<text text-anchor="' + anc + '" x="' + lp[0].toFixed(1) + '" y="' + yNom.toFixed(1) + '"><tspan class="radarNom" fill="' + cols[k] + '">' + U.Estadisticas.etiquetas[k] + '</tspan><tspan class="radarVal" x="' + lp[0].toFixed(1) + '" dy="13">' + textoVal(k) + '</tspan></text>';
     });
-    s += '</svg><div class="radarNota">El hexágono muestra tu equilibrio entre estadísticas, no tu progreso: cada eje se mide contra un máximo fijo (Vida y Esencia hasta 300; Ataque, Defensa, Mente y Velocidad hasta 100), así que el polígono se ve pequeño aunque ya entrenes. Tu progreso real está en los niveles (Nv.) y las barras de XP de abajo. Tope real de cada estadística: 3000.</div></div>';
+    s += '</svg><div class="radarNota">' + (modo === 'nivel'
+      ? 'Vista REAL · por nivel: cada eje es el nivel de esa estadística (máximo del gráfico: Nv. 20, un hito serio). Así ninguna domina por ser número grande y ves cuánto has ENTRENADO cada una: la que más sube es la que más usas.'
+      : 'Vista RELATIVA · equilibrio: cada eje se mide contra su propio máximo (Vida y Esencia hasta 200; Ataque, Defensa, Mente y Velocidad hasta 20). Al inicio se ve lleno porque están parejas; al entrenar una, esa crece y las demás se ven más chicas. De un vistazo ves tu más fuerte y tu más débil.')
+      + ' Cambia con el chip de arriba. Tu progreso detallado está en los niveles (Nv.) y las barras de XP de abajo. Tope real de cada estadística: 3000.</div></div>';
     return s;
   },
   construirPausaBase() {
@@ -410,6 +430,9 @@ U.HUD = {
   cablearPausa() {
     const c = this.el.pausaCuerpo; if (!c) return;
     c.querySelectorAll('[data-sec]').forEach(b => b.addEventListener('click', () => this.seccionPausa(b.dataset.sec)));
+    // Chip del hexágono (Relativo / Real por nivel): cambia la vista y re-renderiza
+    // la sección; la elección persiste en E.radarModo (guardado automático).
+    c.querySelectorAll('[data-radar]').forEach(b => b.addEventListener('click', () => { const E = U.Juego.estado; E.radarModo = b.dataset.radar === 'nivel' ? 'nivel' : 'relativo'; if (U.Audio) U.Audio.sfx('click'); if (E && E.ui === 'pausa') this.seccionPausa('estadisticas'); }));
     // Equipo: añadir / quitar / reordenar (re-render de Ajustes + botones del HUD).
     const reEq = () => { this.refrescarEquipo(); this.refrescarChips(); if (U.Juego.estado && U.Juego.estado.ui === 'pausa') this.seccionPausa('ajustes'); };
     c.querySelectorAll('[data-eq-add]').forEach(b => b.addEventListener('click', () => { const r = U.Habilidades.equipar(U.Juego.estado.jugador, b.dataset.eqAdd); if (!r.ok) U.HUD.toast('No se pudo equipar: ' + r.motivo + '.', 'aviso'); else { U.Audio.sfx('click'); } reEq(); }));
