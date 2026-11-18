@@ -144,14 +144,17 @@ U.TestUI = {
     const stats = {}; const ini = U.Atributos.de(atributo).inicio;
     // BONO POR COMPLETAR EL TEST: +2 a cada estadística de combate (ataque,
     // defensa, mente, velocidad), DESPUÉS de los puntos s, el bono de elemento
-    // y el bono de atributo, y DESPUÉS del clamp (el clamp es 7–14, así que el
-    // tope con bono es 16). Vida/Esencia NO llevan este +2 (rango 80–130/80–120).
+    // y el bono de atributo, y DESPUÉS del clamp (el clamp es 7–12, así que el
+    // tope con bono es 14). Vida/Esencia NO llevan este +2 (rango 80–130/80–120).
     // Es el 'extra' por hacer el test frente a los 40 de la elección directa.
-    // OJO (medido en simulación, 2000 partidas aleatorias): el total de combate
-    // sale en promedio ~59 (mín. 52, máx. 64), no ~50, porque los puntos s ya
-    // saturan el clamp 14 antes del bono (media pre-bono ~12.8 por stat).
+    // OJO (medido en simulación, 2000 partidas aleatorias, archivos reales):
+    // con el multiplicador de s en ×0.15 y el clamp en 12, el total de combate
+    // sale en promedio ~50.2 (mín. 47, máx. 55), media pre-bono ~42.2 (~10.5
+    // por stat). Antes (×1.2, clamp 14) salía ~59.2 porque los puntos s ya
+    // saturaban el clamp 14 antes del bono.
     const BONO_TEST = 2; const STATS_COMBATE = ['ataque', 'defensa', 'mente', 'velocidad'];
-    for (const k in U.Estadisticas.base) { let v = U.Estadisticas.base[k] + (perf[k] || 0) + (S.s[k] || 0) * 1.2 + (ini[k] || 0); v = U.Estadisticas.clampTest(k, v); if (STATS_COMBATE.indexOf(k) >= 0) v += BONO_TEST; stats[k] = v; }
+    let mentePreBono = null; // Mente ANTES del +2: es la mente innata, la que decide el potencial de hechicero.
+    for (const k in U.Estadisticas.base) { let v = U.Estadisticas.base[k] + (perf[k] || 0) + (S.s[k] || 0) * 0.15 + (ini[k] || 0); v = U.Estadisticas.clampTest(k, v); if (k === 'mente') mentePreBono = v; if (STATS_COMBATE.indexOf(k) >= 0) v += BONO_TEST; stats[k] = v; }
     // MAESTRÍA INICIAL DE PRINCIPIANTE (nivel 1): la MAESTRÍA con la que naces
     // es 1% en tu elemento principal — nivel 1 — y 0 en los demás. (distr era el
     // reparto antiguo de 20 puntos; ya no pone niveles de Yin/Yang ni se muestra.)
@@ -182,9 +185,11 @@ U.TestUI = {
     // (HUD y guardado lo leen): es true cuando el estilo natural es yang.
     const yangAfin = estilo === 'yang';
     // POTENCIAL DE HECHICERO (Arte Místico / Mente): el test lo revela si tu Mente
-    // nace alta o tu atributo es Sabio. Sin revelación NO está cerrado: puedes
-    // convertirte en hechicero entrenándote con los hechiceros (camino de una vida).
-    const hechiceroPotencial = atributo === 'sabio' || stats.mente >= 12;
+    // nace alta o tu atributo es Sabio. Se mira la Mente PRE-bono (innata, sin
+    // el +2 por completar el test): con mente pre-bono 10–11 NO se revela y con
+    // 12+ SÍ. Sin revelación NO está cerrado: puedes convertirte en hechicero
+    // entrenándote con los hechiceros (camino de una vida).
+    const hechiceroPotencial = atributo === 'sabio' || mentePreBono >= 12;
     const estilosFin = { yin: 1, yang: 1 };
     // NIVELES POR ESTADÍSTICA: cada estadística nace en nivel 1 con su barra
     // de XP en 0; el valor inicial del test es el del nivel 1.

@@ -5,7 +5,7 @@ window.U = window.U || {};
 U.Estadisticas = {
   base: { vida: 100, esencia: 100, ataque: 10, defensa: 10, mente: 10, velocidad: 10 },
   topes: { vida: 3000, esencia: 3000, ataque: 3000, defensa: 3000, mente: 3000, velocidad: 3000 }, // Tope universal de 3000 para las 6 estadísticas; los atributos NO ponen tope por atributo.
-  rangosTest: { vida: [80, 130], esencia: [80, 120], ataque: [7, 14], defensa: [7, 14], mente: [7, 14], velocidad: [7, 14] },
+  rangosTest: { vida: [80, 130], esencia: [80, 120], ataque: [7, 12], defensa: [7, 12], mente: [7, 12], velocidad: [7, 12] },
   // Perfil inicial por elemento (el test lo suma a las respuestas y al atributo)
   porElemento: {
     fuego:  { ataque: 2, velocidad: 1, defensa: -1 },
