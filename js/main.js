@@ -19,7 +19,7 @@ U.Juego = {
     const rng = U.TestUI.rngSemilla(semilla); const mapa = U.Grid.crearMapaContinuo(rng);
     const j = { tipo: 'jugador', nombre, perfil, elemento: perfil.elemento, elemento2: perfil.elemento2, elementos: perfil.elemento2 ? [perfil.elemento, perfil.elemento2] : [perfil.elemento], elementoActivo: perfil.elemento, atributo: perfil.atributo,
       stats: Object.assign({}, perfil.stats), vida: perfil.stats.vida, esencia: perfil.stats.esencia, maestria: Object.assign({}, perfil.maestria), estilos: Object.assign({}, perfil.estilos), regenBonus: 0,
-      x: mapa.inicio.x, y: mapa.inicio.y, dir: { x: 0, y: 1 }, anim: 0, moviendo: false, trote: false, agotado: false, invuln: 0, flash: 0, carga: 0, cargando: false, ataqueAnim: 0, cdYin: 0, cdYang: 0, cdTec: {}, cdBasico: 0, dash: { t: 0, cd: 0, dx: 0, dy: 0 }, rastro: [], tecnicaIdx: 0, yangForma: 'haz', equipo: [], tecnicasAprendidas: [], tieneYang: !!perfil.yangAfin, buffs: { sobrecarga: 0, sobrecargaCd: 0 }, descansando: false, pociones: 0, bolsaPociones: [], bolsaComida: [], reliquias: { tenidas: [], puesta: null, artefactos: [], casa: [], encontradas: [] }, prohibidas: { pergaminos: [], aprendidas: [], casa: [], encontradas: [] }, prohibidaSel: null, cdProh: {}, karma: {}, sabores: (perfil.sabores || U.Economia.SABORES.slice()), polainas: {}, polainaEquipada: null, polainaMultCrec: 1, pasosPolainas: 0, condPolainas: 0, comidasHoy: 0, permisoHasta: 0, permisoUsos: 0, promesas: [], monedas: 0, ultimaOrilla: null, levitT: 0, enAguaT: 0, caminarAgua: false, cercaAgua: false, sobreAgua: false, hechicero: { potencial: !!(perfil.hechiceroPotencial || perfil.atributo === 'sabio' || (perfil.stats && perfil.stats.mente >= 12)), basicos: 0 }, escudo: false, escudoAprendido: false, escudoNv: 0, escudoExp: 0, escudoVida: 0, cansancio: 100, condicionExtra: 0, gastoFatiga: 0, dot: null, invertido: 0, invMapa: null, invTotal: 0, flags: {} };
+      x: mapa.inicio.x, y: mapa.inicio.y, dir: { x: 0, y: 1 }, anim: 0, moviendo: false, trote: false, agotado: false, invuln: 0, flash: 0, carga: 0, cargando: false, ataqueAnim: 0, cdYin: 0, cdYang: 0, cdTec: {}, cdBasico: 0, dash: { t: 0, cd: 0, dx: 0, dy: 0 }, rastro: [], tecnicaIdx: 0, yangForma: 'haz', equipo: [], tecnicasAprendidas: [], tieneYang: !!perfil.yangAfin, buffs: { sobrecarga: 0, sobrecargaCd: 0 }, descansando: false, pociones: 0, bolsaPociones: [], bolsaComida: [], reliquias: { tenidas: [], puesta: null, artefactos: [], casa: [], encontradas: [] }, prohibidas: { pergaminos: [], aprendidas: [], casa: [], encontradas: [] }, prohibidaSel: null, cdProh: {}, karma: {}, sabores: (perfil.sabores || U.Economia.SABORES.slice()), polainas: {}, polainaEquipada: null, polainaMultCrec: 1, pasosPolainas: 0, condPolainas: 0, comidasHoy: 0, permisoHasta: 0, permisoUsos: 0, promesas: [], monedas: 0, ultimaOrilla: null, levitT: 0, enAguaT: 0, caminarAgua: false, cercaAgua: false, sobreAgua: false, hechicero: { potencial: !!(perfil.hechiceroPotencial || perfil.atributo === 'sabio' || (perfil.stats && perfil.stats.mente >= 12)), basicos: 0 }, escudo: false, escudoAprendido: false, escudoNv: 0, escudoExp: 0, escudoVida: 0, tiempoLento: false, acero: false, cansancio: 100, condicionExtra: 0, gastoFatiga: 0, dot: null, invertido: 0, invMapa: null, invTotal: 0, flags: {} };
     // tieneYang = Yang DESPERTADO: con afinidad naces despierto; sin ella, despierta al entrenar el estilo hasta el umbral (5).
     // SPAWN INICIAL: una nueva vida empieza DENTRO de tu casa en la Aldea de Bruma
     // (el interior 'casa': piso, paredes, cama y cofre, con la puerta del sur para
@@ -437,7 +437,7 @@ U.Juego = {
   // el jugador elige el suyo. Esta función queda como compatibilidad para las
   // llamadas viejas: solo deja el panel apuntando a la portada abierta.
   siguienteObjetivo() { const E = this.estado; if (!E) return; E.objetivoIdx = 0; },
-  despertar() { if (U.Orgs) U.Orgs.alDespertar(); const E = this.estado, j = E.jugador; if (E.mapaId !== 'aldea') this.cambiarMapa('aldea', null, true); U.Combate.limpiar(); j.x = E.mapa.inicio.x; j.y = E.mapa.inicio.y; j.vida = Math.max(1, j.stats.vida * 0.25); j.esencia = j.stats.esencia * 0.5; j.agotado = false; j.dot = null; j.escudo = false; j.buffs.sobrecarga = 0; j.caminarAgua = false; j.sobreAgua = false; j.cercaAgua = false; j.invuln = 1; U.Audio.musica('aldea'); U.HUD.toast('Despiertas junto a la fogata. Sora te mira de reojo.', ''); E.historial.derrotas++; E.npcs.forEach(n => { if (!n.hechos) n.hechos = []; if (n.hechos.indexOf('te vieron caer') < 0) n.hechos.push('te vieron caer'); U.Emociones.evento(n, { realidad: 40, energia: 10, etiqueta: 'te vieron caer' }); }); },
+  despertar() { if (U.Orgs) U.Orgs.alDespertar(); const E = this.estado, j = E.jugador; if (E.mapaId !== 'aldea') this.cambiarMapa('aldea', null, true); U.Combate.limpiar(); j.x = E.mapa.inicio.x; j.y = E.mapa.inicio.y; j.vida = Math.max(1, j.stats.vida * 0.25); j.esencia = j.stats.esencia * 0.5; j.agotado = false; j.dot = null; j.escudo = false; j.tiempoLento = false; j.acero = false; j.buffs.sobrecarga = 0; j.caminarAgua = false; j.sobreAgua = false; j.cercaAgua = false; j.invuln = 1; U.Audio.musica('aldea'); U.HUD.toast('Despiertas junto a la fogata. Sora te mira de reojo.', ''); E.historial.derrotas++; E.npcs.forEach(n => { if (!n.hechos) n.hechos = []; if (n.hechos.indexOf('te vieron caer') < 0) n.hechos.push('te vieron caer'); U.Emociones.evento(n, { realidad: 40, energia: 10, etiqueta: 'te vieron caer' }); }); },
   fin(tipo) { const E = this.estado; if (E.ui === 'fin') return;
     if (tipo === 'derrota' && E.torneo && E.torneo.activo) { if (U.Combate.derrotaTorneo()) return; }
     if (tipo === 'derrota' && E.escolta && E.escolta.activa) { const esc = E.escolta; esc.activa = false; if (esc.npc) { esc.npc.enEscolta = false; esc.npc.vidaEscolta = 100; } E.escolta = null; if (E.mision && E.mision.tipo === 'escolta') { E.mision = null; U.HUD.banner('📜 ESCOLTA FALLIDA · CAÍSTE PROTEGIENDO', 2.4); } } if (tipo === 'derrota') { U.Audio.sfx('derrota'); U.Audio.musica('aldea'); } if (tipo === 'victoria' && E.historial) { E.historial.victorias++; E.npcs.forEach(n => { if (!n.hechos) n.hechos = []; if (n.hechos.indexOf('te vieron ganar la arena') < 0) n.hechos.push('te vieron ganar la arena'); }); } U.Combate.cancelarArena(); U.HUD.mostrarFin(tipo); },
@@ -528,6 +528,10 @@ U.Juego = {
   },
   actualizarMundo(dt) {
     const E = this.estado, j = E.jugador, I = this.input, m = E.mapa;
+    // TIEMPO LENTO: el mundo (enemigos, NPCs, proyectiles, sistemas) corre a
+    // dtM = dt × escala; el jugador y el reloj corren a dt real. El reloj del
+    // día ya avanzó con dt real en bucle() y aquí no se toca.
+    const dtM = dt * U.Combate.escalaMundo();
     // Vector de movimiento: joystick analógico o teclado (8 direcciones, magnitud analógica)
     let vx = 0, vy = 0, mag = 0;
     if (I.joy && I.mag > 0) { vx = I.vx; vy = I.vy; mag = I.mag; }
@@ -545,35 +549,35 @@ U.Juego = {
     } else j.moviendo = true;
     this.tickSuelo(dt, j.moviendo, distCel);
     this.actualizarPuentes(); // el puente de piedra de Tierra dura un día del juego: el agua se traga las baldosas vencidas
-    this.chequearDia(); this.tickEscolta(dt); this.tickPeticiones(dt);
+    this.chequearDia(); this.tickEscolta(dtM); this.tickPeticiones(dtM);
     // Umbrales entre mapas: pisar una salida cambia de mapa (con enfriamiento anti-rebote)
     E.cambioCd = Math.max(0, (E.cambioCd || 0) - dt);
     if (E.cambioCd <= 0 && m.salidas) { for (const s of m.salidas) { if (j.x >= s.x && j.x <= s.x + s.w && j.y >= s.y && j.y <= s.y + s.h) { this.cambiarMapa(s.destino, s.spawn); return; } } }
     // NPC: emociones, deambular y choque
-    E.npcs.forEach(n => { U.Emociones.actualizar(n, dt, j); const d = U.Grid.dist(n, j); if (d < 0.75) { const dx = j.x - n.x, dy = j.y - n.y, dd = d || 0.01; U.Grid.mover(m, j, dx / dd * 0.05, dy / dd * 0.05); if (n.bumpCd <= 0) { n.bumpCd = 3; const r = U.Emociones.evento(n, { realidad: 32, energia: 12, etiqueta: 'choque' }); U.HUD.toast(n.nombre + ' se aparta, molesto por el empujón (confianza ' + r.delta.toFixed(1) + ').', 'aviso'); } } });
-    if (U.Vida) U.Vida.tickGlobal(E, dt); if (U.Sparring) U.Sparring.actualizar(dt);
-    if (U.Criaturas) U.Criaturas.actualizar(dt); // criaturas salvajes: rutinas y temperamentos (hostil persigue, tímida huye, amistosa se acerca)
+    E.npcs.forEach(n => { U.Emociones.actualizar(n, dtM, j); const d = U.Grid.dist(n, j); if (d < 0.75) { const dx = j.x - n.x, dy = j.y - n.y, dd = d || 0.01; U.Grid.mover(m, j, dx / dd * 0.05, dy / dd * 0.05); if (n.bumpCd <= 0) { n.bumpCd = 3; const r = U.Emociones.evento(n, { realidad: 32, energia: 12, etiqueta: 'choque' }); U.HUD.toast(n.nombre + ' se aparta, molesto por el empujón (confianza ' + r.delta.toFixed(1) + ').', 'aviso'); } } });
+    if (U.Vida) U.Vida.tickGlobal(E, dtM); if (U.Sparring) U.Sparring.actualizar(dtM);
+    if (U.Criaturas) U.Criaturas.actualizar(dtM); // criaturas salvajes: rutinas y temperamentos (hostil persigue, tímida huye, amistosa se acerca)
     this.chequearMision(dt);
-    if (U.Orgs) U.Orgs.tick(dt); // organizaciones: emboscadas de los que drenan dominio, la jaula de la Red de Jade, la reliquia de los Coleccionistas y los objetivos abiertos
-    if (U.Escondites) U.Escondites.tick(dt); // escondites secretos: colocar los lugares (sin marcar), descubrir por exploración o por seguir a un miembro
-    if (U.Reliquias) U.Reliquias.tick(dt); // máscaras y artefactos: tesoros escondidos en el mundo, emboscadas de Los Coleccionistas si llevas una máscara puesta en zona salvaje, y agentes del sello si llevas la Llave contigo
-    if (U.Prohibidas) U.Prohibidas.tick(dt); // técnicas prohibidas: pergaminos escondidos en lugares peligrosos, espíritu oscuro invocado, control mental sobre vecinos y emboscadas de Los Coleccionistas si llevas un pergamino encima en zona salvaje
-    if (U.Progresion) U.Progresion.tick(dt); // progresión: duelos de examen/gimnasio/defensa, contadores de academia y títulos automáticos por hazaña
+    if (U.Orgs) U.Orgs.tick(dtM); // organizaciones: emboscadas de los que drenan dominio, la jaula de la Red de Jade, la reliquia de los Coleccionistas y los objetivos abiertos
+    if (U.Escondites) U.Escondites.tick(dtM); // escondites secretos: colocar los lugares (sin marcar), descubrir por exploración o por seguir a un miembro
+    if (U.Reliquias) U.Reliquias.tick(dtM); // máscaras y artefactos: tesoros escondidos en el mundo, emboscadas de Los Coleccionistas si llevas una máscara puesta en zona salvaje, y agentes del sello si llevas la Llave contigo
+    if (U.Prohibidas) U.Prohibidas.tick(dtM); // técnicas prohibidas: pergaminos escondidos en lugares peligrosos, espíritu oscuro invocado, control mental sobre vecinos y emboscadas de Los Coleccionistas si llevas un pergamino encima en zona salvaje
+    if (U.Progresion) U.Progresion.tick(dtM); // progresión: duelos de examen/gimnasio/defensa, contadores de academia y títulos automáticos por hazaña
     if (E.objetivos[9] && E.objetivos[9].estado === 'actual' && (E.historial.torneos || 0) > 0) { E.objetivos[9].estado = 'hecho'; this.siguienteObjetivo(); }
     if (E.objetivos[10] && E.objetivos[10].estado === 'actual' && E.flags.rompioObjeto) { E.objetivos[10].estado = 'hecho'; this.siguienteObjetivo(); }
-    U.Combate.actualizar(dt); U.Recuperacion.actualizar(dt); U.Crecimiento.flush(dt); U.Ambiente.actualizar();
+    U.Combate.actualizar(dt, dtM); U.Recuperacion.actualizar(dt); U.Crecimiento.flush(dt); U.Ambiente.actualizar();
     E.flags.pozoCd = Math.max(0, (E.flags.pozoCd || 0) - dt);
     // Objetivos
     if (E.objetivos[1].estado === 'actual' && E.flags.visitoRibera && E.flags.visitoCenizar) { E.objetivos[1].estado = 'hecho'; U.HUD.toast('Has sentido el ambiente: el mismo elemento cuesta distinto según la zona.', 'exito'); this.siguienteObjetivo(); }
     if (E.objetivos[0].estado === 'hecho' && E.objetivoIdx === 0) this.siguienteObjetivo();
     if (E.objetivos[3].estado === 'actual' && E.flags.contadoVictoria) { E.objetivos[3].estado = 'hecho'; this.siguienteObjetivo(); }
-    U.Clima.actualizar(E, dt);
+    U.Clima.actualizar(E, dtM);
     E.bandidoT = (E.bandidoT || 0) + dt; if (E.bandidoT > 1) { E.bandidoT = 0; this.gestionarBandidos(); }
     if (E.objetivos[5] && E.objetivos[5].estado === 'actual' && E.flags.visitoDesierto && E.flags.visitoMontana) { E.objetivos[5].estado = 'hecho'; this.siguienteObjetivo(); }
     if (E.objetivos[6] && E.objetivos[6].estado === 'actual' && E.flags.hechizoInversion) { E.objetivos[6].estado = 'hecho'; this.siguienteObjetivo(); }
     if (E.objetivos[7] && E.objetivos[7].estado === 'actual' && E.flags.casaDormida) { E.objetivos[7].estado = 'hecho'; this.siguienteObjetivo(); }
     // Partículas ambientales por zona (visibles, ligadas al clima de la zona)
-    const z = E.zonaActual; E.ambienteT += dt;
+    const z = E.zonaActual; E.ambienteT += dtM;
     if (z && E.ambienteT > 0.08) { E.ambienteT = 0; const cx = E.camara.x / 16, cy = E.camara.y / 16, vw = U.Render.viewW / 16, vh = U.Render.viewH / 16; const rx = cx + Math.random() * vw, ry = cy + Math.random() * vh; const P = E.efectos.particulas;
       if ((z.id === 'cenizar' || z.id === 'quemadaSur' || z.id === 'volcanes' || z.id === 'puebloFuego') && P.length < 380) P.push({ x: rx, y: ry, dx: (Math.random() - 0.5) * 0.4, dy: -0.8 - Math.random() * 0.6, vida: 1.5, max: 1.5, color: Math.random() < 0.5 ? '#ff7a2f' : '#ffb347', tam: 1, grav: -0.2 });
       else if (z.id === 'ribera' && P.length < 380) P.push({ x: rx, y: ry, dx: (Math.random() - 0.5) * 0.5, dy: (Math.random() - 0.5) * 0.3, vida: 2, max: 2, color: Math.random() < 0.5 ? '#bfefff' : '#7ef0c0', tam: 1, grav: 0 });

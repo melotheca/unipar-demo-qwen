@@ -209,6 +209,7 @@ U.Combate = {
     if (U.Habilidades.podarEquipo(j).indexOf(id) < 0) { U.HUD.toast(tec.nombre + ' no está en tu EQUIPO: equípala en Pausa → Ajustes → Equipo.', 'aviso'); U.Audio.sfx('fail'); return; }
     if (tec.kind === 'elemento') this.tecnica(id);
     else if (tec.kind === 'yang') this.yang(tec.tecId);
+    else if (tec.kind === 'yin') { if (tec.tecId === 'acero') this.toggleAcero(); }
     else if (tec.kind === 'escudo') this.toggleEscudo();
   },
   // Ataque BÁSICO del elemento principal: línea corta, coste 4, sin aprender nada.
@@ -230,18 +231,30 @@ U.Combate = {
   yang(forma) {
     const E = U.Juego.estado, j = E.jugador;
     if (!j.tieneYang) { U.HUD.toast('Tu Yang aún no despierta: sin afinidad empiezas en 0, pero se alcanza entrenando hasta ' + U.Habilidades.yangDespertar + ' (medita al descansar o entrena con Torin). Como dominar otro elemento: lleva su entrenamiento.', 'aviso'); U.Audio.sfx('fail'); return; }
-    // Sin forma pedida: la seleccionada si está equipada, si no la primera forma Yang equipada.
-    if (!forma) { const eq = U.Habilidades.equipoDetalles(j).filter(t => t.kind === 'yang'); const sel = eq.find(t => t.tecId === j.yangForma); forma = sel ? sel.tecId : (eq[0] ? eq[0].tecId : null); }
+    // Sin forma pedida: la seleccionada si está equipada, si no la primera forma Yang equipada (Tiempo Lento no: es un interruptor, no se lanza con K).
+    if (!forma) { const eq = U.Habilidades.equipoDetalles(j).filter(t => t.kind === 'yang' && t.tecId !== 'tiempoLento'); const sel = eq.find(t => t.tecId === j.yangForma); forma = sel ? sel.tecId : (eq[0] ? eq[0].tecId : null); }
     if (!forma) { U.HUD.toast('No llevas ninguna forma Yang EQUIPADA: elige una en Pausa → Ajustes → Equipo.', 'aviso'); U.Audio.sfx('fail'); return; }
     const h = U.Habilidades.yang[forma];
     if (!h) return;
+    // Tiempo Lento no es una forma lanzable: es un interruptor (no usa yangForma ni cdYang).
+    if (forma === 'tiempoLento') { this.toggleTiempoLento(); return; }
     if (j.estilos.yang < h.umbral) { U.HUD.toast(h.nombre + ' requiere Yang ' + h.umbral + '.', 'aviso'); return; }
     if (U.Habilidades.podarEquipo(j).indexOf('yang:' + forma) < 0) { U.HUD.toast(h.nombre + ' no está en tu EQUIPO: equípala en Pausa → Ajustes → Equipo.', 'aviso'); U.Audio.sfx('fail'); return; }
     j.yangForma = forma;
     if (j.cdYang > 0) return; if (!U.Recuperacion.gastar(h.costo)) return;
     j.cdYang = h.cd; j.ataqueAnim = 0.25; j.descansando = false; const atk = (U.Reliquias ? U.Reliquias.statEf(j, 'ataque') : j.stats.ataque) * (j.buffs.sobrecarga > 0 ? 2 : 1);
     U.Audio.sfx('yang'); this.sacudir(0.3);
-    if (h.forma === 'linea') { const celdas = U.Grid.forma('linea', j.x, j.y, j.dir, h.alcance, 0); this.golpearObjetos(celdas, atk * h.power * 0.85); E.efectos.haces.push({ celdas, color: '#f8fafc', t: 0.25, max: 0.25 }); this.vivos().forEach(e => { if (U.Grid.enCeldas(celdas, e)) this.dañoEnemigo(e, atk * h.power, null, { desafio: this.desafio(e), yang: true }); }); if (U.Criaturas) U.Criaturas.impactoJugador(celdas, { dmg: atk * h.power, elemento: null }); this.particulas(j.x + j.dir.x * 2, j.y + j.dir.y * 2 - 0.5, 8, '#f8fafc', 'chispa'); }
+    if (h.forma === 'cono') { // GOLPE VELOZ: puño Yang cuerpo a cuerpo, instantáneo y sin carga (cancela la carga del puño Yin). No devuelve Esencia al golpear: eso es Yin.
+      j.cargando = false;
+      const celdas = U.Grid.forma('cono', j.x, j.y, j.dir, h.alcance, 1);
+      E.efectos.cortes.push({ x: j.x, y: j.y, dir: j.dir, color: '#f8fafc', t: 0.18, max: 0.18 });
+      const gObj = this.golpearObjetos(celdas, atk * h.power * 0.95); this.golpearObjetosArco(j, h.alcance, atk * h.power * 0.95, gObj); this.golpearInocentes(celdas, { x: j.x, y: j.y, dir: j.dir, alcance: h.alcance + 0.45 });
+      let golpes = 0; this.vivos().forEach(e => { if (U.Grid.enCeldas(celdas, e) || U.Grid.enArco(j.x, j.y, j.dir, h.alcance + 0.45, e)) { golpes++; this.dañoEnemigo(e, atk * h.power, null, { desafio: this.desafio(e), yang: true }); } });
+      if (U.Criaturas) golpes += U.Criaturas.impactoJugador(celdas, { arco: { x: j.x, y: j.y, dir: j.dir, alcance: h.alcance + 0.45 }, dmg: atk * h.power, elemento: null });
+      if (golpes) E.resumen.golpes += golpes;
+      this.particulas(j.x + j.dir.x, j.y + j.dir.y - 0.5, 10, '#f8fafc', 'chispa');
+    }
+    else if (h.forma === 'linea') { const celdas = U.Grid.forma('linea', j.x, j.y, j.dir, h.alcance, 0); this.golpearObjetos(celdas, atk * h.power * 0.85); E.efectos.haces.push({ celdas, color: '#f8fafc', t: 0.25, max: 0.25 }); this.vivos().forEach(e => { if (U.Grid.enCeldas(celdas, e)) this.dañoEnemigo(e, atk * h.power, null, { desafio: this.desafio(e), yang: true }); }); if (U.Criaturas) U.Criaturas.impactoJugador(celdas, { dmg: atk * h.power, elemento: null }); this.particulas(j.x + j.dir.x * 2, j.y + j.dir.y * 2 - 0.5, 8, '#f8fafc', 'chispa'); }
     else this.proyectil(j, h, atk * h.power, null, '#f8fafc', 'jugador');
     U.Crecimiento.estilo('yang', 0.35, 1); U.Crecimiento.stat('mente', 0.08, 1); U.Crecimiento.regenCap(0.02); E.resumen.yang++;
   },
@@ -310,8 +323,8 @@ U.Combate = {
   },
   dash() {
     const E = U.Juego.estado, j = E.jugador; if (j.dash.cd > 0 || j.dash.t > 0) return; if (!U.Recuperacion.gastar(U.Habilidades.yin.dash.costo)) return;
-    const I = U.Juego.input; const d = (I && I.mag > 0.1) ? U.Grid.dir8(I.vx, I.vy) : j.dir; const dist = (2.2 + (U.Reliquias ? U.Reliquias.statEf(j, 'velocidad') : j.stats.velocidad) * 0.06 * (j.buffs.sobrecarga > 0 ? 1.5 : 1)) * (j.elementoActivo === 'rayo' ? 1.6 : 1); // Rayo: paso relámpago
-    j.dash = { t: 0.16, cd: 0.6, dx: d.x * dist / 0.16, dy: d.y * dist / 0.16 }; j.invuln = Math.max(j.invuln, 0.24); j.dir = d; j.descansando = false; j.cargando = false;
+    const I = U.Juego.input; const d = (I && I.mag > 0.1) ? U.Grid.dir8(I.vx, I.vy) : j.dir; const dist = (2.2 + (U.Reliquias ? U.Reliquias.statEf(j, 'velocidad') : j.stats.velocidad) * 0.06 * (j.buffs.sobrecarga > 0 ? 1.5 : 1)) * (j.elementoActivo === 'rayo' ? 1.6 : 1) * (j.tiempoLento ? 1.5 : 1); // Rayo: paso relámpago · SINERGIA con Tiempo Lento: el mundo lento hace el dash aún más efectivo (alcance ×1.5; el daño ×1.25 va en golpeDash)
+    j.dash = { t: 0.16, cd: 0.6, dx: d.x * dist / 0.16, dy: d.y * dist / 0.16, golpeados: [] }; j.invuln = Math.max(j.invuln, 0.24); j.dir = d; j.descansando = false; j.cargando = false;
     U.Audio.sfx('dash'); this.particulas(j.x, j.y - 0.3, 8, '#7ef0c0', 'polvo'); U.Crecimiento.stat('velocidad', E.enCombate ? 0.1 : 0.01, 1); U.Crecimiento.estilo('yin', 0.05, 1); E.resumen.dashes++; if (U.Juego.progresoEntreno) U.Juego.progresoEntreno('esquiva', 1);
   },
   sobrecarga() {
@@ -321,13 +334,60 @@ U.Combate = {
     if (j.estilos.yin < s.umbral) { U.HUD.toast('Sobrecarga requiere Yin ' + s.umbral + '.', 'aviso'); return; }
     j.buffs.sobrecarga = 1; U.Audio.sfx('sobrecarga'); this.sacudir(1); this.particulas(j.x, j.y - 0.6, 30, '#ff5470', 'brasa'); U.HUD.banner('SOBRECARGA', 1.2); U.HUD.toast('Sobrecarga ACTIVA: Ataque y Velocidad ×2. Drena SOLO Esencia (5%/s); si la Esencia llega a 0, drena VIDA a la misma tasa y solo podrás golpear. Pulsa X otra vez para desactivarla cuando quieras.', 'peligro');
   },
+  // ---------- TIEMPO LENTO (Yang avanzado, interruptor) ----------
+  // Escala del mundo y dreno según el nivel de Yang (25–100). Nivel 25
+  // (desbloqueo): mundo a 0.75×, dreno 20 Esencia/s. Nivel 50: ~0.58×, 16/s.
+  // Nivel 75: ~0.42×, 12/s. Nivel 100: mundo a 0.25×, dreno 8/s. La práctica
+  // lo hace más eficiente: más lento el mundo, menos dreno.
+  escalaTiempoLento(nivel) { const f = Math.max(0, Math.min(1, ((nivel || 0) - 25) / 75)); return 0.75 - 0.5 * f; },
+  drenoTiempoLento(nivel) { const f = Math.max(0, Math.min(1, ((nivel || 0) - 25) / 75)); return 20 - 12 * f; },
+  // Escala del mundo AHORA (1 = normal; <1 = Tiempo Lento activo).
+  escalaMundo() { const E = U.Juego.estado, j = E && E.jugador; return (j && j.tiempoLento) ? this.escalaTiempoLento(j.estilos.yang || 0) : 1; },
+  toggleTiempoLento() {
+    const E = U.Juego.estado, j = E.jugador;
+    if (!j || !j.tieneYang) return;
+    const tl = U.Habilidades.yang.tiempoLento;
+    if (j.tiempoLento) { j.tiempoLento = false; U.HUD.toast('El mundo vuelve a su velocidad.', 'info'); U.Audio.sfx('click'); U.HUD.refrescarEquipo(); return; }
+    if ((j.estilos.yang || 0) < tl.umbral) { U.HUD.toast('Tiempo Lento requiere Yang ' + tl.umbral + ' (tienes ' + Math.floor(j.estilos.yang || 0) + ').', 'info'); U.Audio.sfx('fail'); return; }
+    if (U.Habilidades.podarEquipo(j).indexOf('yang:tiempoLento') < 0) { U.HUD.toast('Tiempo Lento no está en tu equipo (Pausa → Ajustes → Equipo).', 'info'); U.Audio.sfx('fail'); return; }
+    if (j.esencia <= 0 || j.agotado) { U.HUD.toast('Sin Esencia: no puedes entrar en Tiempo Lento.', 'info'); U.Audio.sfx('fail'); return; }
+    j.tiempoLento = true;
+    U.HUD.banner('TIEMPO LENTO', 1.6);
+    U.HUD.toast('El mundo se pone lento. Drena Esencia rápido (' + Math.round(this.drenoTiempoLento(j.estilos.yang || 0)) + '/s). El reloj del día sigue a su ritmo.', 'info');
+    U.Audio.sfx('unlock');
+    U.HUD.refrescarEquipo();
+  },
+  // ---------- RESISTENCIA DE ACERO (Yin, interruptor defensivo) ----------
+  toggleAcero() {
+    const E = U.Juego.estado, j = E.jugador;
+    const a = U.Habilidades.yin.acero;
+    if (j.acero) { j.acero = false; U.HUD.toast('Resistencia de Acero desactivada: tu cuerpo vuelve a ser normal.', 'info'); U.Audio.sfx('click'); U.HUD.refrescarEquipo(); return; }
+    if ((j.estilos.yin || 0) < a.umbral) { U.HUD.toast('Resistencia de Acero requiere Yin ' + a.umbral + ' (tienes ' + Math.floor(j.estilos.yin || 0) + ').', 'info'); U.Audio.sfx('fail'); return; }
+    if (U.Habilidades.podarEquipo(j).indexOf('yin:acero') < 0) { U.HUD.toast('Resistencia de Acero no está en tu equipo (Pausa → Ajustes → Equipo).', 'info'); U.Audio.sfx('fail'); return; }
+    if (j.agotado || j.esencia < a.costoActivar) { U.HUD.toast('Resistencia de Acero: necesitas al menos ' + a.costoActivar + ' de Esencia.', 'info'); U.Audio.sfx('fail'); return; }
+    if (!U.Recuperacion.gastar(a.costoActivar)) return;
+    j.acero = true; j.descansando = false; U.Audio.sfx('yang');
+    U.HUD.banner('RESISTENCIA DE ACERO', 1.4);
+    U.HUD.toast('Resistencia de Acero ACTIVA: el daño que recibes se reduce a la mitad. Drena ' + a.drain + ' Esencia/s. No te pone lento (a diferencia de la Armadura de Metal). Pulsa de nuevo para soltarla.', 'exito');
+    U.HUD.refrescarEquipo();
+  },
+  // ---------- VELOCIDAD EXTREMA: el dash GOLPEA al pasar ----------
+  // Al pasar por enfrente de un enemigo lo golpea (una sola vez por enemigo y
+  // por dash). Daño base = Ataque ×1.0. SINERGIA con Tiempo Lento: con el mundo
+  // lento el dash es aún más efectivo: daño ×1.25 (el alcance ×1.5 va en dash()).
+  golpeDash() {
+    const E = U.Juego.estado, j = E.jugador; if (!j.dash || !j.dash.golpeados) return;
+    const atk = (U.Reliquias ? U.Reliquias.statEf(j, 'ataque') : j.stats.ataque) * (j.buffs.sobrecarga > 0 ? 2 : 1);
+    const mult = j.tiempoLento ? 1.25 : 1;
+    this.vivos().forEach(e => { if (j.dash.golpeados.indexOf(e) >= 0) return; if (U.Grid.dist(e, j) < 0.9) { j.dash.golpeados.push(e); this.dañoEnemigo(e, atk * 1.0 * mult, null, { desafio: this.desafio(e), yang: true }); if (j.tiempoLento) this.texto(e, 'SINERGIA ×1.25', '#f8fafc', 1); } });
+  },
   // El elemento ya NO cambia: queda el del test (el principal) toda la vida. Esta
   // función queda como guarda legacy (la tecla Tab de main.js la sigue llamando):
   // no toca j.elementoActivo en ningún sitio.
   cambiarElemento(id) { const j = U.Juego.estado.jugador; U.HUD.toast('Tu elemento es ' + U.Elementos.nombre(j.elementoActivo) + ', el del test: no cambia en esta vida. Lo que cambia es tu EQUIPO (Pausa → Ajustes → Equipo), que puede mezclar técnicas de todos tus elementos.', ''); },
   // Teclas 1-5: USAN la técnica del equipo en ese hueco (1 = primera equipada…).
   seleccionarTec(i) { const j = U.Juego.estado.jugador; const eq = U.Habilidades.equipoDetalles(j); const tec = eq[i]; if (!tec) { if (i === 0) this.ataqueBasico(); return; } this.usarEquipo(tec.id); },
-  seleccionarYang(f) { const j = U.Juego.estado.jugador; if (!j.tieneYang) { U.HUD.toast('Yang sin despertar: entrénalo hasta ' + U.Habilidades.yangDespertar + ' (meditar al descansar, sesiones con Torin) y despertará.', 'aviso'); return; } const h = U.Habilidades.yang[f]; if (!h) return; if (j.estilos.yang < h.umbral) { U.HUD.toast(h.nombre + ': estilo Yang ' + h.umbral + ' requerido.', 'aviso'); U.Audio.sfx('fail'); return; } if (U.Habilidades.podarEquipo(j).indexOf('yang:' + f) < 0) { U.HUD.toast(h.nombre + ' no está en tu EQUIPO: equípala en Pausa → Ajustes → Equipo.', 'aviso'); U.Audio.sfx('fail'); return; } j.yangForma = f; U.Audio.sfx('click'); U.HUD.refrescarChips(); },
+  seleccionarYang(f) { const j = U.Juego.estado.jugador; if (f === 'tiempoLento') return; if (!j.tieneYang) { U.HUD.toast('Yang sin despertar: entrénalo hasta ' + U.Habilidades.yangDespertar + ' (meditar al descansar, sesiones con Torin) y despertará.', 'aviso'); return; } const h = U.Habilidades.yang[f]; if (!h) return; if (j.estilos.yang < h.umbral) { U.HUD.toast(h.nombre + ': estilo Yang ' + h.umbral + ' requerido.', 'aviso'); U.Audio.sfx('fail'); return; } if (U.Habilidades.podarEquipo(j).indexOf('yang:' + f) < 0) { U.HUD.toast(h.nombre + ' no está en tu EQUIPO: equípala en Pausa → Ajustes → Equipo.', 'aviso'); U.Audio.sfx('fail'); return; } j.yangForma = f; U.Audio.sfx('click'); U.HUD.refrescarChips(); },
 
   golpearInocentes(celdas, arco) {
     const E = U.Juego.estado; if (!celdas || !E.npcs) return;
@@ -360,7 +420,10 @@ U.Combate = {
       base = resuelto; // lo que el escudo dejó pasar sigue su curso normal (defensa, etc.)
     }
     if (j.invuln > 0) { this.texto(j, 'ESQUIVA', '#7ef0c0', 1); U.Audio.sfx('esquiva'); U.Crecimiento.stat('velocidad', 0.15, atacante ? this.desafio(atacante) : 1); E.resumen.esquives++; return; }
-    const d = Math.max(1, Math.round(U.Estadisticas.formulaDaño(base, U.Reliquias ? U.Reliquias.statEf(j, 'defensa') : j.stats.defensa))); j.vida -= d; j.flash = 0.15; j.descansando = false; E.resumen.recibido += d;
+    let d = Math.max(1, Math.round(U.Estadisticas.formulaDaño(base, U.Reliquias ? U.Reliquias.statEf(j, 'defensa') : j.stats.defensa)));
+    // RESISTENCIA DE ACERO (Yin): el cuerpo endurecido reduce el daño a la mitad (no a 0: eso es la Armadura de Metal).
+    if (j.acero) { d = Math.max(1, Math.round(d * U.Habilidades.yin.acero.reduccion)); this.texto(j, 'ACERO −50%', '#94a3b8', 1); this.particulas(j.x, j.y - 0.6, 4, '#94a3b8', 'chispa'); }
+    j.vida -= d; j.flash = 0.15; j.descansando = false; E.resumen.recibido += d;
     this.texto(j, '-' + d, '#ff5470', d > j.stats.vida * 0.1 ? 2 : 1); this.particulas(j.x, j.y - 0.6, 8, '#ff5470', 'chispa'); U.Audio.sfx('daño'); this.sacudir(0.9); E.hitstop = 0.03;
     if (atacante) { const ds = this.desafio(atacante); U.Crecimiento.stat('defensa', 0.04, ds); if (d >= j.stats.vida * 0.08) { U.Crecimiento.stat('vida', 0.4, ds); j.flags.peleaDura = true; } }
     if (efecto && efecto.dot) j.dot = { dmg: efecto.dot.dmg, t: efecto.dot.t, tick: 0 };
@@ -592,8 +655,9 @@ U.Combate = {
     if (quedan === 0) { const guia = E.reto.guia; E.reto = null; E.historial.retos++; const j = E.jugador; if ((j.bolsaPociones || []).length < 3) { j.bolsaPociones.push({ tipo: 'vida', unidades: 50, precio: 0 }); U.Recuperacion.sincronizar(j); } U.Crecimiento.stat('ataque', 0.4, 1); U.Crecimiento.stat('defensa', 0.3, 1); U.HUD.banner('🏆 ¡RETO SUPERADO! · +1 POCIÓN', 2.2); U.Audio.sfx('victoria'); if (!E.arena.activa) U.Audio.musica(E.mapaId === 'bosque' ? 'bosque' : 'aldea'); const n = E.npcs.find(x => x.id === guia); if (n) { U.Emociones.evento(n, { realidad: 88, energia: 18, etiqueta: 'reto superado' }); n.hechos.push('superaste su reto de combate'); } return; }
     if (E.reto.t <= 0) { E.enemigos.forEach(e => { if (e.esReto) e.vida = 0; }); E.reto = null; U.HUD.banner('RETO ACABADO · SE TE ACABÓ EL TIEMPO', 1.8); U.Audio.sfx('derrota'); if (!E.arena.activa) U.Audio.musica('aldea'); }
   },
-  actualizar(dt) {
+  actualizar(dt, dtM) {
     const E = U.Juego.estado, j = E.jugador;
+    if (dtM == null) dtM = dt; // compatibilidad: sin escala, el mundo corre a tiempo real
     if (j.escudo) { // Drenaje del escudo: base 9/s × ambiente × clima de SU elemento (en decimales:
       // con el clima a favor drena poquito a poquito). También cuenta como gasto para la Condición.
       const tipoE = this.escudoTipo(j); const fE = tipoE === 'yang' ? { m: 1, flat: null } : U.Ambiente.factorNumerico(tipoE, E.zonaActual, j.atributo);
@@ -604,7 +668,7 @@ U.Combate = {
     j.cdYin = Math.max(0, j.cdYin - dt); j.cdYang = Math.max(0, j.cdYang - dt); for (const k in j.cdTec) j.cdTec[k] = Math.max(0, j.cdTec[k] - dt);
     j.dash.cd = Math.max(0, j.dash.cd - dt); j.invuln = Math.max(0, j.invuln - dt); j.flash = Math.max(0, j.flash - dt); j.ataqueAnim = Math.max(0, j.ataqueAnim - dt);
     if (j.cargando) { j.carga = Math.min(1.2, j.carga + dt); if (Math.random() < dt * 12) this.particulas(j.x + (Math.random() - 0.5) * 1.2, j.y - 0.6 + (Math.random() - 0.5), 1, U.Elementos.datos[j.elementoActivo].claro, 'cura'); }
-    if (j.dash.t > 0) { j.dash.t -= dt; U.Grid.mover(E.mapa, j, j.dash.dx * dt, j.dash.dy * dt); j.rastro.push({ x: j.x, y: j.y, t: 0.5 }); }
+    if (j.dash.t > 0) { j.dash.t -= dt; U.Grid.mover(E.mapa, j, j.dash.dx * dt, j.dash.dy * dt); j.rastro.push({ x: j.x, y: j.y, t: 0.5 }); this.golpeDash(); }
     j.rastro.forEach(r => r.t -= dt); j.rastro = j.rastro.filter(r => r.t > 0);
     if (j.buffs.sobrecarga > 0) { // SOBRECARGA (interruptor, sin duración): drena SOLO Esencia a drain×máx./s.
       // Al llegar la Esencia a 0, el drenaje pasa a VIDA a la MISMA tasa (el costo/s no cambia, cambia la fuente)
@@ -616,13 +680,19 @@ U.Combate = {
         if (j.esencia <= 0.01) { j.esencia = 0; if (!j.agotado) { j.agotado = true; U.HUD.toast('Sobrecarga: Esencia agotada — ahora drena tu VIDA a la misma tasa (5%/s) y solo puedes GOLPEAR (puños). Las técnicas cuestan Esencia: bloqueadas. Desactívala con X cuando quieras.', 'peligro'); U.Audio.sfx('fail'); } } }
       else { j.vida -= j.stats.vida * sS.drain * dt; if (j.vida <= 0) { j.vida = 0; j.buffs.sobrecarga = 0; U.Juego.fin('derrota'); } }
     }
+    // TIEMPO LENTO: drena Esencia rápido por segundo (según el nivel de Yang) y la
+    // práctica lo va puliendo (el estilo Yang crece mientras está activo). Cuando la
+    // Esencia se acaba, el mundo vuelve a velocidad normal.
+    if (j.tiempoLento) { const dren = this.drenoTiempoLento(j.estilos.yang || 0); j.esencia -= dren * dt; U.Recuperacion.registrarGasto(dren * dt); U.Crecimiento.estilo('yang', 0.12 * dt, 1); if (j.esencia <= 0) { j.esencia = 0; j.tiempoLento = false; j.agotado = true; U.HUD.toast('Sin Esencia: el mundo vuelve a su velocidad.', 'peligro'); U.HUD.refrescarEquipo(); } }
+    // RESISTENCIA DE ACERO: dreno pequeño (2/s) mientras está activa.
+    if (j.acero) { const drenA = U.Habilidades.yin.acero.drain; j.esencia -= drenA * dt; U.Recuperacion.registrarGasto(drenA * dt); if (j.esencia <= 0) { j.esencia = 0; j.acero = false; j.agotado = true; U.HUD.toast('Sin Esencia: tu Resistencia de Acero se suelta.', 'peligro'); U.HUD.refrescarEquipo(); } }
     j.buffs.sobrecargaCd = Math.max(0, j.buffs.sobrecargaCd - dt);
     if (j.invertido > 0) { j.invertido = Math.max(0, j.invertido - dt); if (j.invertido === 0) { j.invMapa = null; j.invTotal = 0; U.HUD.toast('Tus controles vuelven a la normalidad.', 'exito'); } }
     this.actualizarReto(dt);
-    if (j.dot) { j.dot.t -= dt; j.dot.tick += dt; if (j.dot.tick >= 0.5) { j.dot.tick = 0; const d = Math.max(1, Math.round(j.dot.dmg)); j.vida -= d; this.texto(j, '-' + d, '#ff7a2f', 1); if (j.vida <= 0) { j.vida = 0; U.Juego.fin('derrota'); } } if (j.dot.t <= 0) j.dot = null; }
+    if (j.dot) { j.dot.t -= dt; j.dot.tick += dt; if (j.dot.tick >= 0.5) { j.dot.tick = 0; const d = Math.max(1, Math.round(j.dot.dmg * (j.acero ? U.Habilidades.yin.acero.reduccion : 1))); j.vida -= d; this.texto(j, '-' + d, '#ff7a2f', 1); if (j.vida <= 0) { j.vida = 0; U.Juego.fin('derrota'); } } if (j.dot.t <= 0) j.dot = null; }
     const vivosN = this.vivos(); E.enCombate = (vivosN.length > 0 && (E.arena.activa || vivosN.some(e => U.Grid.dist(e, j) < 11))) || (U.Criaturas ? U.Criaturas.hayHostilCerca(j, 6) : false);
-    this.actualizarEnemigos(dt); this.actualizarProyectiles(dt); this.actualizarEfectos(dt); this.actualizarArena(dt);
+    this.actualizarEnemigos(dtM); this.actualizarProyectiles(dtM); this.actualizarEfectos(dtM); this.actualizarArena(dt); // enemigos/proyectiles/efectos van a la escala del mundo (Tiempo Lento); la arena es un temporizador de evento (tiempo real)
     // orbes de esencia
-    E.orbes.forEach(o => { o.t -= dt; if (U.Grid.dist(o, j) < 0.9) { o.t = 0; U.Recuperacion.restaurar(10); this.texto(j, '+10 ESE', '#4da3ff', 1); U.Audio.sfx('orb'); this.particulas(o.x, o.y - 0.5, 6, '#4da3ff', 'cura'); } }); E.orbes = E.orbes.filter(o => o.t > 0);
+    E.orbes.forEach(o => { o.t -= dtM; if (U.Grid.dist(o, j) < 0.9) { o.t = 0; U.Recuperacion.restaurar(10); this.texto(j, '+10 ESE', '#4da3ff', 1); U.Audio.sfx('orb'); this.particulas(o.x, o.y - 0.5, 6, '#4da3ff', 'cura'); } }); E.orbes = E.orbes.filter(o => o.t > 0);
   }
 };

@@ -41,9 +41,20 @@ U.Habilidades = {
   yang: {
     haz:      { id: 'haz', nombre: 'Haz', umbral: 0, costo: 15, forma: 'linea', alcance: 10, radio: 0, power: 1.5, cd: 0.9, desc: 'Solo una línea recta, perfora. 10×1 celdas.' },
     onda:     { id: 'onda', nombre: 'Onda', umbral: 5, costo: 14, forma: 'proyectil', vel: 9, power: 1.3, cd: 1.4, efecto: { empuje: 2 }, cometa: true, desc: 'Esfera con línea de energía detrás, como cometa. Empuja.' },
-    esferico: { id: 'esferico', nombre: 'Esférico', umbral: 10, costo: 18, forma: 'proyectil', vel: 6, power: 1.4, cd: 2.2, explora: { radio: 2, power: 1.8 }, desc: 'Solo una esfera: vuela y explota.' }
+    esferico: { id: 'esferico', nombre: 'Esférico', umbral: 10, costo: 18, forma: 'proyectil', vel: 6, power: 1.4, cd: 2.2, explora: { radio: 2, power: 1.8 }, desc: 'Solo una esfera: vuela y explota.' },
+    // GOLPE VELOZ: puño Yang cuerpo a cuerpo, instantáneo y sin carga — difícil de
+    // esquivar o interrumpir. Más rápido que el puño Yin normal y más fuerte que el
+    // toque, pero pega menos que el Golpe Rompe-Todo cargado (1.9). No devuelve
+    // Esencia al golpear (eso es Yin); gasta 8 y usa el enfriamiento de Yang.
+    golpeVeloz: { id: 'golpeVeloz', nombre: 'Golpe Veloz', umbral: 15, costo: 8, forma: 'cono', alcance: 2, radio: 0, power: 1.35, cd: 0.35, icono: 'yin', desc: 'Puño Yang rapidísimo: sin carga, sin preparación, difícil de esquivar. Cuerpo a cuerpo (2 celdas). Pega más que el puño normal, menos que el cargado.' },
+    // TIEMPO LENTO: interruptor Yang avanzado (cámara lenta). NO es una forma
+    // lanzable: no va en yangOrden. El mundo (enemigos, NPCs, proyectiles,
+    // animaciones) va lento y el jugador a velocidad normal. Drena Esencia
+    // rápido por segundo; el dreno y la fuerza dependen del nivel de Yang
+    // (a más nivel, mundo más lento y menos dreno). El reloj del día no se toca.
+    tiempoLento: { id: 'tiempoLento', nombre: 'Tiempo Lento', umbral: 25, costo: 'dreno', forma: 'toggle', icono: 'tiempo', desc: 'Cámara lenta: el mundo se pone lento y tú sigues a tu velocidad. Drena Esencia rápido por segundo; a más nivel de Yang, más lento el mundo y menos dreno. El reloj del día sigue a su ritmo.' }
   },
-  yangOrden: ['haz', 'onda', 'esferico'],
+  yangOrden: ['haz', 'onda', 'esferico', 'golpeVeloz'],
 
   // Yin: base universal, cuerpo a cuerpo, casi sin Esencia. La Velocidad decide la cadencia.
   // ESCUDO: es una TÉCNICA, no un don: hay que buscar a un Guía que te la enseñe (Kaelen, el guardia).
@@ -67,7 +78,13 @@ U.Habilidades = {
     normal:   { costo: 2, power: 1.0, forma: 'cono', alcance: 1.8, restaura: 6 },
     cargado:  { costo: 6, power: 1.9, forma: 'cono', alcance: 2.2, restaura: 12 },
     dash:     { costo: 4 },
-    sobrecarga: { id: 'sobrecarga', nombre: 'Sobrecarga', umbral: 15, mult: 2, drain: 0.05, desc: 'Estilo Yin (Kaioken): es un INTERRUPTOR, sin duración fija ni enfriamiento — Ataque y Velocidad ×2 mientras esté activa, y la apagas con el mismo botón cuando quieras. Drena SOLO Esencia: 5% de tu Esencia máxima por segundo (mientras está activa, la recarga de Esencia se pausa, para que el drenaje sea real). Cuando la Esencia llega a 0, el drenaje pasa a VIDA a la MISMA tasa (5% de tu Vida máxima por segundo; el costo por segundo no cambia, solo cambia de dónde sale) y solamente puedes GOLPEAR (puños Yin): las técnicas quedan bloqueadas porque cuestan Esencia y no tienes. Al desactivarla se detiene el drenaje y termina el aumento de fuerza. Si la Vida llega a 0 con ella activa, caes y despiertas en la fogata, como cualquier derrota.' }
+    sobrecarga: { id: 'sobrecarga', nombre: 'Sobrecarga', umbral: 15, mult: 2, drain: 0.05, desc: 'Estilo Yin (Kaioken): es un INTERRUPTOR, sin duración fija ni enfriamiento — Ataque y Velocidad ×2 mientras esté activa, y la apagas con el mismo botón cuando quieras. Drena SOLO Esencia: 5% de tu Esencia máxima por segundo (mientras está activa, la recarga de Esencia se pausa, para que el drenaje sea real). Cuando la Esencia llega a 0, el drenaje pasa a VIDA a la MISMA tasa (5% de tu Vida máxima por segundo; el costo por segundo no cambia, solo cambia de dónde sale) y solamente puedes GOLPEAR (puños Yin): las técnicas quedan bloqueadas porque cuestan Esencia y no tienes. Al desactivarla se detiene el drenaje y termina el aumento de fuerza. Si la Vida llega a 0 con ella activa, caes y despiertas en la fogata, como cualquier derrota.' },
+    // RESISTENCIA DE ACERO: defensa Yin. Concentras tu energía Yin en un punto
+    // del cuerpo y ese punto se endurece como acero. Interruptor: mientras está
+    // activa, el daño que recibes se reduce a la MITAD. NO es la Armadura de
+    // Metal (Tierra+Yang: daño 0, 20 Esencia + 5/s, más lento y más débil): la
+    // de acero es más débil (no da 0, solo reduce) y NO te pone lento.
+    acero: { id: 'acero', nombre: 'Resistencia de Acero', umbral: 20, costoActivar: 6, drain: 2, reduccion: 0.5, desc: 'Tu cuerpo se endurece como acero: el daño que recibes se reduce a la mitad. Cuesta 6 al activar y drena 2/s. Más débil que la Armadura de Metal (esa da 0) pero no te pone lento.' }
   },
 
   // ---- PRÓXIMAMENTE (datos listos, lógica NO activa en el juego completo) ----
@@ -121,6 +138,12 @@ U.Habilidades = {
       (this.elementos[el] || []).forEach(h => lista.push(Object.assign({}, h, { id: 'tec:' + el + ':' + h.id, tecId: h.id, kind: 'elemento', elemento: el })));
     });
     this.yangOrden.forEach(k => { const h = this.yang[k]; lista.push(Object.assign({}, h, { id: 'yang:' + k, tecId: k, kind: 'yang', elemento: 'yang' })); });
+    // Tiempo Lento (interruptor Yang avanzado, no una forma lanzable: no va en yangOrden).
+    const tl = this.yang.tiempoLento;
+    lista.push(Object.assign({}, tl, { id: 'yang:tiempoLento', tecId: 'tiempoLento', kind: 'yang', elemento: 'yang', cd: 0 }));
+    // Resistencia de Acero (técnica Yin del equipo: interruptor defensivo).
+    const ac = this.yin.acero;
+    lista.push({ id: 'yin:acero', tecId: 'acero', kind: 'yin', elemento: 'yin', nombre: ac.nombre, costo: ac.costoActivar + ' + ' + ac.drain + '/s', cd: 0, umbral: ac.umbral, desc: ac.desc, icono: 'acero' });
     lista.push({ id: 'escudo', tecId: 'escudo', kind: 'escudo', elemento: j.elementoActivo, nombre: 'Escudo', costo: '9/s', cd: 0, umbral: 0, desc: this.escudo.desc });
     return lista;
   },
@@ -132,6 +155,7 @@ U.Habilidades = {
     if (!tec) return false;
     if (tec.kind === 'elemento') return (j.tecnicasAprendidas || []).indexOf(tec.id) >= 0 || (j.maestria[tec.elemento] || 0) >= tec.umbral;
     if (tec.kind === 'yang') return !!j.tieneYang && (j.estilos.yang || 0) >= tec.umbral;
+    if (tec.kind === 'yin') return (j.estilos.yin || 0) >= tec.umbral;
     if (tec.kind === 'escudo') return !!j.escudoAprendido;
     return false;
   },

@@ -144,6 +144,10 @@ U.Render = {
         x.lineWidth = 5; [[7, 15, 29], [11, 24, 39], [7, 33, 29]].forEach(l => { x.beginPath(); x.moveTo(l[0], l[1]); x.lineTo(l[2], l[1]); x.stroke(); }); break;
       case 'sobre': { // estallido
         const pts = []; for (let i = 0; i < 16; i++) { const a = i * Math.PI / 8 - Math.PI / 2, r = i % 2 ? 9 : 20; pts.push([24 + Math.cos(a) * r, 24 + Math.sin(a) * r]); } P(pts); break; }
+      case 'tiempo': // reloj: cámara lenta (Tiempo Lento)
+        x.lineWidth = 4; x.beginPath(); x.arc(24, 24, 16, 0, 6.3); x.stroke(); x.beginPath(); x.moveTo(24, 24); x.lineTo(24, 12); x.moveTo(24, 24); x.lineTo(32, 28); x.stroke(); break;
+      case 'acero': // placa de acero (Resistencia de Acero)
+        P([[24, 4], [40, 10], [40, 26], [24, 44], [8, 26], [8, 10]]); x.fillStyle = claro; x.fillRect(14, 20, 20, 5); break;
       default: circ(24, 24, 10);
     }
     x.restore();
@@ -240,7 +244,12 @@ U.Render = {
 
   // ---------- Mundo ----------
   mundo(estado, dt) {
-    this.tiempo += dt; const ctx = this.ctx, m = estado.mapa, j = estado.jugador, T = U.Grid.T, TS = 16;
+    // TIEMPO LENTO: el reloj de animación del mundo (agua, pulsos, fuego,
+    // luciérnagas) corre a la escala del mundo; la cámara sigue al jugador a
+    // velocidad real (el jugador no se pone lento). En diálogo o pausa el mundo
+    // no corre: escala 1.
+    const escM = (estado.ui === 'mundo' && U.Combate && U.Combate.escalaMundo) ? U.Combate.escalaMundo() : 1;
+    this.tiempo += dt * escM; const ctx = this.ctx, m = estado.mapa, j = estado.jugador, T = U.Grid.T, TS = 16;
     const cam = estado.camara; const vw = this.viewW, vh = this.viewH;
     // Cámara SIEMPRE centrada en el jugador, sin sujetarse a los bordes del mapa:
     // lo que quede fuera del mapa se pinta con el fondo oscuro, y el jugador nunca
@@ -335,6 +344,9 @@ U.Render = {
       else if (ct === 'calor') { ctx.fillStyle = 'rgba(255,150,50,.06)'; ctx.fillRect(0, 0, vw, vh); }
     }
     if (j.vida < j.stats.vida * 0.25) { ctx.fillStyle = 'rgba(255,40,60,' + (0.08 + 0.06 * Math.sin(this.tiempo * 6)) + ')'; ctx.fillRect(0, 0, vw, vh); }
+    // TIEMPO LENTO: tinte frío SUTIL (nunca rojo, nunca un flash): solo marca que
+    // el mundo va lento. Respeta el ajuste de destellos: 'off' = sin tinte.
+    if (j.tiempoLento) { const modoD = estado.destelloModo || 'normal'; const opTL = modoD === 'off' ? 0 : modoD === 'suave' ? 0.03 : 0.06; if (opTL > 0) { ctx.fillStyle = 'rgba(140,170,220,' + opTL.toFixed(3) + ')'; ctx.fillRect(0, 0, vw, vh); } }
     // Etiquetas de nombre de NPC cercanas
     ctx.translate(Math.round(-cam.x + sx), Math.round(-cam.y + sy));
     estado.npcs.forEach(n => { if (!n.enCasa && !n.ocultoSparring && U.Grid.dist(n, j) < 6) this.texto(ctx, n.nombre + (n.enCirculo ? ' · entrenando' : ''), n.x * TS, n.y * TS - 34, 1, '#e8dcc8', 'center'); });

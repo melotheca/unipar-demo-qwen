@@ -60,11 +60,11 @@ U.HUD = {
     cont.innerHTML = '';
     eq.forEach((t, i) => {
       const b = document.createElement('button'); b.className = 'boton equipo'; b.dataset.tec = t.id;
-      b.style.borderColor = t.kind === 'yang' ? '#f8fafc' : t.kind === 'escudo' ? U.Combate.escudoColor(j) : U.Elementos.color(t.elemento);
+      b.style.borderColor = t.kind === 'yang' ? '#f8fafc' : t.kind === 'escudo' ? U.Combate.escudoColor(j) : t.kind === 'yin' ? '#94a3b8' : U.Elementos.color(t.elemento);
       b.title = t.nombre + ' (' + (i + 1) + ') · ' + t.desc + (t.costo != null ? ' · Costo ' + t.costo + ' Esencia' : '') + (t.cd ? ' · CD ' + t.cd + 's' : '');
       const cv = document.createElement('canvas'); cv.width = 72; cv.height = 72;
-      const icono = t.kind === 'yang' ? 'yang' : t.kind === 'escudo' ? (U.Combate.escudoTipo(j) === 'yang' ? 'yang' : U.Combate.escudoTipo(j)) : t.elemento;
-      U.Render.iconoSuave(cv, icono, t.kind === 'yang' ? '#f8fafc' : t.kind === 'escudo' ? U.Combate.escudoColor(j) : U.Elementos.color(t.elemento));
+      const icono = t.icono || (t.kind === 'yang' ? 'yang' : t.kind === 'escudo' ? (U.Combate.escudoTipo(j) === 'yang' ? 'yang' : U.Combate.escudoTipo(j)) : t.elemento);
+      U.Render.iconoSuave(cv, icono, t.kind === 'yang' ? '#f8fafc' : t.kind === 'escudo' ? U.Combate.escudoColor(j) : t.kind === 'yin' ? '#94a3b8' : U.Elementos.color(t.elemento));
       b.appendChild(cv);
       const lbl = document.createElement('span'); lbl.className = 'lbl'; lbl.textContent = (i + 1) + ' · ' + t.nombre.split(' ')[0].toUpperCase(); b.appendChild(lbl);
       const cd = document.createElement('i'); cd.className = 'cd'; b.appendChild(cd);
@@ -80,7 +80,7 @@ U.HUD = {
   htmlEquipo() {
     const j = U.Juego.estado.jugador; const dom = U.Habilidades.dominadas(j); const eq = U.Habilidades.asegurarEquipo(j);
     let h = '<section><h3>🎒 Equipo · hasta 5 técnicas (en orden)</h3>'
-      + '<div style="font-size:12px;color:var(--texto)">Tu elemento es fijo (el del test), pero tu equipo MEZCLA elementos: aquí van todas las técnicas que ya DOMINASTE, de todos tus elementos, más las formas Yang y el Escudo. El HUD muestra solo las equipadas, en este orden (teclas 1-5). Cambiar el equipo se hace aquí, en pausa, con calma.</div>'
+      + '<div style="font-size:12px;color:var(--texto)">Tu elemento es fijo (el del test), pero tu equipo MEZCLA elementos: aquí van todas las técnicas que ya DOMINASTE, de todos tus elementos, más las técnicas Yang, la Resistencia de Acero (Yin) y el Escudo. El HUD muestra solo las equipadas, en este orden (teclas 1-5). Cambiar el equipo se hace aquí, en pausa, con calma.</div>'
       + '<div style="font-size:12px;margin-top:4px">Llevas <b>' + eq.length + '/5</b> equipadas.' + (eq.length >= 5 ? ' Equipo lleno: quita una para meter otra.' : '') + '</div>';
     if (!dom.length) h += '<div style="font-size:12px;color:var(--textoFrio);margin-top:6px">Aún no dominas ninguna técnica. Golpea con Yin en combate para subir la maestría de tu elemento: al 15% podrás aprender la primera de un Guía, por tarea. Mientras, tienes el puño y el ataque básico de tu elemento.</div>';
     const grupo = (titulo, lista) => {
@@ -89,7 +89,7 @@ U.HUD = {
       lista.forEach(t => {
         const pos = eq.indexOf(t.id);
         const enEq = pos >= 0;
-        s += '<div class="mochilaItem equipoFila"><span>' + (enEq ? '<b class="eqNum">' + (pos + 1) + '</b> ' : '') + '<b>' + this.escHtml(t.nombre) + '</b> <small style="color:var(--textoFrio)">' + this.escHtml(t.desc) + ' · Costo ' + t.costo + (t.cd ? ' · CD ' + t.cd + 's' : '') + (t.umbral ? ' · requiere ' + t.umbral + '%' : '') + '</small></span><span class="acts">'
+        s += '<div class="mochilaItem equipoFila"><span>' + (enEq ? '<b class="eqNum">' + (pos + 1) + '</b> ' : '') + '<b>' + this.escHtml(t.nombre) + '</b> <small style="color:var(--textoFrio)">' + this.escHtml(t.desc) + ' · Costo ' + t.costo + (t.cd ? ' · CD ' + t.cd + 's' : '') + (t.umbral ? ' · requiere ' + t.umbral + (t.kind === 'elemento' ? '%' : t.kind === 'yang' ? ' Yang' : t.kind === 'yin' ? ' Yin' : '') : '') + '</small></span><span class="acts">'
           + (enEq
             ? '<button class="mini" data-eq-up="' + t.id + '" title="Subir un hueco (antes en el HUD)">▲</button><button class="mini" data-eq-down="' + t.id + '" title="Bajar un hueco (después en el HUD)">▼</button><button class="mini peligro" data-eq-del="' + t.id + '">QUITAR</button>'
             : '<button class="mini exito" data-eq-add="' + t.id + '"' + (eq.length >= 5 ? ' disabled title="Equipo lleno (máx. 5): quita una primero"' : '') + '>EQUIPAR</button>')
@@ -99,6 +99,7 @@ U.HUD = {
     };
     (j.elementos || [j.elementoActivo]).forEach(el => { h += grupo(U.Elementos.nombre(el) + ' · ' + Math.floor(j.maestria[el] || 0) + '%', dom.filter(t => t.kind === 'elemento' && t.elemento === el)); });
     h += grupo('Yang · estilo ' + Math.floor(j.estilos.yang || 0), dom.filter(t => t.kind === 'yang'));
+    h += grupo('Yin · estilo ' + Math.floor(j.estilos.yin || 0), dom.filter(t => t.kind === 'yin'));
     h += grupo('Escudo · Nv.' + (j.escudoNv || 1), dom.filter(t => t.kind === 'escudo'));
     h += '</section>';
     return h;
@@ -215,7 +216,7 @@ U.HUD = {
       if (el.btnAgua) { const necesitaAgua = j.elementoActivo === 'fuego' || j.elementoActivo === 'rayo'; const visibleAgua = necesitaAgua && (!!j.cercaAgua || !!j.sobreAgua); el.btnAgua.classList.toggle('oculto', !visibleAgua); el.btnAgua.classList.toggle('encendido', !!j.caminarAgua); if (el.btnAguaEstado) el.btnAguaEstado.textContent = j.caminarAgua ? 'ENCENDIDO' : 'APAGADO'; el.btnAgua.title = j.caminarAgua ? 'Caminar sobre el agua ENCENDIDO (C): toca para APAGARLO. Sobre el agua gastas 10 de Esencia/s y, sin Esencia, 10 de Vida/s; si lo apagas a mitad del agua, NADAS (más lento, gratis) hasta la orilla.' : 'Caminar sobre el agua APAGADO (C): el agua te bloquea el paso. Toca para ENCENDERLO y cruzar gastando 10 de Esencia/s (sin Esencia no puedes entrar desde la orilla).'; }
       el.btnTec.querySelector('.cd').style.height = Math.min(1, (j.cdBasico || 0) / b.cd) * 100 + '%'; el.btnYin.querySelector('.cd').style.height = Math.min(1, j.cdYin / 0.4) * 100 + '%';
       // Enfriamiento de cada botón del equipo (según su técnica).
-      Array.from(this.el.equipoBtns ? this.el.equipoBtns.children : []).forEach(btn => { const tec = U.Habilidades.porId(j, btn.dataset.tec); if (!tec) return; const cdv = tec.kind === 'elemento' ? (j.cdTec[tec.tecId] || 0) / (tec.cd || 1) : tec.kind === 'yang' ? j.cdYang / (tec.cd || 1) : 0; const ic = btn.querySelector('.cd'); if (ic) ic.style.height = Math.min(1, Math.max(0, cdv)) * 100 + '%'; btn.classList.toggle('apagado', j.agotado || (tec.kind === 'elemento' && (j.cdTec[tec.tecId] || 0) > 0) || (tec.kind === 'yang' && j.cdYang > 0)); if (tec.kind === 'escudo') { btn.classList.toggle('encendido', !!j.escudo); btn.style.filter = j.escudo ? 'brightness(1.5)' : ''; btn.title = U.Combate.escudoNombre(j) + ' (B) · Nv.' + (j.escudoNv || 1) + ' (' + U.Habilidades.escudo.niveles[j.escudoNv || 1].nombre + ') · integridad ' + Math.max(0, Math.round(j.escudoVida || 0)) + '/' + U.Combate.escudoMax(j) + ' · no te mueves, drena Esencia/s'; } });
+      Array.from(this.el.equipoBtns ? this.el.equipoBtns.children : []).forEach(btn => { const tec = U.Habilidades.porId(j, btn.dataset.tec); if (!tec) return; const esToggle = tec.tecId === 'tiempoLento' || tec.tecId === 'acero'; const cdv = esToggle ? 0 : tec.kind === 'elemento' ? (j.cdTec[tec.tecId] || 0) / (tec.cd || 1) : tec.kind === 'yang' ? j.cdYang / (tec.cd || 1) : 0; const ic = btn.querySelector('.cd'); if (ic) ic.style.height = Math.min(1, Math.max(0, cdv)) * 100 + '%'; btn.classList.toggle('apagado', j.agotado || (tec.kind === 'elemento' && (j.cdTec[tec.tecId] || 0) > 0) || (tec.kind === 'yang' && !esToggle && j.cdYang > 0)); if (tec.kind === 'escudo') { btn.classList.toggle('encendido', !!j.escudo); btn.style.filter = j.escudo ? 'brightness(1.5)' : ''; btn.title = U.Combate.escudoNombre(j) + ' (B) · Nv.' + (j.escudoNv || 1) + ' (' + U.Habilidades.escudo.niveles[j.escudoNv || 1].nombre + ') · integridad ' + Math.max(0, Math.round(j.escudoVida || 0)) + '/' + U.Combate.escudoMax(j) + ' · no te mueves, drena Esencia/s'; } if (tec.tecId === 'tiempoLento') { btn.classList.toggle('encendido', !!j.tiempoLento); btn.style.filter = j.tiempoLento ? 'brightness(1.5)' : ''; } if (tec.tecId === 'acero') { btn.classList.toggle('encendido', !!j.acero); btn.style.filter = j.acero ? 'brightness(1.5)' : ''; } });
       el.btnA.querySelector('.lbl').textContent = j.trote ? 'TROTE +' : 'TROTE';
       el.descanso.classList.toggle('oculto', !j.descansando);
       if (j.descansando) { const durm = !!(E.reloj && E.reloj.durmiendo); el.rellDescanso.style.transform = 'scaleX(' + (durm ? Math.min(1, j.vida / j.stats.vida) : Math.min(1, j.vida / U.Recuperacion.techoVida())) + ')'; if (el.descansoTxt) el.descansoTxt.textContent = durm ? 'Durmiendo junto a la fogata… al despertar: Vida y Esencia al 100%' : 'Meditando · Esencia ×3 · Yang + · muévete para cancelar'; }
