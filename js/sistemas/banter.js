@@ -1,10 +1,11 @@
 /* === js/sistemas/banter.js === */
-/* Unipar — DIÁLOGO DE COMBATE (banter): el enemigo habla SOLO cuando la vida
-   está MUY BAJA (≤25%): la suya (casiPierde) o la tuya (casiPierdes). Nada más:
-   no hay línea de apertura, ni reacción a esquives, técnicas, Tiempo Lento o
-   dash. Solo enemigos humanoides con personalidad habladora; los callados
-   NUNCA dicen nada y las criaturas NUNCA hablan (ni siquiera se consideran
-   como hablante). Efímero: nada se guarda; al cargar partida empieza apagado. */
+/* Unipar — DIÁLOGO DE COMBATE (banter): el enemigo habla AL EMPEZAR la pelea
+   (una línea de apertura) y SOLO cuando la vida está MUY BAJA (≤25%): la
+   suya (casiPierde) o la tuya (casiPierdes). Nada más: ni reacción a
+   esquives, técnicas, Tiempo Lento o dash. Solo enemigos humanoides con
+   personalidad habladora; los callados NUNCA dicen nada y las criaturas
+   NUNCA hablan (ni siquiera se consideran como hablante). Efímero: nada se
+   guarda; al cargar partida empieza apagado. */
 window.U = window.U || {};
 
 U.Banter = {
@@ -106,12 +107,13 @@ U.Banter = {
   },
 
   // ---------- líneas ----------
-  // Prioridad: nombres → tipos → estados por registro. Solo los dos estados
-  // (casiPierde / casiPierdes); si el diccionario trajera otros, se ignoran.
-  // Sin repetir la misma línea dos veces seguidas para el mismo (hablante, estado).
+  // Prioridad: nombres → tipos → estados por registro. Los tres estados
+  // (apertura / casiPierde / casiPierdes); si el diccionario trajera otros,
+  // se ignoran. Sin repetir la misma línea dos veces seguidas para el mismo
+  // (hablante, estado).
   _elegirLinea(e, estado) {
     const D = U.BanterDic;
-    if (!D || (estado !== 'casiPierde' && estado !== 'casiPierdes')) return null;
+    if (!D || (estado !== 'apertura' && estado !== 'casiPierde' && estado !== 'casiPierdes')) return null;
     const nombre = e.nombre || '';
     let lista = null;
     const clave = this._claveNombre(nombre);
@@ -186,9 +188,15 @@ U.Banter = {
     const fH = mejor.vida / (mejor.stats.vida || 1);
     const fJ = j.vida / (j.stats.vida || 1);
     if (this._hablante !== mejor) {
-      // Nuevo hablante (o nueva pelea): el cruce se resetea; no dispara por
-      // entrar ya herido, solo cuando la vida CRUZA el 25% durante la pelea.
+      // Pelea nueva (no había hablante y ahora hay uno): UNA línea de
+      // apertura, aunque el enemigo o el jugador ya entren heridos — es el
+      // inicio, no un cruce de umbral. Si solo cambia el hablante en medio
+      // de la misma pelea (A → B), NO hay apertura. El cruce se resetea en
+      // ambos casos: no dispara por entrar ya herido, solo cuando la vida
+      // CRUZA el 25% durante la pelea.
+      const peleaNueva = this._hablante === null;
       this._hablante = mejor; this._prevVidaH = fH; this._prevVidaJ = fJ;
+      if (peleaNueva) this.mostrar(mejor, 'apertura');
       return;
     }
     // Solo dos cruces de umbral (≤25%), una línea por cruce: si la vida sube

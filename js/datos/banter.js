@@ -1,9 +1,10 @@
 /* === js/datos/banter.js === */
 /* Unipar — DICCIONARIO GRANDE DE DIÁLOGO DE COMBATE (banter).
-   El recuadro de banter aparece SOLO cuando la vida está MUY BAJA (≤25%):
-   la del enemigo (casiPierde: desesperación, miedo, súplica o desafío final)
-   o la tuya (casiPierdes: burla, celebración, amenaza final).
-   No hay banter al inicio del combate ni en ningún otro momento.
+   El recuadro de banter aparece AL INICIO del combate (apertura: el enemigo
+   reta o se presenta) y cuando la vida está MUY BAJA (≤25%): la del enemigo
+   (casiPierde: desesperación, miedo, súplica o desafío final) o la tuya
+   (casiPierdes: burla, celebración, amenaza final).
+   No hay banter en ningún otro momento.
    SOLO HABLAN LOS HUMANOIDES CON PERSONALIDAD HABLADORA.
    - Las criaturas (lobos, bestias, yetis, serpientes, grifos) NUNCA hablan:
      para ellas no aparece el recuadro, así que no hay tipo 'criatura' aquí.
@@ -31,9 +32,52 @@ U.BanterDic = {
     calladas: ['silencioso', 'serio', 'tímido', 'frío', 'callado', 'reservado', 'taciturno', 'distante', 'sombrío', 'mudo', 'formal']
   },
 
-  // 2 estados de la pelea (los únicos en los que aparece el recuadro).
+  // 3 estados de la pelea (los únicos en los que aparece el recuadro).
   // Cada estado: 4 registros, cada uno un ARRAY de líneas.
   estados: {
+    // Al inicio del combate: el enemigo reta o se presenta.
+    apertura: {
+      brusco: [
+        '¡Tú! ¡Al fin te encuentro, mocoso!',
+        'Ven aquí. Esto se acaba rápido.',
+        '¿Tú eres el famoso viajero? Ja. Qué decepción.',
+        '¡Prepárate! ¡No voy a tener piedad!',
+        'Te estaba esperando. Y no para charlar.',
+        'Un paso más y te parto en dos.',
+        '¿Así que tú eres el que anda causando problemas?',
+        '¡Vamos! ¡Quiero verte caer desde ya!'
+      ],
+      amable: [
+        'Perdona… pero no puedo dejarte pasar.',
+        'Lamento esto, de verdad. Nada personal.',
+        'Ojalá no tuviéramos que pelear, pero así es.',
+        'Te pido disculpas por adelantado, viajero.',
+        'No quiero hacerte daño… pero es mi deber.',
+        'Si te rindes ahora, nadie sale lastimado.',
+        'Perdóname, pero tengo que detenerte aquí.',
+        'Buena suerte… la vas a necesitar.'
+      ],
+      neutro: [
+        'Así que tú eres el viajero. Bien.',
+        'No tengo nada contra ti. Solo es mi trabajo.',
+        'Empecemos. Que sea un buen combate.',
+        'Te estaba esperando. Ven.',
+        'No me voy a contener. Espero que tú tampoco.',
+        'Aquí nos encontramos. Peleemos.',
+        'Yo cumplo con mi deber. Tú, con el tuyo.',
+        'Vamos a ver de qué estás hecho.'
+      ],
+      cobarde: [
+        '¡Ay no! ¡¿Por qué yo?! ¡¿Por qué siempre yo?!',
+        'O-oye… ¿no podemos hablarlo? ¿No, verdad?',
+        '¡Yo no quería pelear! ¡Me obligaron!',
+        'M-mira… si me dejas ir, te doy todo lo que tengo.',
+        '¡Por favor, no me hagas daño!… ¡Ay, ya empezó!',
+        'Esto… esto no va a terminar bien para mí, ¿verdad?',
+        '¡Un momento! ¡Yo solo pasaba por aquí!',
+        'Vale, vale… peleemos. Pero con cuidado, ¿sí?'
+      ]
+    },
     // El enemigo está a punto de perder (su vida ≤25%): desesperación, miedo,
     // súplica, desafío final, negación.
     casiPierde: {
@@ -123,7 +167,7 @@ U.BanterDic = {
       ]
     }
   },
-  // Sabor por TIPO de enemigo. Solo los dos estados (casiPierde / casiPierdes).
+  // Sabor por TIPO de enemigo. Solo los tres estados (apertura / casiPierde / casiPierdes).
   // Lo que falte cae a la capa de registros. Sin tipo 'criatura': las bestias
   // nunca hablan y para ellas no aparece el recuadro.
   tipos: {
@@ -139,6 +183,12 @@ U.BanterDic = {
         '¡Mira nomás! ¡El héroe ya no se para!',
         '¡Esto es un asalto, bonito! ¡Y tú ya perdiste!',
         '¡Un golpe más y tus monedas son mías!'
+      ],
+      apertura: [
+        '¡Alto ahí! ¡La bolsa o la vida, bonito!',
+        '¡Ja! ¡Un viajero con pinta de tener monedas!',
+        '¡Esto es un asalto! ¡Vacía los bolsillos!',
+        'Mira nomás… el camino me trae un regalo.'
       ]
     },
     chaman: {
@@ -153,6 +203,12 @@ U.BanterDic = {
         'La tierra te reclama… y yo solo obedezco.',
         'Ríndete… los ancestros ya decidieron.',
         'Tu energía se apaga. El ritual se cumplió.'
+      ],
+      apertura: [
+        'Los espíritus me avisaron de ti, forastero.',
+        'La tierra te olió venir. Yo también.',
+        'Los ancestros quieren verte caer. Yo obedezco.',
+        'Siente el suelo… ya tiembla por tu llegada.'
       ]
     },
     brasa: {
@@ -167,6 +223,12 @@ U.BanterDic = {
         '¡Mi fuego te va a tragar entero!',
         '¡Ya hueles a quemado! ¡Un poco más!',
         '¡La brasa no perdona! ¡Despídete!'
+      ],
+      apertura: [
+        '¡Mi fuego lleva rato esperando a alguien como tú!',
+        '¡Ven! ¡La brasa quiere probar tu temple!',
+        '¿Hueles eso? Es tu derrota, quemándose.',
+        '¡Arde! ¡Hoy ardes tú, forastero!'
       ]
     },
     veterano: {
@@ -181,6 +243,12 @@ U.BanterDic = {
         'Buen combate… pero la arena es mía.',
         'Ya estás acabado, chico. Así es la arena.',
         'Un golpe más y te enseño tu lugar.'
+      ],
+      apertura: [
+        'Otro joven que viene a probar suerte. Bien.',
+        'He visto caer a cien como tú. Serás el ciento uno.',
+        'La arena te espera, chico. A mí también.',
+        'Ven. Te enseñaré cómo pelea un veterano.'
       ]
     },
     ilusionista: {
@@ -195,6 +263,12 @@ U.BanterDic = {
         'Mira a tu alrededor… todo es mi truco.',
         'Caíste en la ilusión. Ahora cae de verdad.',
         'Tu miedo ya es mío. El resto es fácil.'
+      ],
+      apertura: [
+        '¿Estoy aquí… o estoy allá? Ja. Adivina.',
+        'Mira bien… porque nada de esto es real.',
+        'Te voy a mostrar un truco que no olvidarás.',
+        '¿Ves este camino? Ya es mi escenario.'
       ]
     },
     coleccionista: {
@@ -209,6 +283,12 @@ U.BanterDic = {
         '¡Qué pieza tan hermosa vas a ser en mi colección!',
         'Ríndete… y tu artefacto tendrá un buen hogar.',
         'Nadie escapa de mi colección. Nadie.'
+      ],
+      apertura: [
+        '¡Qué pieza tan interesante camina hacia mí!',
+        'Tu máscara… será la joya de mi colección.',
+        'Tienes algo que quiero. Y lo voy a tomar.',
+        '¡Una pieza rara! ¡Justo lo que me faltaba!'
       ]
     },
     patrullero: {
@@ -223,6 +303,12 @@ U.BanterDic = {
         '¡Estás bajo arresto! ¡No te muevas!',
         '¡La ley te alcanzó, forastero!',
         '¡Un paso más y te llevo a la Oficina a rastras!'
+      ],
+      apertura: [
+        '¡Alto! ¡Por orden del Guardián, te detengo aquí!',
+        'Forastero: estás en territorio de la patrulla.',
+        '¡Manos donde las vea! Esto es un control.',
+        'La ley no pregunta. La ley actúa. Y yo soy la ley.'
       ]
     },
     lider: {
@@ -237,6 +323,12 @@ U.BanterDic = {
         '¡Te lo ordeno: ríndete, por el bien de Bruma!',
         '¡Mira el poder de la ley! ¡Esto es autoridad!',
         '¡Ya está! ¡La aldea verá cómo cae un rebelde!'
+      ],
+      apertura: [
+        'Yo soy el Guardián de esta aldea. Arrodíllate.',
+        '¿Tú eres el que anda alterando la paz de Bruma?',
+        'Como líder de la patrulla, te ordeno rendirte.',
+        'Bruma no se arrodilla ante nadie. Y tú, menos.'
       ]
     },
     jefe: {
@@ -251,6 +343,12 @@ U.BanterDic = {
         '¡Te voy a colgar junto a mis trofeos!',
         '¡Mira tu sangre! ¡Mi guarida la celebra!',
         '¡Arrodíllate! ¡El jefe de aquí soy yo!'
+      ],
+      apertura: [
+        '¿Quién se atreve a entrar a MI guarida?',
+        'Nadie pisa mi territorio sin pagar el precio.',
+        'Mira… otro valiente que viene por mi tesoro.',
+        'Esta guarida es mía. Y tu derrota, también.'
       ]
     },
     torneo: {
@@ -265,6 +363,12 @@ U.BanterDic = {
         '¡Ríndete! ¡No arruines mi final!',
         '¡Mira a la grada! ¡Todos saben quién gana!',
         '¡El torneo será mío! ¡Tú solo eres el escalón!'
+      ],
+      apertura: [
+        '¡Bienvenido a la arena, retador!',
+        '¡El público quiere espectáculo! ¡Yo se lo doy!',
+        '¡Que empiece el combate! ¡La grada está mirando!',
+        'Tú contra mí, delante de todos. ¿Listo?'
       ]
     },
     reto: {
@@ -279,11 +383,17 @@ U.BanterDic = {
         '¡Aceptaste el reto! ¡Ahora paga el precio!',
         '¡Esto es lo que pediste! ¡Un duelo de verdad!',
         '¡Ya te tengo! ¡El reto se cobra ahora!'
+      ],
+      apertura: [
+        '¡Tú me retaste! ¡Ahora cumple tu palabra!',
+        'Pediste un duelo… y un duelo tendrás.',
+        '¿Así que te atreves a retarme? Me gusta.',
+        'Acepté tu reto. Ahora no te eches para atrás.'
       ]
     }
   },
   // Líneas PROPIAS por nombre (el sistema busca por substring en el nombre del
-  // enemigo). Solo los dos estados. Dario es 'Frío y cortés' pero habla: con
+  // enemigo). Solo los tres estados. Dario es 'Frío y cortés' pero habla: con
   // líneas CORTAS y frías, de un renglón. Sana es práctica y directa, sin
   // remilgos. El Vacío sin Nombre lleva habla: false: nunca dice nada.
   nombres: {
@@ -299,6 +409,12 @@ U.BanterDic = {
         'Ya no te queda nada. Qué pena.',
         'Te lo advertí… con educación.',
         'Descansa, viajero. Te recordaré… un poco.'
+      ],
+      apertura: [
+        'Viajero. Qué… oportuno.',
+        'Te estaba esperando. Sin prisa.',
+        'Interesante. Ven, entonces.',
+        'No me hagas perder el tiempo.'
       ]
     },
     'Sana': {
@@ -313,6 +429,12 @@ U.BanterDic = {
         'Te falta instinto, chico. Y ya no hay tiempo.',
         'Buena presa. Valdrás monedas… digo, respeto.',
         'Ni a una criatura herida la remato así… pero tú no eres criatura.'
+      ],
+      apertura: [
+        'Otra presa que viene sola. Qué suerte.',
+        'El lago me trajo un regalo. Eres tú.',
+        'Directo al grano: tú caes hoy.',
+        'No te muevas mucho. Así es más fácil.'
       ]
     },
     'Bruno el Leñador': {
@@ -327,6 +449,12 @@ U.BanterDic = {
         '¡Mira nomás! ¡El arbolito ya se dobla!',
         '¡Un hachazo más y caes, tronco débil!',
         '¡En el bosque manda el hacha! ¡Y el hacha soy yo!'
+      ],
+      apertura: [
+        '¡Eh! ¡Este bosque no es para pasear, mocoso!',
+        '¡El hacha está afilada! ¡Y tú estás en mi camino!',
+        '¡Otro que viene a talar mi paciencia!',
+        '¡Ven! ¡Te corto como leña seca!'
       ]
     },
     'Sibila del Viento': {
@@ -341,6 +469,12 @@ U.BanterDic = {
         'Escucha… hasta el viento guarda silencio por ti.',
         'Tu final sopla suave… como yo.',
         'Ríndete… el viento no perdona a quien se aferra.'
+      ],
+      apertura: [
+        'El viento te trajo… y el viento te llevará.',
+        'Escuché tu nombre en el viento. Ven.',
+        'El viento susurra tu llegada. Yo escucho.',
+        'Corre, viento… que el combate empieza.'
       ]
     },
     'Corazón de Brasa': {
@@ -355,6 +489,12 @@ U.BanterDic = {
         '¡Mi fuego te tragó entero, ceniza!',
         '¡Ya hueles a humo! ¡Despídete!',
         '¡La brasa manda! ¡Y tú obedeces cayendo!'
+      ],
+      apertura: [
+        '¡Mi fuego ya te olió, forastero!',
+        '¡Ven! ¡La brasa quiere conocerte de cerca!',
+        '¿Sientes el calor? Es tu bienvenida.',
+        '¡Arde conmigo! ¡O arde por mí!'
       ]
     },
     'El Campeón Velado': {
@@ -369,6 +509,12 @@ U.BanterDic = {
         'Ya viste mi sombra. Ahora verás mi final.',
         'Arrodíllate… el velo lo exige.',
         'Tu derrota ya estaba escrita. Yo solo la leí.'
+      ],
+      apertura: [
+        'El velo no se levanta ante cualquiera. Tú… veremos.',
+        'Llegaste hasta aquí. Respetable. Insuficiente.',
+        'El campeón te recibe… con el velo puesto.',
+        'Dicen que nadie me ha ganado. Hoy lo confirmas.'
       ]
     },
     'El Otro Semifinalista': {
@@ -383,6 +529,12 @@ U.BanterDic = {
         '¡Ya te tengo! ¡La final me espera!',
         '¡Ríndete! ¡No me robes mi final!',
         '¡Mira la grada! ¡Todos saben quién llega!'
+      ],
+      apertura: [
+        '¡Tú! ¡La final es mía, no tuya!',
+        '¡La grada me espera! ¡Tú solo estorbas!',
+        '¡Un combate más y soy finalista!',
+        '¡Ven! ¡No me robes mi final!'
       ]
     },
     'Líder de la Patrulla': {
@@ -397,6 +549,12 @@ U.BanterDic = {
         '¡Estás bajo arresto, forastero!',
         '¡La ley no perdona! ¡Y yo, menos!',
         '¡Arrodíllate ante la patrulla!'
+      ],
+      apertura: [
+        '¡Alto! ¡La patrulla no negocia con forasteros!',
+        'Yo mando en Bruma. Y tú te detienes aquí.',
+        '¡Por el Guardián! ¡Nadie pasa sin mi permiso!',
+        'Forastero: ríndete o pelea. Tú eliges… mal.'
       ]
     },
     'Coleccionista': {
@@ -411,6 +569,12 @@ U.BanterDic = {
         '¡Qué artefacto tan hermoso vas a ser!',
         'Ríndete… y te guardo en buen lugar.',
         'Nadie escapa de mi colección. Nadie.'
+      ],
+      apertura: [
+        '¡Qué maravilla! ¡Una pieza que camina!',
+        'Tu máscara… la vi en sueños. Ya es mía.',
+        'No huyas, pieza rara. El trato es bueno.',
+        'Tengo un lugar especial para ti. En mi vitrina.'
       ]
     },
     'Cazador de la Red de Jade': {
@@ -425,6 +589,12 @@ U.BanterDic = {
         '¡Buena presa! ¡La Red paga bien por ti!',
         '¡Ni te muevas! ¡Ya eres de la Red!',
         '¡Te cazamos a ti… y a tu máscara!'
+      ],
+      apertura: [
+        'La Red te olió a kilómetros. Yo vine a cobrar.',
+        'Presa nueva. La Red paga bien por ti.',
+        'Ni corras: la Red ya te tiene en sus hilos.',
+        'Te cacé a ti… y ni sabías que te perseguían.'
       ]
     },
     'Cazadora de la Red de Jade': {
@@ -439,6 +609,12 @@ U.BanterDic = {
         '¡Qué presa tan rara! ¡Valdrás una fortuna!',
         '¡Ya eres mío… digo, de la Red!',
         '¡Ni corras! ¡La Red llega a todos lados!'
+      ],
+      apertura: [
+        'Bonito… la Red caza mejor con una sonrisa.',
+        'Eres justo lo que la Red estaba buscando.',
+        'Tranquilo, presa. Esto será rápido.',
+        'La Red no suelta. Y yo, menos.'
       ]
     },
     'Élite del guante negro': {
@@ -453,6 +629,12 @@ U.BanterDic = {
         'Arrodíllate. El guante lo ordena.',
         'Tu final ya está firmado… con guante negro.',
         '…Despídete. Sin ruido, como nosotros.'
+      ],
+      apertura: [
+        '…Te encontramos, forastero.',
+        'El guante negro no se presenta. Actúa.',
+        '…Tu nombre ya está en la lista.',
+        'Silencio. Esto se resuelve sin palabras.'
       ]
     },
     // --- Los 11 jefes de guarida, cada uno con su oficio ---
@@ -468,6 +650,12 @@ U.BanterDic = {
         '¡Ni los mejores se me escaparon! ¡Tú, menos!',
         '¡La Red de Jade caza… y yo soy su garra!',
         '¡Tu máscara colgará junto a mis trofeos!'
+      ],
+      apertura: [
+        '¡La presa mayor camina sola! ¡Qué suerte la mía!',
+        'Yo cacé a los mejores. Tú eres el siguiente.',
+        'La Red me dio tu rastro. Yo vine a terminarlo.',
+        '¡Ven! ¡Mi jaula más grande tiene tu nombre!'
       ]
     },
     'Guardabosques de la Red': {
@@ -482,6 +670,12 @@ U.BanterDic = {
         '¡Ni un paso más! ¡El bosque te traga!',
         '¡Conozco cada tronco… y tu final!',
         '¡La Red vigila el bosque! ¡Y yo te vigilo a ti!'
+      ],
+      apertura: [
+        '¡Este bosque es mío! ¡Y tú acabas de entrar sin permiso!',
+        'Cada tronco, cada trampa… todo te está mirando.',
+        'El bosque no perdona intrusos. Yo, menos.',
+        'Te vi cruzar el lindero. Ahora pagas el peaje.'
       ]
     },
     'Vigía de la Cumbre': {
@@ -496,6 +690,12 @@ U.BanterDic = {
         '¡La cumbre es mía! ¡Y tú caes por ella!',
         '¡Ni el viento te salva aquí arriba!',
         '¡Te vi venir desde lejos… y aun así te tengo!'
+      ],
+      apertura: [
+        'Desde la cumbre te vi venir, forastero.',
+        'Nadie sube a mi cumbre sin mi permiso.',
+        'El viento de arriba ya me contó de ti.',
+        'Baja… o subo yo a buscarte.'
       ]
     },
     'Tasador de las Ruinas': {
@@ -510,6 +710,12 @@ U.BanterDic = {
         '¡Tu máscara vale una fortuna! ¡Ya es mía!',
         '¡Todo tiene precio! ¡Tu derrota, también!',
         '¡Las ruinas me dieron tu precio: cero!'
+      ],
+      apertura: [
+        '¡Una pieza rara en mis ruinas! ¡Cuánto valdrás!',
+        'Te tasé desde lejos… y vales una fortuna caído.',
+        'Todo tiene precio. Tu derrota, también.',
+        'Las ruinas me dieron tu valor. Ven a cobrarlo.'
       ]
     },
     'Contrabandista del Puerto': {
@@ -524,6 +730,12 @@ U.BanterDic = {
         '¡Te vendo… digo, te entrego a la Red!',
         '¡Buen cargamento! ¡Valdrás monedas!',
         '¡En el puerto nadie pregunta! ¡Y nadie te busca!'
+      ],
+      apertura: [
+        '¡El puerto trae de todo! ¡Hoy te trajo a ti!',
+        '¿Buscas algo, forastero? Yo tengo… de todo.',
+        'En el puerto no se pregunta. Se cobra.',
+        'Negocios son negocios. Y tú eres buen negocio.'
       ]
     },
     'Custodio del Tesoro': {
@@ -538,6 +750,12 @@ U.BanterDic = {
         '¡Guardo el tesoro… y ahora guardo tu derrota!',
         '¡Ni un paso más! ¡El tesoro es sagrado!',
         '¡Tu sangre pagará lo que miraste!'
+      ],
+      apertura: [
+        '¡Nadie toca el tesoro! ¡Ni lo mira!',
+        'Guardé esto por años. No será un mocoso quien lo tome.',
+        'Da un paso más… y el tesoro tendrá tu sangre.',
+        'El tesoro es sagrado. Tu final, también.'
       ]
     },
     'Drenador de la Cámara': {
@@ -552,6 +770,12 @@ U.BanterDic = {
         '¡Te dreno hasta la última gota!',
         '¡La cámara tiene hambre… y tú eres el plato!',
         '¡Ya siento tu Esencia! ¡Dulce, dulce Esencia!'
+      ],
+      apertura: [
+        '¡Tu Esencia… ya la huelo desde aquí!',
+        'La cámara tiene hambre. Y tú llegaste justo.',
+        'Ven… te dreno gota a gota, despacito.',
+        'Tu energía brilla. Será mía.'
       ]
     },
     'Señor de la Niebla': {
@@ -566,6 +790,12 @@ U.BanterDic = {
         '¡Ni te vi venir… ni te veré irte!',
         '¡En la niebla nadie te oye caer!',
         '¡La niebla es mía! ¡Y tu final, también!'
+      ],
+      apertura: [
+        'La niebla te trajo… la niebla te tragará.',
+        'En mi niebla, nadie ve venir su final.',
+        '¿Oyes eso? Ni la niebla hace ruido aquí.',
+        'Camina, forastero. La niebla ya te tiene.'
       ]
     },
     'Centinela de la Torre': {
@@ -580,6 +810,12 @@ U.BanterDic = {
         '¡Desde arriba se ve tu derrota, forastero!',
         '¡Ni un paso más! ¡La torre no se rinde!',
         '¡Yo vigilo… y yo ejecuto!'
+      ],
+      apertura: [
+        '¡La torre no se rinde! ¡Ni su centinela!',
+        'Desde arriba lo veo todo. Y a ti, primero.',
+        'Subiste hasta aquí. Ahora baja… caído.',
+        'Yo vigilo la torre. Y la torre te vigila a ti.'
       ]
     },
     'Oficiante del Sello': {
@@ -594,6 +830,12 @@ U.BanterDic = {
         '¡El ritual se cumplió! ¡Tu fin llegó!',
         '¡Sellado! ¡Tu destino quedó sellado!',
         '¡Los sellos no perdonan! ¡Yo, menos!'
+      ],
+      apertura: [
+        'El sello ya marcó tu llegada, forastero.',
+        'El ritual empezó en cuanto pisaste aquí.',
+        'Tu destino quedó sellado. Solo falta ejecutarlo.',
+        'Los sellos no se rompen. Tú, sí.'
       ]
     },
     // El Vacío sin Nombre es un vacío: NUNCA habla. habla: false lo marca y
@@ -601,6 +843,7 @@ U.BanterDic = {
     // recuadro para él en ningún estado.
     'Vacío sin Nombre': {
       habla: false,
+      apertura: [],
       casiPierde: [],
       casiPierdes: []
     }
