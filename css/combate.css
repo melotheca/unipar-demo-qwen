@@ -178,6 +178,22 @@
 #dlgScrollAviso.visible,#dlgTextoAviso.visible{display:block}
 @keyframes avisoPulso{0%,100%{filter:brightness(.88)}50%{filter:brightness(1.12)}}
 
+/* Banter de combate: el enemigo habla SOLO cuando la vida está muy baja
+   (≤25%): la suya o la tuya. Caja pequeña abajo centrada, POR ENCIMA de los
+   controles: no tapa el joystick (su parte alta llega a 146px del fondo) ni
+   los botones (hasta 192px) ni la fila de técnicas equipadas (hasta 248px):
+   por eso el fondo va a 256px y no a 200px. pointer-events:none salvo el
+   botón ✕: nunca bloquea el combate. Se muestra 4.5 s y se esconde sola. */
+#banter{position:absolute;left:50%;bottom:calc(256px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:25;width:min(460px,calc(100vw - 24px));display:flex;gap:8px;align-items:center;padding:6px 10px 6px 6px;background:rgba(14,21,48,.93);border:2px solid var(--borde);border-radius:10px;box-shadow:0 3px 0 var(--sombra),0 4px 14px rgba(0,0,0,.45);color:var(--texto);opacity:0;pointer-events:none;transition:opacity .25s ease}
+#banter.visible{opacity:1}
+#banterCara{width:48px;height:48px;flex:0 0 48px;image-rendering:pixelated;border:2px solid var(--borde);background:#0e1530;border-radius:6px}
+.banterCuerpo{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+#banterNombre{font-size:11px;letter-spacing:1px;color:var(--rayo);text-transform:uppercase}
+#banterTexto{font-size:12.5px;line-height:1.35;color:var(--texto)}
+#banterCerrar{flex:0 0 auto;width:26px;height:26px;padding:0;border:2px solid var(--borde);border-radius:8px;background:#05070f;color:var(--textoFrio);font-size:12px;line-height:1;cursor:pointer;pointer-events:none}
+#banter.visible #banterCerrar{pointer-events:auto}
+#banterCerrar:active{transform:translateY(2px)}
+
 @media (hover:hover) and (pointer:fine){
   #joystick{opacity:.55;width:104px;height:104px}
   #joyKnob{width:44px;height:44px;margin:-22px 0 0 -22px}

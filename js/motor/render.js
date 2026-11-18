@@ -216,7 +216,7 @@ U.Render = {
 
   // Cara pixel-art con emoción (una emoción fija y visible; los estados van por dentro)
   cara(ctx, npcId, emocion, x, y, s) {
-    const p = this.paletaNPC[npcId] || this.paletaNPC.kaelen; const R = (rx, ry, w, h, c) => { ctx.fillStyle = c; ctx.fillRect(x + rx * s, y + ry * s, w * s, h * s); };
+    const p = this.paletaNPC[npcId] || this.paletaEnemigo[npcId] || this.paletaNPC.kaelen; const R = (rx, ry, w, h, c) => { ctx.fillStyle = c; ctx.fillRect(x + rx * s, y + ry * s, w * s, h * s); };
     R(0, 0, 16, 16, '#0e1530'); R(2, 3, 12, 12, p.piel); R(2, 1, 12, 4, p.pelo); R(1, 3, 1, 6, p.pelo); R(14, 3, 1, 6, p.pelo);
     if (p.peloLargo) { R(1, 5, 2, 10, p.pelo); R(13, 5, 2, 10, p.pelo); }
     if (npcId === 'torin') { R(3, 11, 10, 4, p.pelo); R(2, 1, 12, 2, p.piel); R(4, 0, 8, 1, p.pelo); }

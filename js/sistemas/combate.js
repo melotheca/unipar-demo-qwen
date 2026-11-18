@@ -694,5 +694,6 @@ U.Combate = {
     this.actualizarEnemigos(dtM); this.actualizarProyectiles(dtM); this.actualizarEfectos(dtM); this.actualizarArena(dt); // enemigos/proyectiles/efectos van a la escala del mundo (Tiempo Lento); la arena es un temporizador de evento (tiempo real)
     // orbes de esencia
     E.orbes.forEach(o => { o.t -= dtM; if (U.Grid.dist(o, j) < 0.9) { o.t = 0; U.Recuperacion.restaurar(10); this.texto(j, '+10 ESE', '#4da3ff', 1); U.Audio.sfx('orb'); this.particulas(o.x, o.y - 0.5, 6, '#4da3ff', 'cura'); } }); E.orbes = E.orbes.filter(o => o.t > 0);
+    if (U.Banter) U.Banter.actualizar(dt); // banter de combate: dt real (el Tiempo Lento no ralentiza sus temporizadores)
   }
 };
