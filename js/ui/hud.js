@@ -60,11 +60,11 @@ U.HUD = {
     cont.innerHTML = '';
     eq.forEach((t, i) => {
       const b = document.createElement('button'); b.className = 'boton equipo'; b.dataset.tec = t.id;
-      b.style.borderColor = t.kind === 'yang' ? '#f8fafc' : t.kind === 'escudo' ? U.Combate.escudoColor(j) : t.kind === 'yin' ? '#94a3b8' : U.Elementos.color(t.elemento);
+      b.style.borderColor = t.kind === 'yang' ? '#f8fafc' : t.kind === 'escudo' ? U.Combate.escudoColor(j) : t.kind === 'yin' ? '#94a3b8' : t.kind === 'mistico' ? '#e8a2e0' : U.Elementos.color(t.elemento);
       b.title = t.nombre + ' (' + (i + 1) + ') · ' + t.desc + (t.costo != null ? ' · Costo ' + t.costo + ' Esencia' : '') + (t.cd ? ' · CD ' + t.cd + 's' : '');
       const cv = document.createElement('canvas'); cv.width = 72; cv.height = 72;
       const icono = t.icono || (t.kind === 'yang' ? 'yang' : t.kind === 'escudo' ? (U.Combate.escudoTipo(j) === 'yang' ? 'yang' : U.Combate.escudoTipo(j)) : t.elemento);
-      U.Render.iconoSuave(cv, icono, t.kind === 'yang' ? '#f8fafc' : t.kind === 'escudo' ? U.Combate.escudoColor(j) : t.kind === 'yin' ? '#94a3b8' : U.Elementos.color(t.elemento));
+      U.Render.iconoSuave(cv, icono, t.kind === 'yang' ? '#f8fafc' : t.kind === 'escudo' ? U.Combate.escudoColor(j) : t.kind === 'yin' ? '#94a3b8' : t.kind === 'mistico' ? '#e8a2e0' : U.Elementos.color(t.elemento));
       b.appendChild(cv);
       const lbl = document.createElement('span'); lbl.className = 'lbl'; lbl.textContent = (i + 1) + ' · ' + t.nombre.split(' ')[0].toUpperCase(); b.appendChild(lbl);
       const cd = document.createElement('i'); cd.className = 'cd'; b.appendChild(cd);
@@ -89,7 +89,7 @@ U.HUD = {
       lista.forEach(t => {
         const pos = eq.indexOf(t.id);
         const enEq = pos >= 0;
-        s += '<div class="mochilaItem equipoFila"><span>' + (enEq ? '<b class="eqNum">' + (pos + 1) + '</b> ' : '') + '<b>' + this.escHtml(t.nombre) + '</b> <small style="color:var(--textoFrio)">' + this.escHtml(t.desc) + ' · Costo ' + t.costo + (t.cd ? ' · CD ' + t.cd + 's' : '') + (t.umbral ? ' · requiere ' + t.umbral + (t.kind === 'elemento' ? '%' : t.kind === 'yang' ? ' Yang' : t.kind === 'yin' ? ' Yin' : '') : '') + '</small></span><span class="acts">'
+        s += '<div class="mochilaItem equipoFila"><span>' + (enEq ? '<b class="eqNum">' + (pos + 1) + '</b> ' : '') + '<b>' + this.escHtml(t.nombre) + '</b> <small style="color:var(--textoFrio)">' + this.escHtml(t.desc) + ' · Costo ' + t.costo + (t.cd ? ' · CD ' + t.cd + 's' : '') + (t.umbral ? ' · requiere ' + t.umbral + (t.kind === 'elemento' ? '%' : t.kind === 'yang' ? ' Yang' : t.kind === 'yin' ? ' Yin' : t.kind === 'mistico' ? ' básico de hechicero' : '') : '') + '</small></span><span class="acts">'
           + (enEq
             ? '<button class="mini" data-eq-up="' + t.id + '" title="Subir un hueco (antes en el HUD)">▲</button><button class="mini" data-eq-down="' + t.id + '" title="Bajar un hueco (después en el HUD)">▼</button><button class="mini peligro" data-eq-del="' + t.id + '">QUITAR</button>'
             : '<button class="mini exito" data-eq-add="' + t.id + '"' + (eq.length >= 5 ? ' disabled title="Equipo lleno (máx. 5): quita una primero"' : '') + '>EQUIPAR</button>')
@@ -100,7 +100,9 @@ U.HUD = {
     (j.elementos || [j.elementoActivo]).forEach(el => { h += grupo(U.Elementos.nombre(el) + ' · ' + Math.floor(j.maestria[el] || 0) + '%', dom.filter(t => t.kind === 'elemento' && t.elemento === el)); });
     h += grupo('Yang · estilo ' + Math.floor(j.estilos.yang || 0), dom.filter(t => t.kind === 'yang'));
     h += grupo('Yin · estilo ' + Math.floor(j.estilos.yin || 0), dom.filter(t => t.kind === 'yin'));
+    h += grupo('Místico · Arte Místico · básicos ' + ((j.hechicero && j.hechicero.basicos) || 0), dom.filter(t => t.kind === 'mistico'));
     h += grupo('Escudo · Nv.' + (j.escudoNv || 1), dom.filter(t => t.kind === 'escudo'));
+    h += grupo('Alma · heredada por tu compañera de contrato', dom.filter(t => t.kind === 'alma'));
     h += '</section>';
     return h;
   },

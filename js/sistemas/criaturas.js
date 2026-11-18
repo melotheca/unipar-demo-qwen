@@ -139,7 +139,30 @@ U.Criaturas = {
     if (c.vinculo < 100) return 'vinculo';
     E.contratos.alma = c.uid; this.contratoAlma = c.uid;
     this.guardarAlmaPasaporte(c);
+    // HERENCIA DE ALMA: la criatura ADEMÁS te PASA una de SUS técnicas por el
+    // vínculo (ver heredarTecnica). Es heredada, no aprendida: sin minijuego.
+    this.heredarTecnica(c);
     return 'ok';
+  },
+  // HERENCIA DE ALMA: al formar el contrato de alma —y al cruzar a una vida nueva
+  // con el pasaporte— la criatura te PASA una de SUS técnicas por el vínculo.
+  // Es HEREDADA, no aprendida: no hay minijuego, ni práctica, ni Guía que la
+  // enseñe, ni tarea que cumplir — te la da el alma de la criatura y queda
+  // contigo. Solo el contrato de alma la da; el de sangre solo invoca, esta vida.
+  // La concesión es doble por seguridad: el id queda en j.tecnicasAprendidas
+  // (lista blanca de guardado.js, así sobrevive a guardar/cargar) y, con el
+  // registro conectado (habilidades.js), aprenderTecnica además la auto-equipa.
+  heredarTecnica(c, silencioso) {
+    const E = U.Juego.estado; if (!E || !E.jugador) return null;
+    if (!U.TecnicasAlma) return null;
+    const tec = U.TecnicasAlma.porEspecie(c.especie); if (!tec) return null;
+    const idReg = 'alma:' + tec.id;
+    const j = E.jugador;
+    j.tecnicasAprendidas = j.tecnicasAprendidas || [];
+    if (j.tecnicasAprendidas.indexOf(idReg) < 0) j.tecnicasAprendidas.push(idReg);
+    if (U.Habilidades && U.Habilidades.aprenderTecnica) U.Habilidades.aprenderTecnica(idReg);
+    if (!silencioso && U.HUD) U.HUD.toast('✦ ' + this.nombreDe(c) + ' te HEREDA su técnica por el vínculo: «' + tec.nombre + '». La heredaste por el alma — no se aprende con práctica ni minijuego — y queda contigo aunque cambies de vida.', 'exito');
+    return tec;
   },
   // El contrato de alma CRUZA VIDAS: vive en el pasaporte del usuario (su propio guardado
   // local, aparte del de la vida actual), como ya preveía U.Portal.
@@ -151,7 +174,10 @@ U.Criaturas = {
     const p = this.leerAlmaPasaporte(); if (!p) return;
     const c = this.buscar(p.uid); if (!c) return;
     E.contratos.alma = c.uid; this.contratoAlma = c.uid; c.vinculo = 100;
-    setTimeout(() => { if (U.HUD) U.HUD.toast('🕯 Tu contrato de alma cruza vidas: ' + this.nombreDe(c) + ' te reconoce en esta vida nueva (vínculo máximo). Está en ' + (this.REGION_NOMBRE[c.region] || 'su región') + '.', 'exito'); }, 4200);
+    // La técnica HEREDADA cruza vidas con el contrato: en esta vida nueva la
+    // vuelves a llevar (no hay que aprenderla de nuevo: te la pasó por el alma).
+    const tec = this.heredarTecnica(c, true);
+    setTimeout(() => { if (U.HUD) U.HUD.toast('🕯 Tu contrato de alma cruza vidas: ' + this.nombreDe(c) + ' te reconoce en esta vida nueva (vínculo máximo). Está en ' + (this.REGION_NOMBRE[c.region] || 'su región') + '.' + (tec ? ' Su técnica heredada, «' + tec.nombre + '», sigue contigo.' : ''), 'exito'); }, 4200);
   },
   invocar(c) {
     const E = U.Juego.estado; if (!this.tieneContrato(c)) return false;

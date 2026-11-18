@@ -148,6 +148,8 @@ U.Render = {
         x.lineWidth = 4; x.beginPath(); x.arc(24, 24, 16, 0, 6.3); x.stroke(); x.beginPath(); x.moveTo(24, 24); x.lineTo(24, 12); x.moveTo(24, 24); x.lineTo(32, 28); x.stroke(); break;
       case 'acero': // placa de acero (Resistencia de Acero)
         P([[24, 4], [40, 10], [40, 26], [24, 44], [8, 26], [8, 10]]); x.fillStyle = claro; x.fillRect(14, 20, 20, 5); break;
+      case 'mistico': // ojo/portal: anillo + pupila (Arte Místico, la capa mental)
+        x.lineWidth = 4; x.beginPath(); x.arc(24, 24, 15, 0, 6.3); x.stroke(); circ(24, 24, 5); break;
       default: circ(24, 24, 10);
     }
     x.restore();

@@ -10,6 +10,88 @@ U.Combate = {
     veterano: { nombre: 'Veterano de la arena', elemento: 'tierra', stats: { vida: 140, esencia: 50, ataque: 15, defensa: 14, mente: 8, velocidad: 8 }, forma: 'circulo', alcance: 2, radio: 2, power: 1.6, tele: 0.8, cd: 2.6, rango: 1.9 },
     ilusionista: { nombre: 'Ilusionista', elemento: 'viento', stats: { vida: 55, esencia: 70, ataque: 11, defensa: 7, mente: 13, velocidad: 10 }, forma: 'linea', alcance: 6, radio: 0, power: 1.0, tele: 0.7, cd: 2.6, rango: 5, efecto: { invertir: 6 } }
   },
+  // ---------- SETS DE TÉCNICAS POR PERSONA (cada uno usa un subconjunto) ----------
+  // Cada clase usa un subconjunto de su elemento (2-4 técnicas); cada persona con
+  // nombre tiene el suyo propio, distinto. El set queda en e.setTec (otros sistemas
+  // pueden ponerle su propio set: e.setTec = [...] + e.setTecManual = true).
+  // Los ids son del catálogo de su elemento (U.Habilidades.elementos[elemento]).
+  SETS: {
+    bandido: ['roca', 'muroPiedra', 'temblor'],
+    chaman: ['rafaga', 'hojaVendaval', 'torbellino'],
+    brasa: ['llamarada', 'colmilloBrasa', 'bolafuego'],
+    veterano: ['roca', 'garraMontana', 'avalancha', 'temblor'],
+    ilusionista: ['rafaga', 'vendavalCortante', 'cuchilla']
+  },
+  SETS_NOMBRE: {
+    // Torneo de Bruma
+    'Bruno el Leñador': ['roca', 'muroPiedra', 'garraMontana'],
+    'Sibila del Viento': ['rafaga', 'hojaVendaval', 'torbellino', 'vendavalCortante'],
+    'Corazón de Brasa': ['llamarada', 'colmilloBrasa', 'bolafuego', 'serpienteFuego'],
+    'El Campeón Velado': ['roca', 'avalancha', 'garraMontana', 'temblor'],
+    'El Otro Semifinalista': ['rafaga', 'torbellino', 'cuchilla'],
+    // Líderes de gimnasio (salas)
+    'Bruno, líder de la sala de Bruma': ['roca', 'temblor', 'muroPiedra'],
+    'Nami, líder de la sala del Puerto': ['rafaga', 'torbellino', 'hojaVendaval'],
+    'Varek, líder de la sala de Ceniza': ['llamarada', 'bolafuego', 'serpienteFuego', 'colmilloBrasa'],
+    'Toruk, líder de la sala de Raíz': ['roca', 'avalancha', 'terremoto', 'garraMontana'],
+    'Lira, líder de la sala de Vuelo': ['rafaga', 'vendavalCortante', 'cuchilla', 'torbellino'],
+    'Vek, líder de la sala de Chispa': ['rafaga', 'cuchilla', 'vendavalCortante'],
+    // Sparring (círculo del bosque)
+    'Kaelen': ['roca', 'avalancha', 'garraMontana'],
+    'Torin': ['roca', 'temblor', 'muroPiedra'],
+    'Breno': ['roca', 'muroPiedra'],
+    'Marco': ['rafaga', 'hojaVendaval', 'torbellino'],
+    // Jefes de guarida
+    'Cazador Mayor de la Red': ['roca', 'avalancha', 'temblor'],
+    'Guardabosques de la Red': ['roca', 'muroPiedra', 'temblor'],
+    'Vigía de la Cumbre': ['rafaga', 'torbellino', 'hojaVendaval'],
+    'Tasador de las Ruinas': ['roca', 'garraMontana', 'avalancha'],
+    'Contrabandista del Puerto': ['roca', 'avalancha', 'garraMontana'],
+    'Custodio del Tesoro': ['roca', 'terremoto', 'avalancha', 'temblor'],
+    'Drenador de la Cámara': ['llamarada', 'bolafuego', 'lluviaBrasas', 'colmilloBrasa'],
+    'Señor de la Niebla': ['rafaga', 'vendavalCortante', 'cuchilla', 'torbellino'],
+    'Centinela de la Torre': ['roca', 'avalancha', 'terremoto'],
+    'Oficiante del Sello': ['rafaga', 'cuchilla', 'vendavalCortante'],
+    'Vacío sin Nombre': ['rafaga', 'vendavalCortante', 'torbellino', 'cuchilla'],
+    // Organizaciones y duelos
+    'Dario': ['roca', 'garraMontana', 'avalancha'],
+    'Sana': ['rafaga', 'torbellino', 'hojaVendaval'],
+    'Líder de la Patrulla': ['roca', 'avalancha', 'garraMontana', 'terremoto'],
+    'Élite del guante negro': ['roca', 'temblor', 'garraMontana'],
+    'Cazador de la Red de Jade': ['roca', 'muroPiedra', 'temblor'],
+    'Cazadora de la Red de Jade': ['rafaga', 'torbellino', 'hojaVendaval'],
+    'Coleccionista': ['roca', 'avalancha', 'garraMontana'],
+    'Agente sin nombre': ['rafaga', 'vendavalCortante', 'cuchilla'],
+    'Guardia examinador del Cuartel': ['roca', 'temblor', 'muroPiedra'],
+    'Finalista de la Metrópolis': ['roca', 'avalancha', 'garraMontana'],
+    'Semifinalista de la Metrópolis': ['rafaga', 'torbellino', 'cuchilla']
+  },
+  // Set efectivo de un enemigo. Precedencia: set manual (e.setTecManual) > set por
+  // nombre > e.setTec > set de su clase. Se resuelve en vivo (no solo al crear):
+  // si otro sistema le cambia el nombre después, el set por nombre se aplica solo.
+  setDe(e) {
+    if (e.setTecManual && Array.isArray(e.setTec) && e.setTec.length) return e.setTec;
+    if (e.nombre) {
+      const keys = Object.keys(this.SETS_NOMBRE || {});
+      for (let i = 0; i < keys.length; i++) if (e.nombre === keys[i]) { if (!e.setTecManual) e.setTec = this.SETS_NOMBRE[keys[i]].slice(); return this.SETS_NOMBRE[keys[i]]; }
+      for (let i = 0; i < keys.length; i++) if (e.nombre.indexOf(keys[i]) === 0) { if (!e.setTecManual) e.setTec = this.SETS_NOMBRE[keys[i]].slice(); return this.SETS_NOMBRE[keys[i]]; }
+    }
+    if (Array.isArray(e.setTec) && e.setTec.length) return e.setTec;
+    return (this.SETS[e.clase] || []).slice();
+  },
+  // Una técnica del catálogo, por id, dentro del elemento del enemigo.
+  tecEnemiga(e, tecId) { const lista = (U.Habilidades.elementos[e.elemento] || []); for (let i = 0; i < lista.length; i++) if (lista[i].id === tecId) return lista[i]; return null; },
+  // Elige el ataque del set según la distancia: prefiere técnicas que alcancen
+  // desde donde está; si ninguna alcanza, cualquiera del set (y se acerca andando).
+  elegirTec(e, d) {
+    const set = this.setDe(e); if (!set || !set.length) return null;
+    const lista = set.map(id => this.tecEnemiga(e, id)).filter(Boolean);
+    if (!lista.length) return null;
+    const lejos = ['linea', 'proyectil', 'alterna', 'cadena'];
+    const encajan = lista.filter(t => lejos.indexOf(t.forma) >= 0 ? d <= (t.alcance || 99) : d <= (t.alcance || 2) + 1);
+    const cands = encajan.length ? encajan : lista;
+    return cands[Math.floor(Math.random() * cands.length)];
+  },
   OLEADAS: [['bandido', 'bandido'], ['bandido', 'chaman'], ['brasa', 'brasa', 'veterano']],
 
   // ---------- utilidades de efectos ----------
@@ -207,10 +289,33 @@ U.Combate = {
     if (!tec) { U.HUD.toast('Técnica desconocida.', 'aviso'); return; }
     if (!U.Habilidades.aprendida(j, tec)) { U.HUD.toast(tec.nombre + ': aún no la dominas.', 'aviso'); U.Audio.sfx('fail'); return; }
     if (U.Habilidades.podarEquipo(j).indexOf(id) < 0) { U.HUD.toast(tec.nombre + ' no está en tu EQUIPO: equípala en Pausa → Ajustes → Equipo.', 'aviso'); U.Audio.sfx('fail'); return; }
-    if (tec.kind === 'elemento') this.tecnica(id);
+    if (tec.kind === 'elemento' || tec.kind === 'alma') this.tecnica(id);
     else if (tec.kind === 'yang') this.yang(tec.tecId);
-    else if (tec.kind === 'yin') { if (tec.tecId === 'acero') this.toggleAcero(); }
+    else if (tec.kind === 'mistico') this.tecnica(id);
+    else if (tec.kind === 'yin') { if (tec.tecId === 'acero') this.toggleAcero(); else if (tec.tecId === 'sobrecarga') this.sobrecarga(); else this.yinTec(id); }
     else if (tec.kind === 'escudo') this.toggleEscudo();
+  },
+  // Técnicas de YIN equipables (Puño de la Montaña, Lluvia de Puños, Palma del
+  // Sueño): físico cuerpo a cuerpo en cono, como el Golpe Veloz de Yang. El puño
+  // normal NO pasa por aquí: es universal y no es técnica. El Golpe Rompe-Todo
+  // tampoco: es el puño cargado (mantener presionado el botón de puño).
+  yinTec(id) {
+    const E = U.Juego.estado, j = E.jugador;
+    const tec = U.Habilidades.porId(j, id);
+    if (!tec || tec.kind !== 'yin') return;
+    if (!U.Habilidades.aprendida(j, tec)) { U.HUD.toast(tec.nombre + ': aún no la dominas.', 'aviso'); U.Audio.sfx('fail'); return; }
+    if (U.Habilidades.podarEquipo(j).indexOf(tec.id) < 0) { U.HUD.toast(tec.nombre + ' no está en tu EQUIPO: equípala en Pausa → Ajustes → Equipo.', 'aviso'); U.Audio.sfx('fail'); return; }
+    if ((j.cdTec[tec.id] || 0) > 0) return;
+    if (typeof tec.costo !== 'number' || !U.Recuperacion.gastar(tec.costo)) return;
+    j.cdTec[tec.id] = tec.cd; j.ataqueAnim = 0.25; j.descansando = false;
+    const atk = (U.Reliquias ? U.Reliquias.statEf(j, 'ataque') : j.stats.ataque) * (j.buffs.sobrecarga > 0 ? 2 : 1);
+    const celdas = U.Grid.forma('cono', j.x, j.y, j.dir, tec.alcance, 1);
+    E.efectos.cortes.push({ x: j.x, y: j.y, dir: j.dir, color: '#ffd08a', t: 0.18, max: 0.18 });
+    U.Audio.sfx('yin'); this.sacudir(0.3);
+    const gObj = this.golpearObjetos(celdas, atk * tec.power * 0.95); this.golpearObjetosArco(j, tec.alcance, atk * tec.power * 0.95, gObj); this.golpearInocentes(celdas, { x: j.x, y: j.y, dir: j.dir, alcance: tec.alcance + 0.45 });
+    let golpes = 0; this.vivos().forEach(e => { if (U.Grid.enCeldas(celdas, e) || U.Grid.enArco(j.x, j.y, j.dir, tec.alcance + 0.45, e)) { golpes++; this.dañoEnemigo(e, atk * tec.power, null, Object.assign({ desafio: this.desafio(e) }, tec.efecto || {})); U.Recuperacion.restaurar(6); } });
+    if (U.Criaturas) golpes += U.Criaturas.impactoJugador(celdas, { arco: { x: j.x, y: j.y, dir: j.dir, alcance: tec.alcance + 0.45 }, dmg: atk * tec.power, elemento: null });
+    U.Crecimiento.estilo('yin', 0.35, 1); if (golpes) E.resumen.golpes += golpes;
   },
   // Ataque BÁSICO del elemento principal: línea corta, coste 4, sin aprender nada.
   // Es lo que hay al inicio (puño + básico) y lo que dispara el botón TÉC.
@@ -287,18 +392,19 @@ U.Combate = {
   tecnica(id) {
     const E = U.Juego.estado, j = E.jugador;
     let tec = id ? U.Habilidades.porId(j, id) : null;
-    if (id && (!tec || tec.kind !== 'elemento')) { U.HUD.toast('Técnica desconocida.', 'aviso'); return; }
-    if (!tec) { const eq = U.Habilidades.equipoDetalles(j).filter(t => t.kind === 'elemento'); if (!eq.length) { this.ataqueBasico(); return; } tec = eq[0]; }
+    if (id && (!tec || (tec.kind !== 'elemento' && tec.kind !== 'mistico' && tec.kind !== 'alma'))) { U.HUD.toast('Técnica desconocida.', 'aviso'); return; }
+    if (!tec) { const eq = U.Habilidades.equipoDetalles(j).filter(t => t.kind === 'elemento' || t.kind === 'alma'); if (!eq.length) { this.ataqueBasico(); return; } tec = eq[0]; }
     const h = tec;
     if (!U.Habilidades.aprendida(j, tec)) { U.HUD.toast(h.nombre + ' requiere maestría mínima de ' + h.umbral + '% y aprenderla de un Guía, por tarea. Canaliza con Yin: la maestría sube con curva multiplicativa, cada tramo cuesta más.', 'aviso'); U.Audio.sfx('fail'); return; }
     if (U.Habilidades.podarEquipo(j).indexOf(tec.id) < 0) { U.HUD.toast(h.nombre + ' no está en tu EQUIPO: equípala en Pausa → Ajustes → Equipo.', 'aviso'); U.Audio.sfx('fail'); return; }
     // Compatibilidad: tecnicaIdx sigue apuntando a la técnica usada dentro de su elemento.
-    j.tecnicaIdx = Math.max(0, (U.Habilidades.elementos[h.elemento] || []).findIndex(x => x.id === h.tecId));
+    const idxTec = (U.Habilidades.elementos[h.elemento] || []).findIndex(x => x.id === h.tecId);
+    if (idxTec >= 0) j.tecnicaIdx = idxTec;
     if ((j.cdTec[h.id] || 0) > 0) return;
-    const z = U.Ambiente.zonaEn(j.x, j.y); const c = U.Ambiente.costo(this.conCostoRadial(h), h.elemento, z, j.atributo); // radial (círculo a tu alrededor): +50% de Esencia
+    const z = U.Ambiente.zonaEn(j.x, j.y); const c = h.elemento === 'mistico' ? { costo: h.costo } : U.Ambiente.costo(this.conCostoRadial(h), h.elemento, z, j.atributo); // radial (círculo a tu alrededor): +50% de Esencia; Místico: costo plano, sin ambiente
     if (!U.Recuperacion.gastar(c.costo, { ajustado: !c.inestable })) return;
-    j.cdTec[h.id] = h.cd; j.ataqueAnim = 0.3; j.descansando = false; const el = U.Elementos.datos[h.elemento]; const atk = (U.Reliquias ? U.Reliquias.statEf(j, 'ataque') : j.stats.ataque) * (j.buffs.sobrecarga > 0 ? 2 : 1); const base = atk * h.power * ((j.reliquias && j.reliquias.artefactos && j.reliquias.artefactos.indexOf('espada') >= 0) ? 1.25 : 1); // ✦ Espada de Orión: +25% de daño elemental
-    const alcEf = Math.max(1, Math.min(h.alcance || h.radio || 99, this.alcanceDe(j, h.elemento))); // alcance efectivo: lo que la forma de la técnica permita, topado por tu maestría (1 celda a 0–5% … 20 a 100%)
+    j.cdTec[h.id] = h.cd; j.ataqueAnim = 0.3; j.descansando = false; const el = U.Elementos.datos[h.elemento] || { color: '#e8a2e0', claro: '#f3c6f1' }; const atk = (U.Reliquias ? U.Reliquias.statEf(j, 'ataque') : j.stats.ataque) * (j.buffs.sobrecarga > 0 ? 2 : 1); const base = atk * h.power * ((j.reliquias && j.reliquias.artefactos && j.reliquias.artefactos.indexOf('espada') >= 0) ? 1.25 : 1); // ✦ Espada de Orión: +25% de daño elemental
+    const alcEf = (tec.kind === 'alma' || h.elemento === 'mistico') ? (h.alcance || h.radio || 3) : Math.max(1, Math.min(h.alcance || h.radio || 99, this.alcanceDe(j, h.elemento))); // alcance efectivo: lo que la forma de la técnica permita, topado por tu maestría (1 celda a 0–5% … 20 a 100%); Místico y Alma no usan maestría: su alcance es el de la técnica (la heredada no se topa: no es dominada, es heredada)
     U.Audio.sfx(h.elemento); this.sacudir(0.4); E.resumen.tecnicas++;
     let objetivo = this.vivos()[0]; let desafio = 0.5;
     const golpear = (celdas, opts, baseUsada) => { const b = baseUsada != null ? baseUsada : base; this.golpearObjetos(celdas, b * 0.85); this.golpearInocentes(celdas); if (U.Criaturas) U.Criaturas.impactoJugador(celdas, { dmg: b, elemento: h.elemento }); this.vivos().forEach(e => { if (U.Grid.enCeldas(celdas, e)) { this.dañoEnemigo(e, b, h.elemento, Object.assign({ desafio: this.desafio(e), alcance: alcEf }, opts || {}, h.efecto || {})); desafio = Math.max(desafio, this.desafio(e)); objetivo = e; } }); };
@@ -306,7 +412,7 @@ U.Combate = {
       case 'linea': case 'rect': { const celdas = U.Grid.forma(h.forma, j.x, j.y, j.dir, alcEf, h.radio || 0); E.efectos.haces.push({ celdas, color: el.color, t: 0.3, max: 0.3 }); golpear(celdas); this.particulas(j.x + j.dir.x * 2, j.y + j.dir.y * 2 - 0.5, 10, el.claro, h.elemento === 'agua' ? 'agua' : 'chispa'); break; }
       case 'cono': { const celdas = U.Grid.forma('cono', j.x, j.y, j.dir, alcEf, 0); E.efectos.haces.push({ celdas, color: el.color, t: 0.35, max: 0.35 }); golpear(celdas); this.particulas(j.x + j.dir.x * 1.5, j.y + j.dir.y * 1.5 - 0.5, 16, el.claro, 'brasa'); break; }
       case 'alterna': { const celdas = U.Grid.forma('alterna', j.x, j.y, j.dir, alcEf, 0); E.efectos.haces.push({ celdas, color: el.color, t: 0.35, max: 0.35 }); golpear(celdas, null, base * 1.2); this.particulas(j.x + j.dir.x * 2, j.y + j.dir.y * 2 - 0.5, 14, el.claro, 'brasa'); break; }
-      case 'circulo': { const esRad = !h.centro; const radioEf = esRad ? this.radioRadialDe(j, h.elemento) : h.radio; const cx = h.centro === 'frente4' ? j.x + j.dir.x * Math.min(4, alcEf) : j.x, cy = h.centro === 'frente4' ? j.y + j.dir.y * Math.min(4, alcEf) : j.y; const celdas = U.Grid.forma('circulo', cx, cy, j.dir, 0, radioEf); E.efectos.haces.push({ celdas, color: el.color, t: 0.35, max: 0.35 }); E.efectos.anillos.push({ x: cx, y: cy, radio: radioEf, color: el.claro, t: 0.4, max: 0.4 }); golpear(celdas, null, esRad ? base * this.DANO_RADIAL : base); this.particulas(cx, cy - 0.5, 20, el.claro, 'chispa'); this.sacudir(0.8); break; }
+      case 'circulo': { const esRad = !h.centro; const radioEf = esRad ? ((tec.kind === 'alma' || h.elemento === 'mistico') ? (h.radio || 1) : this.radioRadialDe(j, h.elemento)) : h.radio; const cx = h.centro === 'frente4' ? j.x + j.dir.x * Math.min(4, alcEf) : j.x, cy = h.centro === 'frente4' ? j.y + j.dir.y * Math.min(4, alcEf) : j.y; const celdas = U.Grid.forma('circulo', cx, cy, j.dir, 0, radioEf); E.efectos.haces.push({ celdas, color: el.color, t: 0.35, max: 0.35 }); E.efectos.anillos.push({ x: cx, y: cy, radio: radioEf, color: el.claro, t: 0.4, max: 0.4 }); golpear(celdas, null, esRad ? base * this.DANO_RADIAL : base); this.particulas(cx, cy - 0.5, 20, el.claro, 'chispa'); this.sacudir(0.8); break; }
       case 'proyectil': this.proyectil(j, Object.assign({}, h, { alcance: alcEf }), base, h.elemento, el.color, 'jugador'); break;
       case 'cadena': { const vivos = this.vivos().map(e => ({ e, d: U.Grid.dist(e, j) })).filter(o => o.d <= alcEf).sort((a, b) => a.d - b.d).slice(0, h.saltos); const puntos = [{ x: j.x, y: j.y }]; vivos.forEach(o => { puntos.push({ x: o.e.x, y: o.e.y }); this.dañoEnemigo(o.e, base, h.elemento, Object.assign({ desafio: this.desafio(o.e), alcance: alcEf }, h.efecto || {})); desafio = Math.max(desafio, this.desafio(o.e)); }); if (puntos.length > 1) E.efectos.cadenas.push({ puntos, t: 0.25, max: 0.25 }); else { U.HUD.toast('Ningún enemigo al alcance de la cadena.', ''); } break; }
       case 'destello': { // DESTELLO (Rayo): flash blanco SUAVE y gradual + ceguera en área. Sin daño directo grande: su poder es dejarlos ciegos.
@@ -315,17 +421,18 @@ U.Combate = {
         E.efectos.anillos.push({ x: j.x, y: j.y, radio: h.radio || 4, color: '#fff7c2', t: 0.5, max: 0.5 }); this.particulas(j.x, j.y - 0.6, 26, '#fff7c2', 'chispa'); U.Audio.sfx('rayo');
         U.HUD.toast(ceg ? '✦ DESTELLO: ' + ceg + ' enemigo(s) CEGADOS unos segundos: no te ven y sus ataques fallan.' : '✦ DESTELLO: luz lanzada, sin enemigos cerca que cegar.', ceg ? 'exito' : 'aviso'); break; }
     }
-    U.Crecimiento.maestria(h.elemento, 0.5, desafio); U.Crecimiento.stat('mente', 0.06, 1); U.Crecimiento.stat('ataque', 0.03, desafio);
+    if (h.elemento === 'mistico') U.Crecimiento.stat('mente', 0.1, desafio); else U.Crecimiento.maestria(h.elemento, 0.5, desafio); U.Crecimiento.stat('mente', 0.06, 1); U.Crecimiento.stat('ataque', 0.03, desafio);
   },
   proyectil(origen, h, base, elemento, color, dueño) {
     const d = U.Grid.dir8(origen.dir.x, origen.dir.y); const vel = h.vel || 7;
     U.Juego.estado.proyectiles.push({ x: origen.x + d.x * 0.6, y: origen.y + d.y * 0.6, dx: d.x, dy: d.y, vel, vida: (h.alcance || 9) / vel, dueño, base, elemento, color, alcance: h.alcance || 9, ox: origen.x, oy: origen.y, forma: h.id === 'roca' ? 'roca' : 'esfera', explora: h.explora || null, efecto: h.efecto || null, cometa: !!h.cometa, golpeados: [] });
   },
   dash() {
-    const E = U.Juego.estado, j = E.jugador; if (j.dash.cd > 0 || j.dash.t > 0) return; if (!U.Recuperacion.gastar(U.Habilidades.yin.dash.costo)) return;
+    const E = U.Juego.estado, j = E.jugador; if (j.dash.cd > 0 || j.dash.t > 0) return; if (!U.Recuperacion.gastar(U.Habilidades.costoDash(j))) return;
     const I = U.Juego.input; const d = (I && I.mag > 0.1) ? U.Grid.dir8(I.vx, I.vy) : j.dir; const dist = (2.2 + (U.Reliquias ? U.Reliquias.statEf(j, 'velocidad') : j.stats.velocidad) * 0.06 * (j.buffs.sobrecarga > 0 ? 1.5 : 1)) * (j.elementoActivo === 'rayo' ? 1.6 : 1) * (j.tiempoLento ? 1.5 : 1); // Rayo: paso relámpago · SINERGIA con Tiempo Lento: el mundo lento hace el dash aún más efectivo (alcance ×1.5; el daño ×1.25 va en golpeDash)
     j.dash = { t: 0.16, cd: 0.6, dx: d.x * dist / 0.16, dy: d.y * dist / 0.16, golpeados: [] }; j.invuln = Math.max(j.invuln, 0.24); j.dir = d; j.descansando = false; j.cargando = false;
-    U.Audio.sfx('dash'); this.particulas(j.x, j.y - 0.3, 8, '#7ef0c0', 'polvo'); U.Crecimiento.stat('velocidad', E.enCombate ? 0.1 : 0.01, 1); U.Crecimiento.estilo('yin', 0.05, 1); E.resumen.dashes++; if (U.Juego.progresoEntreno) U.Juego.progresoEntreno('esquiva', 1);
+    U.Audio.sfx('dash'); this.particulas(j.x, j.y - 0.3, 8, '#7ef0c0', 'polvo'); if (E.enCombate) { U.Crecimiento.stat('velocidad', 0.1, 1); U.Crecimiento.estilo('yang', 0.05, 1); } // SIN farmeo: fuera de combate el dash NO da experiencia; en combate, poquito Yang (0.05: un tercio de lo que da un golpe Yin que conecta, 0.15). El dash es Yang, así que su poquito es de Yang, no de Yin.
+    E.resumen.dashes++; if (U.Juego.progresoEntreno) U.Juego.progresoEntreno('esquiva', 1);
   },
   sobrecarga() {
     const j = U.Juego.estado.jugador; const s = U.Habilidades.yin.sobrecarga;
@@ -406,7 +513,7 @@ U.Combate = {
     if (m > 1) this.texto({ x: e.x, y: e.y - 0.9 }, 'VENTAJA', '#ffe14d', 1); else if (m < 1) this.texto({ x: e.x, y: e.y - 0.9 }, 'RESISTE', '#9fb3d9', 1);
     this.particulas(e.x, e.y - 0.6, o.cargado ? 14 : 7, col, 'chispa'); U.Audio.sfx('golpe'); this.sacudir(o.cargado ? 0.5 : 0.25);
     if (o.empuje) { const dx = e.x - E.jugador.x, dy = e.y - E.jugador.y, dd = Math.hypot(dx, dy) || 1; U.Grid.mover(E.mapa, e, dx / dd * o.empuje * 0.5, dy / dd * o.empuje * 0.5); }
-    if (o.stun) e.efectos.stun = Math.max(e.efectos.stun, o.stun); if (o.slow) e.efectos.slow = Math.max(e.efectos.slow, o.slow); if (o.dot) e.efectos.dot = { dmg: o.dot.dmg, t: o.dot.t, tick: 0 };
+    if (o.stun) e.efectos.stun = Math.max(e.efectos.stun, o.stun); if (o.slow) e.efectos.slow = Math.max(e.efectos.slow, o.slow); if (o.cegar) e.efectos.cegado = Math.max(e.efectos.cegado || 0, o.cegar); if (o.dot) e.efectos.dot = { dmg: o.dot.dmg, t: o.dot.t, tick: 0 };
     if (o.desafio) U.Crecimiento.stat('ataque', 0.02, o.desafio);
     if (e.esSparring) { const minS = Math.max(1, Math.ceil(e.stats.vida * 0.10)); if (e.vida <= minS) { e.vida = minS; e.retirarSparring = true; } }
     else if (e.vida <= 0) this.morir(e);
@@ -432,6 +539,7 @@ U.Combate = {
     else if (j.vida <= 0) { j.vida = 0; U.Juego.fin('derrota'); }
   },
   morir(e) {
+    if (e.esRival && U.Rival) U.Rival.alDerrotaRival(e); // IDEA 1: si cae Ren, el duelo se resuelve al instante (el sondeo de U.Rival es el respaldo)
     if (e.esSparring) { e.vida = Math.max(1, Math.ceil(e.stats.vida * 0.10)); e.retirarSparring = true; return; }
     const E = U.Juego.estado; e.vida = 0; e.estado = 'muerto'; E.resumen.bajas++; U.Audio.sfx('muerte'); this.particulas(e.x, e.y - 0.6, 24, U.Elementos.color(e.elemento), 'chispa'); this.particulas(e.x, e.y - 0.6, 8, '#9fb3d9', 'humo'); this.sacudir(0.6); E.hitstop = 0.06;
     E.orbes.push({ x: e.x, y: e.y, t: 12 });
@@ -447,7 +555,7 @@ U.Combate = {
   // ---------- enemigos ----------
   crearEnemigo(clase, x, y, mult) {
     const c = this.CLASES[clase]; const s = {}; for (const k in c.stats) s[k] = Math.round(c.stats[k] * mult * (k === 'vida' || k === 'esencia' ? 1 : 1));
-    return { tipo: 'enemigo', clase, nombre: c.nombre, elemento: c.elemento, x, y, dir: { x: 0, y: 1 }, stats: s, vida: s.vida, estado: 'persigue', t: 0, cd: 1 + Math.random(), anim: Math.random(), moviendo: false, flash: 0, efectos: { stun: 0, slow: 0, dot: null, invertido: 0, invMapa: null, cegado: 0 }, tele: null, esReto: false, nocturno: false, escudoT: 0, escudoCd: 2 + Math.random() * 3, esTorneo: false, esProteccion: false };
+    return { tipo: 'enemigo', clase, nombre: c.nombre, elemento: c.elemento, x, y, dir: { x: 0, y: 1 }, stats: s, vida: s.vida, estado: 'persigue', t: 0, cd: 1 + Math.random(), anim: Math.random(), moviendo: false, flash: 0, efectos: { stun: 0, slow: 0, dot: null, invertido: 0, invMapa: null, cegado: 0 }, tele: null, esReto: false, nocturno: false, escudoT: 0, escudoCd: 2 + Math.random() * 3, esTorneo: false, esProteccion: false, setTec: (this.SETS[clase] || []).slice(), setTecManual: false, tecActual: null };
   },
   actualizarEnemigos(dt) {
     const E = U.Juego.estado, j = E.jugador; const vivos = this.vivos();
@@ -507,21 +615,33 @@ U.Combate = {
       if (mx || my) { U.Grid.mover(E.mapa, e, mx * vel * dt, my * vel * dt); e.moviendo = true; e.anim += dt; } else e.moviendo = false;
       // separación
       vivos.forEach(o => { if (o !== e) { const sx = e.x - o.x, sy = e.y - o.y, sd = Math.hypot(sx, sy); if (sd < 0.8 && sd > 0.001) { U.Grid.mover(E.mapa, e, sx / sd * dt * 1.5, sy / sd * dt * 1.5); } } });
-      // ataque con telegrafía
-      const enRango = e.clase === 'chaman' ? d <= c.alcance : d <= c.rango + 0.4;
-      if (enRango && e.cd <= 0) { e.estado = 'telegrafia'; e.t = c.tele / Math.sqrt(E.dificultad); const cx = e.clase === 'veterano' ? e.x : e.x, cy = e.clase === 'veterano' ? e.y : e.y; e.tele = U.Grid.forma(c.forma, cx, cy, e.dir, c.alcance, c.radio || 0); E.efectos.telegrafos.push({ celdas: e.tele, owner: e, t: e.t }); U.Audio.sfx(e.clase === 'brasa' ? 'fuego' : e.clase === 'chaman' ? 'viento' : 'cargando'); }
+      // ataque con telegrafía: el enemigo elige UNA técnica de su set según la
+      // distancia (no un solo ataque fijo). La telegrafía marca la forma elegida.
+      const tecE = this.elegirTec(e, d);
+      const enRango = tecE ? (['linea', 'proyectil', 'alterna', 'cadena'].indexOf(tecE.forma) >= 0 ? d <= (tecE.alcance || c.alcance) : d <= (tecE.alcance || c.rango) + 0.4) : (e.clase === 'chaman' ? d <= c.alcance : d <= c.rango + 0.4);
+      if (enRango && e.cd <= 0) { e.estado = 'telegrafia'; e.t = c.tele / Math.sqrt(E.dificultad); e.tecActual = tecE; const fE = tecE || c; e.tele = fE.forma === 'proyectil' ? U.Grid.forma('linea', e.x, e.y, e.dir, Math.min(3, fE.alcance || 3), 0) : U.Grid.forma(fE.forma, e.x, e.y, e.dir, fE.alcance || c.alcance, fE.radio || c.radio || 0); E.efectos.telegrafos.push({ celdas: e.tele, owner: e, t: e.t }); U.Audio.sfx(e.clase === 'brasa' ? 'fuego' : e.clase === 'chaman' ? 'viento' : 'cargando'); }
     });
     E.enemigos = E.enemigos.filter(e => e.vida > 0 || e.t < 1);
   },
+  // Ataque del enemigo: ejecuta la técnica elegida de su set (e.tecActual, puesta
+  // en la telegrafía). Sin set, usa el ataque fijo de su clase (compatibilidad).
+  // Proyectil y cadena tienen su propia resolución; el resto usa las celdas
+  // telegrafiadas. El efecto de la CLASE se suma al de la técnica (p. ej. el
+  // ilusionista siempre invierte, use la técnica que use).
   ataqueEnemigo(e, c) {
     const E = U.Juego.estado, j = E.jugador; const el = U.Elementos.datos[e.elemento];
     if (e.efectos.cegado > 0) { this.texto(e, '👁 ¡FALLA! (CEGADO)', '#fff7c2', 1); U.Audio.sfx('esquiva'); return; } // cegado por Destello: ataca a ciegas y falla
-    if (c.forma === 'circulo') { E.efectos.anillos.push({ x: e.x, y: e.y, radio: c.radio, color: el.color, t: 0.4, max: 0.4 }); this.sacudir(0.8); U.Audio.sfx('tierra'); }
-    else if (c.forma === 'linea') { E.efectos.haces.push({ celdas: e.tele, color: el.color, t: 0.25, max: 0.25 }); U.Audio.sfx('viento'); }
-    else { E.efectos.haces.push({ celdas: e.tele, color: el.color, t: 0.25, max: 0.25 }); U.Audio.sfx(e.elemento); }
+    const tec = e.tecActual || this.elegirTec(e, U.Grid.dist(e, j)) || c;
+    const forma = tec.forma || c.forma, alc = tec.alcance || c.alcance, rad = tec.radio || c.radio || 0;
+    const base = e.stats.ataque * (tec.power || c.power || 1);
+    const efecto = Object.assign({}, tec.efecto || {}, c.efecto || {});
+    if (forma === 'proyectil') { this.proyectil(e, Object.assign({}, tec, { alcance: alc }), base, e.elemento, el.color, 'enemigo'); this.particulas(e.x + e.dir.x, e.y + e.dir.y - 0.5, 8, el.claro, 'chispa'); e.ataqueAnim = 0.2; return; }
+    if (forma === 'cadena') { E.efectos.cadenas.push({ puntos: [{ x: e.x, y: e.y }, { x: j.x, y: j.y }], t: 0.25, max: 0.25 }); U.Audio.sfx(e.elemento); this.particulas(e.x + e.dir.x, e.y + e.dir.y - 0.5, 8, el.claro, 'chispa'); if (U.Grid.dist(e, j) <= alc) this.dañoJugador(base, e, efecto, { elemento: e.elemento, proyectil: false, ox: e.x, oy: e.y }); e.ataqueAnim = 0.2; return; }
+    if (forma === 'circulo') { E.efectos.anillos.push({ x: e.x, y: e.y, radio: rad, color: el.color, t: 0.4, max: 0.4 }); this.sacudir(0.8); U.Audio.sfx('tierra'); }
+    else { E.efectos.haces.push({ celdas: e.tele, color: el.color, t: 0.25, max: 0.25 }); U.Audio.sfx(forma === 'linea' ? 'viento' : e.elemento); }
     this.particulas(e.x + e.dir.x, e.y + e.dir.y - 0.5, 8, el.claro, 'chispa');
-    if (e.esEscolta && E.escolta && E.escolta.activa && U.Grid.enCeldas(e.tele, E.escolta.npc)) { U.Juego.escoltaDanada(E.escolta.npc, Math.max(1, Math.round(U.Estadisticas.formulaDaño(e.stats.ataque * c.power, 6)))); return; }
-    if (U.Grid.enCeldas(e.tele, j)) { const esFisico = c.forma === 'cono' || c.forma === 'circulo'; this.dañoJugador(e.stats.ataque * c.power, e, c.efecto, { elemento: esFisico ? null : e.elemento, proyectil: false, ox: e.x, oy: e.y }); }
+    if (e.esEscolta && E.escolta && E.escolta.activa && U.Grid.enCeldas(e.tele, E.escolta.npc)) { U.Juego.escoltaDanada(E.escolta.npc, Math.max(1, Math.round(U.Estadisticas.formulaDaño(base, 6)))); return; }
+    if (U.Grid.enCeldas(e.tele, j)) { const esFisico = forma === 'cono' || forma === 'circulo'; this.dañoJugador(base, e, efecto, { elemento: esFisico ? null : e.elemento, proyectil: false, ox: e.x, oy: e.y }); }
     e.ataqueAnim = 0.2;
   },
   actualizarProyectiles(dt) {
@@ -595,6 +715,8 @@ U.Combate = {
   TORNEO_TERCERO: { fase: 'PARTIDO POR EL 3º LUGAR', nombre: 'El Otro Semifinalista', clase: 'chaman', mult: 1.15 },
   spawnTorneo() {
     const E = U.Juego.estado, T = E.torneo; if (!T) return; const def = T.fase === 'tercero' ? this.TORNEO_TERCERO : this.TORNEO[T.idx]; if (!def) return;
+    // IDEA 1: la FINAL del torneo ES Ren, el Vendaval (su duelo de torneo).
+    if (T.fase !== 'tercero' && T.idx === 3 && U.Rival) { U.Rival.iniciarDueloTorneo(); return; }
     const j = E.jugador; const cx = E.mapaId === 'aldea' ? E.mapa.arena.x + 0.5 : j.x + 3, cy = E.mapaId === 'aldea' ? E.mapa.arena.y + 0.5 : j.y;
     const e = this.crearEnemigo(def.clase, cx + 2.5, cy, def.mult * E.dificultad); e.nombre = def.nombre; e.esTorneo = true; E.enemigos.push(e); T.spawned = true;
     this.particulas(e.x, e.y - 0.5, 18, '#ffe14d', 'humo'); U.HUD.banner('🏆 ' + def.fase + ' · ' + def.nombre.toUpperCase(), 2); U.Audio.sfx('oleada');
@@ -642,7 +764,7 @@ U.Combate = {
   // RETOS DE COMBATE de los guías: un duelo con tiempo límite junto al guía que lo propone.
   iniciarReto(guia) {
     const E = U.Juego.estado, j = E.jugador; if (E.reto || E.arena.activa) return;
-    const defs = { kaelen: { nombre: 'Reto de Kaelen · El muro', clases: ['veterano'], t: 60, mult: 1.05 }, torin: { nombre: 'Reto de Torin · Puño y brasa', clases: ['bandido', 'brasa'], t: 60, mult: 1.0 } };
+    const defs = { kaelen: { nombre: 'Reto de Kaelen · El muro', clases: ['veterano'], t: 60, mult: 1.05 }, torin: { nombre: 'Reto de Torin · Puño y brasa', clases: ['bandido', 'brasa'], t: 60, mult: 1.0 }, ren: { nombre: 'Reto de Ren · El aprendiz', clases: ['bandido'], t: 60, mult: 0.95 } };
     const d = defs[guia] || defs.kaelen;
     E.reto = { guia, nombre: d.nombre, t: d.t, total: d.t };
     d.clases.forEach((cl, i) => { const a = (i / Math.max(1, d.clases.length)) * Math.PI * 2 + 0.6; const e = this.crearEnemigo(cl, j.x + Math.cos(a) * 3, j.y + Math.sin(a) * 3, d.mult * E.dificultad); e.esReto = true; E.enemigos.push(e); this.particulas(e.x, e.y - 0.5, 14, '#e05bd0', 'humo'); });
