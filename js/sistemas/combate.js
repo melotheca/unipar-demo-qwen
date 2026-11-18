@@ -330,7 +330,9 @@ U.Combate = {
     const alcEf = Math.max(1, Math.min(b.alcanceMax, this.alcanceElemental(j)));
     const celdas = U.Grid.forma('linea', j.x, j.y, j.dir, alcEf, 0);
     E.efectos.haces.push({ celdas, color: el.color, t: 0.2, max: 0.2 });
-    this.golpearObjetos(celdas, atk * b.power * 0.85); this.golpearInocentes(celdas);
+    // El básico nunca dio XP por uso (ni al aire ni a enemigo, como antes): solo
+    // la pizca de entrenamiento de mundo si impacta un árbol/roca/cactus.
+    if (this.golpearObjetos(celdas, atk * b.power * 0.85).length) this.otorgarXpTecnica(j.elementoActivo, 'mundo', 1); this.golpearInocentes(celdas);
     this.vivos().forEach(e => { if (U.Grid.enCeldas(celdas, e)) this.dañoEnemigo(e, atk * b.power, j.elementoActivo, { desafio: this.desafio(e), alcance: alcEf }); });
     if (U.Criaturas) U.Criaturas.impactoJugador(celdas, { dmg: atk * b.power, elemento: j.elementoActivo });
     this.particulas(j.x + j.dir.x, j.y + j.dir.y - 0.5, 5, el.claro, 'chispa');
@@ -389,6 +391,24 @@ U.Combate = {
   radioRadialDe(j, elem) { return Math.max(1, Math.floor(this.alcanceDe(j, elem) / 2)); },
   esRadial(h) { return !!h && h.forma === 'circulo' && !h.centro; },
   conCostoRadial(h) { return this.esRadial(h) ? Object.assign({}, h, { costo: Math.round(h.costo * this.COSTO_RADIAL * 100) / 100, radial: true }) : h },
+  // XP DE TÉCNICA SOLO AL IMPACTAR (nada al aire): lanzar al aire sin tocar
+  // nada no sube nada — si no, se farmea parado lanzando energía. Enemigo /
+  // criatura / inocente = ganancia NORMAL (como antes). Árbol, roca o cactus =
+  // una PIZCA de maestría (entrenamiento de mundo: ayuda en niveles muy bajos,
+  // ~0.06% por golpe a maestría 0; no despierta el elemento por sí solo).
+  // Místico no tiene maestría: contra un árbol no gana nada (lo mental no se
+  // entrena con un árbol). El coste de Esencia se paga igual al lanzar.
+  otorgarXpTecnica(elem, tipo, desafio) {
+    if (!elem) return;
+    if (tipo === 'enemigo') {
+      const d = desafio == null ? 0.5 : desafio;
+      if (elem === 'mistico') U.Crecimiento.stat('mente', 0.1, d); else U.Crecimiento.maestria(elem, 0.5, d);
+      U.Crecimiento.stat('mente', 0.06, 1); U.Crecimiento.stat('ataque', 0.03, d);
+    } else if (tipo === 'mundo') {
+      if (elem === 'mistico') return;
+      U.Crecimiento.maestria(elem, 0.1, 1); // pizca: base 0.1 (1/5 de lo normal)
+    }
+  },
   // Técnica ELEMENTAL del equipo. id = id de registro ('tec:<elem>:<id>'); sin id,
   // la primera técnica elemental EQUIPADA; sin ninguna equipada, el ataque básico.
   // Cada técnica usa SU elemento (color, coste ambiental, maestría, alcance).
@@ -410,25 +430,29 @@ U.Combate = {
     const alcEf = (tec.kind === 'alma' || h.elemento === 'mistico') ? (h.alcance || h.radio || 3) : Math.max(1, Math.min(h.alcance || h.radio || 99, this.alcanceDe(j, h.elemento))); // alcance efectivo: lo que la forma de la técnica permita, topado por tu maestría (1 celda a 0–5% … 20 a 100%); Místico y Alma no usan maestría: su alcance es el de la técnica (la heredada no se topa: no es dominada, es heredada)
     U.Audio.sfx(h.elemento); this.sacudir(0.4); E.resumen.tecnicas++;
     let objetivo = this.vivos()[0]; let desafio = 0.5;
-    const golpear = (celdas, opts, baseUsada) => { const b = baseUsada != null ? baseUsada : base; this.golpearObjetos(celdas, b * 0.85); this.golpearInocentes(celdas); if (U.Criaturas) U.Criaturas.impactoJugador(celdas, { dmg: b, elemento: h.elemento }); this.vivos().forEach(e => { if (U.Grid.enCeldas(celdas, e)) { this.dañoEnemigo(e, b, h.elemento, Object.assign({ desafio: this.desafio(e), alcance: alcEf }, opts || {}, h.efecto || {})); desafio = Math.max(desafio, this.desafio(e)); objetivo = e; } }); };
+    let impactoEnemigo = false, impactoMundo = false; // solo al impactar hay XP (nada al aire)
+    const golpear = (celdas, opts, baseUsada) => { const b = baseUsada != null ? baseUsada : base; if (this.golpearObjetos(celdas, b * 0.85).length) impactoMundo = true; if (this.golpearInocentes(celdas)) impactoEnemigo = true; if (U.Criaturas && U.Criaturas.impactoJugador(celdas, { dmg: b, elemento: h.elemento })) impactoEnemigo = true; this.vivos().forEach(e => { if (U.Grid.enCeldas(celdas, e)) { this.dañoEnemigo(e, b, h.elemento, Object.assign({ desafio: this.desafio(e), alcance: alcEf }, opts || {}, h.efecto || {})); desafio = Math.max(desafio, this.desafio(e)); objetivo = e; impactoEnemigo = true; } }); };
     switch (h.forma) {
       case 'linea': case 'rect': { const celdas = U.Grid.forma(h.forma, j.x, j.y, j.dir, alcEf, h.radio || 0); E.efectos.haces.push({ celdas, color: el.color, t: 0.3, max: 0.3 }); golpear(celdas); this.particulas(j.x + j.dir.x * 2, j.y + j.dir.y * 2 - 0.5, 10, el.claro, h.elemento === 'agua' ? 'agua' : 'chispa'); break; }
       case 'cono': { const celdas = U.Grid.forma('cono', j.x, j.y, j.dir, alcEf, 0); E.efectos.haces.push({ celdas, color: el.color, t: 0.35, max: 0.35 }); golpear(celdas); this.particulas(j.x + j.dir.x * 1.5, j.y + j.dir.y * 1.5 - 0.5, 16, el.claro, 'brasa'); break; }
       case 'alterna': { const celdas = U.Grid.forma('alterna', j.x, j.y, j.dir, alcEf, 0); E.efectos.haces.push({ celdas, color: el.color, t: 0.35, max: 0.35 }); golpear(celdas, null, base * 1.2); this.particulas(j.x + j.dir.x * 2, j.y + j.dir.y * 2 - 0.5, 14, el.claro, 'brasa'); break; }
       case 'circulo': { const esRad = !h.centro; const radioEf = esRad ? ((tec.kind === 'alma' || h.elemento === 'mistico') ? (h.radio || 1) : this.radioRadialDe(j, h.elemento)) : h.radio; const cx = h.centro === 'frente4' ? j.x + j.dir.x * Math.min(4, alcEf) : j.x, cy = h.centro === 'frente4' ? j.y + j.dir.y * Math.min(4, alcEf) : j.y; const celdas = U.Grid.forma('circulo', cx, cy, j.dir, 0, radioEf); E.efectos.haces.push({ celdas, color: el.color, t: 0.35, max: 0.35 }); E.efectos.anillos.push({ x: cx, y: cy, radio: radioEf, color: el.claro, t: 0.4, max: 0.4 }); golpear(celdas, null, esRad ? base * this.DANO_RADIAL : base); this.particulas(cx, cy - 0.5, 20, el.claro, 'chispa'); this.sacudir(0.8); break; }
-      case 'proyectil': this.proyectil(j, Object.assign({}, h, { alcance: alcEf }), base, h.elemento, el.color, 'jugador'); break;
-      case 'cadena': { const vivos = this.vivos().map(e => ({ e, d: U.Grid.dist(e, j) })).filter(o => o.d <= alcEf).sort((a, b) => a.d - b.d).slice(0, h.saltos); const puntos = [{ x: j.x, y: j.y }]; vivos.forEach(o => { puntos.push({ x: o.e.x, y: o.e.y }); this.dañoEnemigo(o.e, base, h.elemento, Object.assign({ desafio: this.desafio(o.e), alcance: alcEf }, h.efecto || {})); desafio = Math.max(desafio, this.desafio(o.e)); }); if (puntos.length > 1) E.efectos.cadenas.push({ puntos, t: 0.25, max: 0.25 }); else { U.HUD.toast('Ningún enemigo al alcance de la cadena.', ''); } break; }
+      case 'proyectil': this.proyectil(j, Object.assign({}, h, { alcance: alcEf, xpTec: true }), base, h.elemento, el.color, 'jugador'); break;
+      case 'cadena': { const vivos = this.vivos().map(e => ({ e, d: U.Grid.dist(e, j) })).filter(o => o.d <= alcEf).sort((a, b) => a.d - b.d).slice(0, h.saltos); const puntos = [{ x: j.x, y: j.y }]; vivos.forEach(o => { puntos.push({ x: o.e.x, y: o.e.y }); this.dañoEnemigo(o.e, base, h.elemento, Object.assign({ desafio: this.desafio(o.e), alcance: alcEf }, h.efecto || {})); desafio = Math.max(desafio, this.desafio(o.e)); }); if (puntos.length > 1) { impactoEnemigo = true; E.efectos.cadenas.push({ puntos, t: 0.25, max: 0.25 }); } else { U.HUD.toast('Ningún enemigo al alcance de la cadena.', ''); } break; }
       case 'destello': { // DESTELLO (Rayo): flash blanco SUAVE y gradual + ceguera en área. Sin daño directo grande: su poder es dejarlos ciegos.
         this.flashPantalla = { t: 0, max: 1.6 }; // lo pinta U.HUD: sube suave a su pico y decae poco a poco (nunca un estrobo); el ajuste de destellos puede reducirlo o apagarlo
-        let ceg = 0; this.vivos().forEach(e => { if (U.Grid.dist(e, j) <= (h.radio || 4)) { e.efectos.cegado = Math.max(e.efectos.cegado || 0, (h.efecto && h.efecto.cegar) || 3); this.dañoEnemigo(e, base, h.elemento, { desafio: this.desafio(e), alcance: h.radio || 4 }); this.texto(e, '👁 CEGADO', '#fff7c2', 1); ceg++; desafio = Math.max(desafio, this.desafio(e)); } });
+        let ceg = 0; this.vivos().forEach(e => { if (U.Grid.dist(e, j) <= (h.radio || 4)) { e.efectos.cegado = Math.max(e.efectos.cegado || 0, (h.efecto && h.efecto.cegar) || 3); this.dañoEnemigo(e, base, h.elemento, { desafio: this.desafio(e), alcance: h.radio || 4 }); this.texto(e, '👁 CEGADO', '#fff7c2', 1); ceg++; desafio = Math.max(desafio, this.desafio(e)); } }); if (ceg) impactoEnemigo = true;
         E.efectos.anillos.push({ x: j.x, y: j.y, radio: h.radio || 4, color: '#fff7c2', t: 0.5, max: 0.5 }); this.particulas(j.x, j.y - 0.6, 26, '#fff7c2', 'chispa'); U.Audio.sfx('rayo');
         U.HUD.toast(ceg ? '✦ DESTELLO: ' + ceg + ' enemigo(s) CEGADOS unos segundos: no te ven y sus ataques fallan.' : '✦ DESTELLO: luz lanzada, sin enemigos cerca que cegar.', ceg ? 'exito' : 'aviso'); break; }
     }
-    if (h.elemento === 'mistico') U.Crecimiento.stat('mente', 0.1, desafio); else U.Crecimiento.maestria(h.elemento, 0.5, desafio); U.Crecimiento.stat('mente', 0.06, 1); U.Crecimiento.stat('ataque', 0.03, desafio);
+    // XP SOLO AL IMPACTAR (nada al aire): enemigo/criatura/inocente = normal;
+    // árbol/roca/cactus = una pizca de maestría (entrenamiento de mundo). El
+    // proyectil otorga su XP al impactar (actualizarProyectiles), no al lanzar.
+    if (h.forma !== 'proyectil') { if (impactoEnemigo) this.otorgarXpTecnica(h.elemento, 'enemigo', desafio); else if (impactoMundo) this.otorgarXpTecnica(h.elemento, 'mundo', 1); }
   },
   proyectil(origen, h, base, elemento, color, dueño) {
     const d = U.Grid.dir8(origen.dir.x, origen.dir.y); const vel = h.vel || 7;
-    U.Juego.estado.proyectiles.push({ x: origen.x + d.x * 0.6, y: origen.y + d.y * 0.6, dx: d.x, dy: d.y, vel, vida: (h.alcance || 9) / vel, dueño, base, elemento, color, alcance: h.alcance || 9, ox: origen.x, oy: origen.y, forma: h.id === 'roca' ? 'roca' : 'esfera', explora: h.explora || null, efecto: h.efecto || null, cometa: !!h.cometa, golpeados: [] });
+    U.Juego.estado.proyectiles.push({ x: origen.x + d.x * 0.6, y: origen.y + d.y * 0.6, dx: d.x, dy: d.y, vel, vida: (h.alcance || 9) / vel, dueño, base, elemento, color, alcance: h.alcance || 9, ox: origen.x, oy: origen.y, forma: h.id === 'roca' ? 'roca' : 'esfera', explora: h.explora || null, efecto: h.efecto || null, cometa: !!h.cometa, golpeados: [], xpTec: !!h.xpTec }); // xpTec: proyectil de TÉCNICA — su XP se otorga al impactar, no al lanzar
   },
   dash() {
     const E = U.Juego.estado, j = E.jugador; if (j.dash.cd > 0 || j.dash.t > 0) return; if (!U.Recuperacion.gastar(U.Habilidades.costoDash(j))) return;
@@ -499,9 +523,13 @@ U.Combate = {
   seleccionarTec(i) { const j = U.Juego.estado.jugador; const eq = U.Habilidades.equipoDetalles(j); const tec = eq[i]; if (!tec) { if (i === 0) this.ataqueBasico(); return; } this.usarEquipo(tec.id); },
   seleccionarYang(f) { const j = U.Juego.estado.jugador; if (f === 'tiempoLento') return; if (!j.tieneYang) { U.HUD.toast('Yang sin despertar: entrénalo hasta ' + U.Habilidades.yangDespertar + ' (meditar al descansar, sesiones con Torin) y despertará.', 'aviso'); return; } const h = U.Habilidades.yang[f]; if (!h) return; if (j.estilos.yang < h.umbral) { U.HUD.toast(h.nombre + ': estilo Yang ' + h.umbral + ' requerido.', 'aviso'); U.Audio.sfx('fail'); return; } if (U.Habilidades.podarEquipo(j).indexOf('yang:' + f) < 0) { U.HUD.toast(h.nombre + ' no está en tu EQUIPO: equípala en Pausa → Ajustes → Equipo.', 'aviso'); U.Audio.sfx('fail'); return; } j.yangForma = f; U.Audio.sfx('click'); U.HUD.refrescarChips(); },
 
+  // Devuelve cuántos inocentes golpeó (0 si ninguno): una técnica que conecta
+  // con un ser vivo (aunque sea inocente, con su castigo de karma) sí impactó.
   golpearInocentes(celdas, arco) {
-    const E = U.Juego.estado; if (!celdas || !E.npcs) return;
-    E.npcs.forEach(n => { if (n.enCasa || n.ocultoSparring) return; if (U.Grid.enCeldas(celdas, n) || (arco && U.Grid.enArco(arco.x, arco.y, arco.dir, arco.alcance, n))) { U.Economia.karmaAdd(-10, U.Economia.puebloDeMapa(n.mapa)); U.Economia.confianza(n, -15); this.texto(n, '¡A UN INOCENTE!', '#ff4d4d', 1); if (!n.hechos) n.hechos = []; n.hechos.push('le pegaste sin razón'); U.HUD.toast('Pegaste a ' + n.nombre + ', un inocente: karma −10 en este pueblo y su confianza cae.', 'peligro'); if (U.Progresion) U.Progresion.sumarRecompensa(1, 'pegar a un inocente'); } });
+    const E = U.Juego.estado; if (!celdas || !E.npcs) return 0;
+    let n = 0;
+    E.npcs.forEach(npc => { if (npc.enCasa || npc.ocultoSparring) return; if (U.Grid.enCeldas(celdas, npc) || (arco && U.Grid.enArco(arco.x, arco.y, arco.dir, arco.alcance, npc))) { n++; U.Economia.karmaAdd(-10, U.Economia.puebloDeMapa(npc.mapa)); U.Economia.confianza(npc, -15); this.texto(npc, '¡A UN INOCENTE!', '#ff4d4d', 1); if (!npc.hechos) npc.hechos = []; npc.hechos.push('le pegaste sin razón'); U.HUD.toast('Pegaste a ' + npc.nombre + ', un inocente: karma −10 en este pueblo y su confianza cae.', 'peligro'); if (U.Progresion) U.Progresion.sumarRecompensa(1, 'pegar a un inocente'); } });
+    return n;
   },
   // ---------- daño ----------
   dañoEnemigo(e, base, elemento, o) {
@@ -816,10 +844,10 @@ U.Combate = {
     E.proyectiles.forEach(p => {
       p.vida -= dt; p.x += p.dx * p.vel * dt; p.y += p.dy * p.vel * dt;
       if (Math.random() < dt * 30) this.particulas(p.x, p.y - 0.5, 1, p.color, p.cometa ? 'chispa' : 'polvo');
-      const estallar = () => { if (p.explora) { const celdas = U.Grid.forma('circulo', p.x, p.y, { x: 1, y: 0 }, 0, p.explora.radio); E.efectos.haces.push({ celdas, color: p.color, t: 0.3, max: 0.3 }); E.efectos.anillos.push({ x: p.x, y: p.y, radio: p.explora.radio, color: p.color, t: 0.4, max: 0.4 }); this.sacudir(0.6); if (U.Audio && typeof U.Audio.sfxCerca === 'function') U.Audio.sfxCerca(p.elemento || 'yang', p.x, p.y, 2); else U.Audio.sfx(p.elemento || 'yang'); if (p.dueño === 'jugador') this.vivos().forEach(e => { if (U.Grid.enCeldas(celdas, e)) this.dañoEnemigo(e, p.base * (p.explora.power / 1.4), p.elemento, Object.assign({ desafio: this.desafio(e), alcance: p.alcance, dist: (p.ox != null ? Math.hypot(e.x - p.ox, e.y - p.oy) : null) }, p.efecto || {})); }); else if (U.Grid.enCeldas(celdas, j)) this.dañoJugador(p.base, null, p.efecto, { elemento: p.elemento || null, proyectil: true, ox: p.x - p.dx, oy: p.y - p.dy }); } p.vida = 0; };
-      if (U.Grid.solidoEn(E.mapa, p.x, p.y)) { if (p.dueño === 'jugador') this.golpearObjetoEn(p.x, p.y, p.base * 0.9); estallar(); return; }
-      if (p.dueño === 'jugador') { for (const e of this.vivos()) { if (p.golpeados.indexOf(e) >= 0) continue; if (Math.hypot(e.x - p.x, e.y - p.y) < 0.65) { p.golpeados.push(e); this.dañoEnemigo(e, p.base, p.elemento, Object.assign({ desafio: this.desafio(e), alcance: p.alcance, dist: (p.ox != null ? Math.hypot(e.x - p.ox, e.y - p.oy) : null) }, p.efecto || {})); if (p.explora) estallar(); else if (!p.cometa) p.vida = 0; else { /* la onda perfora y empuja */ } break; } }
-        if (p.vida > 0 && U.Criaturas && E.criaturas) { for (const c of E.criaturas) { if (c.vida <= 0 || c.invocada || p.golpeados.indexOf(c) >= 0) continue; if (Math.hypot(c.x - p.x, c.y - p.y) < 0.65) { p.golpeados.push(c); U.Criaturas.danar(c, p.base, p.elemento, {}); if (!p.cometa) p.vida = 0; break; } } } }
+      const estallar = () => { let hit = null; if (p.explora) { const celdas = U.Grid.forma('circulo', p.x, p.y, { x: 1, y: 0 }, 0, p.explora.radio); E.efectos.haces.push({ celdas, color: p.color, t: 0.3, max: 0.3 }); E.efectos.anillos.push({ x: p.x, y: p.y, radio: p.explora.radio, color: p.color, t: 0.4, max: 0.4 }); this.sacudir(0.6); if (U.Audio && typeof U.Audio.sfxCerca === 'function') U.Audio.sfxCerca(p.elemento || 'yang', p.x, p.y, 2); else U.Audio.sfx(p.elemento || 'yang'); if (p.dueño === 'jugador') { let ds = 0.5, n = 0; this.vivos().forEach(e => { if (U.Grid.enCeldas(celdas, e)) { ds = Math.max(ds, this.desafio(e)); n++; this.dañoEnemigo(e, p.base * (p.explora.power / 1.4), p.elemento, Object.assign({ desafio: this.desafio(e), alcance: p.alcance, dist: (p.ox != null ? Math.hypot(e.x - p.ox, e.y - p.oy) : null) }, p.efecto || {})); } }); if (n) hit = { enemigo: true, desafio: ds }; } else if (U.Grid.enCeldas(celdas, j)) this.dañoJugador(p.base, null, p.efecto, { elemento: p.elemento || null, proyectil: true, ox: p.x - p.dx, oy: p.y - p.dy }); } p.vida = 0; return hit; };
+      if (U.Grid.solidoEn(E.mapa, p.x, p.y)) { let mundo = false; if (p.dueño === 'jugador') mundo = this.golpearObjetoEn(p.x, p.y, p.base * 0.9); const exp = estallar(); if (p.dueño === 'jugador' && p.xpTec) { p.xpTec = false; if (exp && exp.enemigo) this.otorgarXpTecnica(p.elemento, 'enemigo', exp.desafio); else if (mundo) this.otorgarXpTecnica(p.elemento, 'mundo', 1); } return; }
+      if (p.dueño === 'jugador') { for (const e of this.vivos()) { if (p.golpeados.indexOf(e) >= 0) continue; if (Math.hypot(e.x - p.x, e.y - p.y) < 0.65) { p.golpeados.push(e); this.dañoEnemigo(e, p.base, p.elemento, Object.assign({ desafio: this.desafio(e), alcance: p.alcance, dist: (p.ox != null ? Math.hypot(e.x - p.ox, e.y - p.oy) : null) }, p.efecto || {})); if (p.xpTec) { p.xpTec = false; this.otorgarXpTecnica(p.elemento, 'enemigo', this.desafio(e)); } if (p.explora) estallar(); else if (!p.cometa) p.vida = 0; else { /* la onda perfora y empuja */ } break; } }
+        if (p.vida > 0 && U.Criaturas && E.criaturas) { for (const c of E.criaturas) { if (c.vida <= 0 || c.invocada || p.golpeados.indexOf(c) >= 0) continue; if (Math.hypot(c.x - p.x, c.y - p.y) < 0.65) { p.golpeados.push(c); U.Criaturas.danar(c, p.base, p.elemento, {}); if (p.xpTec) { p.xpTec = false; this.otorgarXpTecnica(p.elemento, 'enemigo', 0.5); } if (!p.cometa) p.vida = 0; break; } } } }
       else if (Math.hypot(j.x - p.x, j.y - p.y) < 0.65) { this.dañoJugador(p.base, null, p.efecto, { elemento: p.elemento || null, proyectil: true, ox: p.x - p.dx, oy: p.y - p.dy }); estallar(); }
     });
     E.proyectiles = E.proyectiles.filter(p => p.vida > 0);
