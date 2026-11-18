@@ -31,9 +31,9 @@ U.Guardado = {
       nombre: j.nombre, mapaId: E.mapaId, x: Math.round(j.x * 100) / 100, y: Math.round(j.y * 100) / 100,
       perfil: { elemento: j.perfil.elemento, elemento2: j.perfil.elemento2 || null, atributo: j.atributo, estilo: j.perfil.estilo, yangAfin: !!j.perfil.yangAfin },
       stats: Object.assign({}, j.stats), vida: Math.round(j.vida * 100) / 100, esencia: Math.round(j.esencia * 100) / 100,
-      maestria: Object.assign({}, j.maestria), estilos: Object.assign({}, j.estilos), tieneYang: !!j.tieneYang,
+      maestria: Object.assign({}, j.maestria), xpElemento: Object.assign({}, j.xpElemento || {}), metaDespertar: Object.assign({}, j.metaDespertar || {}), estilos: Object.assign({}, j.estilos), tieneYang: !!j.tieneYang,
       elementoActivo: j.elementoActivo, tecnicaIdx: j.tecnicaIdx || 0, yangForma: j.yangForma || 'haz',
-      equipo: (j.equipo || []).slice(), tecnicasAprendidas: (j.tecnicasAprendidas || []).slice(), equipoVisto: j._equipoVisto ? Object.assign({}, j._equipoVisto) : {}, desdeCero: !!j.desdeCero, maestriaInicial: j.maestriaInicial ? Object.assign({}, j.maestriaInicial) : null, estilosInicial: j.estilosInicial ? Object.assign({}, j.estilosInicial) : null, hechiceroBasicosInicial: j.hechiceroBasicosInicial || 0, explorado: E.explorado ? { bloques: Object.assign({}, E.explorado.bloques), zonas: (E.explorado.zonas || []).slice() } : null,
+      equipo: (j.equipo || []).slice(), tecnicasAprendidas: (j.tecnicasAprendidas || []).slice(), equipoVisto: j._equipoVisto ? Object.assign({}, j._equipoVisto) : {}, desdeCero: !!j.desdeCero, maestriaInicial: j.maestriaInicial ? Object.assign({}, j.maestriaInicial) : null, xpElementoInicial: j.xpElementoInicial ? Object.assign({}, j.xpElementoInicial) : null, metaDespertarInicial: j.metaDespertarInicial ? Object.assign({}, j.metaDespertarInicial) : null, estilosInicial: j.estilosInicial ? Object.assign({}, j.estilosInicial) : null, hechiceroBasicosInicial: j.hechiceroBasicosInicial || 0, explorado: E.explorado ? { bloques: Object.assign({}, E.explorado.bloques), zonas: (E.explorado.zonas || []).slice() } : null,
       pociones: (j.bolsaPociones || []).length, bolsaPociones: (j.bolsaPociones || []).map(x => Object.assign({}, x)), bolsaComida: (j.bolsaComida || []).slice(), karma: Object.assign({}, j.karma || {}), sabores: (j.sabores || []).slice(), polainas: Object.assign({}, j.polainas || {}), polainaEquipada: j.polainaEquipada || null, comidasHoy: j.comidasHoy || 0, permisoHasta: j.permisoHasta || 0, promesas: (j.promesas || []).map(x => Object.assign({}, x)), tablon: E.tablon ? { dia: E.tablon.dia, lista: E.tablon.lista } : null, monedas: Math.floor(j.monedas || 0), reliquias: j.reliquias ? { tenidas: (j.reliquias.tenidas || []).slice(), puesta: j.reliquias.puesta || null, artefactos: (j.reliquias.artefactos || []).slice(), casa: (j.reliquias.casa || []).slice(), encontradas: (j.reliquias.encontradas || []).slice(), mascarasRoca: j.reliquias.mascarasRoca ? Object.assign({}, j.reliquias.mascarasRoca) : null } : null, prohibidas: j.prohibidas ? { pergaminos: (j.prohibidas.pergaminos || []).slice(), aprendidas: (j.prohibidas.aprendidas || []).slice(), casa: (j.prohibidas.casa || []).slice(), encontradas: (j.prohibidas.encontradas || []).slice() } : null, prohibidaSel: j.prohibidaSel || null, misionIdx: E.misionIdx || 0, mision: E.mision ? Object.assign({}, E.mision) : null, regenBonus: j.regenBonus || 0, crecimientoTotal: Object.assign({}, U.Crecimiento.total || {}),
       escudoAprendido: !!j.escudoAprendido, escudoNv: j.escudoNv || 0, escudoExp: j.escudoExp || 0, presentimientoAprendido: !!j.presentimientoAprendido, hechicero: j.hechicero ? { potencial: !!j.hechicero.potencial, basicos: j.hechicero.basicos || 0, basicas: Array.isArray(j.hechicero.basicas) ? j.hechicero.basicas.slice() : [], despertado: !!j.hechicero.despertado } : null, cansancio: Math.round((j.cansancio != null ? j.cansancio : U.Recuperacion.condicionMax(j)) * 10) / 10, condicionExtra: Math.max(0, Math.min(100, j.condicionExtra || 0)), gastoFatiga: Math.round((j.gastoFatiga || 0) * 100) / 100,
       relojMinutos: E.reloj ? E.reloj.minutos : 540, dia: E.reloj ? (E.reloj.dia || 1) : 1, diaSemana: E.reloj ? (E.reloj.diaSemana || 0) : 0, climaTipo: E.clima ? E.clima.tipo : 'despejado', climaIntensidad: E.clima ? (E.clima.intensidad || 0) : 0, alarmaMin: E.alarmaMin != null ? E.alarmaMin : 420, historial: Object.assign({}, E.historial || {}), dificultad: E.dificultad, ronda: E.arena.ronda,
@@ -92,7 +92,7 @@ U.Guardado = {
   cargar(d) {
     if (!d || d.juego !== 'unipar' || !d.perfil || !d.stats || !d.semilla) { this.aviso('Ese archivo no es una partida válida de Unipar.', false); return; }
     const perfil = { elemento: d.perfil.elemento, elemento2: d.perfil.elemento2 || null, atributo: d.perfil.atributo, estilo: d.perfil.estilo || 'yin', yangAfin: !!d.perfil.yangAfin, sabores: Array.isArray(d.sabores) && d.sabores.length === 5 ? d.sabores.slice() : null,
-      stats: Object.assign({}, d.stats), maestria: Object.assign({ fuego: 0, agua: 0, tierra: 0, viento: 0, rayo: 0 }, d.maestria), estilos: Object.assign({ yin: 0, yang: 0 }, d.estilos), distr: {}, scores: null };
+      stats: Object.assign({}, d.stats), maestria: Object.assign({ fuego: 0, agua: 0, tierra: 0, viento: 0, rayo: 0 }, d.maestria), xpElemento: Object.assign({ fuego: 0, agua: 0, tierra: 0, viento: 0, rayo: 0 }, d.xpElemento), metaDespertar: Object.assign({ fuego: 100, agua: 100, tierra: 100, viento: 100, rayo: 100 }, d.metaDespertar), estilos: Object.assign({ yin: 0, yang: 0 }, d.estilos), distr: {}, scores: null };
     U.Audio.init(); U.Audio.reanudar();
     U.TestUI.activo = false; U.TestUI.escena = null; document.getElementById('test').classList.add('oculto');
     const pausa = document.getElementById('pausa'); if (pausa) pausa.classList.add('oculto');
@@ -120,8 +120,24 @@ U.Guardado = {
     // partida VIEJA (sin estos campos) NO la lleva: se le quita la marca que
     // comenzarMundo le puso al cargarla, y sigue con la regla de antes
     // (maestría = dominio), con su equipo y sus técnicas intactos.
-    if (d.desdeCero) { j.desdeCero = true; if (d.maestriaInicial) j.maestriaInicial = Object.assign({}, d.maestriaInicial); if (d.estilosInicial) j.estilosInicial = Object.assign({}, d.estilosInicial); j.hechiceroBasicosInicial = d.hechiceroBasicosInicial || 0; }
-    else { j.desdeCero = false; delete j.maestriaInicial; delete j.estilosInicial; delete j.hechiceroBasicosInicial; }
+    // XP POR ELEMENTO (piso de afinidad): el segundo elemento nace con 10/100 XP.
+    // Partida guardada DESPUÉS del cambio trae xpElemento/xpElementoInicial y se
+    // restauran tal cual. Partida VIEJA (sin estos campos): no hay XP que perder
+    // — el sistema no existía — así que se reconstruye el piso natural: ceros
+    // con el segundo elemento en 10 si hay elemento2 (la afinidad es, por
+    // definición, el segundo elemento); sin elemento2 no hay forma de saberlo
+    // y queda todo en ceros. En ambos casos la partida carga sin romperse.
+    // META DESPERTAR (partidas viejas): se deriva del elemento principal guardado
+    // — 200 XP para los 2 elementos que le ganan al principal en la tabla de
+    // ventajas (su opuesto), 100 para los demás — en vez de poner 100 en todos,
+    // porque el principal sí se conoce en cualquier partida vieja y la regla es
+    // fija por vida. La meta no cambia durante la vida, así que el snapshot
+    // inicial es igual a la meta actual.
+    const GANA_A = { fuego: ['agua', 'tierra'], agua: ['viento', 'rayo'], tierra: ['agua', 'viento'], viento: ['fuego', 'rayo'], rayo: ['fuego', 'tierra'] };
+    const metaDe = el => { const m = { fuego: 100, agua: 100, tierra: 100, viento: 100, rayo: 100 }; (GANA_A[el] || []).forEach(x => { m[x] = 200; }); return m; };
+    if (!d.metaDespertar) j.metaDespertar = metaDe(j.elemento);
+    if (d.desdeCero) { j.desdeCero = true; if (d.maestriaInicial) j.maestriaInicial = Object.assign({}, d.maestriaInicial); if (d.estilosInicial) j.estilosInicial = Object.assign({}, d.estilosInicial); j.hechiceroBasicosInicial = d.hechiceroBasicosInicial || 0; if (d.xpElementoInicial) j.xpElementoInicial = Object.assign({}, d.xpElementoInicial); else { j.xpElementoInicial = { fuego: 0, agua: 0, tierra: 0, viento: 0, rayo: 0 }; if (j.elemento2) j.xpElementoInicial[j.elemento2] = 10; } if (!d.xpElemento && j.elemento2) j.xpElemento[j.elemento2] = 10; if (d.metaDespertarInicial) j.metaDespertarInicial = Object.assign({}, d.metaDespertarInicial); else j.metaDespertarInicial = Object.assign({}, j.metaDespertar); }
+    else { j.desdeCero = false; delete j.maestriaInicial; delete j.estilosInicial; delete j.hechiceroBasicosInicial; delete j.xpElementoInicial; delete j.metaDespertarInicial; if (!d.xpElemento) { j.xpElemento = { fuego: 0, agua: 0, tierra: 0, viento: 0, rayo: 0 }; if (j.elemento2) j.xpElemento[j.elemento2] = 10; } }
     if (d.explorado) E.explorado = { bloques: Object.assign({}, d.explorado.bloques || {}), zonas: Array.isArray(d.explorado.zonas) ? d.explorado.zonas.slice() : [] };
     if (d.crecimientoTotal) U.Crecimiento.total = Object.assign({}, d.crecimientoTotal);
     if (E.reloj && d.relojMinutos != null) E.reloj.minutos = ((d.relojMinutos % 1440) + 1440) % 1440;

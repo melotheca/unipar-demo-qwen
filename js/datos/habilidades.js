@@ -280,7 +280,7 @@ U.Habilidades = {
   esBasico(j, tec) { return !!tec && tec.kind === 'elemento' && !!j && tec.elemento === j.elemento && tec.tecId === this.BASICO_POR_ELEMENTO[tec.elemento]; },
   // CORRECCIÓN 2 · KIT DE PARTIDA NUEVA ('desde cero'): lo único que lleva un
   // principiante. Lo usa U.Juego.comenzarMundo (y el test de simulación).
-  // desdeCero + los valores iniciales (maestría/estilos/basicos al nacer) son la
+  // desdeCero + los valores iniciales (maestría/xpElemento/metaDespertar/estilos/basicos al nacer) son la
   // prueba de lo que el test te DIO, no de lo que APRENDISTE: aprendida() solo
   // da por dominada una técnica si la entrenaste POR ENCIMA de ese valor inicial
   // (o te la concedió un Guía / un contrato de alma). Las partidas VIEJAS no
@@ -290,6 +290,8 @@ U.Habilidades = {
     const visto = {}; if (basico) visto[basico] = 1;
     return { desdeCero: true,
       maestriaInicial: Object.assign({}, perfil.maestria || {}),
+      xpElementoInicial: Object.assign({}, perfil.xpElemento || {}),
+      metaDespertarInicial: Object.assign({}, perfil.metaDespertar || {}),
       estilosInicial: Object.assign({}, perfil.estilos || {}),
       hechiceroBasicosInicial: 0,
       equipo: basico ? [basico] : [],
@@ -344,7 +346,7 @@ U.Habilidades = {
   // puerta de hechicero (potencial o basicos>0) + basicos ≥ umbral (NO maestría);
   // Invisibilidad: nunca para el jugador. Escudo: aprendido de Kaelen.
   // CORRECCIÓN 2 · PARTIDAS NUEVAS (j.desdeCero): NADA viene dominado del test.
-  // El test reparte maestría/estilos iniciales (5% como mucho), pero eso es lo
+  // El test reparte maestría/estilos iniciales (1% como mucho), pero eso es lo
   // que TRAES, no lo que DOMINAS: una técnica solo cuenta como dominada si la
   // entrenaste POR ENCIMA de tu valor inicial en esta vida, o te la concedieron.
   // Excepción: el ataque BÁSICO de tu elemento principal, que es tuyo desde el
