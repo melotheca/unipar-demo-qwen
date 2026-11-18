@@ -15,6 +15,18 @@ U.Estadisticas = {
     rayo:   { velocidad: 3, mente: 2, vida: -5 }
   },
   etiquetas: { vida: 'Vida', esencia: 'Esencia', ataque: 'Ataque', defensa: 'Defensa', mente: 'Mente', velocidad: 'Velocidad' },
+  // GANANCIA POR NIVEL: al subir un nivel, el VALOR del stat sube esto.
+  // Valor del stat = valor inicial del test + (nivel − 1) × ganancia.
+  gananciaNivel: { vida: 5, esencia: 5, ataque: 1, defensa: 1, mente: 1, velocidad: 1 },
+  // FACTOR DE XP POR ATRIBUTO (la barra, no un multiplicador invisible):
+  // favorita ×0.5, neutral ×1.0, penalizada ×5/3. 'maestria' (favorita de
+  // Fluido) NO es una de las 6 stats: para Fluido las 6 son neutrales salvo
+  // Esencia (penalizada); la maestría de elemento conserva su propia curva.
+  factorXP(atributo, stat) { if (U.Atributos.esFavorita(atributo, stat)) return 0.5; if (U.Atributos.esPenalizada(atributo, stat)) return 5 / 3; return 1; },
+  // XP para subir del nivel n al n+1: base = n × factor, redondeo al entero
+  // más cercano. L1→2: Fav 1, Neu 1, Pen 2 · L5→6: 3/5/8 · L10→11: 5/10/17 ·
+  // L25→26: 13/25/42 · L50→51: 25/50/83 · L100→101: 50/100/167. Sin tope de nivel.
+  xpParaNivel(nivel, atributo, stat) { return Math.max(1, Math.round(Math.max(1, nivel || 1) * this.factorXP(atributo, stat))); },
   descrip: {
     vida: 'Tu cuerpo. En campo abierto se recupera solo cuando está bajo el 25% del máximo, y el 25% es el tope de esa recuperación automática. Dormir en la fogata sí te despierta al 100%.',
     esencia: 'Tu reserva de energía. A 0 quedas Agotado hasta recuperar el 25%.',

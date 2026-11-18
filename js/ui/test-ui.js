@@ -1,5 +1,5 @@
 /* === js/ui/test-ui.js === */
-/* Unipar — test inicial: 20 preguntas al azar del banco (10 de elemento y 10 de estadísticas, mezcladas con Fisher-Yates, opciones también barajadas) + ranking de platillos por arrastre, desempate, revelación y nombre. */
+/* Unipar — test inicial: 20 preguntas al azar del banco (8 de elemento, 6 de atributo y 6 de estadísticas, mezcladas con Fisher-Yates, opciones también barajadas) + ranking de platillos por arrastre, desempate, revelación y nombre. */
 window.U = window.U || {};
 
 U.TestUI = {
@@ -12,16 +12,19 @@ U.TestUI = {
   comenzar() {
     U.Audio.init(); U.Audio.reanudar(); U.Audio.musica('test'); U.Audio.sfx('click'); this.saboresListo = false; this.ordenSabores = [];
     this.scores = { p: { fuego: 0, agua: 0, tierra: 0, viento: 0, rayo: 0 }, s: {}, a: {}, e: { yin: 0, yang: 0 } }; this.usadas = [];
-    // 20 preguntas: 10 al azar de k='elemento' y 10 al azar de k='stats', mezcladas
-    // (Fisher-Yates). El usuario no sabe cuál es cuál: todas se ven iguales.
+    // 20 preguntas: 8 al azar de k='elemento', 6 de k='atributo' y 6 de
+    // k='stats', mezcladas (Fisher-Yates). El usuario no sabe cuál es cuál:
+    // todas se ven iguales.
     const banco = U.TestBanco.preguntas;
     const deElem = banco.filter(q => q.k === 'elemento');
+    const deAtr = banco.filter(q => q.k === 'atributo');
     const deStats = banco.filter(q => q.k === 'stats');
     let elegidas, resto;
-    if (deElem.length >= 10 && deStats.length >= 10) {
-      const e = this.barajar(deElem).slice(0, 10);
-      const s = this.barajar(deStats).slice(0, 10);
-      elegidas = this.barajar(e.concat(s));
+    if (deElem.length >= 8 && deAtr.length >= 6 && deStats.length >= 6) {
+      const e = this.barajar(deElem).slice(0, 8);
+      const a = this.barajar(deAtr).slice(0, 6);
+      const s = this.barajar(deStats).slice(0, 6);
+      elegidas = this.barajar(e.concat(a, s));
       const usados = new Set(elegidas);
       resto = this.barajar(banco.filter(q => !usados.has(q)));
     } else {
@@ -40,7 +43,7 @@ U.TestUI = {
     const auto = (window.U && U.Guardado) ? U.Guardado.leerAuto() : null;
     const escHtml = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     const bloqueAuto = auto ? '<div class="introInfo" style="border-color:var(--exito)"><b style="color:var(--exito)">● Guardado automático: tienes una partida en curso.</b><br>' + escHtml(auto.nombre || 'Sin nombre') + ' · ' + U.Elementos.nombre(auto.perfil.elemento) + ' · guardada el ' + U.Guardado.fechaTexto(auto.guardadoEn) + '. Tu partida se guarda sola en este navegador: entra y sigues donde ibas, sin descargar ni subir ningún archivo.</div><button class="grande" id="btnContinuarAuto" style="background:linear-gradient(180deg,#2f7d4f,#1d5233);border-color:#a7f3c9;box-shadow:0 5px 0 var(--sombra),0 0 22px rgba(103,224,138,.4)">Continuar partida</button>' : '';
-    c.innerHTML = '<div class="intro"><canvas id="logoCanvas" width="360" height="110"></canvas><p class="sub">Una vida. Un elemento. Universos paralelos.</p>' + bloqueAuto + '<div class="introInfo"><b>Antes de nacer en este mundo:</b> 20 preguntas — 10 que revelan tu elemento y 10 que revelan tus estadísticas — mezcladas y distintas en cada vida: el azar elige cuáles salen y en qué orden, y las opciones también cambian de lugar. Responde con instinto: no hay respuestas correctas y nadie te dirá qué busca cada opción. El test decide tu elemento, tu atributo, tus estadísticas iniciales y tu inclinación de estilo. Una prueba por vida.<br><br><b>Recuerda:</b> dominar UN elemento es el trabajo de una vida. Concéntrate en él. Yin y Yang ya están despiertos en ti desde que naces (nivel 1): lo que falta es controlarlos. Se entrenan con el uso — Yin golpeando de cerca, Yang lanzando elementos — y las técnicas se aprenden de un Guía, que te pedirá cierto nivel de Yin o de Yang.</div><div class="semillaFila">Semilla del mundo <input id="inpSemilla" maxlength="8" value="' + this.semilla + '"><button class="mini" id="btnDado">DADO</button></div><button class="grande" id="btnComenzarTest">' + (auto ? 'Nueva vida (repetir test)' : 'Comenzar el test') + '</button><button class="mini" id="btnCargarIntro" style="font-size:12px;padding:8px 14px">CARGAR DESDE ARCHIVO (RESPALDO)</button><p class="nota">100% offline · móvil (touch) y escritorio · juego completo: 1 continente continuo gigante rodeado de mar (la Metrópolis en el centro, 5 aldeas elementales en radial, la ciudad de los magos, 6 pueblos pequeños con casas para rentar, bosque, desierto, montaña de nieve) + interiores, calendario semanal, clima, casa con cama y alarma, retos y hechizo de inversión<br>Guardado automático activado: tu progreso se guarda solo en este navegador. Si quieres un respaldo para otro teléfono, en Opciones (⚙) tienes DESCARGAR PARTIDA.</p></div>';
+    c.innerHTML = '<div class="intro"><canvas id="logoCanvas" width="360" height="110"></canvas><p class="sub">Una vida. Un elemento. Universos paralelos.</p>' + bloqueAuto + '<div class="introInfo"><b>Antes de nacer en este mundo:</b> 20 preguntas — 8 que revelan tu elemento, 6 que revelan tu atributo y 6 que revelan tus estadísticas — mezcladas y distintas en cada vida: el azar elige cuáles salen y en qué orden, y las opciones también cambian de lugar. Responde con instinto: no hay respuestas correctas y nadie te dirá qué busca cada opción. El test decide tu elemento, tu atributo, tus estadísticas iniciales y tu inclinación de estilo. Una prueba por vida.<br><br><b>Recuerda:</b> dominar UN elemento es el trabajo de una vida. Concéntrate en él. Yin y Yang ya están despiertos en ti desde que naces (nivel 1): lo que falta es controlarlos. Se entrenan con el uso — Yin golpeando de cerca, Yang lanzando elementos — y las técnicas se aprenden de un Guía, que te pedirá cierto nivel de Yin o de Yang.</div><div class="semillaFila">Semilla del mundo <input id="inpSemilla" maxlength="8" value="' + this.semilla + '"><button class="mini" id="btnDado">DADO</button></div><button class="grande" id="btnComenzarTest">' + (auto ? 'Nueva vida (repetir test)' : 'Comenzar el test') + '</button><button class="mini" id="btnCargarIntro" style="font-size:12px;padding:8px 14px">CARGAR DESDE ARCHIVO (RESPALDO)</button><p class="nota">100% offline · móvil (touch) y escritorio · juego completo: 1 continente continuo gigante rodeado de mar (la Metrópolis en el centro, 5 aldeas elementales en radial, la ciudad de los magos, 6 pueblos pequeños con casas para rentar, bosque, desierto, montaña de nieve) + interiores, calendario semanal, clima, casa con cama y alarma, retos y hechizo de inversión<br>Guardado automático activado: tu progreso se guarda solo en este navegador. Si quieres un respaldo para otro teléfono, en Opciones (⚙) tienes DESCARGAR PARTIDA.</p></div>';
     document.getElementById('btnComenzarTest').addEventListener('click', () => { const v = document.getElementById('inpSemilla').value.trim().toUpperCase(); this.semilla = v || this.nuevaSemilla(); document.getElementById('semillaTxt').textContent = this.semilla; this.comenzar(); });
     const bCA = document.getElementById('btnContinuarAuto'); if (bCA) bCA.addEventListener('click', () => { U.Audio.init(); U.Audio.reanudar(); U.Guardado.cargarAuto(); });
     const bcI = document.getElementById('btnCargarIntro'); if (bcI) bcI.addEventListener('click', () => { U.Audio.init(); U.Audio.reanudar(); U.Guardado.elegirArchivo(); });
@@ -138,7 +141,16 @@ U.TestUI = {
     let bonoPuro = null;
     if (puro) { const basePuro = perf[primario] || 0; const conPuro = Math.ceil(basePuro * 1.5); perf[primario] = conPuro; bonoPuro = { stat: primario, base: basePuro, puro: conPuro }; }
     const stats = {}; const ini = U.Atributos.de(atributo).inicio;
-    for (const k in U.Estadisticas.base) { let v = U.Estadisticas.base[k] + (perf[k] || 0) + (S.s[k] || 0) * 1.2 + (ini[k] || 0); stats[k] = U.Estadisticas.clampTest(k, v); }
+    // BONO POR COMPLETAR EL TEST: +2 a cada estadística de combate (ataque,
+    // defensa, mente, velocidad), DESPUÉS de los puntos s, el bono de elemento
+    // y el bono de atributo, y DESPUÉS del clamp (el clamp es 7–14, así que el
+    // tope con bono es 16). Vida/Esencia NO llevan este +2 (rango 80–130/80–120).
+    // Es el 'extra' por hacer el test frente a los 40 de la elección directa.
+    // OJO (medido en simulación, 2000 partidas aleatorias): el total de combate
+    // sale en promedio ~59 (mín. 52, máx. 64), no ~50, porque los puntos s ya
+    // saturan el clamp 14 antes del bono (media pre-bono ~12.8 por stat).
+    const BONO_TEST = 2; const STATS_COMBATE = ['ataque', 'defensa', 'mente', 'velocidad'];
+    for (const k in U.Estadisticas.base) { let v = U.Estadisticas.base[k] + (perf[k] || 0) + (S.s[k] || 0) * 1.2 + (ini[k] || 0); v = U.Estadisticas.clampTest(k, v); if (STATS_COMBATE.indexOf(k) >= 0) v += BONO_TEST; stats[k] = v; }
     // MAESTRÍA INICIAL DE PRINCIPIANTE (nivel 1): la MAESTRÍA con la que naces
     // es 1% en tu elemento principal — nivel 1 — y 0 en los demás. (distr era el
     // reparto antiguo de 20 puntos; ya no pone niveles de Yin/Yang ni se muestra.)
@@ -173,7 +185,11 @@ U.TestUI = {
     // convertirte en hechicero entrenándote con los hechiceros (camino de una vida).
     const hechiceroPotencial = atributo === 'sabio' || stats.mente >= 12;
     const estilosFin = { yin: 1, yang: 1 };
-    return { elemento: top, elemento2: elem2, atributo, estilo, estiloNatural: estilo, yangAfin, hechiceroPotencial, puro, bonoPuro, stats, maestria, xpElemento, metaDespertar, estilos: estilosFin, distr, scores: S, sabores: (U.TestUI.ordenSabores && U.TestUI.ordenSabores.length === 5) ? U.TestUI.ordenSabores.slice() : U.Economia.SABORES.slice() };
+    // NIVELES POR ESTADÍSTICA: cada estadística nace en nivel 1 con su barra
+    // de XP en 0; el valor inicial del test es el del nivel 1.
+    const nivelStat = { vida: 1, esencia: 1, ataque: 1, defensa: 1, mente: 1, velocidad: 1 };
+    const xpStat = { vida: 0, esencia: 0, ataque: 0, defensa: 0, mente: 0, velocidad: 0 };
+    return { elemento: top, elemento2: elem2, atributo, estilo, estiloNatural: estilo, yangAfin, hechiceroPotencial, puro, bonoPuro, stats, nivelStat, xpStat, maestria, xpElemento, metaDespertar, estilos: estilosFin, distr, scores: S, sabores: (U.TestUI.ordenSabores && U.TestUI.ordenSabores.length === 5) ? U.TestUI.ordenSabores.slice() : U.Economia.SABORES.slice() };
   },
   reveal() {
     let perfil = this.calcular();
@@ -182,7 +198,7 @@ U.TestUI = {
     const nombres = { fuego: ['Brann', 'Kira', 'Doran'], agua: ['Nima', 'Aren', 'Selia'], tierra: ['Toruk', 'Mara', 'Oren'], viento: ['Lira', 'Sael', 'Nim'], rayo: ['Vek', 'Zuri', 'Ilan'] }[perfil.elemento]; const nombre = nombres[Math.floor(Math.random() * nombres.length)];
     let html = '<div class="reveal"><div class="revealCab"><canvas id="cvSimbolo" width="88" height="88" style="color:' + E.color + '"></canvas><div><h2 style="color:' + E.color + '">TU ELEMENTO ES ' + E.nombre.toUpperCase() + '</h2><p>' + E.personalidad + '</p></div></div>';
     html += '<div class="tarjetas"><div class="tarjeta"><h3>Atributo · ' + a.nombre + '</h3><div class="ventaja">▲ ' + a.ventaja + '</div><div class="desventaja">▼ ' + a.desventaja + '</div><p style="margin:6px 0 0;color:var(--textoFrio)">' + a.desc + '</p></div><div class="tarjeta"><h3>Inclinación de estilo · ' + perfil.estiloNatural.toUpperCase() + '</h3><p style="margin:0;color:var(--textoFrio)">Yin y Yang ya están despiertos en ti desde que naces (nivel 1): lo que falta es controlarlos. Tu estilo natural es ' + perfil.estiloNatural.toUpperCase() + ': crece ×1.5 más rápido que el otro, porque es tu talento natural. ' + (perfil.estiloNatural === 'yin' ? 'Yin: el cuerpo primero. Cerca, barato, universal.' : 'Yang: energía blanca a distancia. Cara, deliberada, y entrena tu recuperación de Esencia.') + '</p></div></div>';
-    html += '<div class="tarjeta"><h3>Estadísticas iniciales</h3><div class="statsGrid">' + Object.keys(perfil.stats).map(k => '<div class="statFila"><span>' + U.Estadisticas.etiquetas[k] + '</span><div class="bar"><i style="transform:scaleX(' + (perfil.stats[k] / ((k === 'vida' || k === 'esencia') ? 130 : 14)) + ')"></i></div><span class="val">' + perfil.stats[k] + '</span></div>').join('') + '</div>' + (perfil.puro && perfil.bonoPuro ? '<p style="margin:8px 0 0;color:var(--exito)">100% concentrado en ' + E.nombre.toUpperCase() + ': tu bono principal sube 50% (' + U.Estadisticas.etiquetas[perfil.bonoPuro.stat] + ' +' + perfil.bonoPuro.puro + ' en vez de +' + perfil.bonoPuro.base + ')</p>' : '') + '</div>';
+    html += '<div class="tarjeta"><h3>Estadísticas iniciales</h3><div class="statsGrid">' + Object.keys(perfil.stats).map(k => '<div class="statFila"><span>' + U.Estadisticas.etiquetas[k] + '</span><div class="bar"><i style="transform:scaleX(' + (perfil.stats[k] / ((k === 'vida' || k === 'esencia') ? 130 : 14)) + ')"></i></div><span class="val">' + perfil.stats[k] + '</span></div>').join('') + '</div><p style="margin:8px 0 0;color:var(--exito)">Bono por completar el test: +2 Fuerza, +2 Resistencia, +2 Mente, +2 Velocidad.</p><p style="margin:8px 0 0;color:var(--textoFrio)">Cada estadística empieza en NIVEL 1: cada acción da XP y al llenar la barra sube de nivel (Vida y Esencia +5, el resto +1). Tu atributo acorta la barra de sus favoritas a la mitad y alarga la de su penalizada.</p>' + (perfil.puro && perfil.bonoPuro ? '<p style="margin:8px 0 0;color:var(--exito)">100% concentrado en ' + E.nombre.toUpperCase() + ': tu bono principal sube 50% (' + U.Estadisticas.etiquetas[perfil.bonoPuro.stat] + ' +' + perfil.bonoPuro.puro + ' en vez de +' + perfil.bonoPuro.base + ')</p>' : '') + '</div>';
     const m = perfil.maestria[perfil.elemento]; const h1 = U.Habilidades.elementos[perfil.elemento][0];
     html += '<div class="tarjeta"><h3>Maestría de ' + E.nombre + ' · ' + m + '% · ' + U.Elementos.etapa(m) + '</h3><div class="maestriaReveal"><i style="transform:scaleX(' + m / 100 + ');background:linear-gradient(90deg,' + E.color + ',' + E.claro + ')"></i><b style="left:15%"></b><b style="left:40%"></b><b style="left:70%"></b></div><p style="margin:6px 0 0;font-size:11px;color:var(--textoFrio)">Tu ataque básico, ' + h1.nombre + ', ya es tuyo desde nivel 1 (botón 1 del equipo, alcance 1 celda). Las demás técnicas son POCAS y se aprenden de un GUÍA por tarea (no por porcentaje): 15 / 40 / 70% es la maestría MÍNIMA para poder aprender cada una. La maestría sube con curva multiplicativa — lenta desde el principio y cada tramo cuesta más que el anterior: ' + U.Habilidades.elementos[perfil.elemento].map(h => h.nombre).join(' · ') + '. Aún sin la maestría mínima de la siguiente técnica: canaliza con golpes Yin hasta el 15%.</p></div>';
     // AFINIDAD (como tu ADN): el 50% de cada barra se reparte en partes iguales

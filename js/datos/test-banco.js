@@ -1,10 +1,10 @@
 /* === js/datos/test-banco.js === */
-/* Unipar — banco del test inicial: 100 preguntas indirectas + catálogo de platillos. Nadie ve los puntajes. */
+/* Unipar — banco del test inicial: 130 preguntas indirectas + catálogo de platillos. Nadie ve los puntajes. */
 window.U = window.U || {};
 
 U.TestBanco = {
   // p = temperamento secreto · s = pista de estadística · a = pista de atributo · e = inclinación de estilo
-  // k = 'elemento' (la pregunta puntúa sobre todo p) o 'stats' (puntúa sobre todo s y a)
+  // k = 'elemento' (la pregunta puntúa sobre todo p), 'atributo' (puntúa sobre todo a) o 'stats' (puntúa sobre todo s y a)
   preguntas: [
     { t: 'Despiertas antes de la alarma. ¿Qué haces?', k: 'elemento', ops: [
       { t: 'Me levanto de una: el día no espera.', p: { fuego: 2 }, s: { velocidad: 1 }, a: { duro: 1 }, e: { yin: 1 } },
@@ -606,6 +606,187 @@ U.TestBanco = {
       { t: 'Me muevo, camino, gasto la energía.', p: { fuego: 1 }, s: { velocidad: 1 }, a: { fuerte: 1 }, e: { yin: 1 } },
       { t: 'No me preparo: entre más pienso, peor.', p: { viento: 1 }, s: { esencia: 1 }, a: { inestable: 1 }, e: { yang: 1 } },
       { t: 'Repito mentalmente todo lo que tengo que hacer.', p: { rayo: 1 }, s: { mente: 2 }, a: { sabio: 1 }, e: { yang: 1 } } ] },
+    // --- PREGUNTAS DE ATRIBUTO (k: 'atributo'): 30, puntúan sobre todo a ---
+    { t: 'Te dan un trabajo que pesa mucho y hay que cargarlo lejos.', k: 'atributo', ops: [
+      { t: 'Lo cargo yo solo, aunque tarde: mi cuerpo aguanta.', p: { tierra: 2 }, s: { vida: 1 }, a: { pesado: 1 }, e: { yin: 1 } },
+      { t: 'Lo llevo en partes, parando a respirar: llegar entero es lo que vale.', p: { tierra: 2 }, s: { defensa: 1 }, a: { tenaz: 1 } },
+      { t: 'Busco la forma de cargarlo sin romperme la espalda.', p: { rayo: 2 }, s: { mente: 1 }, a: { sabio: 1 }, e: { yang: 1 } },
+      { t: 'Pido ayuda: entre dos pesa la mitad.', p: { agua: 2 }, s: { esencia: 1 }, a: { fluido: 1 }, e: { yin: 1 } },
+      { t: 'Lo llevo en tramos, con paradas para respirar: llegar entero vale más.', p: { tierra: 2 }, s: { defensa: 1 }, a: { tenaz: 1}, e: { yin: 1 } } ] },
+    { t: 'Un amigo te reta a ver quién aguanta más sin dormir.', k: 'atributo', ops: [
+      { t: 'Acepto: yo aguanto lo que sea.', p: { fuego: 2 }, s: { vida: 1 }, a: { fuerte: 1 }, e: { yin: 1 } },
+      { t: 'Acepto, pero duermo un rato antes: llego fresco.', p: { rayo: 2 }, s: { mente: 1 }, a: { sabio: 1 }, e: { yang: 1 } },
+      { t: 'No acepto: dormir es sagrado.', p: { tierra: 2 }, s: { vida: 1 }, a: { tenaz: 1 } },
+      { t: 'Acepto y me preparo algo para no dormirme.', p: { viento: 2 }, s: { velocidad: 1 }, a: { fragil: 1 }, e: { yang: 1 } },
+      { t: 'Ni loco: el sueño no se negocia.', p: { tierra: 2 }, s: { vida: 1 }, a: { tenaz: 1} } ] },
+    { t: 'Te toca aprender algo nuevo y difícil en poco tiempo.', k: 'atributo', ops: [
+      { t: 'Lo repito hasta que salga, aunque me duelan las manos.', p: { tierra: 2 }, s: { vida: 1 }, a: { tenaz: 1 }, e: { yin: 1 } },
+      { t: 'Lo miro hacer a otro primero y luego lo copio.', p: { agua: 2 }, s: { mente: 1 }, a: { fluido: 1 } },
+      { t: 'Lo desarmo en partes y entiendo cada una.', p: { rayo: 2 }, s: { mente: 2 }, a: { sabio: 1 }, e: { yang: 1 } },
+      { t: 'Lo intento a lo loco: el cuerpo aprende solo.', p: { fuego: 2 }, s: { velocidad: 1 }, a: { fuerte: 1 }, e: { yin: 1 } },
+      { t: 'Lo estudio por partes hasta entender cada pieza.', p: { rayo: 2 }, s: { mente: 2 }, a: { sabio: 1 }, e: { yang: 1 } } ] },
+    { t: 'Estás cansado, pero te piden un último esfuerzo.', k: 'atributo', ops: [
+      { t: 'Lo doy: el cansancio se aguanta.', p: { tierra: 2 }, s: { defensa: 1 }, a: { tenaz: 1 } },
+      { t: 'Lo doy, pero a mi ritmo: no me voy a romper.', p: { fuego: 1, tierra: 1 }, s: { vida: 1 }, a: { pesado: 1 }, e: { yin: 1 } },
+      { t: 'Digo que no: sin fuerzas solo me equivoco.', p: { rayo: 2 }, s: { mente: 1 }, a: { duro: 1 }, e: { yang: 1 } },
+      { t: 'Lo intento, pero si veo que no puedo, paro.', p: { agua: 2 }, s: { esencia: 1 }, a: { fluido: 1 } },
+      { t: 'Lo doy entero: el cansancio se aguanta un rato más.', p: { tierra: 2 }, s: { defensa: 1 }, a: { tenaz: 1 } } ] },
+    { t: 'Te regalan algo que no sabes usar.', k: 'atributo', ops: [
+      { t: 'Lo pruebo hasta que funcione.', p: { fuego: 2 }, s: { ataque: 1 }, a: { fuerte: 1 }, e: { yin: 1 } },
+      { t: 'Pregunto a alguien que sepa.', p: { agua: 2 }, s: { mente: 1 }, a: { fluido: 1 } },
+      { t: 'Lo miro pieza por pieza antes de tocarlo.', p: { rayo: 2 }, s: { mente: 2 }, a: { sabio: 1 }, e: { yang: 1 } },
+      { t: 'Lo guardo hasta tener tiempo de aprenderlo bien.', p: { tierra: 2 }, s: { defensa: 1 }, a: { pesado: 1 }, e: { yin: 1 } },
+      { t: 'Lo reviso pieza por pieza antes de tocar nada.', p: { rayo: 2 }, s: { mente: 2 }, a: { sabio: 1 }, e: { yang: 1 } } ] },
+    { t: 'Te invitan a un torneo de fuerza, pero no entrenaste.', k: 'atributo', ops: [
+      { t: 'Voy igual: la fuerza se demuestra, no se entrena en un día.', p: { fuego: 2 }, s: { ataque: 1 }, a: { fuerte: 1 }, e: { yin: 1 } },
+      { t: 'Voy, pero peleo con técnica, no a lo bruto.', p: { rayo: 2 }, s: { mente: 1 }, a: { duro: 1 }, e: { yang: 1 } },
+      { t: 'No voy: sin preparar, solo hago el ridículo.', p: { tierra: 2 }, s: { defensa: 1 }, a: { pesado: 1 } },
+      { t: 'Voy a mirar: así aprendo cómo pelean los demás.', p: { agua: 2 }, s: { esencia: 1 }, a: { fluido: 1 } },
+      { t: 'Voy igual: la fuerza se demuestra peleando, no entrenando un día.', p: { fuego: 2 }, s: { ataque: 1 }, a: { fuerte: 1 }, e: { yin: 1 } } ] },
+    { t: 'Un compañero se cae y no se puede levantar solo.', k: 'atributo', ops: [
+      { t: 'Lo levanto yo: pesa lo que pese.', p: { fuego: 1, tierra: 1 }, s: { vida: 1 }, a: { pesado: 1 }, e: { yin: 1 } },
+      { t: 'Lo ayudo a levantarse poco a poco, sin apuro.', p: { tierra: 2 }, s: { defensa: 1 }, a: { tenaz: 1 } },
+      { t: 'Le digo cómo apoyarse para levantarse solo.', p: { rayo: 2 }, s: { mente: 1 }, a: { sabio: 1 }, e: { yang: 1 } },
+      { t: 'Busco a alguien más fuerte que nos ayude a los dos.', p: { agua: 2 }, s: { esencia: 1 }, a: { fluido: 1 } },
+      { t: 'Lo levanto cargándolo: pese lo que pese.', p: { fuego: 1, tierra: 1 }, s: { vida: 1 }, a: { pesado: 1 }, e: { yin: 1 } } ] },
+    { t: 'Tienes que cruzar un desierto a pie.', k: 'atributo', ops: [
+      { t: 'Camino de noche y descanso de día: el sol no me gana.', p: { rayo: 2 }, s: { mente: 1 }, a: { sabio: 1 }, e: { yang: 1 } },
+      { t: 'Camino sin parar: llegar es lo que cuenta.', p: { fuego: 2 }, s: { vida: 1 }, a: { fuerte: 1 }, e: { yin: 1 } },
+      { t: 'Voy parando en cada sombra, con paciencia.', p: { tierra: 2 }, s: { vida: 1 }, a: { tenaz: 1 }, e: { yin: 1 } },
+      { t: 'Llevo agua de más: sin agua no hay camino.', p: { agua: 2 }, s: { esencia: 1 }, a: { fluido: 1 } },
+      { t: 'Avanzo de sombra en sombra, con paciencia.', p: { tierra: 2 }, s: { vida: 1 }, a: { tenaz: 1} } ] },
+    { t: 'Te dan a elegir entre un escudo pesado y una daga ligera.', k: 'atributo', ops: [
+      { t: 'El escudo: prefiero aguantar que esquivar.', p: { tierra: 2 }, s: { defensa: 1 }, a: { pesado: 1 } },
+      { t: 'La daga: rápido y preciso.', p: { viento: 2 }, s: { velocidad: 1 }, a: { fragil: 1 }, e: { yang: 1 } },
+      { t: 'El escudo, pero solo si puedo moverme con él.', p: { fuego: 1, tierra: 1 }, s: { vida: 1 }, a: { tenaz: 1 }, e: { yin: 1 } },
+      { t: 'La daga: un golpe bien puesto vale por diez.', p: { rayo: 2 }, s: { ataque: 1 }, a: { duro: 1 }, e: { yang: 1 } },
+      { t: 'Me quedo el escudo: aguantar vale más que esquivar.', p: { tierra: 2 }, s: { defensa: 1 }, a: { pesado: 1 }, e: { yin: 1 } } ] },
+    { t: 'Alguien te insulta delante de todos.', k: 'atributo', ops: [
+      { t: 'Le respondo en la cara, sin bajar la mirada.', p: { fuego: 2 }, s: { ataque: 1 }, a: { fuerte: 1 }, e: { yin: 1 } },
+      { t: 'Me río: el que grita pierde solo.', p: { agua: 2 }, s: { mente: 1 }, a: { fluido: 1 } },
+      { t: 'Me quedo quieto: no le doy el gusto de verme molesto.', p: { tierra: 2 }, s: { defensa: 1 }, a: { tenaz: 1 } },
+      { t: 'Le contesto con calma, palabra por palabra.', p: { rayo: 2 }, s: { mente: 1 }, a: { sabio: 1 }, e: { yang: 1 } },
+      { t: 'Me quedo quieto, sin darle el gusto de verme molesto.', p: { tierra: 2 }, s: { defensa: 1 }, a: { tenaz: 1}, e: { yin: 1 } } ] },
+    { t: 'Te toca esperar tres horas bajo el sol.', k: 'atributo', ops: [
+      { t: 'Espero: el sol no me mueve de donde estoy.', p: { tierra: 2 }, s: { vida: 1 }, a: { tenaz: 1 } },
+      { t: 'Busco sombra y espero ahí, tranquilo.', p: { agua: 2 }, s: { esencia: 1 }, a: { fluido: 1 } },
+      { t: 'Espero, pero me muevo de a ratos para no dormirme.', p: { viento: 2 }, s: { velocidad: 1 }, a: { inestable: 1 }, e: { yang: 1 } },
+      { t: 'Me quejo todo el rato: tres horas es demasiado.', p: { fuego: 1, viento: 1 }, s: { velocidad: 1 }, a: { inestable: 1 }, e: { yang: 1 } },
+      { t: 'Aguanto quieto: el sol no me mueve de mi lugar.', p: { tierra: 2 }, s: { vida: 1 }, a: { tenaz: 1} } ] },
+    { t: 'Encuentras un atajo, pero está lleno de espinas.', k: 'atributo', ops: [
+      { t: 'Paso igual: unas espinas no me paran.', p: { fuego: 2 }, s: { vida: 1 }, a: { fuerte: 1 }, e: { yin: 1 } },
+      { t: 'Busco otro paso: no vale la pena sangrar.', p: { rayo: 2 }, s: { mente: 1 }, a: { sabio: 1 }, e: { yang: 1 } },
+      { t: 'Paso despacio, apartando las espinas una a una.', p: { tierra: 2 }, s: { defensa: 1 }, a: { tenaz: 1 }, e: { yin: 1 } },
+      { t: 'Paso corriendo: entre más rápido, menos me pincho.', p: { viento: 2 }, s: { velocidad: 1 }, a: { fragil: 1 }, e: { yang: 1 } },
+      { t: 'Cruzo despacio, quitando las espinas una por una.', p: { tierra: 2 }, s: { defensa: 1 }, a: { tenaz: 1} } ] },
+    { t: 'Te piden que cuides la fogata toda la noche.', k: 'atributo', ops: [
+      { t: 'La cuido yo solo: no se apaga mientras yo esté.', p: { tierra: 2 }, s: { vida: 1 }, a: { pesado: 1 } },
+      { t: 'La cuido, pero preparo leña para no moverme.', p: { rayo: 2 }, s: { mente: 1 }, a: { duro: 1 }, e: { yang: 1 } },
+      { t: 'La cuido y aprovecho para pensar en calma.', p: { agua: 2 }, s: { mente: 1 }, a: { fluido: 1 } },
+      { t: 'Me quedo despierto a ratos, con un ojo abierto.', p: { viento: 2 }, s: { esencia: 1 }, a: { inestable: 1 }, e: { yang: 1 } },
+      { t: 'Yo la cuido: mientras yo esté despierto, no se apaga.', p: { tierra: 2 }, s: { vida: 1 }, a: { pesado: 1 }, e: { yin: 1 } } ] },
+    { t: 'Un rival te gana y se burla.', k: 'atributo', ops: [
+      { t: 'Le pido la revancha ahí mismo.', p: { fuego: 2 }, s: { ataque: 1 }, a: { fuerte: 1 }, e: { yin: 1 } },
+      { t: 'Lo felicito y me voy a entrenar en silencio.', p: { tierra: 2 }, s: { vida: 1 }, a: { tenaz: 1 } },
+      { t: 'Le pregunto qué hizo mejor que yo.', p: { rayo: 2 }, s: { mente: 1 }, a: { sabio: 1 }, e: { yang: 1 } },
+      { t: 'Me da igual: cada quien tiene su día.', p: { agua: 2 }, s: { esencia: 1 }, a: { fluido: 1 } },
+      { t: 'Lo felicito, y en silencio me pongo a entrenar.', p: { tierra: 2 }, s: { vida: 1 }, a: { tenaz: 1} } ] },
+    { t: 'Tienes que memorizar un camino largo.', k: 'atributo', ops: [
+      { t: 'Lo camino una vez y me lo aprendo con el cuerpo.', p: { fuego: 1, tierra: 1 }, s: { velocidad: 1 }, a: { pesado: 1 }, e: { yin: 1 } },
+      { t: 'Lo repito en la cabeza, calle por calle.', p: { rayo: 2 }, s: { mente: 2 }, a: { sabio: 1 }, e: { yang: 1 } },
+      { t: 'Marco puntos de referencia: el árbol, la piedra, el río.', p: { tierra: 2 }, s: { mente: 1 }, a: { tenaz: 1 }, e: { yin: 1 } },
+      { t: 'Lo aprendo andando, sin mapa: me pierdo y vuelvo.', p: { viento: 2 }, s: { velocidad: 1 }, a: { fragil: 1 }, e: { yang: 1 } },
+      { t: 'Lo repaso en la cabeza, calle por calle, hasta que quede.', p: { rayo: 2 }, s: { mente: 2 }, a: { sabio: 1 }, e: { yang: 1 } } ] },
+    { t: 'Te ofrecen un trabajo bien pagado pero aburrido.', k: 'atributo', ops: [
+      { t: 'Lo tomo: el dinero es dinero.', p: { tierra: 2 }, s: { defensa: 1 }, a: { pesado: 1 } },
+      { t: 'No lo tomo: me aburro y lo dejo a la semana.', p: { fuego: 2 }, s: { velocidad: 1 }, a: { inestable: 1 }, e: { yin: 1 } },
+      { t: 'Lo tomo, pero solo por un tiempo.', p: { agua: 2 }, s: { esencia: 1 }, a: { fluido: 1 } },
+      { t: 'Lo tomo si me deja tiempo para lo mío.', p: { rayo: 2 }, s: { mente: 1 }, a: { duro: 1 }, e: { yang: 1 } },
+      { t: 'No lo acepto: me aburro y lo abandono a la semana.', p: { fuego: 2 }, s: { velocidad: 1 }, a: { inestable: 1 }, e: { yin: 1 } } ] },
+    { t: 'Estás en una pelea y te quedas sin aire.', k: 'atributo', ops: [
+      { t: 'Sigo: el aire vuelve solo.', p: { fuego: 2 }, s: { vida: 1 }, a: { fuerte: 1 } },
+      { t: 'Me alejo un momento, respiro y vuelvo.', p: { rayo: 2 }, s: { mente: 1 }, a: { sabio: 1 }, e: { yang: 1 } },
+      { t: 'Aguanto: el cuerpo se acostumbra.', p: { tierra: 2 }, s: { defensa: 1 }, a: { tenaz: 1 } },
+      { t: 'Bajo el ritmo: pelear sin aire es pelear a medias.', p: { agua: 2 }, s: { esencia: 1 }, a: { fluido: 1 } },
+      { t: 'Aguanto como sea: el cuerpo al final se acostumbra.', p: { tierra: 2 }, s: { defensa: 1 }, a: { tenaz: 1 }, e: { yin: 1 } } ] },
+    { t: 'Te toca enseñar a alguien que aprende lento.', k: 'atributo', ops: [
+      { t: 'Le repito lo mismo hasta que le salga.', p: { tierra: 2 }, s: { vida: 1 }, a: { tenaz: 1 } },
+      { t: 'Le muestro otra forma: quizá la mía no le sirve.', p: { agua: 2 }, s: { mente: 1 }, a: { fluido: 1 } },
+      { t: 'Le explico con calma, paso a paso.', p: { rayo: 2 }, s: { mente: 1 }, a: { sabio: 1 }, e: { yang: 1 } },
+      { t: 'Lo pongo a hacerlo ya: se aprende haciendo.', p: { fuego: 2 }, s: { ataque: 1 }, a: { duro: 1 }, e: { yin: 1 } },
+      { t: 'Le explico despacio, un paso a la vez.', p: { rayo: 2 }, s: { mente: 1 }, a: { sabio: 1 }, e: { yang: 1 } } ] },
+    { t: 'Te dan una mochila con demasiado peso para un día entero.', k: 'atributo', ops: [
+      { t: 'La cargo igual: mi espalda aguanta.', p: { fuego: 1, tierra: 1 }, s: { vida: 1 }, a: { pesado: 1 }, e: { yin: 1 } },
+      { t: 'Saco lo que no hace falta y cargo solo lo necesario.', p: { rayo: 2 }, s: { mente: 1 }, a: { sabio: 1 }, e: { yang: 1 } },
+      { t: 'La cargo en tramos, descansando entre cada uno.', p: { agua: 2 }, s: { vida: 1 }, a: { tenaz: 1 } },
+      { t: 'La reparto: llevo lo mío y pido que me ayuden con el resto.', p: { viento: 2 }, s: { esencia: 1 }, a: { inestable: 1 }, e: { yang: 1 } },
+      { t: 'La llevo por tramos, con descansos entre cada tramo.', p: { agua: 2 }, s: { vida: 1 }, a: { tenaz: 1} } ] },
+    { t: 'Un desconocido te pide que lo sigas a un lugar oscuro.', k: 'atributo', ops: [
+      { t: 'No lo sigo: no sé quién es.', p: { tierra: 2 }, s: { defensa: 1 }, a: { pesado: 1 } },
+      { t: 'Lo sigo: la curiosidad manda.', p: { viento: 2 }, s: { velocidad: 1 }, a: { inestable: 1 }, e: { yang: 1 } },
+      { t: 'Le pregunto adónde y para qué, antes de moverme.', p: { rayo: 2 }, s: { mente: 1 }, a: { sabio: 1 }, e: { yang: 1 } },
+      { t: 'Lo sigo, pero a distancia, listo para correr.', p: { fuego: 2 }, s: { velocidad: 1 }, a: { fragil: 1 }, e: { yin: 1 } },
+      { t: 'Primero pregunto adónde vamos y para qué.', p: { rayo: 2 }, s: { mente: 1 }, a: { sabio: 1 }, e: { yang: 1 } } ] },
+    { t: 'Te despiertas con el cuerpo dolorido.', k: 'atributo', ops: [
+      { t: 'Me levanto igual: el dolor se pasa moviéndose.', p: { fuego: 2 }, s: { vida: 1 }, a: { fuerte: 1 }, e: { yin: 1 } },
+      { t: 'Me quedo un rato más: el cuerpo pide descanso.', p: { tierra: 2 }, s: { vida: 1 }, a: { tenaz: 1 }, e: { yin: 1 } },
+      { t: 'Me estiro despacio hasta que el cuerpo afloje.', p: { agua: 2 }, s: { esencia: 1 }, a: { fluido: 1 } },
+      { t: 'Reviso qué me duele y por qué, antes de moverme.', p: { rayo: 2 }, s: { mente: 1 }, a: { sabio: 1 }, e: { yang: 1 } },
+      { t: 'Me quedo acostado un rato más: el cuerpo pide descansar.', p: { tierra: 2 }, s: { vida: 1 }, a: { tenaz: 1} } ] },
+    { t: 'Tienes que elegir un compañero para una pelea difícil.', k: 'atributo', ops: [
+      { t: 'Al más fuerte: con él al lado, nadie nos para.', p: { fuego: 2 }, s: { ataque: 1 }, a: { fuerte: 1 }, e: { yin: 1 } },
+      { t: 'Al más listo: la fuerza sin cabeza no sirve.', p: { rayo: 2 }, s: { mente: 1 }, a: { sabio: 1 }, e: { yang: 1 } },
+      { t: 'Al que nunca se rinde, aunque no sea el más fuerte.', p: { tierra: 2 }, s: { vida: 1 }, a: { tenaz: 1 }, e: { yin: 1 } },
+      { t: 'Al más rápido: el que pega primero, pega dos veces.', p: { viento: 2 }, s: { velocidad: 1 }, a: { fragil: 1 }, e: { yang: 1 } },
+      { t: 'Elijo al que jamás se rinde, aunque no sea el más fuerte.', p: { tierra: 2 }, s: { vida: 1 }, a: { tenaz: 1} } ] },
+    { t: 'Te ofrecen entrenar con un maestro muy estricto.', k: 'atributo', ops: [
+      { t: 'Acepto: lo estricto me hace fuerte.', p: { fuego: 2 }, s: { ataque: 1 }, a: { duro: 1 }, e: { yin: 1 } },
+      { t: 'Acepto, pero a mi ritmo: si me apura, me rompo.', p: { agua: 2 }, s: { esencia: 1 }, a: { fluido: 1 } },
+      { t: 'Acepto: aguanto lo que venga, sin quejarme.', p: { tierra: 2 }, s: { defensa: 1 }, a: { tenaz: 1 } },
+      { t: 'No acepto: aprendo mejor a mi manera.', p: { viento: 2 }, s: { esencia: 1 }, a: { inestable: 1 }, e: { yang: 1 } },
+      { t: 'Acepto y aguanto: lo que venga, sin quejarme.', p: { tierra: 2 }, s: { defensa: 1 }, a: { tenaz: 1}, e: { yin: 1 } } ] },
+    { t: 'Estás perdido y se hace de noche.', k: 'atributo', ops: [
+      { t: 'Sigo caminando: quieto no se entiende nada.', p: { fuego: 2 }, s: { velocidad: 1 }, a: { fuerte: 1 }, e: { yin: 1 } },
+      { t: 'Me quedo donde estoy y espero al amanecer.', p: { tierra: 2 }, s: { defensa: 1 }, a: { pesado: 1 } },
+      { t: 'Busco un lugar alto para ver el camino.', p: { viento: 2 }, s: { velocidad: 1 }, a: { fragil: 1 }, e: { yang: 1 } },
+      { t: 'Pienso en el mapa completo y decido con calma.', p: { rayo: 2 }, s: { mente: 1 }, a: { sabio: 1 }, e: { yang: 1 } },
+      { t: 'Me quedo quieto donde estoy y espero a que amanezca.', p: { tierra: 2 }, s: { defensa: 1 }, a: { pesado: 1} } ] },
+    { t: 'Te toca cargar agua para todo el grupo.', k: 'atributo', ops: [
+      { t: 'Cargo dos cubetas a la vez: una en cada mano.', p: { fuego: 1, tierra: 1 }, s: { vida: 1 }, a: { pesado: 1 }, e: { yin: 1 } },
+      { t: 'Cargo una y vuelvo: mejor dos viajes que un accidente.', p: { rayo: 2 }, s: { mente: 1 }, a: { duro: 1 }, e: { yang: 1 } },
+      { t: 'Cargo lo que puedo, sin apuro, viaje por viaje.', p: { tierra: 2 }, s: { vida: 1 }, a: { tenaz: 1 }, e: { yin: 1 } },
+      { t: 'Hago varios viajes cortos, sin cansarme.', p: { agua: 2 }, s: { esencia: 1 }, a: { fluido: 1 } },
+      { t: 'Voy viaje por viaje, sin apuro, cargando lo que puedo.', p: { tierra: 2 }, s: { vida: 1 }, a: { tenaz: 1} } ] },
+    { t: 'Alguien te pide un favor que te cuesta mucho.', k: 'atributo', ops: [
+      { t: 'Lo hago: si prometo, cumplo.', p: { tierra: 2 }, s: { defensa: 1 }, a: { tenaz: 1 } },
+      { t: 'Lo hago, pero pido algo a cambio.', p: { fuego: 2 }, s: { ataque: 1 }, a: { fuerte: 1 }, e: { yin: 1 } },
+      { t: 'Digo que no, con precisión y sin drama.', p: { rayo: 2 }, s: { mente: 1 }, a: { duro: 1 }, e: { yang: 1 } },
+      { t: 'Busco la forma de ayudar sin romperme.', p: { agua: 2 }, s: { esencia: 1 }, a: { fluido: 1 } },
+      { t: 'Si lo prometo, lo cumplo, me cueste lo que me cueste.', p: { tierra: 2 }, s: { defensa: 1 }, a: { tenaz: 1 }, e: { yin: 1 } } ] },
+    { t: 'Te retan a sostener algo pesado con los brazos extendidos.', k: 'atributo', ops: [
+      { t: 'Lo sostengo hasta que me tiemblen los brazos.', p: { fuego: 2 }, s: { vida: 1 }, a: { fuerte: 1 }, e: { yin: 1 } },
+      { t: 'Lo sostengo, pero apoyo los codos: listo es mejor que bruto.', p: { rayo: 2 }, s: { mente: 1 }, a: { sabio: 1 }, e: { yang: 1 } },
+      { t: 'Lo sostengo respirando despacio: la calma aguanta más.', p: { agua: 2 }, s: { vida: 1 }, a: { fluido: 1 } },
+      { t: 'No lo intento: sé que no aguanto.', p: { viento: 1 }, s: { esencia: 1 }, a: { inestable: 1 }, e: { yang: 1 } },
+      { t: 'Lo aguanto hasta que los brazos me tiemblen.', p: { fuego: 2 }, s: { vida: 1 }, a: { fuerte: 1 }, e: { yin: 1 } } ] },
+    { t: 'Tienes que decidir rápido en medio del caos.', k: 'atributo', ops: [
+      { t: 'Decido ya: dudar es peor que equivocarse.', p: { fuego: 2 }, s: { velocidad: 1 }, a: { fuerte: 1 }, e: { yin: 1 } },
+      { t: 'Respiro, miro todo y decido.', p: { rayo: 2 }, s: { mente: 1 }, a: { sabio: 1 }, e: { yang: 1 } },
+      { t: 'Me quedo en mi lugar: el caos pasa solo.', p: { tierra: 2 }, s: { defensa: 1 }, a: { pesado: 1 } },
+      { t: 'Sigo a los demás: en el caos, solo no se decide.', p: { agua: 2 }, s: { esencia: 1 }, a: { fluido: 1 } },
+      { t: 'Miro todo con calma y recién ahí decido.', p: { rayo: 2 }, s: { mente: 1 }, a: { sabio: 1 }, e: { yang: 1 } } ] },
+    { t: 'Te dan a elegir tu arma para siempre.', k: 'atributo', ops: [
+      { t: 'Un martillo grande: rompe lo que sea.', p: { fuego: 2 }, s: { ataque: 1 }, a: { fuerte: 1 }, e: { yin: 1 } },
+      { t: 'Una lanza fina: precisa y rápida.', p: { viento: 2 }, s: { velocidad: 1 }, a: { fragil: 1 }, e: { yang: 1 } },
+      { t: 'Un escudo: con él aguanto cualquier cosa.', p: { tierra: 2 }, s: { defensa: 1 }, a: { pesado: 1 } },
+      { t: 'Un arco: pego desde lejos, sin que me toquen.', p: { rayo: 2 }, s: { ataque: 1 }, a: { duro: 1 }, e: { yang: 1 } },
+      { t: 'Me quedo con el escudo: con él aguanto lo que sea.', p: { tierra: 2 }, s: { defensa: 1 }, a: { pesado: 1 }, e: { yin: 1 } } ] },
+    { t: 'Te toca dormir en el suelo, sin cama.', k: 'atributo', ops: [
+      { t: 'Duermo igual: el suelo no me asusta.', p: { tierra: 2 }, s: { vida: 1 }, a: { tenaz: 1 } },
+      { t: 'Me hago una cama con lo que haya.', p: { rayo: 2 }, s: { mente: 1 }, a: { sabio: 1 }, e: { yang: 1 } },
+      { t: 'Duermo, pero me levanto a cada rato.', p: { viento: 2 }, s: { esencia: 1 }, a: { inestable: 1 } },
+      { t: 'No duermo: prefiero caminar toda la noche.', p: { fuego: 2 }, s: { velocidad: 1 }, a: { fuerte: 1 } },
+      { t: 'Duermo como sea: el suelo no me da miedo.', p: { tierra: 2 }, s: { vida: 1 }, a: { tenaz: 1 } } ] },
   ],
 
   // Catálogo de platillos por sabor (los 5 sabores del juego).

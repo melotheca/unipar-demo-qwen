@@ -1,20 +1,55 @@
 /* === js/sistemas/crecimiento.js === */
-/* Unipar — crecimiento continuo por uso, estrés y desafío. Sin niveles: cada acción relacionada suma un poco; el atributo da ×2 en lo favorito. */
+/* Unipar — crecimiento por uso con NIVELES POR ESTADÍSTICA: cada acción da XP
+   a su estadística (ver ESCALA_XP); al llenar la barra el stat sube 1 nivel y
+   su valor sube por la ganancia por nivel. El atributo acorta la barra de sus
+   favoritas (×0.5) y alarga la de su penalizada (×5/3): la barra es visible,
+   el multiplicador invisible de antes (favorita ×2, penalizada ×0.6) se eliminó. */
 window.U = window.U || {};
 
 U.Crecimiento = {
   acum: {}, total: {}, tFlush: 0, desbloqueos: [],
+  // ESCALA_XP: los `base` antiguos sumaban directo al VALOR del stat (0.05 por
+  // puño, 0.1 por dash...). Ahora cada acción da XP hacia el siguiente nivel:
+  // ×20 convierte el puño (0.05) en 1 XP y el dash (0.1) en 2 XP. El costo de
+  // subir de nivel 5 a 6 neutral es 5 XP ≈ 5 puños.
+  ESCALA_XP: 20,
   // Desafío relativo: igual o más fuerte = 100% (hasta 150%); un poco más débil = mitad; mucho más débil = casi nada. Farmear no hace fuerte.
   desafio(enemigo) { const j = U.Juego.estado.jugador; const r = U.Estadisticas.poder(enemigo) / Math.max(1, U.Estadisticas.poder(j)); if (r >= 0.9) return Math.min(1.5, 1 + (r - 0.9)); if (r >= 0.65) return 0.5; if (r >= 0.4) return 0.25; return 0.05; },
   stat(stat, base, desafio) {
     const j = U.Juego.estado.jugador; const d = desafio == null ? 1 : desafio; if (d <= 0 || base <= 0) return 0;
-    let m = 1; if (U.Atributos.esFavorita(j.atributo, stat)) m = 2; if (U.Atributos.esPenalizada(j.atributo, stat)) m *= 0.6;
-    if (stat === 'velocidad' && j.polainaEquipada && U.Juego.estado.enCombate) m *= (j.polainaMultCrec || 1); // POLAINAS: en combate la Velocidad crece más rápido
-    let c = base * d * m; const tope = U.Estadisticas.topes[stat];
-    const antes = j.stats[stat]; j.stats[stat] = tope ? Math.min(tope, antes + c) : antes + c; c = j.stats[stat] - antes;
-    if (stat === 'vida') j.vida = Math.min(j.stats.vida, j.vida + c); if (stat === 'esencia') j.esencia = Math.min(j.stats.esencia, j.esencia + c);
-    this.acum[stat] = (this.acum[stat] || 0) + c; this.total[stat] = (this.total[stat] || 0) + c; U.Juego.estado.resumen.crecimiento[stat] = (U.Juego.estado.resumen.crecimiento[stat] || 0) + c;
-    return c;
+    // Nivel y XP por defecto (partidas viejas: nivel 1, XP 0 — sin migración).
+    if (!j.nivelStat) j.nivelStat = { vida: 1, esencia: 1, ataque: 1, defensa: 1, mente: 1, velocidad: 1 };
+    if (!j.xpStat) j.xpStat = { vida: 0, esencia: 0, ataque: 0, defensa: 0, mente: 0, velocidad: 0 };
+    if (j.nivelStat[stat] == null) j.nivelStat[stat] = 1;
+    if (j.xpStat[stat] == null) j.xpStat[stat] = 0;
+    const tope = U.Estadisticas.topes[stat];
+    if (tope && j.stats[stat] >= tope) return 0; // al tope de valor, esa estadística ya no gana XP
+    // EL MULTIPLICADOR DE CRECIMIENTO POR ATRIBUTO (favorita ×2, penalizada
+    // ×0.6) SE ELIMINÓ: lo reemplaza la barra de XP (ver xpParaNivel). Se
+    // CONSERVAN: el multiplicador por desafío (antigranja) y el de polainas
+    // (Velocidad en combate multiplica la XP ganada, no la barra).
+    let xp = base * d * this.ESCALA_XP;
+    if (stat === 'velocidad' && j.polainaEquipada && U.Juego.estado.enCombate) xp *= (j.polainaMultCrec || 1); // POLAINAS: en combate la Velocidad gana más XP
+    j.xpStat[stat] += xp;
+    let subidos = 0;
+    while (j.xpStat[stat] >= U.Estadisticas.xpParaNivel(j.nivelStat[stat], j.atributo, stat)) {
+      const need = U.Estadisticas.xpParaNivel(j.nivelStat[stat], j.atributo, stat);
+      j.xpStat[stat] -= need; j.nivelStat[stat]++;
+      const g = U.Estadisticas.gananciaNivel[stat] || 1;
+      const antes = j.stats[stat]; j.stats[stat] = tope ? Math.min(tope, antes + g) : antes + g;
+      const real = j.stats[stat] - antes; subidos++;
+      if (stat === 'vida') j.vida = Math.min(j.stats.vida, j.vida + real); if (stat === 'esencia') j.esencia = Math.min(j.stats.esencia, j.esencia + real);
+      if (tope && j.stats[stat] >= tope) { j.xpStat[stat] = 0; break; } // llegó al tope de valor: se acabó la barra
+    }
+    if (subidos > 0) {
+      const et = U.Estadisticas.etiquetas[stat];
+      U.HUD.toast('¡' + et + ' NIVEL ' + j.nivelStat[stat] + '! +' + (U.Estadisticas.gananciaNivel[stat] || 1) + ' ' + et + ' (ahora ' + Math.round(j.stats[stat]) + ')', 'exito');
+      U.HUD.banner(et.toUpperCase() + ' · NIVEL ' + j.nivelStat[stat], 1.6); U.Audio.sfx('unlock');
+      if (U.HUD.refrescarChips) U.HUD.refrescarChips();
+    }
+    // acum/total/resumen ahora acumulan XP ganada (no valor): el HUD la muestra como XP.
+    this.acum[stat] = (this.acum[stat] || 0) + xp; this.total[stat] = (this.total[stat] || 0) + xp; U.Juego.estado.resumen.crecimiento[stat] = (U.Juego.estado.resumen.crecimiento[stat] || 0) + xp;
+    return xp;
   },
   // CURVA DE MAESTRÍA (multiplicativa, NO lineal): la ganancia se divide entre un
   // divisor que CRECE con tu maestría actual. Los primeros tramos también son lentos
@@ -46,7 +81,7 @@ U.Crecimiento = {
   regenCap(base) { const j = U.Juego.estado.jugador; j.regenBonus = Math.min(U.Atributos.de(j.atributo).regen, (j.regenBonus || 0) + base); },
   flush(dt) {
     this.tFlush += dt; if (this.tFlush < 1.2) return; this.tFlush = 0;
-    const partes = []; for (const k in this.acum) { if (this.acum[k] >= 0.005) partes.push({ k, txt: U.Estadisticas.etiquetas[k].toUpperCase() + ' +' + this.acum[k].toFixed(2) }); }
+    const partes = []; for (const k in this.acum) { if (this.acum[k] >= 0.005) partes.push({ k, txt: U.Estadisticas.etiquetas[k].toUpperCase() + ' +' + (Math.round(this.acum[k] * 100) / 100) + ' XP' }); }
     if (partes.length) { U.HUD.toast(partes.map(p => p.txt).join(' · '), 'crec');
       // Feedback VISIBLE: el toast del HUD es silencioso a propósito, así que el crecimiento se anuncia
       // con texto flotante sobre el jugador. Sin esto las estadísticas SÍ subían al pelear, pero nadie lo veía.
