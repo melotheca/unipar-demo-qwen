@@ -117,8 +117,10 @@ U.Combate = {
   // y no lo dañaba. Este pase usa el arco continuo contra el CENTRO del objeto y salta los que
   // golpearObjetos ya dañó en este mismo golpe (nada de daño doble).
   golpearObjetosArco(j, alcance, dmg, ya) {
-    const E = U.Juego.estado, m = E.mapa; if (!m) return;
-    m.objetos.slice().forEach(o => { if (!U.Grid.esDestructible(o) || (ya && ya.indexOf(o) >= 0)) return; const cx = o.x + (o.w || 1) / 2, cy = o.y + (o.h || 1) / 2; if (U.Grid.enArco(j.x, j.y, j.dir, alcance + 0.45, { x: cx, y: cy })) U.Grid.danarObjeto(m, o, dmg); });
+    const E = U.Juego.estado, m = E.mapa; if (!m) return 0;
+    let n = 0;
+    m.objetos.slice().forEach(o => { if (!U.Grid.esDestructible(o) || (ya && ya.indexOf(o) >= 0)) return; const cx = o.x + (o.w || 1) / 2, cy = o.y + (o.h || 1) / 2; if (U.Grid.enArco(j.x, j.y, j.dir, alcance + 0.45, { x: cx, y: cy })) { U.Grid.danarObjeto(m, o, dmg); n++; } });
+    return n; // cuántos objetos dañó en el arco (0 si ninguno)
   },
   golpearObjetoEn(x, y, dmg) { const E = U.Juego.estado; const o = U.Grid.objetoEn(E.mapa, x, y); if (o && U.Grid.esDestructible(o)) { U.Grid.danarObjeto(E.mapa, o, dmg); return true; } return false; },
   // Rompe el obstáculo destructible (roca/árbol/cactus) que el enemigo tiene enfrente, en la dirección en que intenta moverse.
@@ -354,19 +356,24 @@ U.Combate = {
     if (j.cdYang > 0) return; if (!U.Recuperacion.gastar(h.costo)) return;
     j.cdYang = h.cd; j.ataqueAnim = 0.25; j.descansando = false; const atk = (U.Reliquias ? U.Reliquias.statEf(j, 'ataque') : j.stats.ataque) * (j.buffs.sobrecarga > 0 ? 2 : 1);
     U.Audio.sfx('yang'); this.sacudir(0.3);
+    let impactoEnemigo = false, impactoMundo = false; // XP DE YANG SOLO AL IMPACTAR (nada al aire): igual que las técnicas elementales
     if (h.forma === 'cono') { // GOLPE VELOZ: puño Yang cuerpo a cuerpo, instantáneo y sin carga (cancela la carga del puño Yin). No devuelve Esencia al golpear: eso es Yin.
       j.cargando = false;
       const celdas = U.Grid.forma('cono', j.x, j.y, j.dir, h.alcance, 1);
       E.efectos.cortes.push({ x: j.x, y: j.y, dir: j.dir, color: '#f8fafc', t: 0.18, max: 0.18 });
-      const gObj = this.golpearObjetos(celdas, atk * h.power * 0.95); this.golpearObjetosArco(j, h.alcance, atk * h.power * 0.95, gObj); this.golpearInocentes(celdas, { x: j.x, y: j.y, dir: j.dir, alcance: h.alcance + 0.45 });
+      const gObj = this.golpearObjetos(celdas, atk * h.power * 0.95); if (gObj.length) impactoMundo = true; if (this.golpearObjetosArco(j, h.alcance, atk * h.power * 0.95, gObj) > 0) impactoMundo = true; if (this.golpearInocentes(celdas, { x: j.x, y: j.y, dir: j.dir, alcance: h.alcance + 0.45 })) impactoEnemigo = true;
       let golpes = 0; this.vivos().forEach(e => { if (U.Grid.enCeldas(celdas, e) || U.Grid.enArco(j.x, j.y, j.dir, h.alcance + 0.45, e)) { golpes++; this.dañoEnemigo(e, atk * h.power, null, { desafio: this.desafio(e), yang: true }); } });
       if (U.Criaturas) golpes += U.Criaturas.impactoJugador(celdas, { arco: { x: j.x, y: j.y, dir: j.dir, alcance: h.alcance + 0.45 }, dmg: atk * h.power, elemento: null });
-      if (golpes) E.resumen.golpes += golpes;
+      if (golpes) { E.resumen.golpes += golpes; impactoEnemigo = true; }
       this.particulas(j.x + j.dir.x, j.y + j.dir.y - 0.5, 10, '#f8fafc', 'chispa');
     }
-    else if (h.forma === 'linea') { const celdas = U.Grid.forma('linea', j.x, j.y, j.dir, h.alcance, 0); this.golpearObjetos(celdas, atk * h.power * 0.85); E.efectos.haces.push({ celdas, color: '#f8fafc', t: 0.25, max: 0.25 }); this.vivos().forEach(e => { if (U.Grid.enCeldas(celdas, e)) this.dañoEnemigo(e, atk * h.power, null, { desafio: this.desafio(e), yang: true }); }); if (U.Criaturas) U.Criaturas.impactoJugador(celdas, { dmg: atk * h.power, elemento: null }); this.particulas(j.x + j.dir.x * 2, j.y + j.dir.y * 2 - 0.5, 8, '#f8fafc', 'chispa'); }
-    else this.proyectil(j, h, atk * h.power, null, '#f8fafc', 'jugador');
-    U.Crecimiento.estilo('yang', 0.35, 1); U.Crecimiento.stat('mente', 0.08, 1); U.Crecimiento.regenCap(0.02); E.resumen.yang++;
+    else if (h.forma === 'linea') { const celdas = U.Grid.forma('linea', j.x, j.y, j.dir, h.alcance, 0); if (this.golpearObjetos(celdas, atk * h.power * 0.85).length) impactoMundo = true; E.efectos.haces.push({ celdas, color: '#f8fafc', t: 0.25, max: 0.25 }); let golpes = 0; this.vivos().forEach(e => { if (U.Grid.enCeldas(celdas, e)) { golpes++; this.dañoEnemigo(e, atk * h.power, null, { desafio: this.desafio(e), yang: true }); } }); if (U.Criaturas) golpes += U.Criaturas.impactoJugador(celdas, { dmg: atk * h.power, elemento: null }); if (golpes) impactoEnemigo = true; this.particulas(j.x + j.dir.x * 2, j.y + j.dir.y * 2 - 0.5, 8, '#f8fafc', 'chispa'); }
+    else this.proyectil(j, Object.assign({}, h, { xpYang: true }), atk * h.power, null, '#f8fafc', 'jugador');
+    // XP solo al impactar: enemigo = normal, árbol/roca = una pizca de estilo
+    // y 0 Mente, aire = nada. El proyectil otorga su XP al impactar
+    // (actualizarProyectiles), no al lanzar.
+    if (h.forma !== 'proyectil') { if (impactoEnemigo) this.otorgarXpYang('enemigo'); else if (impactoMundo) this.otorgarXpYang('mundo'); }
+    U.Crecimiento.regenCap(0.02); E.resumen.yang++;
   },
   // ALCANCE ELEMENTAL (en celdas): crece con la MAESTRÍA del elemento activo: +1 celda por
   // cada 5% → 0–5% = 1 celda, 6–10% = 2, 11–15% = 3, … 96–100% = 20 celdas. Es el alcance
@@ -408,6 +415,15 @@ U.Combate = {
       if (elem === 'mistico') return;
       U.Crecimiento.maestria(elem, 0.1, 1); // pizca: base 0.1 (1/5 de lo normal)
     }
+  },
+  // XP DE YANG SOLO AL IMPACTAR (nada al aire): la misma regla que las
+  // técnicas elementales. Enemigo / criatura / inocente = NORMAL (estilo
+  // 0.35 + Mente 0.08, como antes). Árbol, roca o cactus = una PIZCA de
+  // estilo (0.07, 1/5 de lo normal) y 0 Mente. El coste de Esencia se
+  // paga igual al lanzar.
+  otorgarXpYang(tipo) {
+    if (tipo === 'enemigo') { U.Crecimiento.estilo('yang', 0.35, 1); U.Crecimiento.stat('mente', 0.08, 1); }
+    else if (tipo === 'mundo') { U.Crecimiento.estilo('yang', 0.07, 1); } // pizca: 1/5 de lo normal
   },
   // Técnica ELEMENTAL del equipo. id = id de registro ('tec:<elem>:<id>'); sin id,
   // la primera técnica elemental EQUIPADA; sin ninguna equipada, el ataque básico.
@@ -452,7 +468,7 @@ U.Combate = {
   },
   proyectil(origen, h, base, elemento, color, dueño) {
     const d = U.Grid.dir8(origen.dir.x, origen.dir.y); const vel = h.vel || 7;
-    U.Juego.estado.proyectiles.push({ x: origen.x + d.x * 0.6, y: origen.y + d.y * 0.6, dx: d.x, dy: d.y, vel, vida: (h.alcance || 9) / vel, dueño, base, elemento, color, alcance: h.alcance || 9, ox: origen.x, oy: origen.y, forma: h.id === 'roca' ? 'roca' : 'esfera', explora: h.explora || null, efecto: h.efecto || null, cometa: !!h.cometa, golpeados: [], xpTec: !!h.xpTec }); // xpTec: proyectil de TÉCNICA — su XP se otorga al impactar, no al lanzar
+    U.Juego.estado.proyectiles.push({ x: origen.x + d.x * 0.6, y: origen.y + d.y * 0.6, dx: d.x, dy: d.y, vel, vida: (h.alcance || 9) / vel, dueño, base, elemento, color, alcance: h.alcance || 9, ox: origen.x, oy: origen.y, forma: h.id === 'roca' ? 'roca' : 'esfera', explora: h.explora || null, efecto: h.efecto || null, cometa: !!h.cometa, golpeados: [], xpTec: !!h.xpTec, xpYang: !!h.xpYang }); // xpTec/xpYang: proyectil de TÉCNICA o de YANG — su XP se otorga al impactar, no al lanzar
   },
   dash() {
     const E = U.Juego.estado, j = E.jugador; if (j.dash.cd > 0 || j.dash.t > 0) return; if (!U.Recuperacion.gastar(U.Habilidades.costoDash(j))) return;
@@ -845,9 +861,9 @@ U.Combate = {
       p.vida -= dt; p.x += p.dx * p.vel * dt; p.y += p.dy * p.vel * dt;
       if (Math.random() < dt * 30) this.particulas(p.x, p.y - 0.5, 1, p.color, p.cometa ? 'chispa' : 'polvo');
       const estallar = () => { let hit = null; if (p.explora) { const celdas = U.Grid.forma('circulo', p.x, p.y, { x: 1, y: 0 }, 0, p.explora.radio); E.efectos.haces.push({ celdas, color: p.color, t: 0.3, max: 0.3 }); E.efectos.anillos.push({ x: p.x, y: p.y, radio: p.explora.radio, color: p.color, t: 0.4, max: 0.4 }); this.sacudir(0.6); if (U.Audio && typeof U.Audio.sfxCerca === 'function') U.Audio.sfxCerca(p.elemento || 'yang', p.x, p.y, 2); else U.Audio.sfx(p.elemento || 'yang'); if (p.dueño === 'jugador') { let ds = 0.5, n = 0; this.vivos().forEach(e => { if (U.Grid.enCeldas(celdas, e)) { ds = Math.max(ds, this.desafio(e)); n++; this.dañoEnemigo(e, p.base * (p.explora.power / 1.4), p.elemento, Object.assign({ desafio: this.desafio(e), alcance: p.alcance, dist: (p.ox != null ? Math.hypot(e.x - p.ox, e.y - p.oy) : null) }, p.efecto || {})); } }); if (n) hit = { enemigo: true, desafio: ds }; } else if (U.Grid.enCeldas(celdas, j)) this.dañoJugador(p.base, null, p.efecto, { elemento: p.elemento || null, proyectil: true, ox: p.x - p.dx, oy: p.y - p.dy }); } p.vida = 0; return hit; };
-      if (U.Grid.solidoEn(E.mapa, p.x, p.y)) { let mundo = false; if (p.dueño === 'jugador') mundo = this.golpearObjetoEn(p.x, p.y, p.base * 0.9); const exp = estallar(); if (p.dueño === 'jugador' && p.xpTec) { p.xpTec = false; if (exp && exp.enemigo) this.otorgarXpTecnica(p.elemento, 'enemigo', exp.desafio); else if (mundo) this.otorgarXpTecnica(p.elemento, 'mundo', 1); } return; }
-      if (p.dueño === 'jugador') { for (const e of this.vivos()) { if (p.golpeados.indexOf(e) >= 0) continue; if (Math.hypot(e.x - p.x, e.y - p.y) < 0.65) { p.golpeados.push(e); this.dañoEnemigo(e, p.base, p.elemento, Object.assign({ desafio: this.desafio(e), alcance: p.alcance, dist: (p.ox != null ? Math.hypot(e.x - p.ox, e.y - p.oy) : null) }, p.efecto || {})); if (p.xpTec) { p.xpTec = false; this.otorgarXpTecnica(p.elemento, 'enemigo', this.desafio(e)); } if (p.explora) estallar(); else if (!p.cometa) p.vida = 0; else { /* la onda perfora y empuja */ } break; } }
-        if (p.vida > 0 && U.Criaturas && E.criaturas) { for (const c of E.criaturas) { if (c.vida <= 0 || c.invocada || p.golpeados.indexOf(c) >= 0) continue; if (Math.hypot(c.x - p.x, c.y - p.y) < 0.65) { p.golpeados.push(c); U.Criaturas.danar(c, p.base, p.elemento, {}); if (p.xpTec) { p.xpTec = false; this.otorgarXpTecnica(p.elemento, 'enemigo', 0.5); } if (!p.cometa) p.vida = 0; break; } } } }
+      if (U.Grid.solidoEn(E.mapa, p.x, p.y)) { let mundo = false; if (p.dueño === 'jugador') mundo = this.golpearObjetoEn(p.x, p.y, p.base * 0.9); const exp = estallar(); if (p.dueño === 'jugador' && p.xpTec) { p.xpTec = false; if (exp && exp.enemigo) this.otorgarXpTecnica(p.elemento, 'enemigo', exp.desafio); else if (mundo) this.otorgarXpTecnica(p.elemento, 'mundo', 1); } if (p.dueño === 'jugador' && p.xpYang) { p.xpYang = false; if (exp && exp.enemigo) this.otorgarXpYang('enemigo'); else if (mundo) this.otorgarXpYang('mundo'); } return; }
+      if (p.dueño === 'jugador') { for (const e of this.vivos()) { if (p.golpeados.indexOf(e) >= 0) continue; if (Math.hypot(e.x - p.x, e.y - p.y) < 0.65) { p.golpeados.push(e); this.dañoEnemigo(e, p.base, p.elemento, Object.assign({ desafio: this.desafio(e), alcance: p.alcance, dist: (p.ox != null ? Math.hypot(e.x - p.ox, e.y - p.oy) : null) }, p.efecto || {})); if (p.xpTec) { p.xpTec = false; this.otorgarXpTecnica(p.elemento, 'enemigo', this.desafio(e)); } if (p.xpYang) { p.xpYang = false; this.otorgarXpYang('enemigo'); } if (p.explora) estallar(); else if (!p.cometa) p.vida = 0; else { /* la onda perfora y empuja */ } break; } }
+        if (p.vida > 0 && U.Criaturas && E.criaturas) { for (const c of E.criaturas) { if (c.vida <= 0 || c.invocada || p.golpeados.indexOf(c) >= 0) continue; if (Math.hypot(c.x - p.x, c.y - p.y) < 0.65) { p.golpeados.push(c); U.Criaturas.danar(c, p.base, p.elemento, {}); if (p.xpTec) { p.xpTec = false; this.otorgarXpTecnica(p.elemento, 'enemigo', 0.5); } if (p.xpYang) { p.xpYang = false; this.otorgarXpYang('enemigo'); } if (!p.cometa) p.vida = 0; break; } } } }
       else if (Math.hypot(j.x - p.x, j.y - p.y) < 0.65) { this.dañoJugador(p.base, null, p.efecto, { elemento: p.elemento || null, proyectil: true, ox: p.x - p.dx, oy: p.y - p.dy }); estallar(); }
     });
     E.proyectiles = E.proyectiles.filter(p => p.vida > 0);
